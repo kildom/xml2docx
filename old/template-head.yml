@@ -1,0 +1,65 @@
+#
+# This file is included
+#
+
+- $ParagraphStyle:
+  id: Normal
+  name: Normalny
+  run:
+    font: Arial
+
+- $ParagraphStyle:
+  id: ND
+  name: Nagłówki dokumentu
+  basedOn: Normal
+  paragraph:
+    alignment: center
+
+- $ParagraphStyle:
+  id: Heading1
+  name: Nagłówek 1
+  basedOn: Normal
+  paragraph:
+    alignment: center
+  run:
+    size: 22pt
+    bold: true
+
+- $MACRO $ND:
+  $Paragraph:
+  style: ND
+  children:
+  - $TextRun:
+    text: $$val$$
+    $[extend]: $$obj$$
+
+- $MACRO $H1:
+  $Paragraph:
+  style: Heading1
+  children:
+  - $TextRun:
+    text: $$val$$
+    $[extend]: $$obj$$
+
+- $MACRO $A4portrait:
+  orientation: portrait
+  width: 210mm
+  height: 297mm
+  ignore: <%= test2 %>
+  ignore2: <%= test3 %>
+
+- $Section:
+  properties:
+    page:
+      size:
+        $[extend]: { $A4portrait: }
+      margin:
+        $[top|right|bottom|left]: 2cm
+      borders:
+        pageBorders:
+          display: allPages
+          offsetFrom: page
+        pageBorder$[Top|Bottom|Left|Right]:
+          style: single
+          size[1/8pt]: 0.5mm
+          space[pt]: 1cm # for some reasons Word accepts only up to 31 pt (~1cm)

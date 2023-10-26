@@ -1,0 +1,217 @@
+#
+# This file is in YAML format, see: https://yaml.org/
+# It describes docx.js document structure, see: https://docx.js.org/
+# You can find detailed API on https://docx.js.org/api/
+# Template syntax is added on top of it.
+#
+# Template syntax:
+#     < %  ... %> - evaluate JS statements.
+#     < %= ... %> - interpolate JS expression and output YAML text with it.
+#     < %- ... %> - interpolate JS expression and output string directly.
+#     < %! ... %> - interpolate JS expression and output escaped string that
+#                  can be used inside double-quoted YAML string.
+# Template functions:
+#     print(text)         - output text directly (without escaping or converting)
+#     utils.value(x)      - returns one-line YAML text representing "x"
+#     utils.str(x)        - returns escaped string that can be used inside double-quoted YAML string.
+#     utils.include(file) - returns file content (path relative to main document).
+#
+# Additions to standard YAML file:
+#
+#  - Filters: Convert value before it goes to the document. It is added to
+#    the end of mapping key.
+#      - Distance convertion. From number with units (mm, cm, in, pt, pc) to other units:
+#          [pt] - convert distance to points
+#          [3/4pt] - convert distance to 3/4 of point
+#          [1/8pt] - convert distance to 1/8 of point
+#          [1/20pt] or [dxa] - convert distance to 1/20 of point
+#          [emu] - convert distance to English Metric Unit (EMU)
+#      - Other
+#          [file] - read file and return buffer.
+#
+#  - Multi-keys: Assign the same value to multiple keys in a mapping, for example:
+#      pageBorder$[Top|Bottom|Left|Right]:
+#        style: single
+#      margin:
+#        $[top|right|bottom|left]: 2cm
+#
+#  - Mapping extension: Extend mapping with some other mapping.
+#    Useful with user-defined macros, for example:
+#      SomeMapping:         # SomeMapping will contain "foo: bar" pair
+#        foo: bar           # and everything returned by "$MyMacro" macro.
+#        $[extend]:         # If "$MyMacro" also returns "foo" key, "bar" value
+#          $MyMacro: param  # will be replaced by the new one.
+#        $[extend2]:        # You can add anything after "extend" to avoid key collisions.
+#
+#  - Macros: First key of mapping starts with dollar sign "$".
+#    First value of mapping is direct parameter of macro.
+#    Rest of the items are mapping parameter of macro, for example:
+#      - $MacroName: Direct parameter
+#        firstKeyOfMappingParameter: value
+#        secondKeyOfMappingParameter: value
+#
+#  - Build-in macros: 
+#
+#      $ParagraphStyle
+#          Adds new paragraph style to the document, see:
+#          https://docx.js.org/api/interfaces/IParagraphStyleOptions.html
+#
+#      $CharacterStyle
+#          Adds new character style to the document, see:
+#          https://docx.js.org/api/interfaces/ICharacterStyleOptions.html
+#
+#      $Section
+#          Starts a new section, following top-level elements will be added
+#          to this section's children list, see:
+#          https://docx.js.org/api/interfaces/ISectionOptions.html
+#
+#      All classes defined by docx.js
+#          Macro direct or mapping parameter (just one) is passed to the
+#          class constructor. See list of available classes:
+#          https://docx.js.org/api/modules.html
+#
+#  - User macros: Returns mapping defined by the user.
+#
+#      Definition:
+#          - $MACRO $MacroName:
+#            mappingKey: MappingValue
+#            parametrizedValue: $$val$$           # Use direct parameter value.
+#            parametrizedString: "Hello $$str$$!" # Put direct parameter into string.
+#            parametrizedMapping: $$obj$$         # Use mapping parameter as value.
+#            $[extend]: $$obj$$                   # Extend current mapping with mapping parameter.
+#
+
+#
+# This file is included
+#
+
+- $ParagraphStyle:
+  id: Normal
+  name: Normalny
+  run:
+    font: Arial
+
+- $ParagraphStyle:
+  id: ND
+  name: Nagłówki dokumentu
+  basedOn: Normal
+  paragraph:
+    alignment: center
+
+- $ParagraphStyle:
+  id: Heading1
+  name: Nagłówek 1
+  basedOn: Normal
+  paragraph:
+    alignment: center
+  run:
+    size: 22pt
+    bold: true
+
+- $MACRO $ND:
+  $Paragraph:
+  style: ND
+  children:
+  - $TextRun:
+    text: $$val$$
+    $[extend]: $$obj$$
+
+- $MACRO $H1:
+  $Paragraph:
+  style: Heading1
+  children:
+  - $TextRun:
+    text: $$val$$
+    $[extend]: $$obj$$
+
+- $MACRO $A4portrait:
+  orientation: portrait
+  width: 210mm
+  height: 297mm
+  ignore: <%= test2 %>
+  ignore2: <%= test3 %>
+
+- $Section:
+  properties:
+    page:
+      size:
+        $[extend]: { $A4portrait: }
+      margin:
+        $[top|right|bottom|left]: 2cm
+      borders:
+        pageBorders:
+          display: allPages
+          offsetFrom: page
+        pageBorder$[Top|Bottom|Left|Right]:
+          style: single
+          size[1/8pt]: 0.5mm
+          space[pt]: 1cm # for some reasons Word accepts only up to 31 pt (~1cm)
+
+
+- $ND: "ABół\r\nCLaboratorium Wzorcowania Przyrządów Dozymetrycznych"
+  bold: true
+- $ND: "Instytut Fizyki Jądrowej im. Henryka Niewodniczańskiego"
+- $ND: "Polskiej Akademii Nauk"
+- $ND: "ul. Radzikowskiego 152, PL 31-342 Kraków"
+- $ND: "tel. 012/6628486, faks 012/6628066, e-mail: wzorcowanie@ifj.edu.pl"
+- $ND: ""
+- $ND: "Laboratorium wzorcujące akredytowane przez"
+- $ND: "Polskie Centrum Akredytacji, sygnatariusza porozumień EA MLA i ILAC MRA"
+- $ND: "dotyczących wzajemnego uznawania świadectw wzorcowania."
+- $ND: "Nr akredytacji AP 029."
+- $ND: "ABół\r\nC" 
+- $ND: ""
+- $H1: "ŚWIADECTWO WZORCOWANIA"
+
+- $Paragraph:
+  children:
+  - $ImageRun:
+    data[file]: ilac-MRA.png
+    transformation:
+      width[3/4pt]: 2cm
+      height[3/4pt]: 2cm
+    floating:
+      allowOverlap: true
+      behindDocument: true
+      horizontalPosition:
+        offset[emu]: -2cm
+        relative: rightMargin
+      verticalPosition:
+        offset[emu]: 0cm
+        relative: margin
+
+- $Paragraph:
+  children:
+  - $TextRun: "\tData wydania:   18 września 2023\tNr świadectwa:   "
+  - $TextRun:
+    text: "19000/2023"
+    bold: true
+  - $TextRun: "\tStrona   1/2"
+  tabStops:
+  - position[dxa]: 1cm
+    type: left
+  - position[dxa]: 10cm
+    type: center
+  - position[dxa]: 16cm
+    type: right
+  border:
+    bottom:
+      size[1/8pt]: 0.25mm
+      space[pt]: 5mm
+      style: single
+
+# - Table:
+#   width:
+#     size[dxa]: 4cm
+#     type: dxa
+#   columnWidths[dxa]: [ 1cm, 3cm ]
+#   layout: fixed
+#   rows$:
+#   - TableRow:
+#     children:
+#     - TableCell:
+#       children:
+#       - $Paragraph: Hello
+#     - TableCell:
+#       children:
+#       - $Paragraph: World

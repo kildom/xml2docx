@@ -1,0 +1,131 @@
+
+
+- ParagraphStyle:
+  id: Normal
+  name: Normalny
+  run:
+    font: Arial
+
+- ParagraphStyle:
+  id: ND
+  name: Nagłówki dokumentu
+  basedOn: Normal
+  paragraph:
+    alignment: center
+
+- ParagraphStyle:
+  id: Heading1
+  name: Nagłówek 1
+  basedOn: Normal
+  paragraph:
+    alignment: center
+  run:
+    size: 22pt
+    bold: true
+
+- Section:
+  properties:
+    page:
+      size:
+        orientation: portrait
+        width: 210mm
+        height: 297mm
+      margin:
+        top: 2cm
+        right: 2cm
+        bottom: 2cm
+        left: 2cm
+      borders:
+        pageBorders:
+          display: allPages
+          offsetFrom: page
+        pageBorder[Top|Bottom|Left|Right]:
+          style: single
+          size[1/8pt]: 0.5mm
+          space[pt]: 1cm # for some reasons Word accepts only up to 31 pt (~1cm)
+
+- MACRO ND:
+  Paragraph:
+  style: ND
+  children!:
+  - TextRun: "***"
+
+- MACRO ND-bold:
+  Paragraph:
+  style: ND
+  children!:
+  - TextRun:
+    text: "***"
+    bold: true
+
+- MACRO P:
+  Paragraph: "***"
+
+- ND-bold: Laboratorium Wzorcowania Przyrządów Dozymetrycznych
+- ND: Instytut Fizyki Jądrowej im. Henryka Niewodniczańskiego
+- ND: Polskiej Akademii Nauk
+- ND: ul. Radzikowskiego 152, PL 31-342 Kraków
+- ND: "tel. 012/6628486, faks 012/6628066, e-mail: wzorcowanie@ifj.edu.pl"
+- ND: ""
+- ND: Laboratorium wzorcujące akredytowane przez
+- ND: Polskie Centrum Akredytacji, sygnatariusza porozumień EA MLA i ILAC MRA
+- ND: dotyczących wzajemnego uznawania świadectw wzorcowania.
+- ND: Nr akredytacji AP 029.
+- ND: ""
+- ND: ""
+- Paragraph:
+  style: Heading1
+  children!: [ { TextRun: "ŚWIADECTWO WZORCOWANIA" } ]
+
+- Paragraph:
+  children!:
+  - ImageRun:
+    data[file]: ilac-MRA.png
+    transformation:
+      width[3/4pt]: 2cm
+      height[3/4pt]: 2cm
+    floating:
+      allowOverlap: true
+      behindDocument: true
+      horizontalPosition:
+        offset[emu]: -2cm
+        relative: rightMargin
+      verticalPosition:
+        offset[emu]: 0cm
+        relative: margin
+
+- Paragraph:
+  children!:
+  - TextRun: "\tData wydania:   18 września 2023\tNr świadectwa:   "
+  - TextRun:
+    text: "19000/2023"
+    bold: true
+  - TextRun: "\tStrona   1/2"
+  tabStops:
+  - position[dxa]: 1cm
+    type: left
+  - position[dxa]: 10cm
+    type: center
+  - position[dxa]: 16cm
+    type: right
+  border:
+    bottom:
+      size[1/8pt]: 0.25mm
+      space[pt]: 5mm
+      style: single
+
+# - Table:
+#   width:
+#     size[dxa]: 4cm
+#     type: dxa
+#   columnWidths[dxa]: [ 1cm, 3cm ]
+#   layout: fixed
+#   rows!:
+#   - TableRow:
+#     children!:
+#     - TableCell:
+#       children!:
+#       - Paragraph: Hello
+#     - TableCell:
+#       children!:
+#       - Paragraph: World
