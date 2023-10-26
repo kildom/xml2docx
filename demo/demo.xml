@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+
+  <%= utils.include('demo-styles.xml') %>
+
+  <Alias id="border">
+    <bottom size:pt8="0.25mm" space:pt="5mm" style="single" />
+  </Alias>
+
+  <Section>
+    <properties>
+      <page>
+        <size orientation="portrait" width="210mm" height="297mm" />
+        <margin top="1.5cm" right="1.5cm" bottom="1.5cm" left="1.5cm" />
+        <borders>
+          <pageBorders display="allPages" offsetFrom="page" />
+          <pageBorderTop style="single" size:pt8="0.3mm" space:pt="1cm" />
+          <pageBorderBottom style="single" size:pt8="0.3mm" space:pt="1cm" />
+          <pageBorderLeft style="single" size:pt8="0.3mm" space:pt="1cm" />
+          <pageBorderRight style="single" size:pt8="0.3mm" space:pt="1cm" />
+        </borders>
+      </page>
+    </properties>
+    <headers>
+      <default>
+        <Header:new>
+          <children:FileChildren>
+            <p style="HeaderParagraph">Demo Document</p>
+          </children:FileChildren>
+        </Header:new>
+      </default>
+    </headers>
+    <footers>
+      <default>
+        <Footer:new>
+          <children:FileChildren>
+            <p style="FooterParagraph">&#9;<a href="https://github.com/kildom/xml2docx">See on GitHub</a>&#9;<b>xml2docx</b>&#9;Page <CurrentPageNumber /> of <TotalPages /></p>
+          </children:FileChildren>
+        </Footer:new>
+      </default>
+    </footers>
+  </Section>
+
+  <h1>Demo Document</h1>
+
+  <h2>Paragraphs</h2>
+
+  <p>Lorem ipsum dolor sit amet, magna et tincidunt varius. Donec et viverra leo. Nunc nec velit sed quam
+    lobortis enim. Maecenas id dignissim leo. Cras imperdiet purus sit amet mi pellentesque, eget porttitor nisl
+    tincidunt. Curabitur orci erat, laoreet eget felis at, pretium ornare augue.</p>
+  <p>Nunc enim odio, lobortis ut turpis et, auctor aliquam eros. Mauris justo ante, auctor quis condimentum vitae,
+    eleifend eu augue. Duis ut mattis nisi. Phasellus sodales, quam nec varius blandit, sem erat tristique mi, ac
+    placerat lacus ante a ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames.</p>
+  
+  <h2>Formatting</h2>
+
+  <p><b>Bold</b>, <i>italics</i>, <u>underline</u>, <s>strike through</s>,
+    <super>super</super>script, <sub>sub</sub>script, <allCaps>all caps</allCaps>,
+    <smallCaps>Small Caps</smallCaps>, <doubleStrike>double strike through</doubleStrike>,
+    <emboss>emboss</emboss></p>
+
+  <h2>Image</h2>
+
+  <p><img src="cat.jpg" width="3.333cm" height="5cm"
+    horizontalOffset="0cm" horizontalRelative="margin" horizontalAlign="right"
+    verticalOffset="0cm" verticalRelative="line" verticalAlign="top"
+    wrapType="square" marginBottom="4mm" marginLeft="4mm" marginTop="4mm" marginRight="4mm" wrapSide="bothSides"
+    />Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt, augue eu mattis auctor, ante sem aliquet
+    dolor, at efficitur enim sem sit amet mauris. Donec at porta ligula, non ornare diam. Integer eleifend lacinia
+    nulla non auctor. In id leo posuere augue aliquam auctor. Suspendisse non finibus libero.</p>
+  <p>Maecenas congue nisl id felis vehicula, quis hendrerit nisi tincidunt. Fusce hendrerit turpis quam, vitae
+    laoreet arcu egestas et. Duis tempor scelerisque elit, vel euismod erat varius et.</p>
+  <p>Quisque pellentesque interdum nulla vitae convallis. Nunc interdum est id fringilla mattis. Cras in ornare nisl.
+    Pellentesque semper porttitor metus, accumsan faucibus est hendrerit at. Mauris scelerisque lobortis venenatis.
+    Quisque nec vulputate urna. Cras feugiat sodales quam, at sagittis diam pharetra lobortis. Ut felis leo,
+    sodales vel porttitor eu, tempor nec ex.</p>
+  
+  <h2>Tab stops</h2>
+
+  <p tabStops:alias="LCRTabs">&#9;Left&#9;Center&#9;Right</p>
+
+</document>

@@ -1,0 +1,65 @@
+
+<!--
+  Paragraph styles, documentation:
+  https://docx.js.org/api/interfaces/IParagraphStyleOptions.html
+-->
+
+<ParagraphStyle id="Normal" name="Normal">
+  <run font="Arial" size="12pt"  />
+  <paragraph alignment="both">
+    <spacing after:pt20="4mm" />
+    <indent firstLine="9mm" />
+  </paragraph>
+</ParagraphStyle>
+
+<ParagraphStyle id="HeaderParagraph" name="Footer Paragraph" basedOn="Normal">
+  <paragraph alignment="center">
+    <spacing after:pt20="4mm" />
+    <border>
+      <bottom size:pt8="0.25mm" space:pt="4mm" style="single" />
+    </border>
+  </paragraph>
+</ParagraphStyle>
+
+<ParagraphStyle id="FooterParagraph" name="Footer Paragraph" basedOn="Normal">
+  <paragraph>
+    <spacing before:pt20="4mm" />
+    <tabStops>
+      <_ position:dxa="1cm" type="left" />
+      <_ position:dxa="9cm" type="center" />
+      <_ position:dxa="17cm" type="right" />
+    </tabStops>
+    <border>
+      <top size:pt8="0.25mm" space:pt="4mm" style="single" />
+    </border>
+  </paragraph>
+</ParagraphStyle>
+
+<ParagraphStyle id="Heading1" name="Heading 1" basedOn="Normal">
+  <paragraph alignment="center" />
+  <run size="24pt" bold:bool="true" />
+</ParagraphStyle>
+
+<ParagraphStyle id="Heading2" name="Heading 2" basedOn="Normal">
+  <paragraph alignment="center" />
+  <run size="18pt" bold:bool="true" color="#4466EE" />
+</ParagraphStyle>
+
+<!--
+  Character styles, documentation:
+  https://docx.js.org/api/interfaces/ICharacterStyleOptions.html
+-->
+
+<CharacterStyle id="Important" name="Important">
+  <run size="14pt" bold:bool="true" />
+</CharacterStyle>
+
+<!--
+  Aliases, see README.md
+-->
+
+<Alias id="LCRTabs">
+  <_ position:dxa="1cm" type="left" />
+  <_ position:dxa="9cm" type="center" />
+  <_ position:dxa="17cm" type="right" />
+</Alias>
