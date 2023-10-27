@@ -6,9 +6,20 @@
 
 <ParagraphStyle id="Normal" name="Normal">
   <run font="Arial" size="12pt"  />
-  <paragraph alignment="both">
+  <paragraph>
     <spacing after:pt20="4mm" />
+  </paragraph>
+</ParagraphStyle>
+
+<ParagraphStyle id="WithIndent" name="With Indent" basedOn="Normal">
+  <paragraph alignment="both">
     <indent firstLine="9mm" />
+  </paragraph>
+</ParagraphStyle>
+
+<ParagraphStyle id="InTable" name="In Table" basedOn="Normal">
+  <paragraph>
+    <spacing after:pt20="0mm" />
   </paragraph>
 </ParagraphStyle>
 
