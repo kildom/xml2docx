@@ -1,0 +1,37 @@
+{
+    // Superset of JSON is allowed, any JavaScript expression can be used here.
+    title: "Random movies",
+    description: "List of <b>random</b> movies.",
+    movies: [
+        {
+            title: 'The Green Mile', 
+            year: 1999,
+            rating: 8.6,
+        },
+        {
+            title: 'The Shawshank Redemption', 
+            year: 1994,
+            rating: 8.8,
+        },
+        {
+            title: 'Forrest Gump', 
+            year: 1994,
+            rating: 8.5,
+        },
+        {
+            title: 'Requiem for a Dream', 
+            year: 2000,
+            rating: 7.8,
+        },
+        {
+            title: 'The Matrix', 
+            year: 1999,
+            rating: 7.6,
+        },
+        {
+            title: 'The Silence of the Lambs', 
+            year: 1991,
+            rating: 8.2,
+        },
+    ]
+}

@@ -212,7 +212,7 @@ function filter(filterName: string, value: any, passUndefined: boolean = false):
     }
 }
 
-function attributesToOptions(element: Element) {
+function attributesToOptions(element: Element, children?: Node[]) {
     let ref: { [key: string]: any } = {};
     let obj: { [key: string]: any } = {};
     for (let [key, value] of Object.entries({ ...(element.attributes || {}) })) {
@@ -221,6 +221,13 @@ function attributesToOptions(element: Element) {
         } else {
             obj[extractName(key)] = filter(key, value);
         }
+    }
+    children = children || element.elements || [];
+    let first = children.findIndex(node => (node.type != 'text' || node.text.trim() != ''));
+    let ext = children[first];
+    if (ext && ext.type == 'element' && ext.name == '__') {
+        children.splice(0, first + 1);
+        return { ...ref, ...obj, ...elementToOptions(ext) };
     }
     return { ...ref, ...obj };
 }
@@ -263,7 +270,7 @@ function elementToOptions(element: Element): any {
         let obj = new ((docx as any)[extractName(elements[0].name)])(elementToOptions(elements[0]));
         return obj;
 
-    } else if (elements.length == 1 && elements[0].type == 'instruction' && elements[0].name == 'empty') {
+    } else if (elements.length == 1 && elements[0].type == 'element' && elements[0].name == '_empty') {
 
         return [];
 
@@ -285,7 +292,7 @@ function elementToOptions(element: Element): any {
 
     } else {
 
-        let obj: { [key: string]: any } = attributesToOptions(element);
+        let obj: { [key: string]: any } = attributesToOptions(element, elements);
         for (let sub of elements) {
             if (sub.type == 'element') {
                 let value = elementToOptions(sub);
@@ -339,10 +346,26 @@ function processParagraphChild(node: Node, target: docx.ParagraphChild[], state:
             hyperlink = new docx.ExternalHyperlink({ children, link: opt.link || opt.href });
         }
         target.push(hyperlink);
+    } else if (node.name == 'tab') {
+        target.push(new docx.TextRun({ ...state, text: '\t' }));
+    } else if (node.name == 'br') {
+        target.push(new docx.TextRun({ ...state, children: [new docx.CarriageReturn()] }));
     } else if (node.name == 'TotalPages') {
         target.push(new docx.TextRun({ ...state, children: [docx.PageNumber.TOTAL_PAGES] }));
     } else if (node.name == 'CurrentPageNumber') {
         target.push(new docx.TextRun({ ...state, children: [docx.PageNumber.CURRENT] }));
+    } else if (node.name == 'font') {
+        let opt = attributesToOptions(node);
+        let addition: { [key: string]: any } = {};
+        if (opt.size) addition.size = opt.size;
+        if (opt.color) addition.color = opt.color;
+        if (opt.name) addition.font = opt.name;
+        if (opt.highlight) addition.highlight = opt.highlight;
+        if (opt.kern) addition.kern = opt.kern;
+        if (opt.scale) addition.scale = filter(':int', opt.scale);
+        if (opt.spacing) addition.characterSpacing = filter(':dxa', opt.spacing);
+        if (opt.style) addition.style = opt.style;
+        processParagraphChildren(node, target, { ...state, ...addition });
     } else if (node.name in directTextTags) {
         let addition: { [key: string]: any } = {};
         addition[directTextTags[node.name]] = true;
@@ -366,8 +389,8 @@ function processCells(parent: Element, target: docx.TableCell[]) {
             throw new Error(`Expecting only <td> in <tr>.`);
         }
         let children: docxFileChild[] = [];
-        processFileChildren(element, children);
         let opt = attributesToOptions(element);
+        processFileChildren(element, children);
         let cell = new docx.TableCell({ ...opt, children });
         target.push(cell);
     }
@@ -379,35 +402,36 @@ function processRows(parent: Element, target: docx.TableRow[]) {
             throw new Error(`Expecting only <tr> in <table>.`);
         }
         let children: docx.TableCell[] = [];
+        let opt = attributesToOptions(element);
         processCells(element, children);
-        let row = new docx.TableRow({ ...attributesToOptions(element), children });
+        let row = new docx.TableRow({ ...opt, children });
         target.push(row);
     }
 }
 
 function processFileChild(element: Node, target: docxFileChild[]) {
 
-    if (element.type == 'instruction' && element.name == 'FileChildren') {
-        return;
-    } else if (element.type != 'element') {
+    if (element.type != 'element') {
         throw new Error('Only element nodes are allowed as file child element.'); // TODO: better message
     }
 
     if (element.name == 'p') {
         let children: docx.ParagraphChild[] = [];
+        let options = attributesToOptions(element);
         processParagraphChildren(element, children, {});
-        let paragraph = new docx.Paragraph({ ...attributesToOptions(element), children });
+        let paragraph = new docx.Paragraph({ ...options, children });
         target.push(paragraph);
     } else if (element.name.match(/^h[1-9]$/)) {
         let children: docx.ParagraphChild[] = [];
+        let options = attributesToOptions(element);
         processParagraphChildren(element, children, {});
         let style = 'Heading' + element.name.substring(1);
-        let paragraph = new docx.Paragraph({ style, ...attributesToOptions(element), children });
+        let paragraph = new docx.Paragraph({ style, ...options, children });
         target.push(paragraph);
     } else if (element.name == 'table') {
         let rows: docx.TableRow[] = [];
-        processRows(element, rows);
         let options = attributesToOptions(element);
+        processRows(element, rows);
         if (options.columnWidths) {
             options.columnWidths = (options.columnWidths as string)
                 .split(',')
@@ -448,7 +472,7 @@ function processTopLevel(document: Element) {
             if (!id) {
                 throw new Error('Alias without id');
             }
-            delete element.attributes;
+            delete element.attributes!.id;
             let obj = elementToOptions(element);
             aliases[id] = obj;
             continue;
