@@ -1,18 +1,12 @@
 name: Build
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       tag_name:
         description: Release Tag
         required: false
-      create_release:
-        type: choice
-        required: true
-        description: Create release
-        default: 'no'
-        options:
-        - 'no'
-        - 'yes'
       full_test:
         type: choice
         required: true
@@ -58,7 +52,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: "${{ github.event.inputs.tag_name != '' }}"
       with:
-        files: dist/*
+        files: dist/xml2docx.exe
         draft: false
         tag_name: ${{ github.event.inputs.tag_name }}
         fail_on_unmatched_files: true
