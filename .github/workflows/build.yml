@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release Tag'     
+        description: Release Tag
         required: false
       create_release:
         type: choice
@@ -16,7 +16,7 @@ on:
       full_test:
         type: choice
         required: true
-        description: Create release
+        description: Execute full test
         default: 'no'
         options:
         - 'no'
@@ -24,7 +24,7 @@ on:
       upload:
         type: choice
         required: true
-        description: Create release
+        description: Upload artifact
         default: 'no'
         options:
         - 'no'
