@@ -1,6 +1,34 @@
 name: Build
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag'     
+        required: false
+      create_release:
+        type: choice
+        required: true
+        description: Create release
+        default: 'no'
+        options:
+        - 'no'
+        - 'yes'
+      full_test:
+        type: choice
+        required: true
+        description: Create release
+        default: 'no'
+        options:
+        - 'no'
+        - 'yes'
+      upload:
+        type: choice
+        required: true
+        description: Create release
+        default: 'no'
+        options:
+        - 'no'
+        - 'yes'
 jobs:
   build:
     runs-on: windows-latest
@@ -18,7 +46,29 @@ jobs:
       run: |
         dist\xml2docx.exe demo\demo.docx demo\demo.xml demo\demo.json
         dir demo\demo.docx
+    - name: Full test
+      if: "${{ github.event.inputs.full_test == 'yes' }}"
+      shell: cmd
+      run: |
+        choco install officeproplus2013
+        pip install docx2pdf
+        docx2pdf demo\demo.docx
+        dir demo\demo.pdf
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: "${{ github.event.inputs.tag_name != '' }}"
+      with:
+        files: dist/*
+        draft: false
+        tag_name: ${{ github.event.inputs.tag_name }}
+        fail_on_unmatched_files: true
+        target_commitish: ${{ env.commit_hash }}
+        generate_release_notes: true
     - name: Upload a Build Artifact
+      if: "${{ github.event.inputs.upload == 'yes' }}"
       uses: actions/upload-artifact@v3.1.3
       with:
-        path: dist/xml2docx.exe
+        path: |
+          dist/xml2docx.exe
+          demo/demo.docx
+          demo/demo.pdf
