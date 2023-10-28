@@ -18,12 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as fs from 'node:fs';
-import * as path from "node:path";
-import * as util from 'node:util';
 import * as xmlJs from 'xml-js';
 import * as docx from "docx";
-import { error } from './xml2docx';
+import { os } from './os';
 
 type docxFileChild = docx.Paragraph | docx.Table | docx.TableOfContents;
 
@@ -148,8 +145,8 @@ function getPropertyNormalized(obj: any, name: string): any {
 
 const filters: { [key: string]: (value: any) => any } = {
     'file': (value: any) => {
-        let filePath = path.resolve(fileDir, value as string);
-        return fs.readFileSync(filePath);
+        let filePath = os.path.resolve(fileDir, value as string);
+        return os.fs.readFileSync(filePath);
     },
     'int': (value: any) => Math.round(parseFloat(value as string)),
     'pt': (value: any) => convertSize(value as any, false, false),
@@ -572,22 +569,24 @@ function addImage(node: Element, target: docx.ParagraphChild[]) {
     target.push(new docx.ImageRun(options));
 }
 
-export async function convert(inputFile: string, xmlText: string) {
-    fileDir = path.dirname(inputFile);
+export async function convert(inputFile: string, xmlText: string, base64: true): Promise<string>;
+export async function convert(inputFile: string, xmlText: string, base64?: false): Promise<Buffer>;
+export async function convert(inputFile: string, xmlText: string, base64?: boolean) {
+    fileDir = os.path.dirname(inputFile);
     sections = [];
     currentSection = (null as unknown as docx.ISectionOptions);
     paragraphStyles = [];
     characterStyles = [];
     aliases = {};
 
-    error.push('Cannot parse XML file.');
+    os.error.push('Cannot parse XML file.');
     let xml = xmlJs.xml2js(xmlText, {
         ignoreComment: true,
         captureSpacesBetweenElements: true,
     });
-    error.pop();
+    os.error.pop();
 
-    fs.writeFileSync('a.json', JSON.stringify(xml, undefined, 4));
+    os.fs.writeFileSync('a.json', JSON.stringify(xml, undefined, 4));
 
     let topLevelElements = noSpacesBetween(xml.elements);
 
@@ -595,18 +594,18 @@ export async function convert(inputFile: string, xmlText: string) {
         throw new Error('Invalid top level structure of the document. Required one top level <document> element.');
     }
 
-    error.push('Cannot process XML.');
+    os.error.push('Cannot process XML.');
     let document = topLevelElements[0] as Element;
     processTopLevel(document);
-    error.pop();
+    os.error.pop();
 
-    error.push('Cannot create document from generated data.');
+    os.error.push('Cannot create document from generated data.');
     const doc = new docx.Document({ sections, styles: { paragraphStyles, characterStyles } });
-    error.pop();
+    os.error.pop();
 
-    error.push('Cannot pack to docx format.');
-    let result = await docx.Packer.toBuffer(doc);
-    error.pop();
+    os.error.push('Cannot pack to docx format.');
+    let result = base64 ? await docx.Packer.toBase64String(doc) : await docx.Packer.toBuffer(doc);
+    os.error.pop();
 
     return result;
 }

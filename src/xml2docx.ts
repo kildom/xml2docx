@@ -27,6 +27,7 @@ import { template } from 'underscore';
 import { convert } from './converter';
 import { fromTemplate } from './template';
 import { writeSources } from './dev';
+import { os, setInterface } from './os';
 
 let debugMode = false;
 export let error: string[] = [];
@@ -139,5 +140,17 @@ async function main() {
         process.exit(2);
     }
 }
+
+setInterface({
+    error: error,
+    path: {
+        resolve: path.resolve,
+        dirname: path.dirname,
+    },
+    fs: {
+        readFileSync: (path: string, encoding?: 'utf-8') => fs.readFileSync(path, encoding),
+        writeFileSync: fs.writeFileSync,
+    }
+});
 
 main();
