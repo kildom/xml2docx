@@ -322,7 +322,10 @@ async function main() {
     output = await convert(templateFile, xmlText, true);
 }
 
-function download() {
+async function download() {
+    console.log('Compiling...');
+    await main();
+    await new Promise(r => setTimeout(r, 2000));
     console.log('Downloading...');
     let element = document.createElement('a');
     element.setAttribute('href', 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + encodeURIComponent(output));
@@ -355,7 +358,7 @@ setInterface({
     }
 });
 
-self.MonacoEnvironment = {
+(self as any).MonacoEnvironment = {
     getWorkerUrl: function (moduleId, label) {
         if (label === 'json') {
             return './vs/language/json/json.worker.js';
@@ -376,7 +379,7 @@ self.MonacoEnvironment = {
 
 window.onload = () => {
     console.log('loaded');
-    document.getElementById('btn')!.onclick = download;
+    document.getElementById('btn')!.onclick = () => { download() };
     /*monacode({
         container: document.getElementById('editor') as HTMLElement,
         value: '<aaa>Download</aaa>',
@@ -386,6 +389,7 @@ window.onload = () => {
         value: templateText,
         language: "xml",
         theme: "vs-dark",
+        automaticLayout: true,
     });
 
     /*monaco.editor.create(document.getElementById('container') as HTMLElement, {

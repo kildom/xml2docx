@@ -6,13 +6,90 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <script src="xml2docx-web.js" type="text/javascript" charset="utf-8"></script>
     <link rel="stylesheet" href="./xml2docx-web.css" />
+    <style>
+        body {
+            padding: 0px;
+            margin: 0px;
+            font-family: sans-serif;
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        div#content {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-content: stretch;
+            align-items: stretch;
+        }
+
+        div#content>div:nth-child(2) {
+            order: 0;
+            flex: 1 1 auto;
+            align-self: auto;
+            overflow: hidden;
+        }
+
+        div#content>div:nth-child(1) {
+            order: 0;
+            flex: 0 0 400px;
+            align-self: auto;
+        }
+
+        div#side {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-content: stretch;
+            align-items: stretch;
+        }
+
+        div#side>div:nth-child(1) {
+            order: 0;
+            flex: 0 0 64px;
+            align-self: auto;
+        }
+
+        div#side>div:nth-child(2) {
+            order: 0;
+            flex: 1 1 auto;
+            align-self: auto;
+        }
+
+        div#side>div:nth-child(3) {
+            order: 0;
+            flex: 0 0 300px;
+            align-self: auto;
+        }
+
+    </style>
 </head>
 
 <body>
 
-<button id="btn">Download</button>
+    
 
-<div style="width: 1200px; height: 700px;" id="editor"></div>
+    <div id="content">
+        <div id="side">
+            <div>
+                Export docx<br/>
+                Save as ZIP (docx with sources)<br/>
+                Open ZIP<br/>
+            </div>
+            <div>files
+                
+                <button id="btn" >Download</button>
+            </div>
+            <div>
+                error message if present
+            </div>
+        </div>
+        <div>
+            <div style="height: 100vh; padding: 0px;" id="editor"></div>
+        </div>
+    </div>
 
 </body>
 
