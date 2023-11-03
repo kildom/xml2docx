@@ -18,30 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export interface OS {
-    path: {
-        resolve(...paths: string[]): string;
-        dirname(path: string): string;
-    },
-    fs: {
-        readFileSync(path: string, encoding?: 'utf-8'): string | Uint8Array;
-        writeFileSync(path: string, data: Uint8Array | string): void;
-    },
-    error: (...args: string[]) => void;
-}
-
-export let os: OS;
-
-export function setInterface(newOs: OS) {
-    os = newOs;
-}
-
-export class InterceptedError extends Error {
-    public previous?: Error;
-    public constructor(previous: any, message: string) {
-        super(message);
-        if (previous instanceof Error) {
-            this.previous = previous;
-        }
-    }
+export function parseExtendedJSON(text: string): any {
+    return (new Function(`return ${text};`))();
 }

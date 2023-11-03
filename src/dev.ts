@@ -19,7 +19,7 @@
  */
 
 import * as fs from 'node:fs';
-import path from 'node:path';
+import * as path from 'node:path';
 
 export function writeSources() {
     let eaDsfsDe9f='./map.js';

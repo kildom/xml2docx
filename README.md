@@ -259,3 +259,87 @@ The top level element is `<document>`:
 * **`<TableOfContents>`** -  [TableOfContents](https://docx.js.org/api/classes/TableOfContents.html) class.
 
 > TODO: Finish and fix the documentation!!!
+
+
+* Top level: `<document>`
+* Objects context:
+  * `<UpperCase>` - create a new API object, inner context: properties:
+    * `<lowerCase>` - properties of constructor arguments
+    * `<_>...</_><_>...</_>` - array for multiple arguments
+    * `<_><_>...</_><_>...</_></_>` - single item array of array for one argument which is an array.
+    * `:pt`, `:pt:int` - filters, multiple filters
+    * `<property:_>...</property:_>` - special filter to switch to objects context
+    * `<property:UpperCase>...</property:UpperCase>` - if filter does not exists, try to create object
+  * `<lowercase>` - create a new object with shortcut (HTML-like)
+    * inner context may be objects or properties (depending on tag)
+    * `<border:property>` - special filter that provides properties
+      of enclosing element in objects context, in properties context
+      do nothing
+* Alias: `<DEF:NAME attr=...>...</DEF:NAME>`
+  * may appear in any location
+  * scope is na enclosing element only and it is available even before
+  * XML is evaluated in place of use, so it can be used in any context.
+  * `<DEF:NAME:INHERITED1:INHERITED2/>` - alias inheritance is allowed
+  * `<NAME/>` is replaced with the XML content of the alias directly
+    (alias cannot have attributes)
+  * `<element:NAME ...>` (alias used as filter) will merge alias with
+    element, element has priority, multiple aliases can be used,
+    leftmost has priority.
+  * `<element attr:alias="NAME"/>` becomes
+    `<element><attr:property attr...>...</attr:property>`
+* CDATA: works the same as normal text
+
+## Aliases
+
+You can reuse some repeating parts of XML by using aliases.
+
+* `<DEF:ALIAS_NAME attributes...> ... children ... </DEF:ALIAS_NAME>` - 
+  it will define an alias that can be used later on. Example:
+  ```xml
+  <DEF:SIGNATURE>John <b>Smith</b></DEF:SIGNATURE>
+  ```
+
+* `<DEF:ALIAS_NAME:PARENT>...` - aliases can also inherit from other aliases.
+  Attributes from left alias replaces the attributes from right alias.
+  Child elements from right-most alias will be placed at the beginning and
+  the following elements will come from the next alias to the left.
+
+* `<ALIAS_NAME/>` - it will put XML from inside of a alias definition.
+  Both alias and this tag (alias reference) cannot have attributes.
+  Example:
+  ```xml
+  <DEF:SIGNATURE>John <b>Smith</b></DEF:SIGNATURE>
+  ...
+  <p>Employer signature: <SIGNATURE/></p>
+  <!-- It will be converted to: -->
+  <p>Employer signature: John <b>Smith</b></p>
+  ```
+
+* `<element:ALIAS_NAME/>` - It will merge alias definition with this `element`.
+  In case of tags collisions, current element will override the alias attributes.
+  If alias has child elements, they will be added at the beginning.
+  If you want to use also filters, the alias must be at the end. Example:
+  ```xml
+  <DEF:FUN_FACT face="Comic" color="#FF0000"><b>Fun fact: </b></DEF:FUN_FACT>
+  ...
+  <font:FUN_FACT color="#0000FF">3042161 is a prime number.</font:FUN_FACT>
+  <!-- It will be converted to: -->
+  <font face="Comic" color="#0000FF"><b>Fun fact: </b>3042161 is a prime number.</font>
+  ```
+
+* `<element:ALIAS_NAME:OTHER_ALIAS/>` - It will merge multiple aliases to one
+  element. Attributes priority is from left (hihest) to right (lowest).
+  Aliases children will be added from right to left.
+
+<!--
+* `<element attr:alias="NAME"/>` - It will add alias as a child property.
+  Example:
+  ```xml
+  <DEF:TOP_BOTTOM bottom="solid"><top>solid</top></DEF:TOP_BOTTOM>
+  ...
+  <TableCell borders:alias="TOP_ONLY">...
+  <!-- It will be converted to: - - >
+  <TableCell><borders:property bottom="solid"><top>solid</top></borders:property>...
+  ```
+-->
+
