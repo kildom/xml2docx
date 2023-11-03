@@ -19,7 +19,7 @@
  */
 
 import { template } from "underscore";
-import { os } from './os';
+import { InterceptedError, os } from './os';
 
 const commonUtils = {
     templateFile: '',
@@ -27,31 +27,34 @@ const commonUtils = {
     data: ({} as any),
     templateDir: '',
     include: function (fileName: string) {
-        os.error.push(`Could not read include file "${fileName}".`);
-        let includeFile = os.path.resolve(this.templateDir, fileName);
-        let templateFile = os.fs.readFileSync(includeFile, 'utf-8') as string;
-        os.error.pop();
-        os.error.push(`Could not create XML from template.`);
-        let xmlText = fromTemplate(includeFile, templateFile, this.dataFile, this.data);
-        os.error.pop();
-        return xmlText;
+        let includeFile: string;
+        let templateFile: string;
+        try {
+            includeFile = os.path.resolve(this.templateDir, fileName);
+            templateFile = os.fs.readFileSync(includeFile, 'utf-8') as string;
+        } catch (ex) { throw new InterceptedError(ex, `Error reading "${fileName}" file.`); }
+        try {
+            return fromTemplate(includeFile, templateFile, this.dataFile, this.data);
+        } catch (ex) { throw new InterceptedError(ex, `Error evaluating template from "${fileName}" include file.`); }
     }
 };
 
-export function fromTemplate(templateFile: string, templateText: string, dataFile: string, data: any) {
+export function fromTemplate(templateFile: string, templateText: string, dataFile: string, data: any): string {
 
-    os.error.push(`Could not parse template "${templateFile}".`);
-    let compiled = template(templateText);
-    os.error.pop();
+    let compiled: _.CompiledTemplate;
+    try {
+        compiled = template(templateText);
+    } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`) }
 
-    os.error.push(`Could not execute template "${templateFile}" with data from "${dataFile}".`);
-    let utils:{[key:string]:any} = {...commonUtils};
-    utils.templateFile = templateFile;
-    utils.dataFile = dataFile;
-    utils.data = data;
-    utils.templateDir = os.path.dirname(templateFile);
-    let result = compiled({ utils: utils, ...data, __utils__: utils });
-    os.error.pop();
-
-    return result;
+    try {
+        let utils: { [key: string]: any } = { ...commonUtils };
+        utils.templateFile = templateFile;
+        utils.dataFile = dataFile;
+        utils.data = data;
+        utils.templateDir = os.path.dirname(templateFile);
+        return compiled({ utils: utils, ...data, __utils__: utils });
+    } catch (ex) {
+        throw new InterceptedError(ex,
+            `Error evaluating template from "${templateFile}" with data from "${dataFile}".`)
+    }
 }

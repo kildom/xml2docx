@@ -1,0 +1,163 @@
+/*!
+ * Copyright 2023 Dominik Kilian
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *    following disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import * as xmlJs from 'xml-js';
+
+export interface Element {
+    type: 'element';
+    name: string;
+    attributes?: { [key: string]: string };
+    elements?: Node[];
+    path: string;
+}
+
+export interface Text {
+    type: 'text';
+    text: string;
+    path: string;
+}
+
+export interface CData {
+    type: 'cdata';
+    cdata: string;
+    path: string;
+}
+
+export interface Instruction {
+    type: 'instruction';
+    name: string;
+    instruction: string;
+    path: string;
+}
+
+export type Node = Element | Text | CData | Instruction;
+
+export class XMLError extends Error {
+    constructor(node: Node, message: string) {
+        let path = node.path + '/';
+        if (node.type === 'element') {
+            path += node.name;
+        } else {
+            path += node.type.toUpperCase();
+        }
+        super(message + ` [at ${path}]`);
+    }
+}
+
+function addXPathsTo(xml: Element, path: string) {
+    let index = 0;
+    for (let node of xml.elements || []) {
+        if (node.type === 'element') {
+            if (node.name == '_') {
+                node.path = path;
+                addXPathsTo(node, path + `/_[${index}]`);
+                index++;
+            } else {
+                node.path = path;
+                addXPathsTo(node, path + '/' + node.name);
+            }
+        } else {
+            node.path = path;
+        }
+    }
+}
+
+export function parse(xmlText: string, addXPaths: boolean, singleRoot: boolean): Element {
+    let xml = xmlJs.xml2js(xmlText, {
+        ignoreComment: true,
+        captureSpacesBetweenElements: true,
+    });
+    let res: Element;
+    if (singleRoot) {
+        let elements = (xml.elements as Node[]).filter(node => !(node.type === 'text' && node.text.trim() === ''));
+        if (elements.length > 1) {
+            throw new XMLError(elements[1], 'Only one root element expected.');
+        } else if (elements.length === 0) {
+            throw new XMLError({ type: 'text', path: '', text: '' }, 'Only one root element expected.');
+        } else if (elements[0].type !== 'element') {
+            throw new XMLError(elements[0], 'XML element expected at the root of document.');
+        }
+        res = elements[0];
+    } else {
+        res = {
+            type: 'element',
+            name: 'ROOT',
+            path: '',
+            elements: xml.elements,
+        }
+    }
+    if (addXPaths) {
+        addXPathsTo(res, '');
+    }
+    return res;
+}
+
+export function stringify(element: Element, singleRoot: boolean) {
+    if (singleRoot) {
+        let root: Element = {
+            type: 'element',
+            name: 'ROOT',
+            path: '',
+            elements: [element],
+        }
+        return xmlJs.js2xml(root, {compact: false})
+    } else {
+        return xmlJs.js2xml(element, {compact: false})
+    }
+}
+
+export enum TextProcessing {
+    INCLUDE,
+    IGNORE_SPACES,
+    TRIM,
+};
+
+export function processText(nodes: Node[] | undefined, textProcessing: TextProcessing) {
+    function isNotSpace(node: Node): boolean {
+        return node.type != 'text' || node.text.trim() !== '';
+    }
+    if (textProcessing === TextProcessing.INCLUDE || !nodes) {
+        return nodes || [];
+    } else if (textProcessing === TextProcessing.IGNORE_SPACES) {
+        return nodes.filter(isNotSpace);
+    } else {
+        let spacesAtTheBeginning = nodes.findIndex(isNotSpace);
+        if (spacesAtTheBeginning < 0) return [];
+        let spacesAtTheEnd = [...nodes].reverse().findIndex(isNotSpace);
+        return nodes.slice(spacesAtTheBeginning, nodes.length - spacesAtTheEnd);
+    }
+}
+
+export function deepCopy(obj: any) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+export function mergeElements(base: Element, addition: Element): Element {
+    base = deepCopy(base);
+    for (let [key, value] of Object.entries(addition.attributes || {})) {
+        base.attributes = base.attributes || {};
+        base.attributes[key] = value;
+    }
+    for (let node of addition.elements || []) {
+        base.elements = base.elements || [];
+        base.elements.push(deepCopy(node));
+    }
+    return base;
+}
