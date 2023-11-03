@@ -26,6 +26,13 @@ import { os, setInterface } from './os';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
 //import * as monaco from 'monaco-editor';
 //import monacode from 'https://unpkg.com/monacode/index.min.js';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Alignment, Button, Callout, Intent, Navbar, Section, Tree } from "@blueprintjs/core";
+
+import "normalize.css/normalize.css";
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 
 let templateText = `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -377,9 +384,74 @@ setInterface({
 };
 
 
+function App() {
+    return (
+        <div>
+            <Navbar>
+                <Navbar.Group align={Alignment.LEFT}>
+                    <Navbar.Heading>xml2docx</Navbar.Heading>
+                    <Navbar.Divider />
+                    <Button className="bp5-minimal" icon="export" />
+                    <Button className="bp5-minimal" icon="import" />
+                </Navbar.Group>
+                <Navbar.Group align={Alignment.RIGHT}>
+                    <Button className="bp5-minimal" icon="document-share" text="Download" />
+                </Navbar.Group>
+            </Navbar>
+            <div style={{ height: 400, overflowY: 'auto' }}>
+                <Tree contents={new Array(80).fill(0).map((x, i) => ({
+                    depth: 0,
+                    id: i,
+                    isSelected: i == 20,
+                    label: 'abc ' + i,
+                    path: [i],
+                    icon: i < 4 ? 'code' : i < 5 ? 'database' : i < 7 ? 'document' : 'media',
+                }))} />
+            </div>
+            <div style={{ paddingTop: 0 }}>
+                <Callout title="Convertion result - Error" icon="error" intent={Intent.DANGER}>
+                <div style={{ overflowY: "auto", height: 170 }}>
+                        <div style={{ paddingTop: 20, paddingBottom: 30 }}>
+                        Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            Invalid new element "SomeUnexpectedElement".
+                            </div>
+                    </div>
+                </Callout>
+                <Callout title="Convertion result - Success" icon="tick-circle" intent={Intent.PRIMARY}>
+                    <div style={{ overflowY: "auto", height: 170 }}>
+                        <div style={{ paddingTop: 20, paddingBottom: 30 }}>Convertion was successful. You can now download the output.</div>
+                        <Button icon="download" text="Download" intent={Intent.SUCCESS} large={true} style={{ width: 315 }} />
+                    </div>
+                </Callout>
+            </div>
+        </div>
+    );
+}
+
 window.onload = () => {
     console.log('loaded');
-    document.getElementById('btn')!.onclick = () => { download() };
+    if (document.getElementById('btn'))
+        document.getElementById('btn')!.onclick = () => { download() };
     /*monacode({
         container: document.getElementById('editor') as HTMLElement,
         value: '<aaa>Download</aaa>',
@@ -397,5 +469,9 @@ window.onload = () => {
         language: 'javascript'
     });*/
 
+    ReactDOM.render(<App />, document.getElementById("reactRoot"));
+
     main();
 };
+
+

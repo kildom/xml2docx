@@ -31,14 +31,18 @@ build({
 });
 
 build({
-	entryPoints: ['src/xml2docx-web.ts'],
+	entryPoints: ['src/xml2docx-web.tsx'],
 	bundle: true,
     sourcemap: true,
     minify: true,
 	format: 'iife',
 	outdir: path.join(__dirname, '../web'),
 	loader: {
-		'.ttf': 'file'
+		'.ttf': 'file',
+		'.svg': 'file',
+		'.woff': 'file',
+		'.woff2': 'file',
+		'.eot': 'file',
 	}
 });
 
