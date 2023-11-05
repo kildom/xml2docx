@@ -19,6 +19,7 @@
  */
 
 import * as xmlJs from 'xml-js';
+import { InterceptedError } from './os';
 
 export interface Element {
     type: 'element';
@@ -51,30 +52,44 @@ export type Node = Element | Text | CData | Instruction;
 
 export class XMLError extends Error {
     constructor(node: Node, message: string) {
-        let path = node.path + '/';
-        if (node.type === 'element') {
-            path += node.name;
-        } else {
-            path += node.type.toUpperCase();
-        }
-        super(message + ` [at ${path}]`);
+        super(message + ` [at ${node.path}]`);
     }
 }
 
-function addXPathsTo(xml: Element, path: string) {
+export class InterceptedXMLError extends InterceptedError {
+    public constructor(node: Node, previous: any, message: string) {
+        super(previous, message + ` [at ${node.path}]`);
+    }
+}
+
+interface PathTagState {
+    first: Node;
+    count: number;
+};
+
+export function addXPathsTo(xml: Element, path: string) {
     let index = 0;
+    let tagStates = new Map<string, PathTagState>();
+    for (let node of xml.elements || []) {
+        let name = node.type === 'element' ? node.name : node.type.toUpperCase();
+        if (tagStates.has(name)) {
+            let state = tagStates.get(name);
+            node.path = `${path}/${name}[${state!.count}]`;
+            if (state!.count === 1) {
+                state!.first.path += '[0]';
+            }
+            state!.count++;
+        } else {
+            node.path = path + '/' + name;
+            tagStates.set(name, {
+                first: node,
+                count: 1,
+            });
+        }
+    }
     for (let node of xml.elements || []) {
         if (node.type === 'element') {
-            if (node.name == '_') {
-                node.path = path;
-                addXPathsTo(node, path + `/_[${index}]`);
-                index++;
-            } else {
-                node.path = path;
-                addXPathsTo(node, path + '/' + node.name);
-            }
-        } else {
-            node.path = path;
+            addXPathsTo(node, node.path);
         }
     }
 }
@@ -117,31 +132,84 @@ export function stringify(element: Element, singleRoot: boolean) {
             path: '',
             elements: [element],
         }
-        return xmlJs.js2xml(root, {compact: false})
+        return xmlJs.js2xml(root, { compact: false })
     } else {
-        return xmlJs.js2xml(element, {compact: false})
+        return xmlJs.js2xml(element, { compact: false })
     }
 }
 
-export enum TextProcessing {
-    INCLUDE,
-    IGNORE_SPACES,
+export enum SpacesProcessing {
+    PRESERVE,
+    IGNORE,
     TRIM,
 };
 
-export function processText(nodes: Node[] | undefined, textProcessing: TextProcessing) {
-    function isNotSpace(node: Node): boolean {
-        return node.type != 'text' || node.text.trim() !== '';
-    }
-    if (textProcessing === TextProcessing.INCLUDE || !nodes) {
+function trimSpacesAndNewLines(text: string) {
+    return text.replace(/(?:^[ \r\n]*|[ \r\n]*$)/g, '');
+}
+
+function trimStartSpacesAndNewLines(text: string) {
+    return text.replace(/^[ \r\n]*/, '');
+}
+
+function trimEndSpacesAndNewLines(text: string) {
+    return text.replace(/[ \r\n]*$/, '');
+}
+
+export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesProcessing) {
+
+    if (textProcessing === SpacesProcessing.PRESERVE || !nodes) {
+
         return nodes || [];
-    } else if (textProcessing === TextProcessing.IGNORE_SPACES) {
-        return nodes.filter(isNotSpace);
+
+    } else if (textProcessing === SpacesProcessing.IGNORE) {
+
+        return nodes.filter(node => node.type != 'text' || trimSpacesAndNewLines(node.text) !== '');
+
     } else {
-        let spacesAtTheBeginning = nodes.findIndex(isNotSpace);
-        if (spacesAtTheBeginning < 0) return [];
-        let spacesAtTheEnd = [...nodes].reverse().findIndex(isNotSpace);
-        return nodes.slice(spacesAtTheBeginning, nodes.length - spacesAtTheEnd);
+
+        let i;
+        let input: Node[] = nodes;
+        let result: Node[] = [];
+        for (i = 0; i < input.length; i++) {
+            let node = input[i];
+            if (node.type === 'text') {
+                if (trimSpacesAndNewLines(node.text) !== '') {
+                    result.push({ ...node, text: trimStartSpacesAndNewLines(node.text) });
+                    i++;
+                    break;
+                }
+            } else {
+                result.push(node);
+            }
+        }
+        for (; i < input.length; i++) {
+            result.push(input[i]);
+        }
+
+        result.reverse();
+
+        input = result;
+        result = [];
+        for (i = 0; i < input.length; i++) {
+            let node = input[i];
+            if (node.type === 'text') {
+                if (trimSpacesAndNewLines(node.text) !== '') {
+                    result.push({ ...node, text: trimEndSpacesAndNewLines(node.text) });
+                    i++;
+                    break;
+                }
+            } else {
+                result.push(node);
+            }
+        }
+        for (; i < input.length; i++) {
+            result.push(input[i]);
+        }
+
+        result.reverse();
+
+        return result;
     }
 }
 
