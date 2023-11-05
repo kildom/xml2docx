@@ -20,13 +20,14 @@
 
 import * as path from "node:path";
 import * as fs from "node:fs";
+import * as docx from "docx";
 
 import { os, InterceptedError, setInterface } from "./os";
 import { parseExtendedJSON } from "./json";
 import { fromTemplate } from "./template";
-import { Element, parse } from "./xml";
+import { Element, addXPathsTo, parse, stringify } from "./xml";
 import { resolveAliases } from "./aliases";
-import { translate } from "./translate";
+import { translate } from "./docxTranslator";
 
 
 setInterface({
@@ -40,21 +41,33 @@ setInterface({
     },
     error: (...args: any[]) => {
         console.error(args);
-    }
+    },
+    convert: {
+        fromBase64: (str: string): Uint8Array => {
+            return Buffer.from(str, 'base64');
+        }
+    },
 });
 
+let debug: boolean = true;
 
 async function main() {
     try {
-        await exec('demo/demo.xml', 'demo/demo.json', 'demo/demo.docx');
+        fs.writeFileSync('a.docx', await exec('demo/demo.xml', 'demo/demo.json', 'demo/demo.docx'));
     } catch (err) {
+        let cur: Error | undefined = err;
+
         if (err instanceof InterceptedError) {
-            let cur: Error | undefined = err;
             while (cur instanceof InterceptedError) {
                 console.error(cur.message);
                 cur = cur.previous;
             }
-            if (cur) {
+        }
+
+        if (cur) {
+            if (debug) {
+                console.error(cur);
+            } else {
                 console.error(cur.message);
             }
         }
@@ -63,11 +76,12 @@ async function main() {
 
 main();
 
-async function exec(templateFile: string, dataFile: string, docxFile: string) {
+async function exec(templateFile: string, dataFile: string, docxFile: string, base64: boolean = false) {
     let templateText: string;
     let dataText: string;
     let data: any;
     let root: Element;
+    let document: docx.Document;
 
     try {
         dataText = os.fs.readFileSync(dataFile, 'utf-8') as string;
@@ -91,5 +105,14 @@ async function exec(templateFile: string, dataFile: string, docxFile: string) {
         resolveAliases(root);
     } catch (err) { throw new InterceptedError(err, `Error resolving aliases.`) }
 
-    translate(root);
+    os.fs.writeFileSync('a.xml', stringify(root, true));
+    addXPathsTo(root, '');
+
+    try {
+        document = translate(root, os.path.dirname(templateFile));
+    } catch (err) { throw new InterceptedError(err, `Error translating XML to docx.js API.`) }
+
+    try {
+        return base64 ? await docx.Packer.toBase64String(document) : await docx.Packer.toBuffer(document);
+    } catch (err) { throw new InterceptedError(err, `Error packing content to docx.`) }
 }

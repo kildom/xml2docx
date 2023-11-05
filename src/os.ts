@@ -27,6 +27,9 @@ export interface OS {
         readFileSync(path: string, encoding?: 'utf-8'): string | Uint8Array;
         writeFileSync(path: string, data: Uint8Array | string): void;
     },
+    convert: {
+        fromBase64(str: string): Uint8Array;
+    },
     error: (...args: string[]) => void;
 }
 
@@ -37,11 +40,7 @@ export function setInterface(newOs: OS) {
 }
 
 export class InterceptedError extends Error {
-    public previous?: Error;
-    public constructor(previous: any, message: string) {
+    public constructor(public previous: any, message: string) {
         super(message);
-        if (previous instanceof Error) {
-            this.previous = previous;
-        }
     }
 }
