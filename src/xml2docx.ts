@@ -115,4 +115,7 @@ async function exec(templateFile: string, dataFile: string, docxFile: string, ba
     try {
         return base64 ? await docx.Packer.toBase64String(document) : await docx.Packer.toBuffer(document);
     } catch (err) { throw new InterceptedError(err, `Error packing content to docx.`) }
+
+    // TODO: In debug mode, generate JS file that creates document using docx.js API.
+    //       Creating a new object: obj = new docx.SomeClass(...args); obj[constructInfoSymbol] = { className: 'SomeClass', args }
 }
