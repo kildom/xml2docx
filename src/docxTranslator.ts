@@ -8,6 +8,7 @@ import { os } from "./os";
 import { parseExtendedJSON } from "./json";
 import { AnyObject, undefEmpty } from "./common";
 import { getColor } from "./colors";
+import { ITableCellMarginOptions } from "docx/build/file/table/table-properties/table-cell-margin";
 
 const symbolInstance: unique symbol = Symbol('instance');
 
@@ -174,6 +175,7 @@ export class DocxTranslator extends TranslatorBase {
         }
 
         this.filters = {
+            'pass': (value: any) => value,
             'pt': (value: any) => convertSize(value, 1),
             'pt3q': (value: any) => convertSize(value, 4 / 3),
             'pt8': (value: any) => convertSize(value, 8),
@@ -390,19 +392,95 @@ export class DocxTranslator extends TranslatorBase {
 
     // --------------------------------- <table><tr><td> ---------------------------------
 
+    private getTableHVPosition<T>(src: Element, text: string | undefined, enumValue: { [key: string]: string }) {
+        if (text === undefined) return undefined;
+        let anchor: docx.TableAnchorType | undefined = undefined;
+        let absolute: docx.UniversalMeasure | undefined = undefined;
+        let relative: T | undefined = undefined;
+        let parts = text.split(' ');
+        for (let part of parts) {
+            let a = fromEnum(src, part, docx.TableAnchorType, {}, false);
+            if (a !== undefined) {
+                anchor = a as docx.TableAnchorType;
+                continue;
+            }
+            let r = fromEnum(src, part, enumValue, {}, false);
+            if (r !== undefined) {
+                relative = r as T;
+                continue;
+            }
+            absolute = part as docx.UniversalMeasure;
+        }
+        return { anchor, absolute, relative };
+    }
+
     private tableTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+        let hFloat = this.getTableHVPosition<docx.RelativeHorizontalPosition>(src, attributes.horizontal, docx.RelativeHorizontalPosition);
+        let vFloat = this.getTableHVPosition<docx.RelativeVerticalPosition>(src, attributes.vertical, docx.RelativeVerticalPosition);
+        let floatMargins = this.getMargins(src, attributes.floatMargins, ':pass');
         let options: docx.ITableOptions = {
             rows: this.parseObjects(src, SpacesProcessing.IGNORE),
-            columnWidths: (attributes.columnWidths as string)
+            columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
                 .split(',')
-                .map(x => this.filter(src, ':dxa', x))
+                .map(x => this.filter(src, ':dxa', x)),
+            layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
+            alignment: fromEnum(src, attributes.align, docx.AlignmentType, { justify: 'both' }) as docx.AlignmentType,
+            width: attributes.width && {
+                type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
+                size: attributes.width,
+            },
+            borders: undefEmpty({
+                bottom: this.getBorderOptions(src, attributes.borderBottom),
+                left: this.getBorderOptions(src, attributes.borderLeft),
+                right: this.getBorderOptions(src, attributes.borderRight),
+                top: this.getBorderOptions(src, attributes.borderTop),
+                insideHorizontal: this.getBorderOptions(src, attributes.borderHorizontal),
+                insideVertical: this.getBorderOptions(src, attributes.borderVertical),
+            }),
+            margins: attributes.cellMargins && {
+                marginUnitType: docx.WidthType.DXA,
+                ...this.getMargins(src, attributes.cellMargins, ':pass'),
+            },
+            float: undefEmpty({
+                horizontalAnchor: hFloat?.anchor,
+                absoluteHorizontalPosition: hFloat?.absolute,
+                relativeHorizontalPosition: hFloat?.relative,
+                verticalAnchor: vFloat?.anchor,
+                absoluteVerticalPosition: vFloat?.absolute,
+                relativeVerticalPosition: vFloat?.relative,
+                overlap: !attributes.overlap ? undefined
+                    : this.filter(src, ':bool', attributes.overlap) ? docx.OverlapType.OVERLAP : docx.OverlapType.NEVER,
+                topFromText: floatMargins?.top,
+                rightFromText: floatMargins?.right,
+                bottomFromText: floatMargins?.bottom,
+                leftFromText: floatMargins?.left,
+            }),
         };
+        let a: ITableCellMarginOptions;
         return [new docx.Table({ ...options, ...properties })];
-    };
+    }
+
+    private getTableRowHeight(src: Element, text: string | undefined) {
+        if (text === undefined) return undefined;
+        let parts = text.split(' ');
+        if (parts.length > 1) {
+            return {
+                rule: fromEnum(src, parts[0], docx.HeightRule, {}) as docx.HeightRule,
+                value: parts[1] as /* a small hack */ unknown as number
+            };
+        } else if (text.toLowerCase() === 'auto') {
+            return { rule: docx.HeightRule.AUTO, value: 0 };
+        } else {
+            return { rule: docx.HeightRule.ATLEAST, value: text as /* a small hack */ unknown as number };
+        }
+    }
 
     private trTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
         let options: docx.ITableRowOptions = {
             children: this.parseObjects(src, SpacesProcessing.IGNORE),
+            cantSplit: this.filter(src, ':bool', attributes.cantSplit, true),
+            tableHeader: this.filter(src, ':bool', attributes.header, true),
+            height: this.getTableRowHeight(src, attributes.height),
         };
         return [new docx.TableRow({ ...options, ...properties })];
     };
@@ -410,6 +488,30 @@ export class DocxTranslator extends TranslatorBase {
     private tdTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
         let options: docx.ITableCellOptions = {
             children: this.parseObjects(src, SpacesProcessing.IGNORE),
+            borders: undefEmpty({
+                bottom: this.getBorderOptions(src, attributes.borderBottom),
+                left: this.getBorderOptions(src, attributes.borderLeft),
+                right: this.getBorderOptions(src, attributes.borderRight),
+                top: this.getBorderOptions(src, attributes.borderTop),
+                end: this.getBorderOptions(src, attributes.borderEnd),
+                start: this.getBorderOptions(src, attributes.borderStart),
+            }),
+            columnSpan: this.filter(src, ':int', attributes.colspan, true),
+            rowSpan: this.filter(src, ':int', attributes.rowspan, true),
+            margins: attributes.margins && {
+                marginUnitType: docx.WidthType.DXA,
+                ...this.getMargins(src, attributes.margins, ':pass'),
+            },
+            textDirection: fromEnum(src, attributes.dir, docx.TextDirection, {
+                topToBottom: docx.TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT,
+                leftToRight: docx.TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
+                bottomToTop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
+            }, true) as docx.TextDirection,
+            verticalAlign: fromEnum(src, attributes.valign, docx.VerticalAlign, { middle: docx.VerticalAlign.CENTER }, true) as docx.VerticalAlign,
+            shading: attributes.background && {
+                type: docx.ShadingType.SOLID,
+                color: getColor(attributes.background),
+            }
         };
         return [new docx.TableCell({ ...options, ...properties })];
     };
@@ -449,7 +551,7 @@ export class DocxTranslator extends TranslatorBase {
         return { horizontal, vertical };
     }
 
-    private getHVPosition(src: Element, value: string, alignEnum: { [key: string]: string | number }, relEnum: { [key: string]: string | number }) {
+    private getImgHVPosition(src: Element, value: string, alignEnum: { [key: string]: string | number }, relEnum: { [key: string]: string | number }) {
         if (value === undefined) return undefined;
         let parts = value.trim().toLowerCase().split(/\s+/);
         let align: any = undefined;
@@ -474,7 +576,11 @@ export class DocxTranslator extends TranslatorBase {
     private getMargins(src: Element, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined {
         if (value === undefined) return undefined;
         let parts = value.trim().toLowerCase().split(/\s+/);
-        parts = [...parts, ...parts, ...parts, ...parts];
+        if (parts.length == 3) {
+            parts = [...parts, parts[1]];
+        } else {
+            parts = [...parts, ...parts, ...parts, ...parts];
+        }
         return {
             top: this.filter(src, filterName, parts[0], true),
             right: this.filter(src, filterName, parts[1], true),
@@ -483,7 +589,7 @@ export class DocxTranslator extends TranslatorBase {
         };
     }
 
-    private getWrap(src: Element, value: string | undefined, margins:docx.IMargins | undefined): docx.ITextWrapping | undefined {
+    private getWrap(src: Element, value: string | undefined, margins: docx.IMargins | undefined): docx.ITextWrapping | undefined {
         if (value === undefined) return undefined;
         let parts = value.trim().toLowerCase().split(/\s+/);
         let side: docx.TextWrappingSide | undefined = undefined;
@@ -530,8 +636,8 @@ export class DocxTranslator extends TranslatorBase {
                 layoutInCell: this.filter(src, ':bool', attributes.layoutInCell, true),
                 lockAnchor: this.filter(src, ':bool', attributes.lockAnchor, true),
                 zIndex: this.filter(src, ':int', attributes.zIndex, true),
-                horizontalPosition: this.getHVPosition(src, attributes.horizontal, docx.HorizontalPositionAlign, docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
-                verticalPosition: this.getHVPosition(src, attributes.vertical, docx.VerticalPositionAlign, docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
+                horizontalPosition: this.getImgHVPosition(src, attributes.horizontal, docx.HorizontalPositionAlign, docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
+                verticalPosition: this.getImgHVPosition(src, attributes.vertical, docx.VerticalPositionAlign, docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
                 margins,
                 wrap: this.getWrap(src, attributes.wrap, margins),
             }),

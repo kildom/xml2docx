@@ -26,17 +26,17 @@ You can use `:property` elements to pass data directly to it.
 
   Combination of `horizontal` and `vertical`. You can also use also short forms: `h` and `v`.
 
-* `wrap="[side] [type]"` *[optional]*
+* `wrap="[type] [side]"` *[optional]*
 
   Text wrapping around the image.
-  * `side` *[optional]* - https://docx.js.org/api/enums/TextWrappingSide.html
   * `type` *[optional]* - https://docx.js.org/api/enums/TextWrappingType.html
+  * `side` *[optional]* - https://docx.js.org/api/enums/TextWrappingSide.html
 
 * `margins` *[optional]*
 
   Margins around the image. See [surrounding lengths](general.md#surrounding-lengths).
 
-* `vertical="[relative-from] [offset] [align]"` *[optional]*
+* `vertical="[relative-from] [offset or align]"` *[optional]*
 
   Vertical location of the image.
   * `relative-from` *[optional]* - https://docx.js.org/api/enums/VerticalPositionRelativeFrom.html
@@ -45,7 +45,7 @@ You can use `:property` elements to pass data directly to it.
 
     The `offset` and `align` fields are mutually exclusive.
 
-* `horizontal="[relative-from] [offset] [align]"` *[optional]*
+* `horizontal="[relative-from] [offset or align]"` *[optional]*
 
   Horizontal location of the image.
   * `relative-from` *[optional]* - https://docx.js.org/api/enums/HorizontalPositionRelativeFrom.html
