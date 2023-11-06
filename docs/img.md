@@ -1,4 +1,6 @@
-# `<img>`
+# Images
+
+## `<img>`
 
 The `<img>` element adds an image to the document.
 It must be decendent of the `<p>` element.
@@ -8,7 +10,7 @@ Supported image formats: `JPEG`, `BMP`, `GIF`, `PNG`.
 It is a wrapper for the [ImageRun class](https://docx.js.org/api/classes/ImageRun.html).
 You can use `:property` elements to pass data directly to it.
 
-## Attributes
+### Attributes
 
 * `src` or `data` *[required]*
 
@@ -41,8 +43,7 @@ You can use `:property` elements to pass data directly to it.
   Vertical location of the image.
   * `relative-from` *[optional]* - https://docx.js.org/api/enums/VerticalPositionRelativeFrom.html
   * `offset` *[optional]* - distance from referece location ([positive or negative length units](general.md#length)).
-  * `align` *[optional]* - https://docx.js.org/api/enums/VerticalPositionAlign.html
-
+  * `align` *[optional]* - https://docx.js.org/api/enums/VerticalPositionAlign.html <br/>
     The `offset` and `align` fields are mutually exclusive.
 
 * `horizontal="[relative-from] [offset or align]"` *[optional]*
@@ -50,8 +51,7 @@ You can use `:property` elements to pass data directly to it.
   Horizontal location of the image.
   * `relative-from` *[optional]* - https://docx.js.org/api/enums/HorizontalPositionRelativeFrom.html
   * `offset` *[optional]* - distance from referece location ([positive or negative length units](general.md#length)).
-  * `align` *[optional]* - https://docx.js.org/api/enums/HorizontalPositionAlign.html
-
+  * `align` *[optional]* - https://docx.js.org/api/enums/HorizontalPositionAlign.html <br/>
     The `offset` and `align` fields are mutually exclusive.
 
 * `allow-overlap`, `behind-document`, `layout-in-cell`, `lock-anchor`, `z-index` *[optional]*

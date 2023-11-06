@@ -421,10 +421,11 @@ export class DocxTranslator extends TranslatorBase {
         let options: docx.ITableOptions = {
             rows: this.parseObjects(src, SpacesProcessing.IGNORE),
             columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
-                .split(',')
+                .trim()
+                .split(/[, ]+/)
                 .map(x => this.filter(src, ':dxa', x)),
             layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
-            alignment: fromEnum(src, attributes.align, docx.AlignmentType, { justify: 'both' }) as docx.AlignmentType,
+            alignment: fromEnum(src, attributes.align, docx.AlignmentType) as docx.AlignmentType,
             width: attributes.width && {
                 type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
                 size: attributes.width,
@@ -464,10 +465,18 @@ export class DocxTranslator extends TranslatorBase {
         if (text === undefined) return undefined;
         let parts = text.split(' ');
         if (parts.length > 1) {
-            return {
-                rule: fromEnum(src, parts[0], docx.HeightRule, {}) as docx.HeightRule,
-                value: parts[1] as /* a small hack */ unknown as number
-            };
+            let e = fromEnum(src, parts[0], docx.HeightRule, {}, false) as (docx.HeightRule | undefined);
+            if (e) {
+                return {
+                    rule: e,
+                    value: parts[1] as /* a small hack */ unknown as number
+                };
+            } else {
+                return {
+                    rule: fromEnum(src, parts[1], docx.HeightRule, {}) as docx.HeightRule,
+                    value: parts[0] as /* a small hack */ unknown as number
+                };
+            }
         } else if (text.toLowerCase() === 'auto') {
             return { rule: docx.HeightRule.AUTO, value: 0 };
         } else {
@@ -489,10 +498,10 @@ export class DocxTranslator extends TranslatorBase {
         let options: docx.ITableCellOptions = {
             children: this.parseObjects(src, SpacesProcessing.IGNORE),
             borders: undefEmpty({
-                bottom: this.getBorderOptions(src, attributes.borderBottom),
-                left: this.getBorderOptions(src, attributes.borderLeft),
-                right: this.getBorderOptions(src, attributes.borderRight),
-                top: this.getBorderOptions(src, attributes.borderTop),
+                bottom: this.getBorderOptions(src, attributes.borderBottom || attributes.borderVertical || attributes.border),
+                left: this.getBorderOptions(src, attributes.borderLeft || attributes.borderHorizontal || attributes.border),
+                right: this.getBorderOptions(src, attributes.borderRight || attributes.borderHorizontal || attributes.border),
+                top: this.getBorderOptions(src, attributes.borderTop || attributes.borderVertical || attributes.border),
                 end: this.getBorderOptions(src, attributes.borderEnd),
                 start: this.getBorderOptions(src, attributes.borderStart),
             }),
