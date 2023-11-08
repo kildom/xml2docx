@@ -10,19 +10,18 @@ export function getColor(text: string) {
         return text;
     } else if ((m = text.match(/^#[0-9a-f]{3}$/))) {
         return `#${text[1]}${text[1]}${text[2]}${text[2]}${text[3]}${text[3]}`;
-    /*} else if ((m = text.match(/^rgb\s*\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)$/))) {
-        let col = [
-            Math.min(255, parseInt(m[1])),
-            Math.min(255, parseInt(m[2])),
-            Math.min(255, parseInt(m[3]))];
-        return '#' + col.map(x => (0x100 + x).toString(16).substring(0, 2)).join('');*/
+        /*} else if ((m = text.match(/^rgb\s*\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)$/))) {
+            let col = [
+                Math.min(255, parseInt(m[1])),
+                Math.min(255, parseInt(m[2])),
+                Math.min(255, parseInt(m[3]))];
+            return '#' + col.map(x => (0x100 + x).toString(16).substring(0, 2)).join('');*/
     } else {
         return undefined;
     }
 }
 
-
-const colorTable = {
+const colorTable: { [key: string]: string } = {
     'aliceblue': '#F0F8FF',
     'antiquewhite': '#FAEBD7',
     'aqua': '#00FFFF',
@@ -49,6 +48,7 @@ const colorTable = {
     'darkgoldenrod': '#B8860B',
     'darkgray': '#A9A9A9',
     'darkgreen': '#006400',
+    'darkgrey': '#A9A9A9',
     'darkkhaki': '#BDB76B',
     'darkmagenta': '#8B008B',
     'darkolivegreen': '#556B2F',
@@ -59,11 +59,13 @@ const colorTable = {
     'darkseagreen': '#8FBC8F',
     'darkslateblue': '#483D8B',
     'darkslategray': '#2F4F4F',
+    'darkslategrey': '#2F4F4F',
     'darkturquoise': '#00CED1',
     'darkviolet': '#9400D3',
     'deeppink': '#FF1493',
     'deepskyblue': '#00BFFF',
     'dimgray': '#696969',
+    'dimgrey': '#696969',
     'dodgerblue': '#1E90FF',
     'firebrick': '#B22222',
     'floralwhite': '#FFFAF0',
@@ -76,10 +78,11 @@ const colorTable = {
     'gray': '#808080',
     'green': '#008000',
     'greenyellow': '#ADFF2F',
+    'grey': '#808080',
     'honeydew': '#F0FFF0',
     'hotpink': '#FF69B4',
-    'indianred': '	#CD5C5C	 ',
-    'indigo': '	#4B0082	 ',
+    'indianred': '#CD5C5C',
+    'indigo': '#4B0082',
     'ivory': '#FFFFF0',
     'khaki': '#F0E68C',
     'lavender': '#E6E6FA',
@@ -90,13 +93,15 @@ const colorTable = {
     'lightcoral': '#F08080',
     'lightcyan': '#E0FFFF',
     'lightgoldenrodyellow': '#FAFAD2',
-    'lightgrey': '#D3D3D3',
+    'lightgray': '#D3D3D3',
     'lightgreen': '#90EE90',
+    'lightgrey': '#D3D3D3',
     'lightpink': '#FFB6C1',
     'lightsalmon': '#FFA07A',
     'lightseagreen': '#20B2AA',
     'lightskyblue': '#87CEFA',
     'lightslategray': '#778899',
+    'lightslategrey': '#778899',
     'lightsteelblue': '#B0C4DE',
     'lightyellow': '#FFFFE0',
     'lime': '#00FF00',
@@ -107,7 +112,7 @@ const colorTable = {
     'mediumaquamarine': '#66CDAA',
     'mediumblue': '#0000CD',
     'mediumorchid': '#BA55D3',
-    'mediumpurple': '#9370D8',
+    'mediumpurple': '#9370DB',
     'mediumseagreen': '#3CB371',
     'mediumslateblue': '#7B68EE',
     'mediumspringgreen': '#00FA9A',
@@ -128,7 +133,7 @@ const colorTable = {
     'palegoldenrod': '#EEE8AA',
     'palegreen': '#98FB98',
     'paleturquoise': '#AFEEEE',
-    'palevioletred': '#D87093',
+    'palevioletred': '#DB7093',
     'papayawhip': '#FFEFD5',
     'peachpuff': '#FFDAB9',
     'peru': '#CD853F',
@@ -136,6 +141,7 @@ const colorTable = {
     'plum': '#DDA0DD',
     'powderblue': '#B0E0E6',
     'purple': '#800080',
+    'rebeccapurple': '#663399',
     'red': '#FF0000',
     'rosybrown': '#BC8F8F',
     'royalblue': '#4169E1',
@@ -149,6 +155,7 @@ const colorTable = {
     'skyblue': '#87CEEB',
     'slateblue': '#6A5ACD',
     'slategray': '#708090',
+    'slategrey': '#708090',
     'snow': '#FFFAFA',
     'springgreen': '#00FF7F',
     'steelblue': '#4682B4',
@@ -164,4 +171,3 @@ const colorTable = {
     'yellow': '#FFFF00',
     'yellowgreen': '#9ACD32',
 };
-
