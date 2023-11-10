@@ -55,7 +55,7 @@ async function main() {
     try {
         fs.writeFileSync('a.docx', await exec('demo/demo.xml', 'demo/demo.json', 'demo/demo.docx'));
     } catch (err) {
-        let cur: Error | undefined = err;
+        let cur: any = err;
 
         if (err instanceof InterceptedError) {
             while (cur instanceof InterceptedError) {

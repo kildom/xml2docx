@@ -6,11 +6,15 @@ import { FileChild } from "docx/build/file/file-child";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { os } from "./os";
 import { parseExtendedJSON } from "./json";
-import { AnyObject, undefEmpty } from "./common";
+import { AnyObject, symbolInstance, undefEmpty } from "./common";
 import { getColor } from "./colors";
 import { ITableCellMarginOptions } from "docx/build/file/table/table-properties/table-cell-margin";
-
-const symbolInstance: unique symbol = Symbol('instance');
+import { pTag } from "./tags/paragraph";
+import { getBorderOptions } from "./tags/borders";
+import { documentTag } from "./tags/document";
+import { fallbackStyleChange, fontTag, underlineTag } from "./tags/style";
+import { tableTag, tdTag, trTag } from "./tags/table";
+import { imgTag } from "./tags/img";
 
 const boolValues: { [key: string]: boolean } = {
     'true': true,
@@ -25,42 +29,6 @@ const boolValues: { [key: string]: boolean } = {
     'n': false,
     '0': false,
     'off': false,
-};
-
-const simpleBoolStyleTable: { [key: string]: string } = {
-    'allCaps': 'allCaps',
-    'all-caps': 'allCaps',
-    'b': 'bold',
-    'boldComplexScript': 'boldComplexScript',
-    'bold-complex-script': 'boldComplexScript',
-    'doubleStrike': 'doubleStrike',
-    'double-strike': 'doubleStrike',
-    'emboss': 'emboss',
-    'imprint': 'imprint',
-    'i': 'italics',
-    'italics': 'italics',
-    'italicsComplexScript': 'italicsComplexScript',
-    'italics-complex-script': 'italicsComplexScript',
-    'math': 'math',
-    'noProof': 'noProof',
-    'no-proof': 'noProof',
-    'rightToLeft': 'rightToLeft',
-    'right-to-left': 'rightToLeft',
-    'smallCaps': 'smallCaps',
-    'small-caps': 'smallCaps',
-    'snapToGrid': 'snapToGrid',
-    'snap-to-grid': 'snapToGrid',
-    'specVanish': 'specVanish',
-    'spec-vanish': 'specVanish',
-    's': 'strike',
-    'strike': 'strike',
-    'sub': 'subScript',
-    'subScript': 'subScript',
-    'sub-script': 'subScript',
-    'sup': 'superScript',
-    'superScript': 'superScript',
-    'super-script': 'superScript',
-    'vanish': 'vanish',
 };
 
 function enumValueNormalize(text: string | number) {
@@ -142,9 +110,28 @@ function normalizeAttributes(attributes: AnyObject): AnyObject {
 }
 
 
+const tags: { [key: string]: (tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject) => any[] } = {
+    'document': documentTag,
+    'p': pTag,
+    'h1': pTag,
+    'h2': pTag,
+    'h3': pTag,
+    'h4': pTag,
+    'h5': pTag,
+    'h6': pTag,
+    'h7': pTag,
+    'h8': pTag,
+    'h9': pTag,
+    'font': fontTag,
+    'u': underlineTag,
+    'table': tableTag,
+    'tr': trTag,
+    'td': tdTag,
+    'img': imgTag,
+}
+
 export class DocxTranslator extends TranslatorBase {
 
-    private tags: { [key: string]: (src: Element, attributes: AnyObject, properties: AnyObject) => any[] };
     private filters: { [key: string]: (value: any, src: Element) => any };
 
     constructor(
@@ -152,27 +139,6 @@ export class DocxTranslator extends TranslatorBase {
         private runOptions: docx.IRunOptions
     ) {
         super();
-
-        this.tags = {
-            'document': this.documentTag,
-            'p': this.pTag,
-            'h1': this.pTag,
-            'h2': this.pTag,
-            'h3': this.pTag,
-            'h4': this.pTag,
-            'h5': this.pTag,
-            'h6': this.pTag,
-            'h7': this.pTag,
-            'h8': this.pTag,
-            'h9': this.pTag,
-            'font': this.fontTag,
-            'u': this.underlineTag,
-            'table': this.tableTag,
-            'tr': this.trTag,
-            'td': this.tdTag,
-            'underline': this.underlineTag,
-            'img': this.imgTag,
-        }
 
         this.filters = {
             'pass': (value: any) => value,
@@ -247,7 +213,7 @@ export class DocxTranslator extends TranslatorBase {
         };
     }
 
-    private copy(runOptionsChanges: docx.IRunOptions) {
+    public copy(runOptionsChanges: docx.IRunOptions) {
         return new DocxTranslator(this.baseDir, { ...this.runOptions, ...runOptionsChanges });
     }
 
@@ -266,14 +232,14 @@ export class DocxTranslator extends TranslatorBase {
     }
 
     protected createTagObject(src: Element): any[] | null {
-        if (this.tags[src.name] !== undefined) {
-            let args: any[] = [src];
-            let numArgs = this.tags[src.name].length;
-            if (numArgs > 1) args.push(normalizeAttributes(this.getAttributes(src)));
-            if (numArgs > 2) args.push(this.getProperties(src));
-            return this.tags[src.name].apply(this, args);
+        if (tags[src.name] !== undefined) {
+            let args: any[] = [this, src];
+            let numArgs = tags[src.name].length;
+            if (numArgs > 2) args.push(normalizeAttributes(this.getAttributes(src)));
+            if (numArgs > 3) args.push(this.getProperties(src));
+            return tags[src.name].apply(this, args as any);
         } else {
-            return this.fallbackTag(src);
+            return fallbackStyleChange(this, src);
         }
     }
 
@@ -323,379 +289,8 @@ export class DocxTranslator extends TranslatorBase {
     }
 
     public translate(root: Element): docx.Document {
-        return this.documentTag(root)[0] as docx.Document;
+        return documentTag(this, root)[0] as docx.Document;
     }
-
-    private getBorderOptions(src: Element, text: string | undefined) {
-        if (text === undefined) return undefined;
-        let parts = text.trim().split(/\s+/);
-        let color: string | undefined = undefined;
-        let style: docx.BorderStyle | undefined = undefined;
-        let size: number | undefined = undefined;
-        let space: number | undefined = undefined;
-        for (let p of parts) {
-            let c = getColor(p);
-            if (c !== undefined) {
-                color = c;
-                continue;
-            }
-            let st = fromEnum(src, p, docx.BorderStyle, undefined, false) as docx.BorderStyle;
-            if (st !== undefined) {
-                style = st;
-                continue;
-            }
-            if (size === undefined) {
-                size = this.filter(src, ':pt8', p);
-            } else if (space === undefined) {
-                space = this.filter(src, ':pt', p);
-            } else {
-                throw new XMLError(src, 'Invalid border options.');
-            }
-        }
-        if (style === undefined) throw new XMLError(src, 'Border style required.');
-        return { color, style, size, space };
-    }
-
-    private simpleStyleChange(src: Element, styleChange: docx.IRunOptions) {
-        let newTranslator = this.copy(styleChange);
-        let properties = newTranslator.getProperties(src);
-        newTranslator = newTranslator.copy(properties);
-        return newTranslator.parseObjects(src, SpacesProcessing.PRESERVE);
-    }
-
-    private fallbackTag(src: Element): any[] | null {
-        if (simpleBoolStyleTable[src.name] !== undefined) {
-            return this.simpleStyleChange(src, { [simpleBoolStyleTable[src.name]]: true });
-        }
-        return null;
-    }
-
-    // --------------------------------- <p><h1><h2>... ---------------------------------
-
-    private pTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-        let style: string | undefined = undefined;
-        let m = src.name.match(/^h([1-9])$/);
-        if (m) style = 'Heading' + m[1];
-        let options: docx.IParagraphOptions = {
-            children: this.parseObjects(src, SpacesProcessing.TRIM),
-            alignment: fromEnum(src, attributes.align, docx.AlignmentType, { justify: 'both' }) as docx.AlignmentType,
-            style: attributes.style || style,
-            border: undefEmpty({
-                bottom: this.getBorderOptions(src, attributes.borderBottom),
-                left: this.getBorderOptions(src, attributes.borderLeft),
-                right: this.getBorderOptions(src, attributes.borderRight),
-                top: this.getBorderOptions(src, attributes.borderTop),
-            }),
-        };
-        return [new docx.Paragraph({ ...options, ...properties })];
-    };
-
-    // --------------------------------- <table><tr><td> ---------------------------------
-
-    private getTableHVPosition<T>(src: Element, text: string | undefined, enumValue: { [key: string]: string }) {
-        if (text === undefined) return undefined;
-        let anchor: docx.TableAnchorType | undefined = undefined;
-        let absolute: docx.UniversalMeasure | undefined = undefined;
-        let relative: T | undefined = undefined;
-        let parts = text.split(' ');
-        for (let part of parts) {
-            let a = fromEnum(src, part, docx.TableAnchorType, {}, false);
-            if (a !== undefined) {
-                anchor = a as docx.TableAnchorType;
-                continue;
-            }
-            let r = fromEnum(src, part, enumValue, {}, false);
-            if (r !== undefined) {
-                relative = r as T;
-                continue;
-            }
-            absolute = part as docx.UniversalMeasure;
-        }
-        return { anchor, absolute, relative };
-    }
-
-    private tableTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-        let hFloat = this.getTableHVPosition<docx.RelativeHorizontalPosition>(src, attributes.horizontal, docx.RelativeHorizontalPosition);
-        let vFloat = this.getTableHVPosition<docx.RelativeVerticalPosition>(src, attributes.vertical, docx.RelativeVerticalPosition);
-        let floatMargins = this.getMargins(src, attributes.floatMargins, ':pass');
-        let options: docx.ITableOptions = {
-            rows: this.parseObjects(src, SpacesProcessing.IGNORE),
-            columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
-                .trim()
-                .split(/[, ]+/)
-                .map(x => this.filter(src, ':dxa', x)),
-            layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
-            alignment: fromEnum(src, attributes.align, docx.AlignmentType) as docx.AlignmentType,
-            width: attributes.width && {
-                type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
-                size: attributes.width,
-            },
-            borders: undefEmpty({
-                bottom: this.getBorderOptions(src, attributes.borderBottom),
-                left: this.getBorderOptions(src, attributes.borderLeft),
-                right: this.getBorderOptions(src, attributes.borderRight),
-                top: this.getBorderOptions(src, attributes.borderTop),
-                insideHorizontal: this.getBorderOptions(src, attributes.borderHorizontal),
-                insideVertical: this.getBorderOptions(src, attributes.borderVertical),
-            }),
-            margins: attributes.cellMargins && {
-                marginUnitType: docx.WidthType.DXA,
-                ...this.getMargins(src, attributes.cellMargins, ':pass'),
-            },
-            float: undefEmpty({
-                horizontalAnchor: hFloat?.anchor,
-                absoluteHorizontalPosition: hFloat?.absolute,
-                relativeHorizontalPosition: hFloat?.relative,
-                verticalAnchor: vFloat?.anchor,
-                absoluteVerticalPosition: vFloat?.absolute,
-                relativeVerticalPosition: vFloat?.relative,
-                overlap: !attributes.overlap ? undefined
-                    : this.filter(src, ':bool', attributes.overlap) ? docx.OverlapType.OVERLAP : docx.OverlapType.NEVER,
-                topFromText: floatMargins?.top,
-                rightFromText: floatMargins?.right,
-                bottomFromText: floatMargins?.bottom,
-                leftFromText: floatMargins?.left,
-            }),
-        };
-        let a: ITableCellMarginOptions;
-        return [new docx.Table({ ...options, ...properties })];
-    }
-
-    private getTableRowHeight(src: Element, text: string | undefined) {
-        if (text === undefined) return undefined;
-        let parts = text.split(' ');
-        if (parts.length > 1) {
-            let e = fromEnum(src, parts[0], docx.HeightRule, {}, false) as (docx.HeightRule | undefined);
-            if (e) {
-                return {
-                    rule: e,
-                    value: parts[1] as /* a small hack */ unknown as number
-                };
-            } else {
-                return {
-                    rule: fromEnum(src, parts[1], docx.HeightRule, {}) as docx.HeightRule,
-                    value: parts[0] as /* a small hack */ unknown as number
-                };
-            }
-        } else if (text.toLowerCase() === 'auto') {
-            return { rule: docx.HeightRule.AUTO, value: 0 };
-        } else {
-            return { rule: docx.HeightRule.ATLEAST, value: text as /* a small hack */ unknown as number };
-        }
-    }
-
-    private trTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-        let options: docx.ITableRowOptions = {
-            children: this.parseObjects(src, SpacesProcessing.IGNORE),
-            cantSplit: this.filter(src, ':bool', attributes.cantSplit, true),
-            tableHeader: this.filter(src, ':bool', attributes.header, true),
-            height: this.getTableRowHeight(src, attributes.height),
-        };
-        return [new docx.TableRow({ ...options, ...properties })];
-    };
-
-    private tdTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-        let options: docx.ITableCellOptions = {
-            children: this.parseObjects(src, SpacesProcessing.IGNORE),
-            borders: undefEmpty({
-                bottom: this.getBorderOptions(src, attributes.borderBottom || attributes.borderVertical || attributes.border),
-                left: this.getBorderOptions(src, attributes.borderLeft || attributes.borderHorizontal || attributes.border),
-                right: this.getBorderOptions(src, attributes.borderRight || attributes.borderHorizontal || attributes.border),
-                top: this.getBorderOptions(src, attributes.borderTop || attributes.borderVertical || attributes.border),
-                end: this.getBorderOptions(src, attributes.borderEnd),
-                start: this.getBorderOptions(src, attributes.borderStart),
-            }),
-            columnSpan: this.filter(src, ':int', attributes.colspan, true),
-            rowSpan: this.filter(src, ':int', attributes.rowspan, true),
-            margins: attributes.margins && {
-                marginUnitType: docx.WidthType.DXA,
-                ...this.getMargins(src, attributes.margins, ':pass'),
-            },
-            textDirection: fromEnum(src, attributes.dir, docx.TextDirection, {
-                topToBottom: docx.TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT,
-                leftToRight: docx.TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
-                bottomToTop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
-            }, true) as docx.TextDirection,
-            verticalAlign: fromEnum(src, attributes.valign, docx.VerticalAlign, { middle: docx.VerticalAlign.CENTER }, true) as docx.VerticalAlign,
-            shading: attributes.background && {
-                type: docx.ShadingType.SOLID,
-                color: getColor(attributes.background),
-            }
-        };
-        return [new docx.TableCell({ ...options, ...properties })];
-    };
-
-    // --------------------------------- <u> ---------------------------------
-
-    private underlineTag(src: Element, attributes: AnyObject): any[] {
-        let change: docx.IRunOptions = {
-            underline: {
-                color: attributes.color,
-                type: fromEnum(src, attributes.type, docx.UnderlineType) as docx.UnderlineType,
-            }
-        }
-        return this.simpleStyleChange(src, change);
-    }
-
-    // --------------------------------- <font> ---------------------------------
-
-    private fontTag(src: Element, attributes: AnyObject): any[] {
-        let color = getColor(attributes.color);
-        if (color === undefined) throw new XMLError(src, `Invalid color "${attributes.color}".`);
-        let change: docx.IRunOptions = {
-            color,
-            font: attributes.face,
-            size: attributes.size,
-        }
-        return this.simpleStyleChange(src, change);
-    }
-
-    // --------------------------------- <img> ---------------------------------
-
-    private getFlip(src: Element, value: string | undefined) {
-        if (value === undefined) return undefined;
-        let lower = value.toLowerCase();
-        let horizontal: boolean = lower.indexOf('h') >= 0;
-        let vertical: boolean = lower.indexOf('v') >= 0;
-        return { horizontal, vertical };
-    }
-
-    private getImgHVPosition(src: Element, value: string, alignEnum: { [key: string]: string | number }, relEnum: { [key: string]: string | number }) {
-        if (value === undefined) return undefined;
-        let parts = value.trim().toLowerCase().split(/\s+/);
-        let align: any = undefined;
-        let offset: number | undefined = undefined;
-        let relative: any = undefined;
-        for (let part of parts) {
-            let a = fromEnum(src, part, alignEnum, {}, false);
-            if (a !== undefined) {
-                align = a;
-                continue;
-            }
-            let r = fromEnum(src, part, relEnum, {}, false);
-            if (r !== undefined) {
-                relative = r;
-                continue;
-            }
-            offset = this.filter(src, ':emu', part);
-        }
-        return { align, offset, relative };
-    }
-
-    private getMargins(src: Element, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined {
-        if (value === undefined) return undefined;
-        let parts = value.trim().toLowerCase().split(/\s+/);
-        if (parts.length == 3) {
-            parts = [...parts, parts[1]];
-        } else {
-            parts = [...parts, ...parts, ...parts, ...parts];
-        }
-        return {
-            top: this.filter(src, filterName, parts[0], true),
-            right: this.filter(src, filterName, parts[1], true),
-            bottom: this.filter(src, filterName, parts[2], true),
-            left: this.filter(src, filterName, parts[3], true),
-        };
-    }
-
-    private getWrap(src: Element, value: string | undefined, margins: docx.IMargins | undefined): docx.ITextWrapping | undefined {
-        if (value === undefined) return undefined;
-        let parts = value.trim().toLowerCase().split(/\s+/);
-        let side: docx.TextWrappingSide | undefined = undefined;
-        let type: docx.TextWrappingType | undefined = undefined;
-        for (let part of parts) {
-            let s = fromEnum(src, part, docx.TextWrappingSide, {}, false);
-            if (s !== undefined) {
-                side = s as docx.TextWrappingSide;
-                continue;
-            }
-            let t = fromEnum(src, part, docx.TextWrappingType, {}, false);
-            if (t !== undefined) {
-                type = t as docx.TextWrappingType;
-                continue;
-            }
-            throw new XMLError(src, 'Invalid wrapping options.');
-        }
-        if (type === undefined) throw new XMLError(src, 'At least wrapping side is required.');
-        return {
-            side,
-            type,
-            margins: !margins ? undefined : {
-                distT: margins.top,
-                distR: margins.right,
-                distB: margins.bottom,
-                distL: margins.left,
-            },
-        };
-    }
-
-    private imgTag(src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-        let margins = this.getMargins(src, attributes.margins);
-        let options: docx.IImageOptions = {
-            data: attributes.src ? this.filter(src, ':file', attributes.src) : this.filter(src, ':base64', attributes.data),
-            transformation: {
-                width: this.filter(src, ':pt3q', attributes.width, true),
-                height: this.filter(src, ':pt3q', attributes.height, true),
-                rotation: this.filter(src, ':int', attributes.rotate, true),
-                flip: this.getFlip(src, attributes.flip),
-            },
-            floating: undefEmpty({
-                allowOverlap: this.filter(src, ':bool', attributes.allowOverlap, true),
-                behindDocument: this.filter(src, ':bool', attributes.behindDocument, true),
-                layoutInCell: this.filter(src, ':bool', attributes.layoutInCell, true),
-                lockAnchor: this.filter(src, ':bool', attributes.lockAnchor, true),
-                zIndex: this.filter(src, ':int', attributes.zIndex, true),
-                horizontalPosition: this.getImgHVPosition(src, attributes.horizontal, docx.HorizontalPositionAlign, docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
-                verticalPosition: this.getImgHVPosition(src, attributes.vertical, docx.VerticalPositionAlign, docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
-                margins,
-                wrap: this.getWrap(src, attributes.wrap, margins),
-            }),
-        };
-        return [new docx.ImageRun(options)];
-    }
-
-    // --------------------------------- <document> ---------------------------------
-
-    private documentTag(src: Element): any[] {
-        let attributes = this.getAttributes(src);
-        let properties = this.getProperties(src);
-        let sections: docx.ISectionOptions[] = [];
-        let paragraphStyles: docx.IParagraphStyleOptions[] = [];
-        let characterStyles: docx.ICharacterStyleOptions[] = [];
-        let children: FileChild[] = [];
-        let options: IPropertiesOptions = {
-            sections: sections,
-            title: attributes.title,
-            subject: attributes.subject,
-            creator: attributes.creator,
-            keywords: attributes.keywords,
-            description: attributes.description,
-            lastModifiedBy: attributes.lastModifiedBy,
-            // TODO: More properties
-            styles: {
-                paragraphStyles,
-                characterStyles,
-            },
-            ...properties,
-        }
-        for (let obj of this.parseObjects(src, SpacesProcessing.IGNORE)) {
-            if (obj[symbolInstance] === 'ISectionOptions') {
-                sections.push(obj);
-                children = obj.children;
-            } else if (obj[symbolInstance] === 'IParagraphStyleOptions') {
-                paragraphStyles.push(obj);
-            } else if (obj[symbolInstance] === 'ICharacterStyleOptions') {
-                characterStyles.push(obj);
-            } else {
-                if (sections.length === 0) {
-                    children = [];
-                    sections.push({ children });
-                }
-                children.push(obj);
-            }
-        }
-        return [new docx.Document(options)]
-    };
 
 }
 

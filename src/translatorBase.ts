@@ -9,7 +9,7 @@ export abstract class TranslatorBase {
     protected abstract createClassObject(src: Element, name: string, args: any): any[];
     protected abstract singleFilter(src: Element, filterName: string, value: any): any;
 
-    protected filter(src: Element, filters: string[] | string, value: any, skipUndefined: boolean = false) {
+    public filter(src: Element, filters: string[] | string, value: any, skipUndefined: boolean = false) {
         if (skipUndefined && value === undefined) {
             return undefined;
         }
@@ -41,7 +41,7 @@ export abstract class TranslatorBase {
         }
     }
 
-    protected getAttributes(element: Element) {
+    public getAttributes(element: Element) {
         let obj: AnyObject = {};
         for (let [key, value] of Object.entries({ ...(element.attributes || {}) })) {
             obj[this.extractName(key)] = this.filter(element, key, value);
@@ -49,7 +49,7 @@ export abstract class TranslatorBase {
         return obj;
     }
 
-    protected getProperties(element: Element): AnyObject {
+    public getProperties(element: Element): AnyObject {
         let result: AnyObject = {};
         for (let child of element.elements || []) {
             if (child.type === 'element') {
@@ -137,7 +137,7 @@ export abstract class TranslatorBase {
         return this.filter(element, filters, result);
     }
 
-    protected parseObjects(container: Element, spaces: SpacesProcessing): any[] {
+    public parseObjects(container: Element, spaces: SpacesProcessing): any[] {
 
         let result: any[] = [];
         let children = processSpaces(container.elements, spaces);
