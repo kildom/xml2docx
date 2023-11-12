@@ -53,7 +53,15 @@ let debug: boolean = true;
 
 async function main() {
     try {
-        fs.writeFileSync('a.docx', await exec('demo/demo.xml', 'demo/demo.json', 'demo/demo.docx'));
+        try {
+            fs.mkdirSync('test/outputs');
+        } catch (err) {}
+        for (let file of fs.readdirSync('test/inputs')) {
+            if (file.endsWith('.xml')) {
+                let out = 'test/outputs/' + file.replace('.xml', '.docx');
+                fs.writeFileSync(out, await exec(`test/inputs/${file}`, 'test/inputs/empty.json', out));
+            }
+        }
     } catch (err) {
         let cur: any = err;
 
