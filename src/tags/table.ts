@@ -25,7 +25,7 @@ import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, symbolInstance, undefEmpty } from "../common";
-import { getBorderOptions, getMargins } from "./borders";
+import { getBorder, getMargins } from "./borders";
 import { fromEnum } from "../filters";
 import { pTag } from "./paragraph";
 
@@ -56,6 +56,8 @@ export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject
     let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(src, attributes.horizontal, docx.RelativeHorizontalPosition);
     let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(src, attributes.vertical, docx.RelativeVerticalPosition);
     let floatMargins = getMargins(tr, src, attributes.floatMargins, ':pass');
+    let border = getBorder(tr, src, attributes.border);
+    let insideBorder = getBorder(tr, src, attributes.insideBorder);
     let options: docx.ITableOptions = {
         rows: tr.copy().parseObjects(src, SpacesProcessing.IGNORE),
         columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
@@ -69,12 +71,12 @@ export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject
             size: attributes.width,
         },
         borders: undefEmpty({
-            bottom: getBorderOptions(tr, src, attributes.borderBottom),
-            left: getBorderOptions(tr, src, attributes.borderLeft),
-            right: getBorderOptions(tr, src, attributes.borderRight),
-            top: getBorderOptions(tr, src, attributes.borderTop),
-            insideHorizontal: getBorderOptions(tr, src, attributes.borderHorizontal),
-            insideVertical: getBorderOptions(tr, src, attributes.borderVertical),
+            bottom: border?.bottom,
+            left: border?.left,
+            right: border?.right,
+            top: border?.top,
+            insideHorizontal: insideBorder?.top,
+            insideVertical: insideBorder?.right,
         }),
         margins: attributes.cellMargins && {
             marginUnitType: docx.WidthType.DXA,
@@ -147,14 +149,7 @@ export function tdTag(tr: DocxTranslator, src: Element, attributes: AnyObject, p
     }
     let options: docx.ITableCellOptions = {
         children,
-        borders: undefEmpty({
-            bottom: getBorderOptions(tr, src, attributes.borderBottom || attributes.borderVertical || attributes.border),
-            left: getBorderOptions(tr, src, attributes.borderLeft || attributes.borderHorizontal || attributes.border),
-            right: getBorderOptions(tr, src, attributes.borderRight || attributes.borderHorizontal || attributes.border),
-            top: getBorderOptions(tr, src, attributes.borderTop || attributes.borderVertical || attributes.border),
-            end: getBorderOptions(tr, src, attributes.borderEnd),
-            start: getBorderOptions(tr, src, attributes.borderStart),
-        }),
+        borders: getBorder(tr, src, attributes.border),
         columnSpan: tr.filter(src, ':int', attributes.colspan, true),
         rowSpan: tr.filter(src, ':int', attributes.rowspan, true),
         margins: attributes.margins && {

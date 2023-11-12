@@ -26,7 +26,7 @@ import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, symbolInstance, undefEmpty } from "../common";
 import { fromEnum } from "../filters";
-import { getBorderOptions, getBorder } from "./borders";
+import { getBorder } from "./borders";
 
 
 export function getIParagraphPropertiesOptions(tr: DocxTranslator, src: Element, attributes: AnyObject) {

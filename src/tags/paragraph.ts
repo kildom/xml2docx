@@ -22,7 +22,6 @@ import * as docx from "docx";
 import { AnyObject, undefEmpty } from "../common";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing } from "../xml";
-import { getBorderOptions } from "./borders";
 import { fromEnum } from "../filters";
 import { getIParagraphPropertiesOptions } from "./styles";
 
