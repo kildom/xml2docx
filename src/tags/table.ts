@@ -1,11 +1,33 @@
+/*!
+ * Copyright 2023 Dominik Kilian
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *    following disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import { FileChild } from "docx/build/file/file-child";
 import { getColor } from "../colors";
-import { DocxTranslator, fromEnum } from "../docxTranslator";
+import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, symbolInstance, undefEmpty } from "../common";
 import { getBorderOptions, getMargins } from "./borders";
+import { fromEnum } from "../filters";
+import { pTag } from "./paragraph";
 
 
 function getTableHVPosition<T>(src: Element, text: string | undefined, enumValue: { [key: string]: string }) {
@@ -35,7 +57,7 @@ export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject
     let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(src, attributes.vertical, docx.RelativeVerticalPosition);
     let floatMargins = getMargins(tr, src, attributes.floatMargins, ':pass');
     let options: docx.ITableOptions = {
-        rows: tr.parseObjects(src, SpacesProcessing.IGNORE),
+        rows: tr.copy().parseObjects(src, SpacesProcessing.IGNORE),
         columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
             .trim()
             .split(/[, ]+/)
@@ -110,8 +132,21 @@ export function trTag(tr: DocxTranslator, src: Element, attributes: AnyObject, p
 };
 
 export function tdTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+    let children = tr.parseObjects(src, SpacesProcessing.IGNORE);
+    for (let child of children) {
+        if (!(child instanceof docx.Paragraph) && !(child instanceof docx.Table)) {
+            children = pTag(tr, {
+                name: 'p',
+                path: src.path + '/p[auto]',
+                type: 'element',
+                attributes: {},
+                elements: src.elements?.filter(element => element.type !== 'element' || !element.name.endsWith(':property')),
+            }, {}, {});
+            break;
+        }
+    }
     let options: docx.ITableCellOptions = {
-        children: tr.parseObjects(src, SpacesProcessing.IGNORE),
+        children,
         borders: undefEmpty({
             bottom: getBorderOptions(tr, src, attributes.borderBottom || attributes.borderVertical || attributes.border),
             left: getBorderOptions(tr, src, attributes.borderLeft || attributes.borderHorizontal || attributes.border),

@@ -1,0 +1,24 @@
+<document>
+
+    <title>Table tests</title>
+
+    <h1 spacing="9mm 5mm" preserve="y">Simplest table</h1>
+    <table>
+        <tr>
+            <td>First cell</td>
+            <td>Second cell</td>
+        </tr>
+        <tr>
+            <td>Third cell</td>
+            <td>Forurth cell</td>
+        </tr>
+    </table>
+
+    <h1>align</h1>
+    <table align="left"><tr><td>Left aligned</td></tr></table>
+    <p></p>
+    <table align="right"><tr><td>Right aligned</td></tr></table>
+    <p></p>
+    <table align="center"><tr><td>Cenetered</td></tr></table>
+
+</document>

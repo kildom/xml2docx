@@ -25,11 +25,11 @@ You can use `:property` elements to pass data directly to it.
 
 * `border-bottom`, `border-left`, `border-right`, `border-top` *[optional]*
 
-  Table borders, [border styles](general.md#border-styles).
+  Table borders, see [border styles](general.md#border-styles).
 
 * `border-horizontal`, `border-vertical` *[optional]*
 
-  Default borders between cells, [border styles](general.md#border-styles).
+  Default borders between cells, see [border styles](general.md#border-styles).
 
 * `cell-margins` *[optional]*
 
@@ -101,7 +101,7 @@ You can use `:property` elements to pass data directly to it.
 
 * `border`, `border-bottom`, `border-left`, `border-right`, `border-top`, `border-end`, `border-start`, `border-horizontal`, `border-vertical` *[optional]*
 
-  Cell borders, [border styles](general.md#border-styles).
+  Cell borders, see [border styles](general.md#border-styles).
 
 * `margins` *[optional]*
 
