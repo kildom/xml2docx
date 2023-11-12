@@ -18,7 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export function getColor(text: string) {
+import { Element, XMLError } from "./xml";
+
+export function getColor(text: string | undefined, throws?: Element) {
+    if (text === undefined) return undefined;
     text = text.trim().toLowerCase();
     let normalized = text.replace(/[^a-z]/g, '');
     if (colorTable[normalized] !== undefined) {
@@ -35,6 +38,8 @@ export function getColor(text: string) {
                 Math.min(255, parseInt(m[2])),
                 Math.min(255, parseInt(m[3]))];
             return '#' + col.map(x => (0x100 + x).toString(16).substring(0, 2)).join('');*/
+    } else if (throws) {
+        throw new XMLError(throws, `Invalid color value "${text}".`);
     } else {
         return undefined;
     }

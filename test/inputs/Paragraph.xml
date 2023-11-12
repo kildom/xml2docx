@@ -51,6 +51,17 @@
     <p spacing="1cm 1cm exactly 1.2 contextual">[spacing="1cm 1cm exactly 1.2 contextual"] 1cm before and after (contextual), and 1.2 between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
     <p>No spacing</p>
 
+    <h1>tabs</h1>
+    <p tabs="left 2cm, center 5cm, decimal 9cm, right 13cm" preserve="y">Begin<tab/>Left<tab/>Center<tab/>123.456<tab/>Right</p>
+    <p>B&#9;L&#9;C&#9;1.55555&#9;R</p>
+    <p preserve="n">Begin	Left	Center	123.456	Right</p>
+    <p tabs="12cm dot">Leader Type:<tab/>dot</p>
+    <p tabs="12cm hyphen">Leader Type:<tab/>hyphen</p>
+    <p tabs="12cm middle-dot">Leader Type:<tab/>middle-dot</p>
+    <p tabs="12cm none">Leader Type:<tab/>none</p>
+    <p tabs="12cm underscore">Leader Type:<tab/>underscore</p>
+    <p tabs="underscore">Leader Type:<tab/>none</p>
+
     <h1>background</h1>
     <p background="aliceblue">[background="aliceblue"] "Alice in Wonderland" blue.</p>
     <p background="#FEA" spacing="5mm 5mm">First paragraph with background and spacing.</p>

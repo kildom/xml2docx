@@ -18,84 +18,188 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from "docx/build/file/file-child";
+import * as docx from "docx";
+
 import { getColor } from "../colors";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
-import * as docx from "docx";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, symbolInstance } from "../common";
+import { AnyObject, requiredAttribute, symbolInstance } from "../common";
 import { fromEnum } from "../filters";
+import { getBorder } from "./borders";
 
 
-const simpleBoolStyleTable: { [key: string]: string } = {
-    'allCaps': 'allCaps',
-    'all-caps': 'allCaps',
-    'b': 'bold',
-    'boldComplexScript': 'boldComplexScript',
-    'bold-complex-script': 'boldComplexScript',
-    'doubleStrike': 'doubleStrike',
-    'double-strike': 'doubleStrike',
-    'emboss': 'emboss',
-    'imprint': 'imprint',
-    'i': 'italics',
-    'italics': 'italics',
-    'italicsComplexScript': 'italicsComplexScript',
-    'italics-complex-script': 'italicsComplexScript',
-    'math': 'math',
-    'noProof': 'noProof',
-    'no-proof': 'noProof',
-    'rightToLeft': 'rightToLeft',
-    'right-to-left': 'rightToLeft',
-    'smallCaps': 'smallCaps',
-    'small-caps': 'smallCaps',
-    'snapToGrid': 'snapToGrid',
-    'snap-to-grid': 'snapToGrid',
-    'specVanish': 'specVanish',
-    'spec-vanish': 'specVanish',
-    's': 'strike',
-    'strike': 'strike',
-    'sub': 'subScript',
-    'subScript': 'subScript',
-    'sub-script': 'subScript',
-    'sup': 'superScript',
-    'superScript': 'superScript',
-    'super-script': 'superScript',
-    'vanish': 'vanish',
+const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {
+    'allCaps': { allCaps: true },
+    'all-caps': { allCaps: true },
+    'b': { bold: true },
+    'bold': { bold: true },
+    'boldComplexScript': { boldComplexScript: true },
+    'bold-complex-script': { boldComplexScript: true },
+    'doubleStrike': { doubleStrike: true },
+    'double-strike': { doubleStrike: true },
+    'emboss': { emboss: true },
+    'imprint': { imprint: true },
+    'i': { italics: true },
+    'italics': { italics: true },
+    'italicsComplexScript': { italicsComplexScript: true },
+    'italics-complex-script': { italicsComplexScript: true },
+    'math': { math: true },
+    'noProof': { noProof: true },
+    'no-proof': { noProof: true },
+    'rightToLeft': { rightToLeft: true },
+    'right-to-left': { rightToLeft: true },
+    'smallCaps': { smallCaps: true },
+    'small-caps': { smallCaps: true },
+    'snapToGrid': { snapToGrid: true },
+    'snap-to-grid': { snapToGrid: true },
+    'specVanish': { specVanish: true },
+    'spec-vanish': { specVanish: true },
+    's': { strike: true },
+    'strike': { strike: true },
+    'sub': { subScript: true },
+    'subScript': { subScript: true },
+    'sub-script': { subScript: true },
+    'sup': { superScript: true },
+    'superScript': { superScript: true },
+    'super-script': { superScript: true },
+    'u': { underline: { type: docx.UnderlineType.SINGLE } },
+    'underline': { underline: { type: docx.UnderlineType.SINGLE } },
+    'vanish': { vanish: true },
+    'span': {},
+    'font': {},
 };
 
-export function underlineTag(tr: DocxTranslator, src: Element, attributes: AnyObject): any[] {
-    let change: docx.IRunOptions = {
-        underline: {
-            color: attributes.color,
-            type: fromEnum(src, attributes.type, docx.UnderlineType) as docx.UnderlineType,
+const simpleBoolStyleTable: { [key: string]: string } = {
+    noProof: 'noProof',
+    bold: 'bold',
+    boldComplexScript: 'boldComplexScript',
+    italics: 'italics',
+    italicsComplexScript: 'italicsComplexScript',
+    sizeComplexScript: 'sizeComplexScript',
+    rightToLeft: 'rightToLeft',
+    smallCaps: 'smallCaps',
+    allCaps: 'allCaps',
+    strike: 'strike',
+    doubleStrike: 'doubleStrike',
+    sub: 'subScript',
+    subScript: 'subScript',
+    super: 'superScript',
+    superScript: 'superScript',
+    highlightComplexScript: 'highlightComplexScript',
+    emboss: 'emboss',
+    imprint: 'imprint',
+    snapToGrid: 'snapToGrid',
+    vanish: 'vanish',
+    specVanish: 'specVanish',
+    math: 'math',
+};
+
+enum HighlightColor {
+    BLACK = 'black',
+    BLUE = 'blue',
+    CYAN = 'cyan',
+    DARK_BLUE = 'darkBlue',
+    DARK_CYAN = 'darkCyan',
+    DARK_GRAY = 'darkGray',
+    DARK_GREEN = 'darkGreen',
+    DARK_MAGENTA = 'darkMagenta',
+    DARK_RED = 'darkRed',
+    DARK_YELLOW = 'darkYellow',
+    GREEN = 'green',
+    LIGHT_GRAY = 'lightGray',
+    MAGENTA = 'magenta',
+    RED = 'red',
+    WHITE = 'white',
+    YELLOW = 'yellow',
+};
+
+export function removeShallowUndefined(object: { [key: string]: any }) {
+    object = { ...object };
+    for (let key of [...Object.keys(object)]) {
+        if (object[key] === undefined) {
+            delete object[key];
         }
     }
-    return simpleStyleChange(tr, src, change);
+    return object;
 }
 
+type SplitListMatcher = (tr: DocxTranslator, src: Element, value: string) => any;
 
-export function fontTag(tr: DocxTranslator, src: Element, attributes: AnyObject): any[] {
-    let color = getColor(attributes.color);
-    if (color === undefined) throw new XMLError(src, `Invalid color "${attributes.color}".`);
-    let change: docx.IRunOptions = {
-        color,
-        font: attributes.face,
-        size: attributes.size,
+export function splitListValues(tr: DocxTranslator, src: Element, value: string | undefined, matchers: { [key: string]: SplitListMatcher }, split: ',' | ' ' | 'both' = 'both') {
+    if (value === undefined) return undefined;
+    let arr = value.split(split == ' ' ? /\s+/ : split == ',' ? /\s*[,;]\s*/ : /(?:\s*[,;]\s*|\s+)/);
+    let result: { [key: string]: any } = {};
+    outerLoop:
+    for (let item of arr) {
+        for (let [name, matcher] of Object.entries(matchers)) {
+            if (name in result) continue;
+            let m = matcher(tr, src, item);
+            if (m !== undefined) {
+                result[name] = m;
+                continue outerLoop;
+            }
+        }
+        throw new XMLError(src, `Invalid list item ${item}.`);
     }
-    return simpleStyleChange(tr, src, change);
+    return result; // TODO: Use more this function in more places
 }
 
-function simpleStyleChange(tr: DocxTranslator, src: Element, styleChange: docx.IRunOptions) {
+
+export function getIRunStylePropertiesOptions(tr: DocxTranslator, src: Element, attributes: AnyObject): docx.IRunStylePropertiesOptions {
+    let options: docx.IRunStylePropertiesOptions = {
+        underline: splitListValues(tr, src, attributes.underline, {
+            type: (tr: DocxTranslator, src: Element, value: string) => fromEnum(src, value, docx.UnderlineType, {}, false),
+            color: (tr: DocxTranslator, src: Element, value: string) => getColor(value, src),
+        }),
+        color: getColor(attributes.color),
+        kern: attributes.kern,
+        position: attributes.position,
+        size: attributes.size,
+        font: attributes.font || attributes.face,
+        highlight: fromEnum(src, attributes.highlight, HighlightColor, {}, false) as string | undefined,
+        shading: attributes.background && {
+            type: docx.ShadingType.SOLID,
+            color: getColor(attributes.background),
+        },
+        border: getBorder(tr, src, attributes.border)?.top,
+        scale: tr.filter(src, ':float', attributes.scale, true),
+    };
+    for (let [key, value] of Object.entries(attributes)) {
+        if (simpleBoolStyleTable[key] !== undefined) {
+            (options as any)[simpleBoolStyleTable[key]] = tr.filter(src, ':bool', value);
+        }
+    }
+    return removeShallowUndefined(options) as docx.IRunStylePropertiesOptions;
+}
+
+function simpleStyleChange(tr: DocxTranslator, src: Element, styleChange: docx.IRunOptions, attributes: AnyObject) {
+    styleChange = {
+        ...styleChange,
+        style: attributes.style,
+        ...getIRunStylePropertiesOptions(tr, src, attributes),
+    };
     let newTranslator = tr.copy(styleChange);
     let properties = newTranslator.getProperties(src);
     newTranslator = newTranslator.copy(properties);
     return newTranslator.parseObjects(src, SpacesProcessing.PRESERVE);
 }
 
-export function fallbackStyleChange(tr: DocxTranslator, src: Element): any[] | null {
-    if (simpleBoolStyleTable[src.name] !== undefined) {
-        return simpleStyleChange(tr, src, { [simpleBoolStyleTable[src.name]]: true });
+export function fallbackStyleChange(tr: DocxTranslator, src: Element, attributes: AnyObject): any[] | null {
+    if (simpleBoolTagsTable[src.name] !== undefined) {
+        return simpleStyleChange(tr, src, simpleBoolTagsTable[src.name], attributes);
     }
     return null;
+}
+
+export function fontStyleTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+    let options: docx.ICharacterStyleOptions = {
+        id: requiredAttribute(src, attributes, 'id'),
+        basedOn: attributes.basedOn,
+        name: requiredAttribute(src, attributes, 'name'),
+        next: attributes.next,
+        run: getIRunStylePropertiesOptions(tr, src, attributes),
+    };
+    (options as any)[symbolInstance] = 'ICharacterStyleOptions';
+    return [options]
+   
 }

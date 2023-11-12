@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+
+    <font-style id="MyFontStyle" name="My Font Style"
+        face="Cooper Black"
+        size="24pt"
+        color="Indigo"
+        underline="dash BlueViolet"
+        />
+
+    <title>Table tests</title>
+
+    <h1 spacing="9mm 5mm" preserve="y">Simplest tags</h1>
+    <p>
+        <all-caps>all-caps Tag</all-caps>
+        <br/><b>b Tag</b>
+        <br/><bold>bold Tag</bold>
+        <br/><double-strike>double-strike Tag</double-strike>
+        <br/><emboss>emboss Tag</emboss>
+        <br/><imprint>imprint Tag</imprint>
+        <br/><i>i Tag</i>
+        <br/><italics>italics Tag</italics>
+        <br/><small-caps>small-caps Tag</small-caps>
+        <br/><s>s Tag</s>
+        <br/><strike>strike Tag</strike>
+        <br/><sub>sub Tag</sub>
+        <br/><sub-script>sub-script Tag</sub-script>
+        <br/><sup>sup Tag</sup>
+        <br/><super-script>super-script Tag</super-script>
+    </p>
+
+    <h1>Use style</h1>
+    <p><font style="MyFontStyle">This is some styled text.</font></p>
+
+</document>

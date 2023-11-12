@@ -23,13 +23,15 @@ You can use `:property` elements to pass data directly to it.
 
   Table width in [length units](general.md#length) or a percentage value followed by `%` sign.
 
-* `border-bottom`, `border-left`, `border-right`, `border-top` *[optional]*
+* `border` *[optional]*
 
   Table borders, see [border styles](general.md#border-styles).
 
-* `border-horizontal`, `border-vertical` *[optional]*
+* `inside-border` *[optional]*
 
-  Default borders between cells, see [border styles](general.md#border-styles).
+  Default borders between cells. Just two first styles are used. First one is horizontal, second is vertical.
+  If there is just one border style, then it is used for both vertical and horizontal.
+  See [border styles](general.md#border-styles).
 
 * `cell-margins` *[optional]*
 

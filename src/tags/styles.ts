@@ -24,9 +24,10 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, requiredAttribute, symbolInstance, undefEmpty } from "../common";
 import { fromEnum } from "../filters";
 import { getBorder } from "./borders";
+import { getIRunStylePropertiesOptions } from "./characters";
 
 
 export function getIParagraphPropertiesOptions(tr: DocxTranslator, src: Element, attributes: AnyObject) {
@@ -163,3 +164,16 @@ function getTabStops(tr: DocxTranslator, src: Element, tabs: string | undefined)
         .sort((a, b) => a!.position - b!.position) as docx.TabStopDefinition[];
 }
 
+
+export function pStyleTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+    let options: docx.IParagraphStyleOptions = {
+        id: requiredAttribute(src, attributes, 'id'),
+        basedOn: attributes.basedOn,
+        name: requiredAttribute(src, attributes, 'name'),
+        next: attributes.next,
+        paragraph: getIParagraphStylePropertiesOptions(tr, src, attributes),
+        run: getIRunStylePropertiesOptions(tr, src, attributes),
+    };
+    (options as any)[symbolInstance] = 'IParagraphStyleOptions';
+    return [options]
+}

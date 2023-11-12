@@ -18,6 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { Element, XMLError } from "./xml";
+
 export type AnyObject = { [key: string]: any };
 
 export const symbolInstance: unique symbol = Symbol('instance');
@@ -30,3 +32,11 @@ export function undefEmpty<T extends {}>(obj: T): T | undefined {
     }
     return undefined;
 }
+
+export function requiredAttribute(src: Element, attributes: AnyObject, name: string) {
+    if (attributes[name] === undefined) {
+        throw new XMLError(src, `This element requires "${name}" attribute.`);
+    }
+    return attributes[name];
+}
+

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <p-style id="MyStyle" name="My Style" based-on="Normal" next="MyStyle"
+    align="justify"
+    indent="5mm 2cm 10mm"
+    spacing="3mm 3mm exactly 1.3" />
+
+    <title>Paragraph style tests</title>
+
+    <h1 spacing="9mm 5mm" preserve="y">Paragraph style</h1>
+    <p style="MyStyle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p style="MyStyle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p style="MyStyle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+
+</document>
