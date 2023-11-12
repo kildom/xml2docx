@@ -29,12 +29,13 @@ import { parseExtendedJSON } from "./json";
 import { AnyObject, symbolInstance, undefEmpty } from "./common";
 import { getColor } from "./colors";
 import { ITableCellMarginOptions } from "docx/build/file/table/table-properties/table-cell-margin";
-import { pTag } from "./tags/paragraph";
+import { brTag, pTag, tabTag } from "./tags/paragraph";
 import { documentTag } from "./tags/document";
-import { fallbackStyleChange, fontTag, underlineTag } from "./tags/characters";
+import { fallbackStyleChange, fontStyleTag } from "./tags/characters";
 import { tableTag, tdTag, trTag } from "./tags/table";
 import { imgTag } from "./tags/img";
 import { filters } from "./filters";
+import { pStyleTag } from "./tags/styles";
 
 function normalizeAttributes(attributes: AnyObject): AnyObject {
     let result: AnyObject = {};
@@ -61,13 +62,14 @@ const tags: { [key: string]: (tr: DocxTranslator, src: Element, attributes: AnyO
     'h5': pTag,
     'h6': pTag,
     'title': pTag,
-    'font': fontTag,
-    'u': underlineTag,
-    'underline': underlineTag,
     'table': tableTag,
     'tr': trTag,
     'td': tdTag,
     'img': imgTag,
+    'tab': tabTag,
+    'br': brTag,
+    'p-style': pStyleTag,
+    'font-style': fontStyleTag,
 }
 
 export class DocxTranslator extends TranslatorBase {
@@ -112,7 +114,8 @@ export class DocxTranslator extends TranslatorBase {
             if (numArgs > 3) args.push(this.getProperties(src));
             return tags[src.name].apply(this, args as any);
         } else {
-            return fallbackStyleChange(this, src);
+            let attr = normalizeAttributes(this.getAttributes(src));
+            return fallbackStyleChange(this, src, attr);
         }
     }
 

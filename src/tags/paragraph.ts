@@ -58,3 +58,11 @@ export function pTag(tr: DocxTranslator, src: Element, attributes: AnyObject, pr
     }
     return [new docx.Paragraph({ ...options, ...properties })];
 };
+
+export function tabTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+    return [new docx.TextRun({ children: [new docx.Tab()] })];
+}
+
+export function brTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+    return [new docx.TextRun({ children: [new docx.CarriageReturn()] })];
+}

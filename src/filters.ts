@@ -30,7 +30,6 @@ import { AnyObject, symbolInstance, undefEmpty } from "./common";
 import { getColor } from "./colors";
 import { ITableCellMarginOptions } from "docx/build/file/table/table-properties/table-cell-margin";
 import { pTag } from "./tags/paragraph";
-import { getBorderOptions } from "./tags/borders";
 import { documentTag } from "./tags/document";
 import { fallbackStyleChange, fontTag, underlineTag } from "./tags/characters";
 import { tableTag, tdTag, trTag } from "./tags/table";

@@ -168,7 +168,11 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
 
     } else {
 
-        let i;
+        if (nodes[1]?.type === 'element' && nodes[1].name == 'b') {
+            nodes = nodes;
+        }
+
+        let i: number;
         let input: Node[] = nodes;
         let result: Node[] = [];
         for (i = 0; i < input.length; i++) {
@@ -179,8 +183,10 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
                     i++;
                     break;
                 }
-            } else {
+            } else if (node.type === 'element' && node.name.endsWith(':property')) {
                 result.push(node);
+            } else {
+                break;
             }
         }
         for (; i < input.length; i++) {
@@ -199,8 +205,10 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
                     i++;
                     break;
                 }
-            } else {
+            } else if (node.type === 'element' && node.name.endsWith(':property')) {
                 result.push(node);
+            } else {
+                break;
             }
         }
         for (; i < input.length; i++) {

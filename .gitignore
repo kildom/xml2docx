@@ -3,3 +3,4 @@
 /.vscode/
 /web/*
 !/web/index.html
+/test/outputs/
