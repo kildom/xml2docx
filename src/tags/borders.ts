@@ -24,7 +24,7 @@ import { fromEnum } from "../filters";
 import { Element, XMLError } from "../xml";
 import * as docx from "docx";
 
-export function getBorderOptions(tr: DocxTranslator, src: Element, text: string | undefined) {
+function getBorderOptions(tr: DocxTranslator, src: Element, text: string | undefined) {
     if (text === undefined) return undefined;
     let parts = text.trim().split(/\s+/);
     let color: string | undefined = undefined;
