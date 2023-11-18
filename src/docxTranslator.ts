@@ -26,9 +26,8 @@ import { FileChild } from "docx/build/file/file-child";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { os } from "./os";
 import { parseExtendedJSON } from "./json";
-import { AnyObject, symbolInstance, undefEmpty } from "./common";
+import { AnyObject, Attributes, symbolInstance, undefEmpty } from "./common";
 import { getColor } from "./colors";
-import { ITableCellMarginOptions } from "docx/build/file/table/table-properties/table-cell-margin";
 import { brTag, pTag, tabTag } from "./tags/paragraph";
 import { documentTag } from "./tags/document";
 import { fallbackStyleChange, fontStyleTag } from "./tags/characters";
@@ -37,7 +36,7 @@ import { imgTag } from "./tags/img";
 import { filters } from "./filters";
 import { pStyleTag } from "./tags/styles";
 
-function normalizeAttributes(attributes: AnyObject): AnyObject {
+function normalizeAttributes(attributes: Attributes): AnyObject {
     let result: AnyObject = {};
     for (let key in attributes) {
         let norm = key
@@ -52,7 +51,7 @@ function normalizeAttributes(attributes: AnyObject): AnyObject {
 }
 
 
-const tags: { [key: string]: (tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject) => any[] } = {
+const tags: { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] } = {
     'document': documentTag,
     'p': pTag,
     'h1': pTag,
@@ -76,20 +75,23 @@ export class DocxTranslator extends TranslatorBase {
 
     public paragraphStylePreserved: {
         [key: string]: {
-            attributes: AnyObject,
+            attributes: Attributes,
             properties: AnyObject,
         } | undefined
     } = {};
 
+
+
     constructor(
         public baseDir: string,
-        private runOptions: docx.IRunOptions
+        private runOptions: docx.IRunOptions,
+        public element: Element
     ) {
         super();
     }
 
     public copy(runOptionsChanges?: docx.IRunOptions) {
-        return new DocxTranslator(this.baseDir, { ...this.runOptions, ...runOptionsChanges });
+        return new DocxTranslator(this.baseDir, { ...this.runOptions, ...runOptionsChanges }, this.element);
     }
 
     private createFromText(text: string) {
@@ -107,46 +109,67 @@ export class DocxTranslator extends TranslatorBase {
     }
 
     protected createTagObject(src: Element): any[] | null {
-        if (tags[src.name] !== undefined) {
-            let args: any[] = [this, src];
-            let numArgs = tags[src.name].length;
-            if (numArgs > 2) args.push(normalizeAttributes(this.getAttributes(src)));
-            if (numArgs > 3) args.push(this.getProperties(src));
-            return tags[src.name].apply(this, args as any);
-        } else {
-            let attr = normalizeAttributes(this.getAttributes(src));
-            return fallbackStyleChange(this, src, attr);
+        let oldElement = this.element;
+        this.element = src;
+        try {
+            if (tags[src.name] !== undefined) {
+                let args: any[] = [this];
+                let numArgs = tags[src.name].length;
+                if (numArgs > 1) args.push(normalizeAttributes(this.getAttributes(src)));
+                if (numArgs > 2) args.push(this.getProperties(src));
+                return tags[src.name].apply(this, args as any);
+            } else {
+                let attr = normalizeAttributes(this.getAttributes(src));
+                return fallbackStyleChange(this, attr);
+            }
+        } catch(err) {
+            if (err instanceof XMLError) {
+                throw err;
+            }
+            throw new InterceptedXMLError(src, err, 'Error processing XML element.');
+        } finally {
+            this.element = oldElement;
         }
     }
 
     protected createClassObject(src: Element, name: string, args: any): any[] {
+        let oldElement = this.element;
+        this.element = src;
+        try {
+            if (name === 'ParagraphStyle') {
+                args[0][symbolInstance] = 'IParagraphStyleOptions';
+                return args;
+            } else if (name === 'CharacterStyle') {
+                args[0][symbolInstance] = 'ICharacterStyleOptions'
+                return args;
+            } else if (name === 'Section') {
+                args[0][symbolInstance] = 'ISectionOptions'
+                args[0].children = args[0].children || [];
+                return args;
+            } else if (name === 'TotalPages') {
+                return [new docx.TextRun({ ...this.runOptions, children: [docx.PageNumber.TOTAL_PAGES] })];
+            } else if (name == 'CurrentPageNumber') {
+                return [new docx.TextRun({ ...this.runOptions, children: [docx.PageNumber.CURRENT] })];
+            }
 
-        if (name === 'ParagraphStyle') {
-            args[0][symbolInstance] = 'IParagraphStyleOptions';
-            return args;
-        } else if (name === 'CharacterStyle') {
-            args[0][symbolInstance] = 'ICharacterStyleOptions'
-            return args;
-        } else if (name === 'Section') {
-            args[0][symbolInstance] = 'ISectionOptions'
-            args[0].children = args[0].children || [];
-            return args;
-        } else if (name === 'TotalPages') {
-            return [new docx.TextRun({ ...this.runOptions, children: [docx.PageNumber.TOTAL_PAGES] })];
-        } else if (name == 'CurrentPageNumber') {
-            return [new docx.TextRun({ ...this.runOptions, children: [docx.PageNumber.CURRENT] })];
+            let construct = (docx as any)[name];
+            if (!construct || typeof construct !== 'function') {
+                throw new XMLError(src, `Unknown tag "${name}".`);
+            }
+            return [new construct(...args)];
+        } catch(err) {
+            if (err instanceof XMLError) {
+                throw err;
+            }
+            throw new InterceptedXMLError(src, err, 'Error processing XML element.');
+        } finally {
+            this.element = oldElement;
         }
-
-        let construct = (docx as any)[name];
-        if (!construct || typeof construct !== 'function') {
-            throw new XMLError(src, `Unknown tag "${name}".`);
-        }
-        return [new construct(...args)];
     }
 
-    protected singleFilter(src: Element, filterName: string, value: any): any {
+    protected singleFilter(filterName: string, value: any): any {
         if (filters[filterName] !== undefined) {
-            return filters[filterName](value, src, this);
+            return filters[filterName](value, this);
         }
 
         let construct = (docx as any)[filterName];
@@ -158,10 +181,10 @@ export class DocxTranslator extends TranslatorBase {
         }
 
         if (filterName === 'property') {
-            throw new XMLError(src, 'The ":property: can be used only in tag, not an object.');
+            throw new Error('The ":property: can be used only in tag, not an object.');
         }
 
-        throw new XMLError(src, `Unknown filter "${filterName}".`);
+        throw new Error(`Unknown filter "${filterName}".`);
     }
 
     public translate(root: Element): docx.Document {
@@ -171,6 +194,6 @@ export class DocxTranslator extends TranslatorBase {
 }
 
 export function translate(root: Element, baseDir: string): docx.Document {
-    let tr = new DocxTranslator(baseDir, {});
+    let tr = new DocxTranslator(baseDir, {}, root);
     return tr.translate(root);
 }

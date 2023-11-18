@@ -24,11 +24,9 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { symbolInstance } from "../common";
+import { AnyObject, Attributes, symbolInstance } from "../common";
 
-export function documentTag(tr: DocxTranslator, src: Element): any[] {
-    let attributes = tr.getAttributes(src);
-    let properties = tr.getProperties(src);
+export function documentTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let sections: docx.ISectionOptions[] = [];
     let paragraphStyles: docx.IParagraphStyleOptions[] = [];
     let characterStyles: docx.ICharacterStyleOptions[] = [];
@@ -48,7 +46,7 @@ export function documentTag(tr: DocxTranslator, src: Element): any[] {
         },
         ...properties,
     }
-    for (let obj of tr.parseObjects(src, SpacesProcessing.IGNORE)) {
+    for (let obj of tr.parseObjects(tr.element, SpacesProcessing.IGNORE)) {
         if (obj[symbolInstance] === 'ISectionOptions') {
             sections.push(obj);
             children = obj.children;

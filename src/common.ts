@@ -18,9 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { DocxTranslator } from "./docxTranslator";
 import { Element, XMLError } from "./xml";
 
 export type AnyObject = { [key: string]: any };
+export type Attributes = { [key: string]: string };
 
 export const symbolInstance: unique symbol = Symbol('instance');
 
@@ -33,10 +35,51 @@ export function undefEmpty<T extends {}>(obj: T): T | undefined {
     return undefined;
 }
 
-export function requiredAttribute(src: Element, attributes: AnyObject, name: string) {
+export function requiredAttribute(attributes: Attributes, name: string): string {
     if (attributes[name] === undefined) {
-        throw new XMLError(src, `This element requires "${name}" attribute.`);
+        throw new Error(`This element requires "${name}" attribute.`);
     }
     return attributes[name];
 }
 
+
+export type SplitListMatcher = (value: string) => any;
+export type SplitListDefault = () => any;
+
+export function splitListValues(value: string | undefined, matchers: { [key: string]: SplitListMatcher | [SplitListMatcher, SplitListDefault | string] }, split?: ',' | ' ') {
+    if (value === undefined) return undefined;
+    let arr = value.trim().split(split === ' ' ? /\s+/ : split === ',' ? /\s*[,;]\s*/ : /(?:\s*[,;]\s*|\s+)/);
+    let result: { [key: string]: any } = {};
+    outerLoop:
+    for (let item of arr) {
+        for (let [name, matcher] of Object.entries(matchers)) {
+            if (name in result) continue;
+            matcher = typeof(matcher) === 'function' ? [ matcher, '' ] : matcher;
+            let m = matcher[0](item);
+            if (m !== undefined) {
+                result[name] = m;
+                continue outerLoop;
+            }
+        }
+        throw new Error(`Invalid list item ${item}.`);
+    }
+    for (let [name, matcher] of Object.entries(matchers)) {
+        if ((name in result) || typeof(matcher) === 'function') {
+            continue;
+        } else if (typeof(matcher[1]) === 'string') {
+            throw new Error(matcher[1]);
+        } else if (typeof(matcher[1]) === 'function') {
+            result[name] = matcher[1]();
+        }
+    }
+    return result; // TODO: Use more this function in more places
+}
+
+export function selectFirst<T>(...args: (T| undefined)[]): T | undefined {
+    for (let a of args) {
+        if (a !== undefined) {
+            return a;
+        }
+    }
+    return undefined;
+}

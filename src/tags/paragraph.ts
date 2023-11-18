@@ -19,10 +19,10 @@
  */
 
 import * as docx from "docx";
-import { AnyObject, undefEmpty } from "../common";
+import { AnyObject, Attributes, undefEmpty } from "../common";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing } from "../xml";
-import { fromEnum } from "../filters";
+import { fromEnum, filterBool, FilterMode } from "../filters";
 import { getIParagraphPropertiesOptions } from "./styles";
 
 const headingTags: { [key: string]: docx.HeadingLevel } = {
@@ -35,34 +35,35 @@ const headingTags: { [key: string]: docx.HeadingLevel } = {
     'title': docx.HeadingLevel.TITLE,
 }
 
-export function pTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-    let heading: docx.HeadingLevel | undefined = headingTags[src.name];
-    let preserve: boolean | undefined = tr.filter(src, ':bool', attributes.preserve, true);
+export function pTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    let name = tr.element.name;
+    let heading: docx.HeadingLevel | undefined = headingTags[name];
+    let preserve: boolean | undefined = filterBool(attributes.preserve, FilterMode.UNDEF);
     attributes = { ...attributes };
     delete attributes.preserve;
-    if (Object.keys(attributes).length === 0 && Object.keys(properties).length === 0 && tr.paragraphStylePreserved[src.name]) {
-        attributes = tr.paragraphStylePreserved[src.name]!.attributes;
-        properties = tr.paragraphStylePreserved[src.name]!.properties;
+    if (Object.keys(attributes).length === 0 && Object.keys(properties).length === 0 && tr.paragraphStylePreserved[name]) {
+        attributes = tr.paragraphStylePreserved[name]!.attributes;
+        properties = tr.paragraphStylePreserved[name]!.properties;
     } else {
-        tr.paragraphStylePreserved[src.name] = undefined;
+        tr.paragraphStylePreserved[name] = undefined;
     }
     let options: docx.IParagraphOptions = {
-        ...getIParagraphPropertiesOptions(tr, src, attributes),
-        children: tr.copy().parseObjects(src, SpacesProcessing.TRIM),
+        ...getIParagraphPropertiesOptions(tr, attributes),
+        children: tr.copy().parseObjects(tr.element, SpacesProcessing.TRIM),
         heading,
     };
     if (preserve === true) {
-        tr.paragraphStylePreserved[src.name] = { attributes, properties };
+        tr.paragraphStylePreserved[name] = { attributes, properties };
     } else if (preserve === false) {
-        tr.paragraphStylePreserved[src.name] = undefined;
+        tr.paragraphStylePreserved[name] = undefined;
     }
     return [new docx.Paragraph({ ...options, ...properties })];
 };
 
-export function tabTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+export function tabTag(): any[] {
     return [new docx.TextRun({ children: [new docx.Tab()] })];
 }
 
-export function brTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+export function brTag(): any[] {
     return [new docx.TextRun({ children: [new docx.CarriageReturn()] })];
 }
