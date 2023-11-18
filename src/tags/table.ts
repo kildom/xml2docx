@@ -18,16 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from "docx/build/file/file-child";
-import { getColor } from "../colors";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, Attributes, symbolInstance, undefEmpty } from "../common";
 import { getBorder, getMargins } from "./borders";
-import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero } from "../filters";
-import { pTag } from "./paragraph";
+import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor } from "../filters";
 
 
 function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: string]: string }) {
@@ -56,8 +52,8 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(attributes.horizontal, docx.RelativeHorizontalPosition);
     let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(attributes.vertical, docx.RelativeVerticalPosition);
     let floatMargins = getMargins(tr, attributes.floatMargins, ':pass');
-    let border = getBorder(tr, attributes.border);
-    let insideBorder = getBorder(tr, attributes.insideBorder);
+    let border = getBorder(attributes.border);
+    let insideBorder = getBorder(attributes.insideBorder);
     let options: docx.ITableOptions = {
         rows: tr.copy().parseObjects(tr.element, SpacesProcessing.IGNORE),
         columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
@@ -154,7 +150,7 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
     let options: docx.ITableCellOptions = {
         children,
         //* Cell border.
-        borders: getBorder(tr, attributes.border),
+        borders: getBorder(attributes.border),
         //* Number of spanning columns.
         columnSpan: filterUintNonZero(attributes.colspan, FilterMode.UNDEF),
         //* Number of spanning rows.
@@ -171,9 +167,9 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
             bottomToTop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
         }, true) as docx.TextDirection,
         verticalAlign: fromEnum(attributes.valign, docx.VerticalAlign, { middle: docx.VerticalAlign.CENTER }, true) as docx.VerticalAlign,
-        shading: attributes.background && {
+        shading: attributes.background === undefined ? undefined : {
             type: docx.ShadingType.SOLID,
-            color: getColor(attributes.background),
+            color: filterColor(attributes.background, FilterMode.EXACT),
         }
     };
     return [new docx.TableCell({ ...options, ...properties })];

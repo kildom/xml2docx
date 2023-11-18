@@ -19,13 +19,12 @@
  */
 
 import { FileChild } from "docx/build/file/file-child";
-import { getColor } from "../colors";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, Attributes, requiredAttribute, symbolInstance, undefEmpty } from "../common";
-import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt } from "../filters";
+import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt, filterColor } from "../filters";
 import { getBorder } from "./borders";
 import { getIRunStylePropertiesOptions } from "./characters";
 
@@ -33,14 +32,14 @@ import { getIRunStylePropertiesOptions } from "./characters";
 export function getIParagraphPropertiesOptions(tr: DocxTranslator, attributes: Attributes) {
     let options: docx.IParagraphPropertiesOptions = {
         ...getIParagraphStylePropertiesOptions(tr, attributes),
-        border: getBorder(tr, attributes.border),
+        border: getBorder(attributes.border),
         pageBreakBefore: filterBool(attributes.pageBreak, FilterMode.UNDEF),
         tabStops: getTabStops(tr, attributes.tabs),
         style: attributes.style,
         // TODO: bullet - numbering
-        shading: attributes.background && {
+        shading: attributes.background === undefined ? undefined : {
             type: docx.ShadingType.SOLID,
-            color: getColor(attributes.background),
+            color: filterColor(attributes.background, FilterMode.EXACT),
         },
         // TODO: what is frame?
         wordWrap: filterBool(attributes.wordWrap, FilterMode.UNDEF),
@@ -172,7 +171,7 @@ export function pStyleTag(tr: DocxTranslator, attributes: Attributes, properties
         name: requiredAttribute(attributes, 'name'),
         next: attributes.next,
         paragraph: getIParagraphStylePropertiesOptions(tr, attributes),
-        run: getIRunStylePropertiesOptions(tr, attributes),
+        run: getIRunStylePropertiesOptions(attributes),
         ...properties,
     };
     (options as any)[symbolInstance] = 'IParagraphStyleOptions';

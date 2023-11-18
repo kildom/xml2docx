@@ -20,11 +20,10 @@
 
 import * as docx from "docx";
 
-import { getColor } from "../colors";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
-import { AnyObject, Attributes, requiredAttribute, splitListValues, symbolInstance } from "../common";
-import { filterFloat, fromEnum, filterBool, FilterMode } from "../filters";
+import { AnyObject, Attributes, requiredAttribute, selectUndef, splitListValues, symbolInstance } from "../common";
+import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from "../filters";
 import { getBorder } from "./borders";
 
 
@@ -124,24 +123,24 @@ export function removeShallowUndefined(object: { [key: string]: any }) {
 }
 
 
-export function getIRunStylePropertiesOptions(tr: DocxTranslator, attributes: Attributes): docx.IRunStylePropertiesOptions {
+export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRunStylePropertiesOptions {
     let options: docx.IRunStylePropertiesOptions = {
         underline: splitListValues(attributes.underline, {
             type: (value: string) => fromEnum(value, docx.UnderlineType),
-            color: (value: string) => getColor(value),
+            color: (value: string) => filterColor(value, FilterMode.ALL),
         }),
-        color: getColor(attributes.color),
-        kern: attributes.kern,
-        position: attributes.position,
-        size: attributes.size,
+        color: filterColor(attributes.color, FilterMode.UNDEF),
+        kern: filterPositiveUniversalMeasure(attributes.kern, FilterMode.UNDEF),
+        position: filterUniversalMeasure(attributes.position, FilterMode.UNDEF),
+        size: filterPositiveUniversalMeasure(attributes.size, FilterMode.UNDEF),
         font: attributes.font || attributes.face,
         highlight: fromEnum(attributes.highlight, HighlightColor, {}, false) as string | undefined,
-        shading: attributes.background && {
+        shading: selectUndef(attributes.background, {
             type: docx.ShadingType.SOLID,
-            color: getColor(attributes.background),
-        },
-        border: getBorder(tr, attributes.border)?.top,
-        scale: filterFloat(attributes.scale, FilterMode.UNDEF),
+            color: filterColor(attributes.background, FilterMode.UNDEF),
+        }),
+        border: getBorder(attributes.border)?.top,
+        scale: filterUfloat(attributes.scale, FilterMode.UNDEF),
     };
     for (let [key, value] of Object.entries(attributes)) {
         if (simpleBoolStyleTable[key] !== undefined) {
@@ -155,7 +154,7 @@ function simpleStyleChange(tr: DocxTranslator, styleChange: docx.IRunOptions, at
     styleChange = {
         ...styleChange,
         style: attributes.style,
-        ...getIRunStylePropertiesOptions(tr, attributes),
+        ...getIRunStylePropertiesOptions(attributes),
     };
     let newTranslator = tr.copy(styleChange);
     let properties = newTranslator.getProperties(tr.element);
@@ -176,7 +175,7 @@ export function fontStyleTag(tr: DocxTranslator, attributes: Attributes, propert
         basedOn: attributes.basedOn,
         name: requiredAttribute(attributes, 'name'),
         next: attributes.next,
-        run: getIRunStylePropertiesOptions(tr, attributes),
+        run: getIRunStylePropertiesOptions(attributes),
         ...properties,
     };
     (options as any)[symbolInstance] = 'ICharacterStyleOptions';

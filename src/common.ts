@@ -83,3 +83,17 @@ export function selectFirst<T>(...args: (T| undefined)[]): T | undefined {
     }
     return undefined;
 }
+
+export function selectUndef<T>(a: any, b: T): T | undefined;
+export function selectUndef<T>(a: any, b: any, c: T): T | undefined;
+export function selectUndef<T>(a: any, b: any, c: any, d: T): T | undefined;
+export function selectUndef<T>(...args: (T| undefined)[]): T | undefined {
+        let last: T | undefined = undefined;
+    for (let a of args) {
+        last = a;
+        if (a === undefined) {
+            return a;
+        }
+    }
+    return last;
+}

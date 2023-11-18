@@ -19,9 +19,8 @@
  */
 
 import { FileChild } from "docx/build/file/file-child";
-import { getColor } from "../colors";
 import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing, XMLError } from "../xml";
+import { SpacesProcessing } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, Attributes, symbolInstance } from "../common";
