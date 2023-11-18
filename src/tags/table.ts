@@ -24,25 +24,25 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, symbolInstance, undefEmpty } from "../common";
 import { getBorder, getMargins } from "./borders";
-import { fromEnum } from "../filters";
+import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero } from "../filters";
 import { pTag } from "./paragraph";
 
 
-function getTableHVPosition<T>(src: Element, text: string | undefined, enumValue: { [key: string]: string }) {
+function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: string]: string }) {
     if (text === undefined) return undefined;
     let anchor: docx.TableAnchorType | undefined = undefined;
     let absolute: docx.UniversalMeasure | undefined = undefined;
     let relative: T | undefined = undefined;
     let parts = text.split(' ');
     for (let part of parts) {
-        let a = fromEnum(src, part, docx.TableAnchorType, {}, false);
+        let a = fromEnum(part, docx.TableAnchorType, {}, false);
         if (a !== undefined) {
             anchor = a as docx.TableAnchorType;
             continue;
         }
-        let r = fromEnum(src, part, enumValue, {}, false);
+        let r = fromEnum(part, enumValue, {}, false);
         if (r !== undefined) {
             relative = r as T;
             continue;
@@ -52,20 +52,20 @@ function getTableHVPosition<T>(src: Element, text: string | undefined, enumValue
     return { anchor, absolute, relative };
 }
 
-export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-    let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(src, attributes.horizontal, docx.RelativeHorizontalPosition);
-    let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(src, attributes.vertical, docx.RelativeVerticalPosition);
-    let floatMargins = getMargins(tr, src, attributes.floatMargins, ':pass');
-    let border = getBorder(tr, src, attributes.border);
-    let insideBorder = getBorder(tr, src, attributes.insideBorder);
+export function tableTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(attributes.horizontal, docx.RelativeHorizontalPosition);
+    let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(attributes.vertical, docx.RelativeVerticalPosition);
+    let floatMargins = getMargins(tr, attributes.floatMargins, ':pass');
+    let border = getBorder(tr, attributes.border);
+    let insideBorder = getBorder(tr, attributes.insideBorder);
     let options: docx.ITableOptions = {
-        rows: tr.copy().parseObjects(src, SpacesProcessing.IGNORE),
+        rows: tr.copy().parseObjects(tr.element, SpacesProcessing.IGNORE),
         columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
             .trim()
             .split(/[, ]+/)
-            .map(x => tr.filter(src, ':dxa', x)),
+            .map(x => filterLengthUintNonZero(x, LengthUnits.dxa, FilterMode.EXACT)),
         layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
-        alignment: fromEnum(src, attributes.align, docx.AlignmentType) as docx.AlignmentType,
+        alignment: fromEnum(attributes.align, docx.AlignmentType) as docx.AlignmentType,
         width: attributes.width && {
             type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
             size: attributes.width,
@@ -78,9 +78,9 @@ export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject
             insideHorizontal: insideBorder?.top,
             insideVertical: insideBorder?.right,
         }),
-        margins: attributes.cellMargins && {
+        margins: attributes.cellMargins && { // TODO: Rename to margin to be compatible with CSS
             marginUnitType: docx.WidthType.DXA,
-            ...getMargins(tr, src, attributes.cellMargins, ':pass'),
+            ...getMargins(tr, attributes.cellMargins, ':pass'),
         },
         float: undefEmpty({
             horizontalAnchor: hFloat?.anchor,
@@ -90,7 +90,7 @@ export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject
             absoluteVerticalPosition: vFloat?.absolute,
             relativeVerticalPosition: vFloat?.relative,
             overlap: !attributes.overlap ? undefined
-                : tr.filter(src, ':bool', attributes.overlap) ? docx.OverlapType.OVERLAP : docx.OverlapType.NEVER,
+                : filterBool(attributes.overlap, FilterMode.UNDEF) ? docx.OverlapType.OVERLAP : docx.OverlapType.NEVER,
             topFromText: floatMargins?.top,
             rightFromText: floatMargins?.right,
             bottomFromText: floatMargins?.bottom,
@@ -100,11 +100,11 @@ export function tableTag(tr: DocxTranslator, src: Element, attributes: AnyObject
     return [new docx.Table({ ...options, ...properties })];
 }
 
-function getTableRowHeight(src: Element, text: string | undefined) {
+function getTableRowHeight(text: string | undefined) {
     if (text === undefined) return undefined;
     let parts = text.split(' ');
     if (parts.length > 1) {
-        let e = fromEnum(src, parts[0], docx.HeightRule, {}, false) as (docx.HeightRule | undefined);
+        let e = fromEnum(parts[0], docx.HeightRule, {}, false) as (docx.HeightRule | undefined);
         if (e) {
             return {
                 rule: e,
@@ -112,7 +112,7 @@ function getTableRowHeight(src: Element, text: string | undefined) {
             };
         } else {
             return {
-                rule: fromEnum(src, parts[1], docx.HeightRule, {}) as docx.HeightRule,
+                rule: fromEnum(parts[1], docx.HeightRule, {}) as docx.HeightRule,
                 value: parts[0] as /* a small hack */ unknown as number
             };
         }
@@ -123,45 +123,54 @@ function getTableRowHeight(src: Element, text: string | undefined) {
     }
 }
 
-export function trTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+export function trTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let options: docx.ITableRowOptions = {
-        children: tr.parseObjects(src, SpacesProcessing.IGNORE),
-        cantSplit: tr.filter(src, ':bool', attributes.cantSplit, true),
-        tableHeader: tr.filter(src, ':bool', attributes.header, true),
-        height: getTableRowHeight(src, attributes.height),
+        children: tr.parseObjects(tr.element, SpacesProcessing.IGNORE),
+        cantSplit: filterBool(attributes.cantSplit, FilterMode.UNDEF),
+        tableHeader: filterBool(attributes.header, FilterMode.UNDEF),
+        height: getTableRowHeight(attributes.height),
     };
     return [new docx.TableRow({ ...options, ...properties })];
 };
 
-export function tdTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
-    let children = tr.parseObjects(src, SpacesProcessing.IGNORE);
+//* <td>
+//* Table cell.<br/>Child elements of the cell must be `<p>` or `<table>` (or its associated @api classes).
+//* If they are not, then the content of the cell will be put into automatically generated `<p>` element.
+//* @api:TableCell
+export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    let children = tr.parseObjects(tr.element, SpacesProcessing.IGNORE);
     for (let child of children) {
         if (!(child instanceof docx.Paragraph) && !(child instanceof docx.Table)) {
-            children = pTag(tr, {
+            children = tr.parseObjects([{
                 name: 'p',
-                path: src.path + '/p[auto]',
+                path: tr.element.path + '/p[auto]',
                 type: 'element',
                 attributes: {},
-                elements: src.elements?.filter(element => element.type !== 'element' || !element.name.endsWith(':property')),
-            }, {}, {});
+                elements: tr.element.elements?.filter(element => element.type !== 'element' || !element.name.endsWith(':property')),
+            }], SpacesProcessing.IGNORE);
             break;
         }
     }
     let options: docx.ITableCellOptions = {
         children,
-        borders: getBorder(tr, src, attributes.border),
-        columnSpan: tr.filter(src, ':int', attributes.colspan, true),
-        rowSpan: tr.filter(src, ':int', attributes.rowspan, true),
+        //* Cell border.
+        borders: getBorder(tr, attributes.border),
+        //* Number of spanning columns.
+        columnSpan: filterUintNonZero(attributes.colspan, FilterMode.UNDEF),
+        //* Number of spanning rows.
+        rowSpan: filterUintNonZero(attributes.rowspan, FilterMode.UNDEF),
+        //* Cell inner margins.
         margins: attributes.margins && {
             marginUnitType: docx.WidthType.DXA,
-            ...getMargins(tr, src, attributes.margins, ':pass'),
+            ...getMargins(tr, attributes.margins, ':pass'),
         },
-        textDirection: fromEnum(src, attributes.dir, docx.TextDirection, {
+        //* Text direction.
+        textDirection: fromEnum(attributes.dir, docx.TextDirection, {
             topToBottom: docx.TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT,
             leftToRight: docx.TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
             bottomToTop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
         }, true) as docx.TextDirection,
-        verticalAlign: fromEnum(src, attributes.valign, docx.VerticalAlign, { middle: docx.VerticalAlign.CENTER }, true) as docx.VerticalAlign,
+        verticalAlign: fromEnum(attributes.valign, docx.VerticalAlign, { middle: docx.VerticalAlign.CENTER }, true) as docx.VerticalAlign,
         shading: attributes.background && {
             type: docx.ShadingType.SOLID,
             color: getColor(attributes.background),

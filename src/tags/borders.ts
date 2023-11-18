@@ -18,70 +18,61 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { getColor } from "../colors";
-import { DocxTranslator } from "../docxTranslator";
-import { fromEnum } from "../filters";
-import { Element, XMLError } from "../xml";
 import * as docx from "docx";
+import { getColor } from "../colors";
+import { selectFirst, splitListValues } from "../common";
+import { DocxTranslator } from "../docxTranslator";
+import { FilterMode, LengthUnits, filterLengthUint, filterLengthUintNonZero, fromEnum } from "../filters";
 
-function getBorderOptions(tr: DocxTranslator, src: Element, text: string | undefined) {
-    if (text === undefined) return undefined;
-    let parts = text.trim().split(/\s+/);
-    let color: string | undefined = undefined;
-    let style: docx.BorderStyle = docx.BorderStyle.SINGLE;
-    let size: number | undefined = undefined;
-    let space: number | undefined = undefined;
-    for (let p of parts) {
-        let c = getColor(p);
-        if (c !== undefined) {
-            color = c;
-            continue;
-        }
-        let st = fromEnum(src, p, docx.BorderStyle, undefined, false) as docx.BorderStyle;
-        if (st !== undefined) {
-            style = st;
-            continue;
-        }
-        if (size === undefined) {
-            size = tr.filter(src, ':pt8', p);
-        } else if (space === undefined) {
-            space = tr.filter(src, ':pt', p);
-        } else {
-            throw new XMLError(src, 'Invalid border options.');
-        }
-    }
-    if (style === undefined) throw new XMLError(src, 'Border style required.');
-    return { color, style, size, space };
+function getBorderOptions(tr: DocxTranslator, text: string | undefined) {
+    if (text == '0.3mm') text = text;
+    return splitListValues(text, {
+        color: (value: string) => getColor(value),
+        style: [
+            (value: string) => fromEnum(value, docx.BorderStyle, undefined, false) as docx.BorderStyle,
+            () => docx.BorderStyle.SINGLE,
+        ],
+        size: (value: string) => filterLengthUintNonZero(value, LengthUnits.pt8, FilterMode.ALL),
+        space: (value: string) => filterLengthUint(value, LengthUnits.pt, FilterMode.ALL),
+    });
 }
 
-export function getBorder(tr: DocxTranslator, src: Element, value: string | undefined) {
-    if (value === undefined) return undefined;
-    let parts = value.trim().toLowerCase().split(/[,;]/);
-    if (parts.length == 3) {
-        parts = [...parts, parts[1]];
-    } else {
-        parts = [...parts, ...parts, ...parts, ...parts];
-    }
-    return {
-        top: getBorderOptions(tr, src, parts[0]),
-        right: getBorderOptions(tr, src, parts[1]),
-        bottom: getBorderOptions(tr, src, parts[2]),
-        left: getBorderOptions(tr, src, parts[3]),
-    }
+//* @sub:getBorder
+export function getBorder(tr: DocxTranslator, value: string | undefined) {
+    let borders = splitListValues(value, {
+        top: [
+            (value: string) => getBorderOptions(tr, value),
+            'At least one border is required.'
+        ],
+        right: (value: string) => getBorderOptions(tr, value),
+        bottom: (value: string) => getBorderOptions(tr, value),
+        left: (value: string) => getBorderOptions(tr, value),
+    }, ',');
+    if (borders === undefined) return undefined;
+    borders.right = selectFirst(borders.right, borders.top);
+    borders.bottom = selectFirst(borders.bottom, borders.top);
+    borders.left = selectFirst(borders.left, borders.right);
+    return borders;
 }
 
-export function getMargins(tr: DocxTranslator, src: Element, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined {
-    if (value === undefined) return undefined;
-    let parts = value.trim().toLowerCase().split(/(\s+|[,;])/);
-    if (parts.length == 3) {
-        parts = [...parts, parts[1]];
-    } else {
-        parts = [...parts, ...parts, ...parts, ...parts];
-    }
-    return {
-        top: tr.filter(src, filterName, parts[0], true),
-        right: tr.filter(src, filterName, parts[1], true),
-        bottom: tr.filter(src, filterName, parts[2], true),
-        left: tr.filter(src, filterName, parts[3], true),
-    };
+//* @sub:getMargins
+export function getMargins(tr: DocxTranslator, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined {
+    let margins = splitListValues(value, {
+        //* Top margin.
+        top: [
+            (value: string) => tr.filter(filterName, value),
+            'At least one margin is required.'
+        ],
+        //* Right margin. Default: the same as top.
+        right: (value: string) => tr.filter(filterName, value),
+        //* Bottom margin. Default: the same as top.
+        bottom: (value: string) => tr.filter(filterName, value),
+        //* Left margin. Default: the same as right.
+        left: (value: string) => tr.filter(filterName, value),
+    });
+    if (margins === undefined) return undefined;
+    margins.right = selectFirst(margins.right, margins.top);
+    margins.bottom = selectFirst(margins.bottom, margins.top);
+    margins.left = selectFirst(margins.left, margins.right);
+    return margins;
 }

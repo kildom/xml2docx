@@ -23,8 +23,8 @@ import * as docx from "docx";
 import { getColor } from "../colors";
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
-import { AnyObject, requiredAttribute, symbolInstance } from "../common";
-import { fromEnum } from "../filters";
+import { AnyObject, Attributes, requiredAttribute, splitListValues, symbolInstance } from "../common";
+import { filterFloat, fromEnum, filterBool, FilterMode } from "../filters";
 import { getBorder } from "./borders";
 
 
@@ -123,83 +123,62 @@ export function removeShallowUndefined(object: { [key: string]: any }) {
     return object;
 }
 
-type SplitListMatcher = (tr: DocxTranslator, src: Element, value: string) => any;
 
-export function splitListValues(tr: DocxTranslator, src: Element, value: string | undefined, matchers: { [key: string]: SplitListMatcher }, split: ',' | ' ' | 'both' = 'both') {
-    if (value === undefined) return undefined;
-    let arr = value.split(split == ' ' ? /\s+/ : split == ',' ? /\s*[,;]\s*/ : /(?:\s*[,;]\s*|\s+)/);
-    let result: { [key: string]: any } = {};
-    outerLoop:
-    for (let item of arr) {
-        for (let [name, matcher] of Object.entries(matchers)) {
-            if (name in result) continue;
-            let m = matcher(tr, src, item);
-            if (m !== undefined) {
-                result[name] = m;
-                continue outerLoop;
-            }
-        }
-        throw new XMLError(src, `Invalid list item ${item}.`);
-    }
-    return result; // TODO: Use more this function in more places
-}
-
-
-export function getIRunStylePropertiesOptions(tr: DocxTranslator, src: Element, attributes: AnyObject): docx.IRunStylePropertiesOptions {
+export function getIRunStylePropertiesOptions(tr: DocxTranslator, attributes: Attributes): docx.IRunStylePropertiesOptions {
     let options: docx.IRunStylePropertiesOptions = {
-        underline: splitListValues(tr, src, attributes.underline, {
-            type: (tr: DocxTranslator, src: Element, value: string) => fromEnum(src, value, docx.UnderlineType, {}, false),
-            color: (tr: DocxTranslator, src: Element, value: string) => getColor(value, src),
+        underline: splitListValues(attributes.underline, {
+            type: (value: string) => fromEnum(value, docx.UnderlineType),
+            color: (value: string) => getColor(value),
         }),
         color: getColor(attributes.color),
         kern: attributes.kern,
         position: attributes.position,
         size: attributes.size,
         font: attributes.font || attributes.face,
-        highlight: fromEnum(src, attributes.highlight, HighlightColor, {}, false) as string | undefined,
+        highlight: fromEnum(attributes.highlight, HighlightColor, {}, false) as string | undefined,
         shading: attributes.background && {
             type: docx.ShadingType.SOLID,
             color: getColor(attributes.background),
         },
-        border: getBorder(tr, src, attributes.border)?.top,
-        scale: tr.filter(src, ':float', attributes.scale, true),
+        border: getBorder(tr, attributes.border)?.top,
+        scale: filterFloat(attributes.scale, FilterMode.UNDEF),
     };
     for (let [key, value] of Object.entries(attributes)) {
         if (simpleBoolStyleTable[key] !== undefined) {
-            (options as any)[simpleBoolStyleTable[key]] = tr.filter(src, ':bool', value);
+            (options as any)[simpleBoolStyleTable[key]] = filterBool(value, FilterMode.EXACT);
         }
     }
     return removeShallowUndefined(options) as docx.IRunStylePropertiesOptions;
 }
 
-function simpleStyleChange(tr: DocxTranslator, src: Element, styleChange: docx.IRunOptions, attributes: AnyObject) {
+function simpleStyleChange(tr: DocxTranslator, styleChange: docx.IRunOptions, attributes: Attributes) {
     styleChange = {
         ...styleChange,
         style: attributes.style,
-        ...getIRunStylePropertiesOptions(tr, src, attributes),
+        ...getIRunStylePropertiesOptions(tr, attributes),
     };
     let newTranslator = tr.copy(styleChange);
-    let properties = newTranslator.getProperties(src);
+    let properties = newTranslator.getProperties(tr.element);
     newTranslator = newTranslator.copy(properties);
-    return newTranslator.parseObjects(src, SpacesProcessing.PRESERVE);
+    return newTranslator.parseObjects(tr.element, SpacesProcessing.PRESERVE);
 }
 
-export function fallbackStyleChange(tr: DocxTranslator, src: Element, attributes: AnyObject): any[] | null {
-    if (simpleBoolTagsTable[src.name] !== undefined) {
-        return simpleStyleChange(tr, src, simpleBoolTagsTable[src.name], attributes);
+export function fallbackStyleChange(tr: DocxTranslator, attributes: Attributes): any[] | null {
+    if (simpleBoolTagsTable[tr.element.name] !== undefined) {
+        return simpleStyleChange(tr, simpleBoolTagsTable[tr.element.name], attributes);
     }
     return null;
 }
 
-export function fontStyleTag(tr: DocxTranslator, src: Element, attributes: AnyObject, properties: AnyObject): any[] {
+export function fontStyleTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let options: docx.ICharacterStyleOptions = {
-        id: requiredAttribute(src, attributes, 'id'),
+        id: requiredAttribute(attributes, 'id'),
         basedOn: attributes.basedOn,
-        name: requiredAttribute(src, attributes, 'name'),
+        name: requiredAttribute(attributes, 'name'),
         next: attributes.next,
-        run: getIRunStylePropertiesOptions(tr, src, attributes),
+        run: getIRunStylePropertiesOptions(tr, attributes),
+        ...properties,
     };
     (options as any)[symbolInstance] = 'ICharacterStyleOptions';
-    return [options]
-   
+    return [options];
 }

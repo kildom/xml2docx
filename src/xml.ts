@@ -51,8 +51,12 @@ export interface Instruction {
 export type Node = Element | Text | CData | Instruction;
 
 export class XMLError extends Error {
-    constructor(node: Node, message: string) {
-        super(message + ` [at ${node.path}]`);
+    constructor(node: Node | { element: Node } | { node: Node } | undefined, message: string) {
+        if (node) {
+            super(message + ` [at ${(node as any)?.path || (node as any)?.element?.path || (node as any)?.node?.path}]`);
+        } else {
+            super(message);
+        }
     }
 }
 

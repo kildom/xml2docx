@@ -83,6 +83,13 @@
     <h2>Not yellow</h2>
 
     <h1>Outline</h1>
-    <p outline="0">This paragraph is in outline.</p>
+    <p outline="0">This paragraph is in outline0.</p>
+    <p outline="1">This paragraph is in outline1.</p>
+    <p outline="2">This paragraph is in outline2.</p>
+    <p outline="1">This paragraph is in outline1.</p>
+    <p outline="2">This paragraph is in outline2.</p>
+    <p outline="2">This paragraph is in outline2.</p>
+    <p outline="0">This paragraph is in outline0.</p>
+    <p outline="1">This paragraph is in outline1.</p>
     <!-- TODO: add TOC -->
 </document>

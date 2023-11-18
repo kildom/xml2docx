@@ -20,7 +20,7 @@
 
 import { Element, XMLError } from "./xml";
 
-export function getColor(text: string | undefined, throws?: Element) {
+export function getColor(text: string | undefined, throws?: boolean) {
     if (text === undefined) return undefined;
     text = text.trim().toLowerCase();
     let normalized = text.replace(/[^a-z]/g, '');
@@ -32,14 +32,8 @@ export function getColor(text: string | undefined, throws?: Element) {
         return text;
     } else if ((m = text.match(/^#[0-9a-f]{3}$/))) {
         return `#${text[1]}${text[1]}${text[2]}${text[2]}${text[3]}${text[3]}`;
-        /*} else if ((m = text.match(/^rgb\s*\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)$/))) {
-            let col = [
-                Math.min(255, parseInt(m[1])),
-                Math.min(255, parseInt(m[2])),
-                Math.min(255, parseInt(m[3]))];
-            return '#' + col.map(x => (0x100 + x).toString(16).substring(0, 2)).join('');*/
     } else if (throws) {
-        throw new XMLError(throws, `Invalid color value "${text}".`);
+        throw new Error(`Invalid color value "${text}".`);
     } else {
         return undefined;
     }

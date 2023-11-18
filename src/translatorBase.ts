@@ -19,7 +19,7 @@
  */
 
 import { AnyObject } from "./common";
-import { CData, Element, InterceptedXMLError, Text, SpacesProcessing, XMLError, processSpaces } from "./xml";
+import { CData, Element, InterceptedXMLError, Text, SpacesProcessing, XMLError, processSpaces, Node } from "./xml";
 
 export abstract class TranslatorBase {
 
@@ -27,9 +27,9 @@ export abstract class TranslatorBase {
     protected abstract createCDataObject(child: CData): any[];
     protected abstract createTagObject(src: Element): any[] | null;
     protected abstract createClassObject(src: Element, name: string, args: any): any[];
-    protected abstract singleFilter(src: Element, filterName: string, value: any): any;
+    protected abstract singleFilter(filterName: string, value: any): any;
 
-    public filter(src: Element, filters: string[] | string, value: any, allowUndefined: boolean = false) {
+    public filter(filters: string[] | string, value: any, allowUndefined: boolean = false) {
         if (allowUndefined && value === undefined) {
             return undefined;
         }
@@ -38,14 +38,7 @@ export abstract class TranslatorBase {
             filters.shift();
         }
         for (let name of [...filters].reverse()) {
-            try {
-                value = this.singleFilter(src, name, value);
-            } catch (err) {
-                if (err instanceof XMLError) {
-                    throw err;
-                }
-                throw new InterceptedXMLError(src, err, `Error in "${name}" filter.`);
-            }
+            value = this.singleFilter(name, value);
         }
         return value;
     }
@@ -64,7 +57,7 @@ export abstract class TranslatorBase {
     public getAttributes(element: Element) {
         let obj: AnyObject = {};
         for (let [key, value] of Object.entries({ ...(element.attributes || {}) })) {
-            obj[this.extractName(key)] = this.filter(element, key, value);
+            obj[this.extractName(key)] = this.filter(key, value);
         }
         return obj;
     }
@@ -101,7 +94,7 @@ export abstract class TranslatorBase {
                 throw new XMLError(element, 'Invalid spaces attribute.');
             }
             let objects = this.parseObjects(element, spaces);
-            return this.filter(element, filters, objects);
+            return this.filter(filters, objects);
         }
 
         let children = element.elements || [];
@@ -154,13 +147,19 @@ export abstract class TranslatorBase {
             }
         }
 
-        return this.filter(element, filters, result);
+        return this.filter(filters, result);
     }
 
-    public parseObjects(container: Element, spaces: SpacesProcessing): any[] {
+    public parseObjects(container: Element | Node[], spaces: SpacesProcessing): any[] {
 
         let result: any[] = [];
-        let children = processSpaces(container.elements, spaces);
+        let elements: Node[];
+        if (container instanceof Array) {
+            elements = container;
+        } else {
+            elements = container.elements || [];
+        }
+        let children = processSpaces(elements, spaces);
 
         for (let child of children) {
             if (child.type === 'instruction') {

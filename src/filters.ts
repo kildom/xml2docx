@@ -28,12 +28,6 @@ import { os } from "./os";
 import { parseExtendedJSON } from "./json";
 import { AnyObject, symbolInstance, undefEmpty } from "./common";
 import { getColor } from "./colors";
-import { ITableCellMarginOptions } from "docx/build/file/table/table-properties/table-cell-margin";
-import { pTag } from "./tags/paragraph";
-import { documentTag } from "./tags/document";
-import { fallbackStyleChange, fontTag, underlineTag } from "./tags/characters";
-import { tableTag, tdTag, trTag } from "./tags/table";
-import { imgTag } from "./tags/img";
 import { DocxTranslator } from "./docxTranslator";
 
 const boolValues: { [key: string]: boolean } = {
@@ -51,11 +45,157 @@ const boolValues: { [key: string]: boolean } = {
     'off': false,
 };
 
+/* unit name => number of points per this unit */
+const units = {
+    mm: 360 / 127,
+    cm: 3600 / 127,
+    in: 72,
+    pt: 1,
+    pi: 12,
+    pc: 12,
+    px: 72 / 96,
+};
+
+export const LengthUnits = {
+    pt: 1,
+    pt3q: 4 / 3,
+    pt8: 8,
+    dxa: 20,
+    emu: 12700,
+};
+
+export enum FilterMode {
+    EXACT, // exact value required, undefined or invalid value will cause exception.
+    UNDEF, // undefined value allowed (it will return undefined), invalid value will cause exception.
+    ALL, // all values allowed, undefined or invalid value will return undefined.
+};
+
+function returnInvalid(mode: FilterMode, message: string): undefined {
+    if (mode === FilterMode.ALL) {
+        return undefined;
+    } else {
+        throw new Error(message);
+    }
+}
+
+export function filterBool(value: any, mode: FilterMode.EXACT): boolean;
+export function filterBool(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): boolean | undefined;
+export function filterBool(value: any, mode: FilterMode): boolean | undefined {
+    if (mode != FilterMode.EXACT && value === undefined) return undefined;
+    let v = ('' + value).toLowerCase();
+    if (boolValues[v] !== undefined) {
+        return boolValues[v];
+    } else {
+        return returnInvalid(mode, `Invalid boolean value "${value}"`);
+    }
+}
+
+function filterIntCommon(value: any, mode: FilterMode, min: number, max: number): number | undefined {
+    if (mode !== FilterMode.EXACT && value === undefined) return undefined;
+    let result = Number(('' + value).trim());
+    if (Number.isNaN(result) || !Number.isFinite(result) || !Number.isInteger(result) || result < min || result > max) {
+        return returnInvalid(mode, `Invalid number "${value}".`);
+    }
+    return result;
+}
+
+export function filterInt(value: any, mode: FilterMode.EXACT): number;
+export function filterInt(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterInt(value: any, mode: FilterMode): number | undefined {
+    return filterIntCommon(value, mode, -0x80000000, 0x7FFFFFFF);
+}
+
+export function filterUint(value: any, mode: FilterMode.EXACT): number;
+export function filterUint(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterUint(value: any, mode: FilterMode): number | undefined {
+    return filterIntCommon(value, mode, 0, 0x7FFFFFFF);
+}
+
+export function filterUintNonZero(value: any, mode: FilterMode.EXACT): number;
+export function filterUintNonZero(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterUintNonZero(value: any, mode: FilterMode): number | undefined {
+    return filterIntCommon(value, mode, 1, 0x7FFFFFFF);
+}
+
+function filterFloatCommon(value: any, mode: FilterMode, min: number, max: number): number | undefined {
+    if (mode != FilterMode.EXACT && value === undefined) return undefined;
+    let result = Number(('' + value).trim());
+    if (Number.isNaN(result) || !Number.isFinite(result) || value < min || value > max) {
+        return returnInvalid(mode, `Invalid number "${value}".`);
+    }
+    return result;
+}
+
+export function filterFloat(value: any, mode: FilterMode.EXACT): number;
+export function filterFloat(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterFloat(value: any, mode: FilterMode): number | undefined {
+    return filterFloatCommon(value, mode, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+}
+
+export function filterUfloat(value: any, mode: FilterMode.EXACT): number;
+export function filterUfloat(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterUfloat(value: any, mode: FilterMode): number | undefined {
+    return filterFloatCommon(value, mode, 0, Number.POSITIVE_INFINITY);
+}
+
+function splitUnits(value: string, mode: FilterMode): [number | undefined, string] {
+    if (mode != FilterMode.EXACT && value === undefined) return [undefined, ''];
+    let m = value.match(/^\s*(-?)\s*((?:[0-9]+(?:[.,][0-9]*)?|[0-9]*(?:\.[0-9]+)?)(?:e[+-]?[0-9]+)?)\s*([a-z]+)\s*$/);
+    if (!m) {
+        return [returnInvalid(mode, `Invalid length "${value}".`), ''];
+    }
+    let numStr = (m[1] + m[2]).toLowerCase().replace(/,/g, '.');
+    let num = Number(numStr);
+    if (Number.isNaN(num) || !Number.isFinite(num)) {
+        return [returnInvalid(mode, `Invalid number "${numStr}".`), ''];
+    }
+    return [num, m[3].toLowerCase()];
+}
+
+function filterLengthIntCommon(value: any, targetUnitsPerPt: number, mode: FilterMode, min: number, max: number): number | undefined {
+    let [num, unit] = splitUnits(value, mode);
+    if (num === undefined) return undefined;
+    if (units[unit] === undefined) {
+        return returnInvalid(mode, `Invalid unit "${value}".`);
+    }
+    let numFloat = num * units[unit] * targetUnitsPerPt;
+    let numInt = Math.round(numFloat);
+    if (numInt < min || numInt > max) {
+        numInt = Math.ceil(numFloat);
+        if (numInt < min || numInt > max) {
+            numInt = Math.floor(numFloat);
+        }
+    }
+    if (Number.isNaN(numInt) || numInt < min || numInt > max) {
+        return returnInvalid(mode, `Invalid length "${value}".`);
+    }
+    return numInt;
+}
+
+export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
+export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
+    return filterLengthIntCommon(value, targetUnitsPerPt, mode, -0x80000000, 0x7FFFFFFF);
+}
+
+export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
+export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
+    return filterLengthIntCommon(value, targetUnitsPerPt, mode, 0, 0x7FFFFFFF);
+}
+
+export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
+export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
+    return filterLengthIntCommon(value, targetUnitsPerPt, mode, 1, 0x7FFFFFFF);
+}
+
+
 function enumValueNormalize(text: string | number) {
     return text.toString().toLowerCase().replace(/[_-]/g, '');
 }
 
-export function fromEnum(src: Element, value: string | undefined, enumValue: { [key: string]: string | number }, aliases?: { [key: string]: string | number }, throws: boolean = true) {
+export function fromEnum(value: string | undefined, enumValue: { [key: string]: string | number }, aliases?: { [key: string]: string | number }, throws: boolean = true) {
     if (value === undefined) return undefined;
     // By Enum key
     if (enumValue[value] !== undefined) return enumValue[value];
@@ -79,7 +219,7 @@ export function fromEnum(src: Element, value: string | undefined, enumValue: { [
     if (throws) {
         let all = new Set(Object.values(enumValue));
         if (aliases) Object.keys(aliases).forEach(key => all.add(key));
-        throw new XMLError(src, `Invalid enum value "${value}". Possible values: "${[...all].sort().join('", "')}"`);
+        throw new Error(`Invalid enum value "${value}". Possible values: "${[...all].sort().join('", "')}"`);
     } else {
         return undefined;
     }
@@ -97,10 +237,10 @@ function convertSize(value: string | string[], targetUnitsPerPt: number): any {
             scale = targetUnitsPerPt * 72;
         } else if (value.endsWith('pt')) {
             scale = targetUnitsPerPt * 1;
-        } else if (value.endsWith('pc')) {
+        } else if (value.endsWith('pc') || value.endsWith('pi')) {
             scale = targetUnitsPerPt * 12;
-        } else if (value.endsWith('pi')) {
-            throw new Error(`Not implemented.`); // TODO: implement
+        } else if (value.endsWith('px')) { // TODO: filter px in string lengths
+            scale = targetUnitsPerPt * 72 / 96;
         } else {
             throw new Error(`Unknown units at "${value}".`);
         }
@@ -115,7 +255,7 @@ function convertSize(value: string | string[], targetUnitsPerPt: number): any {
     }
 }
 
-export const filters: { [key: string]: (value: any, src: Element, tr: DocxTranslator) => any } = {
+export const filters: { [key: string]: (value: any, tr: DocxTranslator) => any } = {
     'pass': (value: any) => value,
     'pt': (value: any) => convertSize(value, 1),
     'pt3q': (value: any) => convertSize(value, 4 / 3),
@@ -123,11 +263,11 @@ export const filters: { [key: string]: (value: any, src: Element, tr: DocxTransl
     'pt20': (value: any) => convertSize(value, 20),
     'dxa': (value: any) => convertSize(value, 20),
     'emu': (value: any) => convertSize(value, 12700),
-    'file': (value: any, src:Element, tr: DocxTranslator) => {
+    'file': (value: any, tr: DocxTranslator) => {
         let filePath = os.path.resolve(tr.baseDir, value as string);
         return os.fs.readFileSync(filePath);
     },
-    'textFile': (value: any, src:Element, tr: DocxTranslator) => {
+    'textFile': (value: any, tr: DocxTranslator) => {
         let filePath = os.path.resolve(tr.baseDir, value as string);
         return os.fs.readFileSync(filePath, 'utf-8');
     },
@@ -153,7 +293,7 @@ export const filters: { [key: string]: (value: any, src: Element, tr: DocxTransl
             throw new Error(`Invalid boolean value "${value}"`);
         }
     },
-    'enum': (value: any, element: Element) => {
+    'enum': (value: any) => {
         let arr = ('' + value).split(/[:.=>\\\/,;|-]+/);
         if (arr.length != 2) {
             throw new Error(`Invalid ":enum" filter input "${value}".`);
@@ -165,7 +305,7 @@ export const filters: { [key: string]: (value: any, src: Element, tr: DocxTransl
             throw new Error(`Undefined enum "${arr[0]}"`);
         }
         let enumValue = Object.values(enums)[index];
-        return fromEnum(element, arr[1], enumValue);
+        return fromEnum(arr[1], enumValue);
     },
     'color': (value: any) => {
         let col = getColor(value);
