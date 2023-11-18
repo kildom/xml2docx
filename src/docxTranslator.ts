@@ -27,7 +27,6 @@ import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { os } from "./os";
 import { parseExtendedJSON } from "./json";
 import { AnyObject, Attributes, symbolInstance, undefEmpty } from "./common";
-import { getColor } from "./colors";
 import { brTag, pTag, tabTag } from "./tags/paragraph";
 import { documentTag } from "./tags/document";
 import { fallbackStyleChange, fontStyleTag } from "./tags/characters";

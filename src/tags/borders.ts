@@ -19,15 +19,13 @@
  */
 
 import * as docx from "docx";
-import { getColor } from "../colors";
 import { selectFirst, splitListValues } from "../common";
 import { DocxTranslator } from "../docxTranslator";
-import { FilterMode, LengthUnits, filterLengthUint, filterLengthUintNonZero, fromEnum } from "../filters";
+import { FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, fromEnum } from "../filters";
 
-function getBorderOptions(tr: DocxTranslator, text: string | undefined) {
-    if (text == '0.3mm') text = text;
+function getBorderOptions(text: string | undefined) {
     return splitListValues(text, {
-        color: (value: string) => getColor(value),
+        color: (value: string) => filterColor(value, FilterMode.ALL),
         style: [
             (value: string) => fromEnum(value, docx.BorderStyle, undefined, false) as docx.BorderStyle,
             () => docx.BorderStyle.SINGLE,
@@ -38,15 +36,15 @@ function getBorderOptions(tr: DocxTranslator, text: string | undefined) {
 }
 
 //* @sub:getBorder
-export function getBorder(tr: DocxTranslator, value: string | undefined) {
+export function getBorder(value: string | undefined) {
     let borders = splitListValues(value, {
         top: [
-            (value: string) => getBorderOptions(tr, value),
+            (value: string) => getBorderOptions(value),
             'At least one border is required.'
         ],
-        right: (value: string) => getBorderOptions(tr, value),
-        bottom: (value: string) => getBorderOptions(tr, value),
-        left: (value: string) => getBorderOptions(tr, value),
+        right: (value: string) => getBorderOptions(value),
+        bottom: (value: string) => getBorderOptions(value),
+        left: (value: string) => getBorderOptions(value),
     }, ',');
     if (borders === undefined) return undefined;
     borders.right = selectFirst(borders.right, borders.top);
@@ -56,7 +54,7 @@ export function getBorder(tr: DocxTranslator, value: string | undefined) {
 }
 
 //* @sub:getMargins
-export function getMargins(tr: DocxTranslator, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined {
+export function getMargins(tr: DocxTranslator, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined { // TODO: Filter callback
     let margins = splitListValues(value, {
         //* Top margin.
         top: [
