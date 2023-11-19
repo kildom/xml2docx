@@ -24,7 +24,7 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import { AnyObject, Attributes, requiredAttribute, selectUndef, splitListValues, symbolInstance } from "../common";
 import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from "../filters";
-import { getBorder } from "./borders";
+import { getBorder, getBorderOptions } from "./borders";
 
 
 const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {
@@ -122,24 +122,38 @@ export function removeShallowUndefined(object: { [key: string]: any }) {
     return object;
 }
 
-
+/*>>> */
 export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRunStylePropertiesOptions {
     let options: docx.IRunStylePropertiesOptions = {
+        //* "type color" Text underline.
+        //* * `type` - Underline type. @enum:UnderlineType
+        //* * `color` - Underline color. @filterColor
         underline: splitListValues(attributes.underline, {
             type: (value: string) => fromEnum(value, docx.UnderlineType),
             color: (value: string) => filterColor(value, FilterMode.ALL),
         }),
+        //* Text color. @@
         color: filterColor(attributes.color, FilterMode.UNDEF),
+        //* Text kerning. @@
         kern: filterPositiveUniversalMeasure(attributes.kern, FilterMode.UNDEF),
+        //* Position. @@
         position: filterUniversalMeasure(attributes.position, FilterMode.UNDEF),
+        //* Font size. @@
         size: filterPositiveUniversalMeasure(attributes.size, FilterMode.UNDEF),
-        font: attributes.font || attributes.face,
+        //* Font name.
+        font: attributes.font ||
+        //* Alias of `font` attribute.
+            attributes.face,
+        //* Text Highlighting. @enum:HighlightColor
         highlight: fromEnum(attributes.highlight, HighlightColor, {}, false) as string | undefined,
         shading: selectUndef(attributes.background, {
             type: docx.ShadingType.SOLID,
+            //* Background color. @@
             color: filterColor(attributes.background, FilterMode.UNDEF),
         }),
-        border: getBorder(attributes.border)?.top,
+        //* Border around the text. @@
+        border: getBorderOptions(attributes.border),
+        //* Font scale. @@
         scale: filterUfloat(attributes.scale, FilterMode.UNDEF),
     };
     for (let [key, value] of Object.entries(attributes)) {

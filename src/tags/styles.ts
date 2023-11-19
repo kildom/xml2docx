@@ -27,13 +27,19 @@ import { AnyObject, Attributes, requiredAttribute, symbolInstance, undefEmpty } 
 import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt, filterColor } from "../filters";
 import { getBorder } from "./borders";
 import { getIRunStylePropertiesOptions } from "./characters";
+import { AlignmentTypeAliases } from "../enums";
 
-
+/*>>>
+@merge:getIParagraphStylePropertiesOptions
+*/
 export function getIParagraphPropertiesOptions(tr: DocxTranslator, attributes: Attributes) {
     let options: docx.IParagraphPropertiesOptions = {
         ...getIParagraphStylePropertiesOptions(tr, attributes),
+        //* Paragraph border. @@
         border: getBorder(attributes.border),
+        //* Force page break before this paragraph. @@
         pageBreakBefore: filterBool(attributes.pageBreak, FilterMode.UNDEF),
+        //* Tabulator stops. @@
         tabStops: getTabStops(tr, attributes.tabs),
         style: attributes.style,
         // TODO: bullet - numbering
@@ -48,6 +54,9 @@ export function getIParagraphPropertiesOptions(tr: DocxTranslator, attributes: A
     return options;
 }
 
+/*>>>
+@merge:getILevelParagraphStylePropertiesOptions
+*/
 export function getIParagraphStylePropertiesOptions(tr: DocxTranslator, attributes: Attributes) {
     let options: docx.IParagraphStylePropertiesOptions = {
         ...getILevelParagraphStylePropertiesOptions(tr, attributes),
@@ -56,20 +65,26 @@ export function getIParagraphStylePropertiesOptions(tr: DocxTranslator, attribut
     return options;
 }
 
+/*>>> */
 export function getILevelParagraphStylePropertiesOptions(tr: DocxTranslator, attributes: Attributes) {
     let options: docx.ILevelParagraphStylePropertiesOptions = {
-        alignment: fromEnum(attributes.align, docx.AlignmentType, { justify: 'both' }) as docx.AlignmentType,
-        indent: getIndent(attributes),
+        //* Text alignment. @enum:AlignmentType+AlignmentTypeAliases
+        alignment: fromEnum(attributes.align, docx.AlignmentType, AlignmentTypeAliases) as docx.AlignmentType,
+        //* Text indentation. @@
+        indent: getIndent(attributes.indent),
+        //* Keep text lines. @@
         keepLines: filterBool(attributes.keepLines, FilterMode.UNDEF),
+        //* Keep next. @@
         keepNext: filterBool(attributes.keepNext, FilterMode.UNDEF),
+        //* Outline level if this paragraph should be part of document outline. @@
         outlineLevel: filterUint(attributes.outline, FilterMode.UNDEF),
+        //* Vertical spacing of the paragraph. @@
         ...getSpacing(tr, attributes.spacing),
     };
     return options;
 }
 
-function getIndent(attributes: Attributes): docx.IIndentAttributesProperties | undefined {
-    let indent = attributes.indent;
+function getIndent(indent:string| undefined): docx.IIndentAttributesProperties | undefined {
     if (indent === undefined) return undefined;
     let arr = indent.split(/\s+/);
     let firstLine: docx.PositiveUniversalMeasure | undefined = undefined;
@@ -155,6 +170,9 @@ function getSingleTabStop(tr: DocxTranslator, tab: string): docx.TabStopDefiniti
     return position !== undefined ? { type: type || docx.TabStopType.LEFT, position, leader } : undefined;
 }
 
+/*>>>
+TODO: tabstops
+*/
 function getTabStops(tr: DocxTranslator, tabs: string | undefined): docx.TabStopDefinition[] | undefined {
     if (tabs === undefined) return undefined;
     return tabs.split(/\s*[,;]\s*/)
