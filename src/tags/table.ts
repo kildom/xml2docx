@@ -21,16 +21,23 @@
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
-import { AnyObject, Attributes, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, selectUndef, symbolInstance, undefEmpty } from "../common";
 import { getBorder, getMargins } from "./borders";
 import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor } from "../filters";
+import { TextDirectionAliases, VerticalAlignAliases } from "../enums";
 
 
+/*>>> : anchor absolute|relative
+*/
 function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: string]: string }) {
     if (text === undefined) return undefined;
+    //* `anchor` - Archon from which position is relative to. @enum:TableAnchorType
     let anchor: docx.TableAnchorType | undefined = undefined;
+    //* `absolute` - Absolute position. @filterUniversalMeasure
     let absolute: docx.UniversalMeasure | undefined = undefined;
+    //* `relative` - Relative position. @enum:RelativeHorizontalPosition
     let relative: T | undefined = undefined;
+    /*> The `absolute` and `relative` fields are mutually exclusive. Specify just one of them. */
     let parts = text.split(' ');
     for (let part of parts) {
         let a = fromEnum(part, docx.TableAnchorType, {}, false);
@@ -48,10 +55,21 @@ function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: stri
     return { anchor, absolute, relative };
 }
 
+/*>>>
+Table.
+
+Child elements of the row are `<tr>` (or its associated @api class).
+
+@api:classes/Table.
+*/
 export function tableTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    //* Horizontal floating position. @@
     let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(attributes.horizontal, docx.RelativeHorizontalPosition);
+    //* Vertical floating position. @@
     let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(attributes.vertical, docx.RelativeVerticalPosition);
+    //* Distance between table and surrounding text in floating mode. @@
     let floatMargins = getMargins(tr, attributes.floatMargins, ':pass');
+    //* Table border. @@
     let border = getBorder(attributes.border);
     let insideBorder = getBorder(attributes.insideBorder);
     let options: docx.ITableOptions = {
@@ -96,10 +114,13 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     return [new docx.Table({ ...options, ...properties })];
 }
 
+/*>>> : rule value
+*/
 function getTableRowHeight(text: string | undefined) {
     if (text === undefined) return undefined;
     let parts = text.split(' ');
     if (parts.length > 1) {
+        //* `rule` - Rule how the row height is determined. @enum:HeightRule
         let e = fromEnum(parts[0], docx.HeightRule, {}, false) as (docx.HeightRule | undefined);
         if (e) {
             return {
@@ -112,6 +133,7 @@ function getTableRowHeight(text: string | undefined) {
                 value: parts[0] as /* a small hack */ unknown as number
             };
         }
+        //* `value` - Height value. @filterPositiveUniversalMeasure
     } else if (text.toLowerCase() === 'auto') {
         return { rule: docx.HeightRule.AUTO, value: 0 };
     } else {
@@ -119,20 +141,34 @@ function getTableRowHeight(text: string | undefined) {
     }
 }
 
+/*>>>
+Table row.
+
+Child elements of the row are `<td>` (or its associated @api class).
+
+@api:classes/TableRow.
+*/
 export function trTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let options: docx.ITableRowOptions = {
         children: tr.parseObjects(tr.element, SpacesProcessing.IGNORE),
+        //* Row can be splitted into multiple pages. @@
         cantSplit: filterBool(attributes.cantSplit, FilterMode.UNDEF),
+        //* This row is a table header. @@
         tableHeader: filterBool(attributes.header, FilterMode.UNDEF),
+        //* Table height. @@
         height: getTableRowHeight(attributes.height),
     };
     return [new docx.TableRow({ ...options, ...properties })];
 };
 
-//* <td>
-//* Table cell.<br/>Child elements of the cell must be `<p>` or `<table>` (or its associated @api classes).
-//* If they are not, then the content of the cell will be put into automatically generated `<p>` element.
-//* @api:TableCell
+/*>>>
+Table cell.
+
+Child elements of the cell must be `<p>` or `<table>` (or its associated @api classes).
+If they are not, then the content of the cell will be put into automatically generated `<p>` element.
+
+@api:classes/TableCell.
+*/
 export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let children = tr.parseObjects(tr.element, SpacesProcessing.IGNORE);
     for (let child of children) {
@@ -149,26 +185,24 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
     }
     let options: docx.ITableCellOptions = {
         children,
-        //* Cell border.
+        //* Cell border. @@
         borders: getBorder(attributes.border),
-        //* Number of spanning columns.
+        //* Number of spanning columns. @@
         columnSpan: filterUintNonZero(attributes.colspan, FilterMode.UNDEF),
-        //* Number of spanning rows.
+        //* Number of spanning rows. @@
         rowSpan: filterUintNonZero(attributes.rowspan, FilterMode.UNDEF),
-        //* Cell inner margins.
-        margins: attributes.margins && {
+        margins: selectUndef(attributes.margins, {
             marginUnitType: docx.WidthType.DXA,
+            //* Cell inner margins. @@
             ...getMargins(tr, attributes.margins, ':pass'),
-        },
-        //* Text direction.
-        textDirection: fromEnum(attributes.dir, docx.TextDirection, {
-            topToBottom: docx.TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT,
-            leftToRight: docx.TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
-            bottomToTop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
-        }, true) as docx.TextDirection,
-        verticalAlign: fromEnum(attributes.valign, docx.VerticalAlign, { middle: docx.VerticalAlign.CENTER }, true) as docx.VerticalAlign,
+        }),
+        //* Text direction. @enum:TextDirection+TextDirectionAliases
+        textDirection: fromEnum(attributes.dir, docx.TextDirection, TextDirectionAliases, true) as docx.TextDirection,
+        //* Vertical alignment. @enum:VerticalAlign+VerticalAlignAliases
+        verticalAlign: fromEnum(attributes.valign, docx.VerticalAlign, VerticalAlignAliases, true) as docx.VerticalAlign,
         shading: attributes.background === undefined ? undefined : {
             type: docx.ShadingType.SOLID,
+            //* Background color. @@
             color: filterColor(attributes.background, FilterMode.EXACT),
         }
     };

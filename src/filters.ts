@@ -77,6 +77,9 @@ function returnInvalid(mode: FilterMode, message: string): undefined {
     }
 }
 
+/*>>> filterBool
+*[Boolean value](attributes.md#boolean-value)*.
+*/
 export function filterBool(value: any, mode: FilterMode.EXACT): boolean;
 export function filterBool(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): boolean | undefined;
 export function filterBool(value: any, mode: FilterMode): boolean | undefined {
@@ -98,18 +101,21 @@ function filterIntCommon(value: any, mode: FilterMode, min: number, max: number)
     return result;
 }
 
+/*>>> :integer */
 export function filterInt(value: any, mode: FilterMode.EXACT): number;
 export function filterInt(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterInt(value: any, mode: FilterMode): number | undefined {
     return filterIntCommon(value, mode, -0x80000000, 0x7FFFFFFF);
 }
 
+/*>>> :positive integer */
 export function filterUint(value: any, mode: FilterMode.EXACT): number;
 export function filterUint(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterUint(value: any, mode: FilterMode): number | undefined {
     return filterIntCommon(value, mode, 0, 0x7FFFFFFF);
 }
 
+/*>>> :non-zero positive integer */
 export function filterUintNonZero(value: any, mode: FilterMode.EXACT): number;
 export function filterUintNonZero(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterUintNonZero(value: any, mode: FilterMode): number | undefined {
@@ -125,12 +131,14 @@ function filterFloatCommon(value: any, mode: FilterMode, min: number, max: numbe
     return result;
 }
 
+/*>>> :number */
 export function filterFloat(value: any, mode: FilterMode.EXACT): number;
 export function filterFloat(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterFloat(value: any, mode: FilterMode): number | undefined {
     return filterFloatCommon(value, mode, -Number.MAX_VALUE, Number.MAX_VALUE);
 }
 
+/*>>> :positive number */
 export function filterUfloat(value: any, mode: FilterMode.EXACT): number;
 export function filterUfloat(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterUfloat(value: any, mode: FilterMode): number | undefined {
@@ -171,18 +179,27 @@ function filterLengthIntCommon(value: any, targetUnitsPerPt: number, mode: Filte
     return numInt;
 }
 
+/*>>> filterLengthInt
+*[Universal measure](attributes.md#universal-measure)*.
+*/
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, -0x80000000, 0x7FFFFFFF);
 }
 
+/*>>> filterLengthUint
+*[Positive universal measure](attributes.md#positive-universal-measure)*.
+*/
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, 0, 0x7FFFFFFF);
 }
 
+/*>>> filterLengthUintNonZero
+*[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+*/
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
@@ -216,19 +233,27 @@ function filterUniversalMeasureCommon(value: any, mode: FilterMode, min: number,
     return str + unit;
 }
 
+/*>>> filterUniversalMeasure
+*[Universal measure](attributes.md#universal-measure)*.
+*/
 export function filterUniversalMeasure(value: any, mode: FilterMode.EXACT): docx.UniversalMeasure;
 export function filterUniversalMeasure(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): docx.UniversalMeasure | undefined;
 export function filterUniversalMeasure(value: any, mode: FilterMode): docx.UniversalMeasure | undefined {
     return filterUniversalMeasureCommon(value, mode, -Number.MAX_VALUE, Number.MAX_VALUE) as docx.UniversalMeasure;
 }
 
+/*>>> filterPositiveUniversalMeasure
+*[Positive universal measure](attributes.md#positive-universal-measure)*.
+*/
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode.EXACT): docx.PositiveUniversalMeasure;
 export function filterPositiveUniversalMeasure(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): docx.PositiveUniversalMeasure | undefined;
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode): docx.PositiveUniversalMeasure | undefined {
     return filterUniversalMeasureCommon(value, mode, 0, Number.MAX_VALUE) as docx.PositiveUniversalMeasure;
 }
 
-
+/*>>> filterColor
+*[Hex color value or color name](attributes.md#color)*.
+*/
 export function filterColor(value: any, mode: FilterMode.EXACT): string;
 export function filterColor(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): string | undefined;
 export function filterColor(value: any, mode: FilterMode): string | undefined {
