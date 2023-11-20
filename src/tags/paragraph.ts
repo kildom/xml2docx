@@ -35,6 +35,20 @@ const headingTags: { [key: string]: docx.HeadingLevel } = {
     'title': docx.HeadingLevel.TITLE,
 }
 
+/*>>>
+Paragraph.
+
+The paragraph contains formatted text and images.
+Any whitespaces at the beginning and end of the paragraph are removed.
+
+You can avoid repeating the same attributes with `preserve` attribute.
+Paragraphs can maintain its attributes if `preserve` attribute is set to true.
+All following paragraphs without any attributes `<p>` will reuse the maintained attributes.
+You can stop reusing attributes if you specify at least one attribute.
+
+
+@api:Paragraph
+*/
 export function pTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let name = tr.element.name;
     let heading: docx.HeadingLevel | undefined = headingTags[name];
