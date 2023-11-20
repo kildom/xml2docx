@@ -40,7 +40,6 @@ interface Entry {
     short: string;
     text: string;
     items: (Item | Note)[];
-    processed?: true;
 };
 
 let entries: { [key: string]: Entry } = {};
@@ -169,9 +168,10 @@ class Commands {
                 throw new Error(`Unknown enum ${enumName} in @enum:${param}`);
             }
             for (let [key, value] of Object.entries(enumObj)) {
+                if (key.match(/^[0-9]+$/)) continue;
                 let set = enumValues[value.toString()] || [];
                 set.unshift(normalizeName(key));
-                if (typeof(value) === 'string') {
+                if (typeof (value) === 'string' && !value.match(/^[0-9]+$/)) {
                     set.push(normalizeName(value));
                 }
                 enumValues[value.toString()] = set;
@@ -208,6 +208,7 @@ class Commands {
     }
 
     static commandFromEntry(cmdEntry: Entry, param: string, entry: Entry, item?: Item): string {
+        cmdEntry = processEntry(cmdEntry, param.split('|'));
         if (item && !item.short) {
             item.short = cmdEntry.short;
         }
@@ -226,7 +227,6 @@ class Commands {
     static fallback(cmd: string, param: string, entry: Entry, item?: Item): string {
         if (entries[cmd] !== undefined) {
             let cmdEntry = entries[cmd];
-            processEntry(cmdEntry);
             return Commands.commandFromEntry(cmdEntry, param, entry, item);
         }
         console.log(`???@${cmd}:${param}???`);
@@ -243,27 +243,29 @@ function processCmd(cmd: string, param: string, entry: Entry, item?: Item): stri
     return func(cmd, param, entry, item);
 }
 
-function processEntry(entry: Entry) {
-    const commandRegex = /@([a-z0-9_@]+)(?::(.*?)(?=[^a-z0-9_+\/-]|$))?/gsi;
-    if (entry.processed) return;
-    entry.processed = true;
-    entry.text = entry.text.replace(commandRegex, (_?: string, cmd?: string, param?: string) => {
-        return processCmd(cmd || '', param || '', entry, undefined);
+const commandRegex = /@([a-z0-9_@]+)(?::([a-z0-9_+\/|-]+))?/gsi;
+
+function processText(text: string, entry: Entry, item: Item | undefined, params: string[]) {
+    text = text.replace(/@([0-9])@/gis, (_?: string, index?: string) => params[parseInt(index || '')] || '');
+    return text.replace(commandRegex, (_?: string, cmd?: string, param?: string) => {
+        return processCmd(cmd || '', param || '', entry, item);
     });
-    for (let item of entry.items) {
+}
+
+function processEntry(entry: Entry, params: string[]): Entry {
+    let result: Entry = { ...entry, items: entry.items.map(item => ({ ...item })) };
+    result.text = processText(result.text, result, undefined, params);
+    for (let item of result.items) {
         if (item.type === 'note') {
-            item.text = item.text.replace(commandRegex, (_?: string, cmd?: string, param?: string) => {
-                return processCmd(cmd || '', param || '', entry, undefined);
-            });
+            item.text = processText(item.text, result, undefined, params);
         }
     }
-    for (let item of entry.items) {
+    for (let item of result.items) {
         if (item.type === 'item') {
-            item.text = item.text.replace(commandRegex, (_?: string, cmd?: string, param?: string) => {
-                return processCmd(cmd || '', param || '', entry, item as Item);
-            });
+            item.text = processText(item.text, result, item, params);
         }
     }
+    return result;
 }
 
 function addIndent(text: string, indent: string) {
@@ -308,8 +310,8 @@ for (let file of fs.readdirSync(srcDir, { recursive: true, encoding: 'utf8' })) 
 
 for (let name in entries) {
     if (name.endsWith('Tag')) {
-        processEntry(entries[name]);
-        let doc = generateTagDoc(entries[name]);
+        let entry = processEntry(entries[name], []);
+        let doc = generateTagDoc(entry);
         fs.writeFileSync(`${name}.md`, doc);
     }
 }

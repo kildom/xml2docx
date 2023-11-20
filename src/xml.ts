@@ -172,10 +172,6 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
 
     } else {
 
-        if (nodes[1]?.type === 'element' && nodes[1].name == 'b') {
-            nodes = nodes;
-        }
-
         let i: number;
         let input: Node[] = nodes;
         let result: Node[] = [];

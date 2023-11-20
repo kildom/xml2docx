@@ -35,7 +35,7 @@ function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: stri
     let anchor: docx.TableAnchorType | undefined = undefined;
     //* `absolute` - Absolute position. @filterUniversalMeasure
     let absolute: docx.UniversalMeasure | undefined = undefined;
-    //* `relative` - Relative position. @enum:RelativeHorizontalPosition
+    //* `relative` - Relative position. @enum:@0@
     let relative: T | undefined = undefined;
     /*> The `absolute` and `relative` fields are mutually exclusive. Specify just one of them. */
     let parts = text.split(' ');
@@ -55,6 +55,21 @@ function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: stri
     return { anchor, absolute, relative };
 }
 
+
+/*>>> : horizontal, vertical */
+export function getBorderHV(value: string | undefined) {
+    let borders = getBorder(value);
+    if (borders === undefined) return undefined;
+    return {
+        //* `horizontal` - Horizontal borders.
+        horizontal: borders.top,
+        //* `vertical` - Vertical borders.
+        vertical: borders.left,
+    }
+    /*> Each type of the border is `@short:getBorderOptions`: @getBorderOptions */
+}
+
+
 /*>>>
 Table.
 
@@ -63,23 +78,28 @@ Child elements of the row are `<tr>` (or its associated @api class).
 @api:classes/Table.
 */
 export function tableTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
-    //* Horizontal floating position. @@
+    //* Horizontal floating position. @@:RelativeHorizontalPosition
     let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(attributes.horizontal, docx.RelativeHorizontalPosition);
-    //* Vertical floating position. @@
+    //* Vertical floating position. @@:RelativeVerticalPosition
     let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(attributes.vertical, docx.RelativeVerticalPosition);
     //* Distance between table and surrounding text in floating mode. @@
     let floatMargins = getMargins(tr, attributes.floatMargins, ':pass');
     //* Table border. @@
     let border = getBorder(attributes.border);
-    let insideBorder = getBorder(attributes.insideBorder);
+    //* Default border between cells. @@
+    let insideBorder = getBorderHV(attributes.insideBorder);
     let options: docx.ITableOptions = {
         rows: tr.copy().parseObjects(tr.element, SpacesProcessing.IGNORE),
+        //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
         columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
             .trim()
-            .split(/[, ]+/)
+            .split(/[;, ]+/)
             .map(x => filterLengthUintNonZero(x, LengthUnits.dxa, FilterMode.EXACT)),
         layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
+        //* Table alignment. @enum:AlignmentType
         alignment: fromEnum(attributes.align, docx.AlignmentType) as docx.AlignmentType,
+        //* Table width. It can be expressed as percentage of entire available space (with `%` sign)
+        //* or straightforward distance. @filterPositiveUniversalMeasure
         width: attributes.width && {
             type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
             size: attributes.width,
@@ -89,11 +109,12 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
             left: border?.left,
             right: border?.right,
             top: border?.top,
-            insideHorizontal: insideBorder?.top,
-            insideVertical: insideBorder?.right,
+            insideHorizontal: insideBorder?.horizontal,
+            insideVertical: insideBorder?.vertical,
         }),
         margins: attributes.cellMargins && { // TODO: Rename to margin to be compatible with CSS
             marginUnitType: docx.WidthType.DXA,
+            //* Default cell margins. @@
             ...getMargins(tr, attributes.cellMargins, ':pass'),
         },
         float: undefEmpty({
@@ -104,6 +125,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
             absoluteVerticalPosition: vFloat?.absolute,
             relativeVerticalPosition: vFloat?.relative,
             overlap: !attributes.overlap ? undefined
+                //* Enable overlapping for floating mode. @@
                 : filterBool(attributes.overlap, FilterMode.UNDEF) ? docx.OverlapType.OVERLAP : docx.OverlapType.NEVER,
             topFromText: floatMargins?.top,
             rightFromText: floatMargins?.right,

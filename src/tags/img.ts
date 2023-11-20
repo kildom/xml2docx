@@ -22,7 +22,7 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, selectFirst, splitListValues, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, symbolInstance, undefEmpty } from "../common";
 import { getMargins } from "./borders";
 import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero } from "../filters";
 
@@ -36,17 +36,25 @@ function getFlip(value: string | undefined) {
     };
 }
 
+/*>>> : anchor align|offset */
 function getHVPosition(tr: DocxTranslator, value: string, alignEnum: { [key: string]: string | number }, relEnum: { [key: string]: string | number }) {
     return splitListValues(value, {
-        align: (value: string) => fromEnum(value, alignEnum, {}, false),
+        //* `anchor` - Archon from which position is relative to. @enum:@1@
         relative: (value: string) => fromEnum(value, relEnum, {}, false),
+        //* `align` - Image alignment relative to archon. @enum:@0@
+        align: (value: string) => fromEnum(value, alignEnum, {}, false),
+        //* `offset` - Offset of absolute position from the archon. @filterLengthInt
         offset: (value: string) => filterLengthInt(value, LengthUnits.emu, FilterMode.ALL),
     });
+    /*> The `align` and `offset` fields are mutually exclusive. Specify just one of them. */
 }
 
+/*>>> : side type */
 function getWrap(value: string | undefined, margins: docx.IMargins | undefined): docx.ITextWrapping | undefined {
     let wrap = splitListValues(value, {
+        //* `side` - Wrapping side. @enum:TextWrappingSide
         side: (value: string) => fromEnum(value, docx.TextWrappingSide, {}, false),
+        //* `type` - Wrapping type. @enum:TextWrappingType
         type: [
             (value: string) => fromEnum(value, docx.TextWrappingType, {}, false),
             () => docx.TextWrappingType.SQUARE,
@@ -63,25 +71,50 @@ function getWrap(value: string | undefined, margins: docx.IMargins | undefined):
     return wrap as docx.ITextWrapping;
 }
 
+/*>>>
+Adds image to the document.
+
+You must put it into `<p>` element. Supported image formats are: `JPEG`, `BMP`, `GIF`, `PNG`.
+
+One of the `src` and `data` attributes is required. They are mutually exclusive, so use exactly one of them.
+
+@api:classes/ImageRun
+*/
 export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    //* Margins around the image. @@
     let margins = getMargins(tr, attributes.margins);
     let options: docx.IImageOptions = {
-        data: attributes.src ? tr.filter(':file', attributes.src) : tr.filter(':base64', attributes.data),
+        //* Image source path. An absolute path or a path relative to main input file.
+        data: attributes.src ? tr.filter(':file', attributes.src)
+            //* Raw image data in BASE-64 encoding.
+            : tr.filter(':base64', attributes.data),
         transformation: {
-            width: filterLengthUintNonZero(attributes.width, LengthUnits.pt3q, FilterMode.EXACT),
-            height: filterLengthUintNonZero(attributes.height, LengthUnits.pt3q, FilterMode.EXACT),
+            //* Width of the image. @@
+            width: filterLengthUintNonZero(requiredAttribute(attributes, 'width'), LengthUnits.pt3q, FilterMode.EXACT),
+            //* Height of the image. @@
+            height: filterLengthUintNonZero(requiredAttribute(attributes, 'height'), LengthUnits.pt3q, FilterMode.EXACT),
+            //* Clockwise rotation in degrees. @@
             rotation: filterInt(attributes.rotate, FilterMode.UNDEF),
+            //* Image flip. Combination of `horizontal` (mirror) and `vertical`. You can also use also short forms: `h` and `v`.
             flip: getFlip(attributes.flip),
         },
         floating: undefEmpty({
+            //* Allow overlapping. @@
             allowOverlap: filterBool(attributes.allowOverlap, FilterMode.UNDEF),
+            //* Put image behind text. @@
             behindDocument: filterBool(attributes.behindDocument, FilterMode.UNDEF),
+            //* Layout in cell. @@
             layoutInCell: filterBool(attributes.layoutInCell, FilterMode.UNDEF),
+            //* Lock image archon in single place. @@
             lockAnchor: filterBool(attributes.lockAnchor, FilterMode.UNDEF),
+            //* Image z-index. Decides which image is on top another. @@
             zIndex: filterInt(attributes.zIndex, FilterMode.UNDEF),
+            //* Horizontal position in floating mode. @@:HorizontalPositionAlign|HorizontalPositionRelativeFrom
             horizontalPosition: getHVPosition(tr, attributes.horizontal, docx.HorizontalPositionAlign, docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
+            //* Vertical position in floating mode. @@:VerticalPositionAlign|VerticalPositionRelativeFrom
             verticalPosition: getHVPosition(tr, attributes.vertical, docx.VerticalPositionAlign, docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
             margins,
+            //* Text wrapping around the image. @@
             wrap: getWrap(attributes.wrap, margins),
         }),
         ...properties,

@@ -23,7 +23,7 @@ import { selectFirst, splitListValues } from "../common";
 import { DocxTranslator } from "../docxTranslator";
 import { FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, fromEnum } from "../filters";
 
-/*>>> getBorderOptions: color style size space */
+/*>>> : color style size space */
 export function getBorderOptions(text: string | undefined): docx.IBorderOptions | undefined {
     return splitListValues(text, {
         //* `color` - Border color. @filterColor
@@ -40,7 +40,7 @@ export function getBorderOptions(text: string | undefined): docx.IBorderOptions 
     }) as docx.IBorderOptions | undefined;
 }
 
-/*>>> getBorder: top, left, bottom, right */
+/*>>> : top, left, bottom, right */
 export function getBorder(value: string | undefined) {
     let borders = splitListValues(value, {
         //* `top` - Top border.
