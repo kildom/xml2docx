@@ -1,58 +1,25 @@
-# Images
+# Paragraphs
 
 ## `<p>`
 
-The `<p>` element adds a new paragraph to the document.
-Document text must be contained within the paragraph.
+<!-- >>> pTag -->
 
-It is a wrapper for the [Paragraph class](https://docx.js.org/api/classes/Paragraph.html).
-You can use `:property` elements to pass data directly to it.
+Paragraph.
 
-### Attributes
+The paragraph contains formatted text and images.
+Any whitespaces at the beginning and end of the paragraph are removed.
 
-* `style` *[optional]*
-
-  Style name for this paragraph.
-
-* `border-bottom`, `border-left`, `border-right`, `border-top` *[optional]*
-
-  Paragraph borders, ser [border styles](general.md#border-styles).
+You can avoid repeating the same attributes with `preserve` attribute.
+Paragraphs can maintain its attributes if `preserve` attribute is set to true.
+All following paragraphs without any attributes `<p>` will reuse the maintained attributes.
+You can stop reusing attributes if you specify at least one attribute.
 
 
-## `<h1>` `<h2>` `<h3>` ...
+[Paragraph](https://docx.js.org/api/Paragraph.html)
 
-Header paragraphs. Those are aliases for the `<p>` tag with `style` attribute
-set to `Heading1`, `Heading2`, `Heading3`, and so on.
+<!-- <<< -->
 
+## `<title>` `<h1>` `<h2>` `<h3>` ...
 
-## Styles
+Header paragraphs. They takes the same attributes as the [`<p>`](#p) tag.
 
-* `align` *[optional]*
-
-  Text alignment, see https://docx.js.org/api/enums/AlignmentType.html.
-  One additional value `justify` which is alias of `both`.
-
-* `spacing="[before] [after] [rule] [line] [contextual]"` *[optional]*
-
-  Paragraph vertical spacing.
-  * `before` *[optional]* - space before the paragraph in [length units](general.md#length)
-  * `after` *[optional]* - space after the paragraph in [length units](general.md#length)
-  * `rule` *[required if "line" is present]* - https://docx.js.org/api/enums/LineRuleType.html
-  * `line` *[optional]* - space between lines in [length units](general.md#length) for "at-least" and "exact" rules,
-    fraction of a line for other rules.
-  * `contextual` *[optional]* - if it is literally `contextual` string, then skip space for the same paragraph styles.
-
-* `indent="[left] [right] [first-line]"` *[optional]*
-
-  Paragraph indentation.
-  * `left` *[optional]* - left indentation in [length units](general.md#length)
-  * `right` *[optional]* - right indentation in [length units](general.md#length)
-  * `first-line` *[optional]* - first line indentation in [length units](general.md#length)
-
-* `outline` *[optional]*
-
-  Level of the document outline.
-
-* `keep-lines` *[optional]*
-
-* `keep-next` *[optional]*

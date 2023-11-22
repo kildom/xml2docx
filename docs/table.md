@@ -2,127 +2,289 @@
 
 ## `<table>`
 
-Create a HTML-like table.
+<!-- >>> tableTag -->
 
-Only allowed child element is `<tr>`.
+Table.
 
-It is a wrapper for the [Table class](https://docx.js.org/api/classes/Table.html).
-You can use `:property` elements to pass data directly to it.
+Child elements of the row are `<tr>` (or its associated [docx.js API](https://docx.js.org/api/) class).
 
-### Attributes
+[Table](https://docx.js.org/api/classes/Table.html).
 
-* `columnWidths` *[optional]*
+* `horizontal="anchor absolute|relative"` *[optional]*
+  
+  Horizontal floating position. 
+  * `anchor` - Archon from which position is relative to. Enumeration values:
+    * `margin`
+    * `page`
+    * `text`
+  * `absolute` - Absolute position. *[Universal measure](attributes.md#universal-measure)*.
+  * `relative` - Relative position. Enumeration values:
+    * `center`
+    * `inside`
+    * `left`
+    * `outside`
+    * `right`
+  
+  The `absolute` and `relative` fields are mutually exclusive. Specify just one of them.
 
-  List of column widths ([length units](general.md#length)) for fixed table layout.
+* `vertical="anchor absolute|relative"` *[optional]*
+  
+  Vertical floating position. 
+  * `anchor` - Archon from which position is relative to. Enumeration values:
+    * `margin`
+    * `page`
+    * `text`
+  * `absolute` - Absolute position. *[Universal measure](attributes.md#universal-measure)*.
+  * `relative` - Relative position. Enumeration values:
+    * `bottom`
+    * `center`
+    * `inline`
+    * `inside`
+    * `outside`
+    * `top`
+  
+  The `absolute` and `relative` fields are mutually exclusive. Specify just one of them.
+
+* `float-margins="top left bottom right"` *[optional]*
+  
+  Distance between table and surrounding text in floating mode. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+  * `top` - Top margin.
+  * `right` - Right margin. Default: the same as top.
+  * `bottom` - Bottom margin. Default: the same as top.
+  * `left` - Left margin. Default: the same as right.
+
+* `border="top, left, bottom, right"` *[optional]*
+  
+  Table border. 
+  * `top` - Top border.
+  * `right` - Right border. Default: the same as top.
+  * `bottom` - Bottom border. Default: the same as top.
+  * `left` - Left border. Default: the same as right.
+  
+  Each side of the border is `color style size space`: 
+  * `color` - Border color. *[Hex color value or color name](attributes.md#color)*.
+  * `style` - Border style. Enumeration values:
+    * `dash-dot-stroked`
+    * `dash-small-gap`
+    * `dashed`
+    * `dot-dash`
+    * `dot-dot-dash`
+    * `dotted`
+    * `double`
+    * `double-wave`
+    * `inset`
+    * `nil`
+    * `none`
+    * `outset`
+    * `single`
+    * `thick`
+    * `thick-thin-large-gap`
+    * `thick-thin-medium-gap`
+    * `thick-thin-small-gap`
+    * `thin-thick-large-gap`
+    * `thin-thick-medium-gap`
+    * `thin-thick-small-gap`
+    * `thin-thick-thin-large-gap`
+    * `thin-thick-thin-medium-gap`
+    * `thin-thick-thin-small-gap`
+    * `three-d-emboss` (alias `three-demboss`)
+    * `three-d-engrave` (alias `three-dengrave`)
+    * `triple`
+    * `wave`
+  * `size` - Border size. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+  * `space` - Space between border and content. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+
+* `inside-border="horizontal, vertical"` *[optional]*
+  
+  Default border between cells. 
+  * `horizontal` - Horizontal borders.
+  * `vertical` - Vertical borders.
+  
+  Each type of the border is `color style size space`: 
+  * `color` - Border color. *[Hex color value or color name](attributes.md#color)*.
+  * `style` - Border style. Enumeration values:
+    * `dash-dot-stroked`
+    * `dash-small-gap`
+    * `dashed`
+    * `dot-dash`
+    * `dot-dot-dash`
+    * `dotted`
+    * `double`
+    * `double-wave`
+    * `inset`
+    * `nil`
+    * `none`
+    * `outset`
+    * `single`
+    * `thick`
+    * `thick-thin-large-gap`
+    * `thick-thin-medium-gap`
+    * `thick-thin-small-gap`
+    * `thin-thick-large-gap`
+    * `thin-thick-medium-gap`
+    * `thin-thick-small-gap`
+    * `thin-thick-thin-large-gap`
+    * `thin-thick-thin-medium-gap`
+    * `thin-thick-thin-small-gap`
+    * `three-d-emboss` (alias `three-demboss`)
+    * `three-d-engrave` (alias `three-dengrave`)
+    * `triple`
+    * `wave`
+  * `size` - Border size. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+  * `space` - Space between border and content. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+
+* `column-widths` *[optional]*
+  
+  List of columns widths for fixed table layout. *[Positive universal measure](attributes.md#positive-universal-measure)*.
 
 * `align` *[optional]*
-
-  Table alignment, see https://docx.js.org/api/enums/AlignmentType.html.
+  
+  Table alignment. Enumeration values:
+  * `center`
+  * `distribute`
+  * `end`
+  * `high-kashida`
+  * `justified` (alias `both`)
+  * `left`
+  * `low-kashida`
+  * `medium-kashida`
+  * `num-tab`
+  * `right`
+  * `start`
+  * `thai-distribute`
 
 * `width` *[optional]*
+  
+  Table width. It can be expressed as percentage of entire available space (with `%` sign)
+  or straightforward distance. *[Positive universal measure](attributes.md#positive-universal-measure)*.
 
-  Table width in [length units](general.md#length) or a percentage value followed by `%` sign.
-
-* `border` *[optional]*
-
-  Table borders, see [border styles](general.md#border-styles).
-
-* `inside-border` *[optional]*
-
-  Default borders between cells. Just two first styles are used. First one is horizontal, second is vertical.
-  If there is just one border style, then it is used for both vertical and horizontal.
-  See [border styles](general.md#border-styles).
-
-* `cell-margins` *[optional]*
-
-  Default cell margins, see [surrounding lengths](general.md#surrounding-lengths).
-
-### Floating table attributes
-
-* `horizontal="[archon] [absolute or relative]"` *[optional]*
-
-  Horizontal positioning for floating table.
-  * `archon` *[optional]* - https://docx.js.org/api/enums/TableAnchorType.html
-  * `absolute` *[optional]* - distance from referece location ([positive or negative length units](general.md#length)).
-  * `relative` *[optional]* - https://docx.js.org/api/enums/RelativeHorizontalPosition.html <br/>
-    The `absolute` and `relative` fields are mutually exclusive.
-
-* `vertical="[archon] [absolute or relative]"` *[optional]*
-
-  Vertical positioning for floating table.
-  * `archon` *[optional]* - https://docx.js.org/api/enums/TableAnchorType.html
-  * `absolute` *[optional]* - distance from referece location ([positive or negative length units](general.md#length)).
-  * `relative` *[optional]* - https://docx.js.org/api/enums/RelativeVerticalPosition.html <br/>
-    The `absolute` and `relative` fields are mutually exclusive.
-
-* `float-margins` *[optional]*
-
-  Distance between text and floating table, see [surrounding lengths](general.md#surrounding-lengths).
+* `cell-margins="top left bottom right"` *[optional]*
+  
+  Default cell margins. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+  * `top` - Top margin.
+  * `right` - Right margin. Default: the same as top.
+  * `bottom` - Bottom margin. Default: the same as top.
+  * `left` - Left margin. Default: the same as right.
 
 * `overlap` *[optional]*
+  
+  Enable overlapping for floating mode. *[Boolean value](attributes.md#boolean-value)*.
 
-  Boolean overlap value for floating table, see https://docx.js.org/api/types/ITableFloatOptions.html.
-
+<!-- <<< -->
 
 ## `<tr>`
 
-Create a table row.
+<!-- >>> trTag -->
 
-Only allowed child element is `<td>`.
+Table row.
 
-It is a wrapper for the [TableRow class](https://docx.js.org/api/classes/TableRow.html).
-You can use `:property` elements to pass data directly to it.
+Child elements of the row are `<td>` (or its associated [docx.js API](https://docx.js.org/api/) class).
 
-### Attributes
-
-* `height="[rule] [length]"` *[optional]*
-
-  Height of the row.
-  * `rule` *[optional]* - https://docx.js.org/api/enums/HeightRule.html, default `at-least`.
-  * `length` *[optional]* - [length units](general.md#length)
-
-* `header` *[optional]*
-
-  This is header row (boolean)
+[TableRow](https://docx.js.org/api/classes/TableRow.html).
 
 * `cant-split` *[optional]*
+  
+  Row can be splitted into multiple pages. *[Boolean value](attributes.md#boolean-value)*.
 
-  The row cannot split (boolean)
+* `header` *[optional]*
+  
+  This row is a table header. *[Boolean value](attributes.md#boolean-value)*.
 
+* `height="rule value"` *[optional]*
+  
+  Table height. 
+  * `rule` - Rule how the row height is determined. Enumeration values:
+    * `atleast` (alias `at-least`)
+    * `auto`
+    * `exact`
+  * `value` - Height value. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+
+<!-- <<< -->
 
 ## `<td>`
 
-Create a table cell.
+<!-- >>> tdTag -->
 
-Only allowed child elements are `<p>`, `<table>`, `<Paragraph>`, `<Table>`.
+Table cell.
 
-It is a wrapper for the [TableCell class](https://docx.js.org/api/classes/TableCell.html).
-You can use `:property` elements to pass data directly to it.
+Child elements of the cell must be `<p>` or `<table>` (or its associated [docx.js API](https://docx.js.org/api/) classes).
+If they are not, then the content of the cell will be put into automatically generated `<p>` element.
 
-### Attributes
+[TableCell](https://docx.js.org/api/classes/TableCell.html).
 
-* `border`, `border-bottom`, `border-left`, `border-right`, `border-top`, `border-end`, `border-start`, `border-horizontal`, `border-vertical` *[optional]*
+* `border="top, left, bottom, right"` *[optional]*
+  
+  Cell border. 
+  * `top` - Top border.
+  * `right` - Right border. Default: the same as top.
+  * `bottom` - Bottom border. Default: the same as top.
+  * `left` - Left border. Default: the same as right.
+  
+  Each side of the border is `color style size space`: 
+  * `color` - Border color. *[Hex color value or color name](attributes.md#color)*.
+  * `style` - Border style. Enumeration values:
+    * `dash-dot-stroked`
+    * `dash-small-gap`
+    * `dashed`
+    * `dot-dash`
+    * `dot-dot-dash`
+    * `dotted`
+    * `double`
+    * `double-wave`
+    * `inset`
+    * `nil`
+    * `none`
+    * `outset`
+    * `single`
+    * `thick`
+    * `thick-thin-large-gap`
+    * `thick-thin-medium-gap`
+    * `thick-thin-small-gap`
+    * `thin-thick-large-gap`
+    * `thin-thick-medium-gap`
+    * `thin-thick-small-gap`
+    * `thin-thick-thin-large-gap`
+    * `thin-thick-thin-medium-gap`
+    * `thin-thick-thin-small-gap`
+    * `three-d-emboss` (alias `three-demboss`)
+    * `three-d-engrave` (alias `three-dengrave`)
+    * `triple`
+    * `wave`
+  * `size` - Border size. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+  * `space` - Space between border and content. *[Positive universal measure](attributes.md#positive-universal-measure)*.
 
-  Cell borders, see [border styles](general.md#border-styles).
+* `colspan="non-zero positive integer"` *[optional]*
+  
+  Number of spanning columns.
 
-* `margins` *[optional]*
+* `rowspan="non-zero positive integer"` *[optional]*
+  
+  Number of spanning rows.
 
-  Cell margins, see [surrounding lengths](general.md#surrounding-lengths).
-
-* `valign` *[optional]*
-
-  Vertical content alignment, see https://docx.js.org/api/enums/VerticalAlign.html.
-  You can also use HTML-like value `middle` that is alias for `center`.
-
-* `background` *[optional]*
-
-  Background color, see [colors](general.md#colors).
-
-* `colspan`, `rowspan` *[optional]*
-
-  Number of cell that this cell is spanning.
+* `margins="top left bottom right"` *[optional]*
+  
+  Cell inner margins. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+  * `top` - Top margin.
+  * `right` - Right margin. Default: the same as top.
+  * `bottom` - Bottom margin. Default: the same as top.
+  * `left` - Left margin. Default: the same as right.
 
 * `dir` *[optional]*
+  
+  Text direction. Enumeration values:
+  * `bottom-to-top` (aliases: `bottom-to-top-left-to-right`, `bt-lr`)
+  * `left-to-right` (aliases: `left-to-right-top-to-bottom`, `lr-tb`)
+  * `top-to-bottom` (aliases: `top-to-bottom-right-to-left`, `tb-rl`)
 
-  Text direction, see https://docx.js.org/api/enums/TextDirection.html.
-  You can also use short forms: `bottom-to-top`, `left-to-right`, `top-to-bottom`.
+* `valign` *[optional]*
+  
+  Vertical alignment. Enumeration values:
+  * `bottom`
+  * `middle` (alias `center`)
+  * `top`
+
+* `background` *[optional]*
+  
+  Background color. *[Hex color value or color name](attributes.md#color)*.
+
+<!-- <<< -->
