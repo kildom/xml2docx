@@ -2,58 +2,124 @@
 
 ## `<img>`
 
-The `<img>` element adds an image to the document.
-It must be decendent of the `<p>` element.
+<!-- >>> imgTag -->
 
-Supported image formats: `JPEG`, `BMP`, `GIF`, `PNG`.
+Adds image to the document.
 
-It is a wrapper for the [ImageRun class](https://docx.js.org/api/classes/ImageRun.html).
-You can use `:property` elements to pass data directly to it.
+You must put it into `<p>` element. Supported image formats are: `JPEG`, `BMP`, `GIF`, `PNG`.
 
-### Attributes
+One of the `src` and `data` attributes is required. They are mutually exclusive, so use exactly one of them.
 
-* `src` or `data` *[required]*
+[ImageRun](https://docx.js.org/api/classes/ImageRun.html)
 
-  The image. A path relative to the main XML file location should be provided in the `src` attribute. A base-64 encoded string containing the image should be provided in the `data` attribute. The `src` and `data` are mutually exclusive.
+* `margins="top left bottom right"` *[optional]*
+  
+  Margins around the image. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+  * `top` - Top margin.
+  * `right` - Right margin. Default: the same as top.
+  * `bottom` - Bottom margin. Default: the same as top.
+  * `left` - Left margin. Default: the same as right.
 
-* `width`, `height` *[required]*
+* `src` *[optional]*
+  
+  Image source path. An absolute path or a path relative to main input file.
 
-  Desired size of the image ([length units](general.md#length)).
+* `data` *[optional]*
+  
+  Raw image data in BASE-64 encoding.
 
-* `rotate` *[optional]*
+* `width` *[required]*
+  
+  Width of the image. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
 
+* `height` *[required]*
+  
+  Height of the image. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+
+* `rotate="integer"` *[optional]*
+  
   Clockwise rotation in degrees.
 
 * `flip` *[optional]*
+  
+  Image flip. Combination of `horizontal` (mirror) and `vertical`. You can also use also short forms: `h` and `v`.
 
-  Combination of `horizontal` and `vertical`. You can also use also short forms: `h` and `v`.
+* `allow-overlap` *[optional]*
+  
+  Allow overlapping. *[Boolean value](attributes.md#boolean-value)*.
 
-* `wrap="[type] [side]"` *[optional]*
+* `behind-document` *[optional]*
+  
+  Put image behind text. *[Boolean value](attributes.md#boolean-value)*.
 
-  Text wrapping around the image.
-  * `type` *[optional]* - https://docx.js.org/api/enums/TextWrappingType.html
-  * `side` *[optional]* - https://docx.js.org/api/enums/TextWrappingSide.html
+* `layout-in-cell` *[optional]*
+  
+  Layout in cell. *[Boolean value](attributes.md#boolean-value)*.
 
-* `margins` *[optional]*
+* `lock-anchor` *[optional]*
+  
+  Lock image archon in single place. *[Boolean value](attributes.md#boolean-value)*.
 
-  Margins around the image. See [surrounding lengths](general.md#surrounding-lengths).
+* `z-index="integer"` *[optional]*
+  
+  Image z-index. Decides which image is on top another.
 
-* `vertical="[relative-from] [offset or align]"` *[optional]*
+* `horizontal="anchor align|offset"` *[optional]*
+  
+  Horizontal position in floating mode. 
+  * `anchor` - Archon from which position is relative to. Enumeration values:
+    * `character`
+    * `column`
+    * `inside-margin`
+    * `left-margin`
+    * `margin`
+    * `outside-margin`
+    * `page`
+    * `right-margin`
+  * `align` - Image alignment relative to archon. Enumeration values:
+    * `center`
+    * `inside`
+    * `left`
+    * `outside`
+    * `right`
+  * `offset` - Offset of absolute position from the archon. *[Universal measure](attributes.md#universal-measure)*.
+  
+  The `align` and `offset` fields are mutually exclusive. Specify just one of them.
 
-  Vertical location of the image.
-  * `relative-from` *[optional]* - https://docx.js.org/api/enums/VerticalPositionRelativeFrom.html
-  * `offset` *[optional]* - distance from referece location ([positive or negative length units](general.md#length)).
-  * `align` *[optional]* - https://docx.js.org/api/enums/VerticalPositionAlign.html <br/>
-    The `offset` and `align` fields are mutually exclusive.
+* `vertical="anchor align|offset"` *[optional]*
+  
+  Vertical position in floating mode. 
+  * `anchor` - Archon from which position is relative to. Enumeration values:
+    * `bottom-margin`
+    * `inside-margin`
+    * `line`
+    * `margin`
+    * `outside-margin`
+    * `page`
+    * `paragraph`
+    * `top-margin`
+  * `align` - Image alignment relative to archon. Enumeration values:
+    * `bottom`
+    * `center`
+    * `inside`
+    * `outside`
+    * `top`
+  * `offset` - Offset of absolute position from the archon. *[Universal measure](attributes.md#universal-measure)*.
+  
+  The `align` and `offset` fields are mutually exclusive. Specify just one of them.
 
-* `horizontal="[relative-from] [offset or align]"` *[optional]*
+* `wrap="side type"` *[optional]*
+  
+  Text wrapping around the image. 
+  * `side` - Wrapping side. Enumeration values:
+    * `both-sides`
+    * `largest`
+    * `left`
+    * `right`
+  * `type` - Wrapping type. Enumeration values:
+    * `none`
+    * `square`
+    * `tight`
+    * `top-and-bottom`
 
-  Horizontal location of the image.
-  * `relative-from` *[optional]* - https://docx.js.org/api/enums/HorizontalPositionRelativeFrom.html
-  * `offset` *[optional]* - distance from referece location ([positive or negative length units](general.md#length)).
-  * `align` *[optional]* - https://docx.js.org/api/enums/HorizontalPositionAlign.html <br/>
-    The `offset` and `align` fields are mutually exclusive.
-
-* `allow-overlap`, `behind-document`, `layout-in-cell`, `lock-anchor`, `z-index` *[optional]*
-
-  Other image floating options defined by the [IFloating in docx API](https://docx.js.org/api/interfaces/IFloating.html).
+<!-- <<< -->

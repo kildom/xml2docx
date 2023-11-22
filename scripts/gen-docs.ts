@@ -195,7 +195,7 @@ class Commands {
 
     static short(cmd: string, param: string, entry: Entry, item?: Item): string {
         let src = entries[param];
-        console.log(param);
+        //console.log(param);
         if (!src) throw new Error(`Cannot find entry "${param}".`);
         return src.short.trim();
     }
@@ -229,8 +229,8 @@ class Commands {
             let cmdEntry = entries[cmd];
             return Commands.commandFromEntry(cmdEntry, param, entry, item);
         }
-        console.log(`???@${cmd}:${param}???`);
-        return `???@${cmd}:${param}???`; // TODO: remove it
+        //console.log(`???@${cmd}:${param}???`);
+        //return `???@${cmd}:${param}???`; //
         throw new Error(`Invalid command @${cmd}`);
     }
 };
@@ -285,8 +285,7 @@ function generateAttrDoc(entry: Entry, item: Item) {
 
 function generateTagDoc(entry: Entry) {
     let tagName = normalizeName(entry.name.replace(/Tag$/, ''));
-    let res = `## \`<${tagName}>\`\n\n`;
-    res += entry.text.trim() + '\n\n';
+    let res = entry.text.trim() + '\n\n';
     for (let item of entry.items) {
         if (item.type === 'note') {
             res += item.text.trim();
@@ -299,6 +298,7 @@ function generateTagDoc(entry: Entry) {
 }
 
 let srcDir = path.normalize(path.join(__dirname, '../src'));
+let docsDir = path.normalize(path.join(__dirname, '../docs'));
 
 for (let file of fs.readdirSync(srcDir, { recursive: true, encoding: 'utf8' })) {
     let fullPath = path.join(srcDir, file);
@@ -308,13 +308,18 @@ for (let file of fs.readdirSync(srcDir, { recursive: true, encoding: 'utf8' })) 
     }
 }
 
-for (let name in entries) {
-    if (name.endsWith('Tag')) {
-        let entry = processEntry(entries[name], []);
-        let doc = generateTagDoc(entry);
-        fs.writeFileSync(`${name}.md`, doc);
+function replaceMarkdown(_: any, prefix: string, name: string, postfix: string) {
+    let entry = processEntry(entries[name], []);
+    let doc = generateTagDoc(entry);
+    return prefix + '\n\n' + doc.trim() + '\n\n' + postfix;
+}
+
+for (let file of fs.readdirSync(docsDir, { recursive: true, encoding: 'utf8' })) {
+    let fullPath = path.join(docsDir, file);
+    if (fs.statSync(fullPath).isFile() && fullPath.endsWith('.md')) {
+        let markdown = fs.readFileSync(fullPath, 'utf8');
+        let converted = markdown.replace(/(<!--\s*>>>\s*(.+?)\s*-->).*?(<!--\s*<<<\s*-->)/sg, replaceMarkdown);
+        fs.writeFileSync(fullPath, converted);
     }
 }
 
-
-Object.values(entries).forEach(entry => console.log(entry));
