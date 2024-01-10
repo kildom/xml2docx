@@ -142,7 +142,7 @@ function parseFile(code: string) {
 function normalizeName(name?: string): string {
     if (name === undefined) throw new Error('Name must be specified.');
     return name
-        .replace(/(?<=[a-z])(?=[A-Z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])/gs, '-')
+        .replace(/(?<=[a-z])(?=[A-Z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-z][A-Z])(?=[A-Z])/gs, '-')
         .toLowerCase()
         .replace(/[^a-z0-9]+/gs, '-');
 }
@@ -205,6 +205,28 @@ class Commands {
         if (!words?.length) throw new Error(`No commands detected: ${item?.code}`);
         if (words.length > 1) throw new Error(`Unambiguous command detection: ${words.join(', ')}`);
         return processCmd(words[0], param, entry, item);
+    }
+
+    static merge(cmd: string, param: string, entry: Entry, item?: Item): string {
+        let subParams = param.split('|');
+        let subEntryName = subParams.shift() as string;
+        if (entries[subEntryName] === undefined) {
+            throw new Error(`Unknown entry: ${subEntryName}`);
+        }
+        let subEntry = entries[subEntryName];
+        subEntry = processEntry(subEntry, subParams);
+        // console.log('----- cmd -----', cmd);
+        // console.log('----- param -----', param);
+        // console.log('----- entry -----', entry);
+        // console.log('----- item -----', item);
+        // console.log('----- subEntry -----', subEntry);
+        for (let item of subEntry.items) {
+            entry.items.push(item);
+        }
+        if (!entry.short && subEntry.short) {
+            entry.short = subEntry.short;
+        }
+        return subEntry.text;
     }
 
     static commandFromEntry(cmdEntry: Entry, param: string, entry: Entry, item?: Item): string {

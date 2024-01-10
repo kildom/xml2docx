@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+
+    <section border="double red 0.3mm 3mm, blue, 1mm 3mm, none" width="10cm" height="12cm" margins="1cm 2cm"/>
+
+    <header page="first">
+        First page header
+    </header>
+
+    <header>
+        This is header
+    </header>
+
+    <footer>
+        This is <b>footer</b>.
+    </footer>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+
+    <section>
+        <properties:property>
+            <page>
+                <borders>
+                    <pageBorderTop color="#0000FF" size:int="8" style="single" space:int="31" />
+                </borders>
+            </page>
+        </properties:property>
+    </section>
+
+    <header page="first">
+        First page header
+    </header>
+
+    <header>
+        This is header
+    </header>
+
+    <footer>
+        This is <b>footer</b>.
+    </footer>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+    <p>aaaaaa </p>
+
+</document>
