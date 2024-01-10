@@ -84,7 +84,8 @@ export function getILevelParagraphStylePropertiesOptions(tr: DocxTranslator, att
     return options;
 }
 
-function getIndent(indent:string| undefined): docx.IIndentAttributesProperties | undefined {
+/*>>> */
+function getIndent(indent: string | undefined): docx.IIndentAttributesProperties | undefined {
     if (indent === undefined) return undefined;
     let arr = indent.split(/\s+/);
     let firstLine: docx.PositiveUniversalMeasure | undefined = undefined;
@@ -104,6 +105,7 @@ function getIndent(indent:string| undefined): docx.IIndentAttributesProperties |
     };
 }
 
+/*>>> */
 function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphStylePropertiesOptions | undefined {
     if (spacing === undefined) return undefined;
     let arr: string[] = spacing.split(/\s+/);
@@ -181,17 +183,36 @@ function getTabStops(tr: DocxTranslator, tabs: string | undefined): docx.TabStop
         .sort((a, b) => a!.position - b!.position) as docx.TabStopDefinition[];
 }
 
+function pStyleFontTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    return [getIRunStylePropertiesOptions(attributes)];
+}
 
+/*>>>
+Define a paragraph style.
+
+Default font style inside paragraph can be set using
+[`<font>` element](format.md#font) inside this element.
+
+@merge:getIParagraphStylePropertiesOptions
+*/
 export function pStyleTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    let fonts = tr.copy(undefined, { 'font': pStyleFontTag }).parseObjects(tr.element, SpacesProcessing.IGNORE);
+    if ((fonts.length > 1) || (fonts.length > 0 && fonts[0][symbolInstance] !== 'IRunStylePropertiesOptions')) {
+        throw new Error("The <p-style> tag allows only one <font> child tag.");
+    }
     let options: docx.IParagraphStyleOptions = {
+        //* Style id. Use it to identify the style.
         id: requiredAttribute(attributes, 'id'),
+        //* Style id of the parent style.
         basedOn: attributes.basedOn,
+        //* User friendly name of the style.
         name: requiredAttribute(attributes, 'name'),
+        //* Id if style for new paragraphs following this style.
         next: attributes.next,
         paragraph: getIParagraphStylePropertiesOptions(tr, attributes),
-        run: getIRunStylePropertiesOptions(attributes),
+        run: fonts[0],
         ...properties,
     };
     (options as any)[symbolInstance] = 'IParagraphStyleOptions';
-    return [options]
+    return [options];
 }

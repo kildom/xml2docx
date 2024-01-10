@@ -25,6 +25,7 @@ import { Element, SpacesProcessing, XMLError } from "../xml";
 import { AnyObject, Attributes, requiredAttribute, selectUndef, splitListValues, symbolInstance } from "../common";
 import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from "../filters";
 import { getBorder, getBorderOptions } from "./borders";
+import { HighlightColor } from "../enums";
 
 
 const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {
@@ -68,7 +69,36 @@ const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {
     'font': {},
 };
 
+/*>>> simpleBoolStyleTable
+*/
 const simpleBoolStyleTable: { [key: string]: string } = {
+    /*>
+
+    The following attributes are optional
+    *[boolean values](attributes.md#boolean-value)*
+    defining the text format.
+
+    * `bold`
+    * `italics`
+    * `strike`
+    * `double-strike`
+    * `sub` (alias `sub-script`)
+    * `super` (alias `super-script`)
+    * `small-caps`
+    * `all-caps`
+    * `emboss`
+    * `imprint`
+    * `vanish`
+    * `spec-vanish`
+    * `no-proof`
+    * `snap-to-grid`
+    * `math`
+    * `bold-complex-script`
+    * `italics-complex-script`
+    * `size-complex-script`
+    * `highlight-complex-script`
+    * `right-to-left`
+    */
     noProof: 'noProof',
     bold: 'bold',
     boldComplexScript: 'boldComplexScript',
@@ -93,25 +123,6 @@ const simpleBoolStyleTable: { [key: string]: string } = {
     math: 'math',
 };
 
-enum HighlightColor {
-    BLACK = 'black',
-    BLUE = 'blue',
-    CYAN = 'cyan',
-    DARK_BLUE = 'darkBlue',
-    DARK_CYAN = 'darkCyan',
-    DARK_GRAY = 'darkGray',
-    DARK_GREEN = 'darkGreen',
-    DARK_MAGENTA = 'darkMagenta',
-    DARK_RED = 'darkRed',
-    DARK_YELLOW = 'darkYellow',
-    GREEN = 'green',
-    LIGHT_GRAY = 'lightGray',
-    MAGENTA = 'magenta',
-    RED = 'red',
-    WHITE = 'white',
-    YELLOW = 'yellow',
-};
-
 export function removeShallowUndefined(object: { [key: string]: any }) {
     object = { ...object };
     for (let key of [...Object.keys(object)]) {
@@ -122,7 +133,9 @@ export function removeShallowUndefined(object: { [key: string]: any }) {
     return object;
 }
 
-/*>>> */
+/*>>>
+@merge:simpleBoolStyleTable
+*/
 export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRunStylePropertiesOptions {
     let options: docx.IRunStylePropertiesOptions = {
         //* "type color" Text underline.
@@ -164,9 +177,13 @@ export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRun
     return removeShallowUndefined(options) as docx.IRunStylePropertiesOptions;
 }
 
+/*>>> fontTag
+@merge:getIRunStylePropertiesOptions
+*/
 function simpleStyleChange(tr: DocxTranslator, styleChange: docx.IRunOptions, attributes: Attributes) {
     styleChange = {
         ...styleChange,
+        //* Font style id.
         style: attributes.style,
         ...getIRunStylePropertiesOptions(attributes),
     };
@@ -183,12 +200,21 @@ export function fallbackStyleChange(tr: DocxTranslator, attributes: Attributes):
     return null;
 }
 
+/*>>>
+Define a font style.
+
+This tag inherits all the attributes from the [`<font>` tag](#font)
+except `style` attribute.
+It also defines the following own attributes:
+*/
 export function fontStyleTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let options: docx.ICharacterStyleOptions = {
+        //* Style id. Use it to identify the style.
         id: requiredAttribute(attributes, 'id'),
+        //* Style id of the parent style.
         basedOn: attributes.basedOn,
+        //* User friendly name of the style.
         name: requiredAttribute(attributes, 'name'),
-        next: attributes.next,
         run: getIRunStylePropertiesOptions(attributes),
         ...properties,
     };

@@ -28,12 +28,13 @@ import { os } from "./os";
 import { parseExtendedJSON } from "./json";
 import { AnyObject, Attributes, symbolInstance, undefEmpty } from "./common";
 import { brTag, pTag, tabTag } from "./tags/paragraph";
-import { documentTag } from "./tags/document";
+import { documentTag, headerFooterTag } from "./tags/document";
 import { fallbackStyleChange, fontStyleTag } from "./tags/characters";
 import { tableTag, tdTag, trTag } from "./tags/table";
 import { imgTag } from "./tags/img";
 import { filters } from "./filters";
 import { pStyleTag } from "./tags/styles";
+import { sectionTag } from "./tags/section";
 
 function normalizeAttributes(attributes: Attributes): AnyObject {
     let result: AnyObject = {};
@@ -49,9 +50,13 @@ function normalizeAttributes(attributes: Attributes): AnyObject {
     return result;
 }
 
+export type TagsSet = { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] };
 
-const tags: { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] } = {
+const tags: TagsSet = {
     'document': documentTag,
+    'section': sectionTag,
+    'header': headerFooterTag,
+    'footer': headerFooterTag,
     'p': pTag,
     'h1': pTag,
     'h2': pTag,
@@ -61,8 +66,6 @@ const tags: { [key: string]: (tr: DocxTranslator, attributes: Attributes, proper
     'h6': pTag,
     'title': pTag,
     'table': tableTag,
-    'tr': trTag,
-    'td': tdTag,
     'img': imgTag,
     'tab': tabTag,
     'br': brTag,
@@ -79,18 +82,17 @@ export class DocxTranslator extends TranslatorBase {
         } | undefined
     } = {};
 
-
-
     constructor(
         public baseDir: string,
         private runOptions: docx.IRunOptions,
-        public element: Element
+        public element: Element,
+        public customTags?: TagsSet
     ) {
         super();
     }
 
-    public copy(runOptionsChanges?: docx.IRunOptions) {
-        return new DocxTranslator(this.baseDir, { ...this.runOptions, ...runOptionsChanges }, this.element);
+    public copy(runOptionsChanges?: docx.IRunOptions, customTags?: TagsSet) {
+        return new DocxTranslator(this.baseDir, { ...this.runOptions, ...runOptionsChanges }, this.element, customTags);
     }
 
     private createFromText(text: string) {
@@ -111,12 +113,13 @@ export class DocxTranslator extends TranslatorBase {
         let oldElement = this.element;
         this.element = src;
         try {
-            if (tags[src.name] !== undefined) {
+            let currentTags = this.customTags || tags;
+            if (currentTags[src.name] !== undefined) {
                 let args: any[] = [this];
-                let numArgs = tags[src.name].length;
+                let numArgs = currentTags[src.name].length;
                 if (numArgs > 1) args.push(normalizeAttributes(this.getAttributes(src)));
                 if (numArgs > 2) args.push(this.getProperties(src));
-                return tags[src.name].apply(this, args as any);
+                return currentTags[src.name].apply(this, args as any);
             } else {
                 let attr = normalizeAttributes(this.getAttributes(src));
                 return fallbackStyleChange(this, attr);

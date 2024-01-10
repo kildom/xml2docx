@@ -25,6 +25,7 @@ import { AnyObject, Attributes, selectUndef, symbolInstance, undefEmpty } from "
 import { getBorder, getMargins } from "./borders";
 import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor } from "../filters";
 import { TextDirectionAliases, VerticalAlignAliases } from "../enums";
+import { createDummyParagraph } from "./paragraph";
 
 
 /*>>> : anchor absolute|relative
@@ -89,7 +90,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     //* Default border between cells. @@
     let insideBorder = getBorderHV(attributes.insideBorder);
     let options: docx.ITableOptions = {
-        rows: tr.copy().parseObjects(tr.element, SpacesProcessing.IGNORE),
+        rows: tr.copy(undefined, { 'tr': trTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
         //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
         columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
             .trim()
@@ -172,7 +173,7 @@ Child elements of the row are `<td>` (or its associated @api class).
 */
 export function trTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let options: docx.ITableRowOptions = {
-        children: tr.parseObjects(tr.element, SpacesProcessing.IGNORE),
+        children: tr.copy(undefined, { 'td': tdTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
         //* Row can be splitted into multiple pages. @@
         cantSplit: filterBool(attributes.cantSplit, FilterMode.UNDEF),
         //* This row is a table header. @@
@@ -192,19 +193,9 @@ If they are not, then the content of the cell will be put into automatically gen
 @api:classes/TableCell.
 */
 export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    tr = tr.copy();
     let children = tr.parseObjects(tr.element, SpacesProcessing.IGNORE);
-    for (let child of children) {
-        if (!(child instanceof docx.Paragraph) && !(child instanceof docx.Table)) {
-            children = tr.parseObjects([{
-                name: 'p',
-                path: tr.element.path + '/p[auto]',
-                type: 'element',
-                attributes: {},
-                elements: tr.element.elements?.filter(element => element.type !== 'element' || !element.name.endsWith(':property')),
-            }], SpacesProcessing.IGNORE);
-            break;
-        }
-    }
+    children = createDummyParagraph(tr, children);
     let options: docx.ITableCellOptions = {
         children,
         //* Cell border. @@

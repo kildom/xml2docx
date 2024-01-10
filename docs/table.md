@@ -87,8 +87,8 @@ Child elements of the row are `<tr>` (or its associated [docx.js API](https://do
     * `thin-thick-thin-large-gap`
     * `thin-thick-thin-medium-gap`
     * `thin-thick-thin-small-gap`
-    * `three-d-emboss` (alias `three-demboss`)
-    * `three-d-engrave` (alias `three-dengrave`)
+    * `three-d-emboss`
+    * `three-d-engrave`
     * `triple`
     * `wave`
   * `size` - Border size. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
@@ -126,8 +126,8 @@ Child elements of the row are `<tr>` (or its associated [docx.js API](https://do
     * `thin-thick-thin-large-gap`
     * `thin-thick-thin-medium-gap`
     * `thin-thick-thin-small-gap`
-    * `three-d-emboss` (alias `three-demboss`)
-    * `three-d-engrave` (alias `three-dengrave`)
+    * `three-d-emboss`
+    * `three-d-engrave`
     * `triple`
     * `wave`
   * `size` - Border size. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
@@ -246,8 +246,8 @@ If they are not, then the content of the cell will be put into automatically gen
     * `thin-thick-thin-large-gap`
     * `thin-thick-thin-medium-gap`
     * `thin-thick-thin-small-gap`
-    * `three-d-emboss` (alias `three-demboss`)
-    * `three-d-engrave` (alias `three-dengrave`)
+    * `three-d-emboss`
+    * `three-d-engrave`
     * `triple`
     * `wave`
   * `size` - Border size. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.

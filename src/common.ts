@@ -97,3 +97,7 @@ export function selectUndef<T>(...args: (T| undefined)[]): T | undefined {
     }
     return last;
 }
+
+export type Mutable<T> = {
+    -readonly [P in keyof T]: T[P];
+};

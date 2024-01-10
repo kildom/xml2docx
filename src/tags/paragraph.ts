@@ -19,10 +19,10 @@
  */
 
 import * as docx from "docx";
-import { AnyObject, Attributes, undefEmpty } from "../common";
+import { AnyObject, Attributes } from "../common";
 import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing } from "../xml";
-import { fromEnum, filterBool, FilterMode } from "../filters";
+import { SpacesProcessing } from "../xml";
+import { filterBool, FilterMode } from "../filters";
 import { getIParagraphPropertiesOptions } from "./styles";
 
 const headingTags: { [key: string]: docx.HeadingLevel } = {
@@ -42,16 +42,18 @@ The paragraph contains formatted text and images.
 Any whitespaces at the beginning and end of the paragraph are removed.
 
 You can avoid repeating the same attributes with `preserve` attribute.
-Paragraphs can maintain its attributes if `preserve` attribute is set to true.
-All following paragraphs without any attributes `<p>` will reuse the maintained attributes.
-You can stop reusing attributes if you specify at least one attribute.
-
+Paragraphs can preserve its attributes if `preserve` attribute is set to true.
+All following paragraphs without any attributes will reuse the preserved attributes.
+You can stop reusing attributes if you specify at least one attribute in new paragraph.
 
 @api:Paragraph
+
+@merge:getIParagraphPropertiesOptions
 */
 export function pTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let name = tr.element.name;
     let heading: docx.HeadingLevel | undefined = headingTags[name];
+    //* Preserve the attributes. See description above. @@
     let preserve: boolean | undefined = filterBool(attributes.preserve, FilterMode.UNDEF);
     attributes = { ...attributes };
     delete attributes.preserve;
@@ -74,10 +76,31 @@ export function pTag(tr: DocxTranslator, attributes: Attributes, properties: Any
     return [new docx.Paragraph({ ...options, ...properties })];
 };
 
+/*>>>
+Adds tabulation.
+*/
 export function tabTag(): any[] {
     return [new docx.TextRun({ children: [new docx.Tab()] })];
 }
 
+/*>>>
+Adds line break without breaking the paragraph.
+*/
 export function brTag(): any[] {
     return [new docx.TextRun({ children: [new docx.CarriageReturn()] })];
+}
+
+export function createDummyParagraph(tr: DocxTranslator, children: any) {
+    for (let child of children) {
+        if (!(child instanceof docx.Paragraph) && !(child instanceof docx.Table)) {
+            return tr.parseObjects([{
+                name: 'p',
+                path: tr.element.path + '/p[auto]',
+                type: 'element',
+                attributes: {},
+                elements: tr.element.elements?.filter(element => element.type !== 'element' || !element.name.endsWith(':property')),
+            }], SpacesProcessing.IGNORE);
+        }
+    }
+    return children;
 }
