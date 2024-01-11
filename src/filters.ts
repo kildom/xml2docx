@@ -26,10 +26,10 @@ import { FileChild } from 'docx/build/file/file-child';
 import { IPropertiesOptions } from 'docx/build/file/core-properties';
 import { os } from './os';
 import { parseExtendedJSON } from './json';
-import { AnyObject, undefEmpty } from './common';
+import { AnyObject, Dict, undefEmpty } from './common';
 import { DocxTranslator } from './docxTranslator';
 
-const boolValues: { [key: string]: boolean } = {
+const boolValues: Dict<boolean> = {
     'true': true,
     't': true,
     'yes': true,
@@ -45,7 +45,7 @@ const boolValues: { [key: string]: boolean } = {
 };
 
 /* unit name => number of points per this unit */
-const units: { [key: string]: number } = {
+const units: Dict<number> = {
     mm: 360 / 127,
     cm: 3600 / 127,
     in: 72,
@@ -286,11 +286,11 @@ function enumValueNormalize(text: string | number) {
     return text.toString().toLowerCase().replace(/[_-]/g, '');
 }
 
-export function fromEnum<T extends {}>(value: string | undefined, enumValue: T, aliases?: { [key: string]: string | number }, throws: boolean = true): (T)[keyof T] {
+export function fromEnum<T extends {}>(value: string | undefined, enumValue: T, aliases?: Dict<string | number>, throws: boolean = true): (T)[keyof T] {
     return fromEnumInternal(value, enumValue, aliases, throws) as (T)[keyof T];
 }
 
-function fromEnumInternal(value: string | undefined, enumValue: { [key: string]: string | number }, aliases?: { [key: string]: string | number }, throws: boolean = true) {
+function fromEnumInternal(value: string | undefined, enumValue: Dict<string | number>, aliases?: Dict<string | number>, throws: boolean = true) {
     if (value === undefined) return undefined;
     // By Enum key
     if (enumValue[value] !== undefined) return enumValue[value];
@@ -350,7 +350,7 @@ function convertSize(value: string | string[], targetUnitsPerPt: number): any {
     }
 }
 
-export const filters: { [key: string]: (value: any, tr: DocxTranslator) => any } = {
+export const filters: Dict<(value: any, tr: DocxTranslator) => any> = {
     'pass': (value: any) => value,
     'pt': (value: any) => convertSize(value, 1),
     'pt3q': (value: any) => convertSize(value, 4 / 3),
@@ -393,7 +393,7 @@ export const filters: { [key: string]: (value: any, tr: DocxTranslator) => any }
         if (arr.length != 2) {
             throw new Error(`Invalid ":enum" filter input "${value}".`);
         }
-        let enums = (docx as unknown as { [key: string]: AnyObject });
+        let enums = (docx as unknown as Dict<AnyObject>);
         let enumName = enumValueNormalize(arr[0]);
         let index = Object.keys(enums).map(enumValueNormalize).indexOf(enumName);
         if (index < 0) {
@@ -425,7 +425,7 @@ export const filters: { [key: string]: (value: any, tr: DocxTranslator) => any }
     }
 };
 
-const colorTable: { [key: string]: string } = {
+const colorTable: Dict<string> = {
     'aliceblue': '#F0F8FF',
     'antiquewhite': '#FAEBD7',
     'aqua': '#00FFFF',

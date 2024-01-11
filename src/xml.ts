@@ -20,11 +20,12 @@
 
 import * as xmlJs from 'xml-js';
 import { InterceptedError } from './os';
+import { Attributes } from './common';
 
 export interface Element {
     type: 'element';
     name: string;
-    attributes?: { [key: string]: string };
+    attributes?: Attributes;
     elements?: Node[];
     path: string;
 }
