@@ -21,7 +21,7 @@
 import * as docx from 'docx';
 import { selectFirst, splitListValues } from '../common';
 import {
-    FilterCallback, FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero,
+    FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero,
     filterPositiveUniversalMeasure, fromEnum
 } from '../filters';
 
@@ -81,7 +81,9 @@ export function getBorder(value: string | undefined): docx.IBordersOptions | und
 /*>>> : top left bottom right
 @filterLengthUint
 */
-export function getMargin(value: string | undefined, filter: FilterCallback = filterPositiveUniversalMeasure as any) {
+export function getMargin(
+    value: string | undefined, filter: ((value: any, mode: FilterMode) => any) = filterPositiveUniversalMeasure as any
+) {
     let margin = splitListValues(value, {
         //* `top` - Top margin.
         top: [

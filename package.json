@@ -20,11 +20,10 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --outfile=dist/xml2docx.js && node scripts/postprocess.js",
-    "build": "npx pkg -C Brotli -t node18-win-x64 --public -o dist/xml2docx.exe dist/xml2docx.js",
+    "prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --outfile=dist/xml2docx.cjs && node scripts/postprocess.cjs",
+    "build": "npx pkg -C Brotli -t node18-win-x64 --public -o dist/xml2docx.exe dist/xml2docx.cjs",
     "build-web": "node scripts/build-web.js",
-    "lint": "npx eslint src",
-    "check": "npx tsc -p tsconfig.json"
+    "check": "npx tsc -p tsconfig.json && npx eslint src"
   },
   "type": "module"
 }

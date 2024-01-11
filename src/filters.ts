@@ -66,8 +66,6 @@ export enum FilterMode {
 }
 
 
-export type FilterCallback = (value: any, mode: FilterMode) => any;
-
 function returnInvalid(mode: FilterMode, message: string): undefined {
     if (mode === FilterMode.ALL) {
         return undefined;
