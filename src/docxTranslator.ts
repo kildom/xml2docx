@@ -21,20 +21,18 @@
 import * as docx from "docx";
 
 import { TranslatorBase } from "./translatorBase";
-import { CData, Text, Element, XMLError, InterceptedXMLError, SpacesProcessing } from "./xml";
-import { FileChild } from "docx/build/file/file-child";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { os } from "./os";
-import { parseExtendedJSON } from "./json";
-import { AnyObject, Attributes, symbolInstance, undefEmpty } from "./common";
+import { CData, Text, Element, XMLError, InterceptedXMLError } from "./xml";
+import { AnyObject, Attributes, symbolInstance } from "./common";
 import { brTag, pTag, tabTag } from "./tags/paragraph";
 import { documentTag, headerFooterTag } from "./tags/document";
 import { fallbackStyleChange, fontStyleTag } from "./tags/characters";
-import { tableTag, tdTag, trTag } from "./tags/table";
+import { tableTag } from "./tags/table";
 import { imgTag } from "./tags/img";
 import { filters } from "./filters";
 import { pStyleTag } from "./tags/styles";
 import { sectionTag } from "./tags/section";
+
+export type TagsSet = { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] };
 
 function normalizeAttributes(attributes: Attributes): AnyObject {
     let result: AnyObject = {};
@@ -49,8 +47,6 @@ function normalizeAttributes(attributes: Attributes): AnyObject {
     }
     return result;
 }
-
-export type TagsSet = { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] };
 
 const tags: TagsSet = {
     'document': documentTag,
@@ -190,7 +186,11 @@ export class DocxTranslator extends TranslatorBase {
     }
 
     public translate(root: Element): docx.Document {
-        return documentTag(this, root)[0] as docx.Document;
+        let document = this.createTagObject(root);
+        if (!document || document.length !== 1 || !(document[0] instanceof docx.Document)) {
+            throw new Error(`Expecting exactly one <document> root element.`);
+        }
+        return document[0];
     }
 
 }

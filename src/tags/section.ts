@@ -22,7 +22,7 @@ import * as docx from "docx";
 import { AnyObject, Attributes, selectFirst, splitListValues, symbolInstance, undefEmpty } from "../common";
 import { DocxTranslator } from "../docxTranslator";
 import { filterBool, filterLengthUint, FilterMode, filterPositiveUniversalMeasure, fromEnum, LengthUnits } from "../filters";
-import { getBorder, getMargins } from "./borders";
+import { getBorder, getMargin, getMargins } from "./borders";
 
 
 /*>>>
@@ -38,7 +38,7 @@ export function sectionTag(tr: DocxTranslator, attributes: Attributes, propertie
         zOrder: fromEnum(attributes.borderZOrder, docx.PageBorderZOrder) as any,
     });
     //* Page margins. @@
-    let margins = getMargins(tr, attributes.margins, ':pass');
+    let margin = getMargin(attributes.margin);
     let options: docx.ISectionOptions = {
         children: [],
         properties: undefEmpty({
@@ -55,13 +55,13 @@ export function sectionTag(tr: DocxTranslator, attributes: Attributes, propertie
                     pageBorders: attr,
                 }),
                 margin: undefEmpty({
-                    ...margins,
+                    ...margin,
                     //* Header margin length. @@
-                    header: filterLengthUint(attributes.headerMargin, LengthUnits.emu, FilterMode.UNDEF),
+                    header: filterPositiveUniversalMeasure(attributes.headerMargin, FilterMode.UNDEF),
                     //* Footer margin length. @@
-                    footer: filterLengthUint(attributes.footerMargin, LengthUnits.emu, FilterMode.UNDEF),
+                    footer: filterPositiveUniversalMeasure(attributes.footerMargin, FilterMode.UNDEF),
                     //* Gutter margin length. @@
-                    gutter: filterLengthUint(attributes.gutterMargin, LengthUnits.emu, FilterMode.UNDEF),
+                    gutter: filterPositiveUniversalMeasure(attributes.gutterMargin, FilterMode.UNDEF),
                 }),
                 size: undefEmpty({
                     //* Page width. @@

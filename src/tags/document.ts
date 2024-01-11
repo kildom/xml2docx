@@ -23,10 +23,11 @@ import { DocxTranslator } from "../docxTranslator";
 import { SpacesProcessing } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, Mutable, symbolInstance } from "../common";
-import { fromEnum } from "../filters";
+import { AnyObject, Attributes, Mutable, symbolInstance, undefEmpty } from "../common";
+import { FilterMode, filterBool, filterLengthUint, filterPositiveUniversalMeasure, fromEnum } from "../filters";
 import { HeaderFooterPage } from "../enums";
 import { createDummyParagraph } from "./paragraph";
+import { getBorder, getMargin } from "./borders";
 
 
 function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: docx.Header | docx.Footer) {

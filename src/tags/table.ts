@@ -22,8 +22,8 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { AnyObject, Attributes, selectUndef, symbolInstance, undefEmpty } from "../common";
-import { getBorder, getMargins } from "./borders";
-import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor } from "../filters";
+import { getBorder, getMargin } from "./borders";
+import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint } from "../filters";
 import { TextDirectionAliases, VerticalAlignAliases } from "../enums";
 import { createDummyParagraph } from "./paragraph";
 
@@ -84,7 +84,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     //* Vertical floating position. @@:RelativeVerticalPosition
     let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(attributes.vertical, docx.RelativeVerticalPosition);
     //* Distance between table and surrounding text in floating mode. @@
-    let floatMargins = getMargins(tr, attributes.floatMargins, ':pass');
+    let floatMargins = getMargin(attributes.floatMargins);
     //* Table border. @@
     let border = getBorder(attributes.border);
     //* Default border between cells. @@
@@ -101,10 +101,10 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
         alignment: fromEnum(attributes.align, docx.AlignmentType) as docx.AlignmentType,
         //* Table width. It can be expressed as percentage of entire available space (with `%` sign)
         //* or straightforward distance. @filterPositiveUniversalMeasure
-        width: attributes.width && {
+        width: attributes.width ? {
             type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
             size: attributes.width,
-        },
+        } : undefined,
         borders: undefEmpty({
             bottom: border?.bottom,
             left: border?.left,
@@ -113,11 +113,11 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
             insideHorizontal: insideBorder?.horizontal,
             insideVertical: insideBorder?.vertical,
         }),
-        margins: attributes.cellMargins && { // TODO: Rename to margin to be compatible with CSS
+        margins: attributes.cellMargin ? { // TODO: Rename to margin to be compatible with CSS
             marginUnitType: docx.WidthType.DXA,
             //* Default cell margins. @@
-            ...getMargins(tr, attributes.cellMargins, ':pass'),
-        },
+            ...getMargin(attributes.cellMargin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
+        } : undefined,
         float: undefEmpty({
             horizontalAnchor: hFloat?.anchor,
             absoluteHorizontalPosition: hFloat?.absolute,
@@ -204,10 +204,10 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
         columnSpan: filterUintNonZero(attributes.colspan, FilterMode.UNDEF),
         //* Number of spanning rows. @@
         rowSpan: filterUintNonZero(attributes.rowspan, FilterMode.UNDEF),
-        margins: selectUndef(attributes.margins, {
+        margins: selectUndef(attributes.margin, {
             marginUnitType: docx.WidthType.DXA,
             //* Cell inner margins. @@
-            ...getMargins(tr, attributes.margins, ':pass'),
+            ...getMargin(attributes.margin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
         }),
         //* Text direction. @enum:TextDirection+TextDirectionAliases
         textDirection: fromEnum(attributes.dir, docx.TextDirection, TextDirectionAliases, true) as docx.TextDirection,

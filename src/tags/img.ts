@@ -23,8 +23,8 @@ import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, symbolInstance, undefEmpty } from "../common";
-import { getMargins } from "./borders";
-import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero } from "../filters";
+import { getMargin } from "./borders";
+import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero, filterLengthUint } from "../filters";
 
 
 function getFlip(value: string | undefined) {
@@ -50,7 +50,7 @@ function getHVPosition(tr: DocxTranslator, value: string, alignEnum: { [key: str
 }
 
 /*>>> : side type */
-function getWrap(value: string | undefined, margins: docx.IMargins | undefined): docx.ITextWrapping | undefined {
+function getWrap(value: string | undefined, margin: docx.IMargins | undefined): docx.ITextWrapping | undefined {
     let wrap = splitListValues(value, {
         //* `side` - Wrapping side. @enum:TextWrappingSide
         side: (value: string) => fromEnum(value, docx.TextWrappingSide, {}, false),
@@ -60,12 +60,12 @@ function getWrap(value: string | undefined, margins: docx.IMargins | undefined):
             () => docx.TextWrappingType.SQUARE,
         ],
     });
-    if (wrap && margins) {
+    if (wrap && margin) {
         wrap.margins = {
-            distT: margins.top,
-            distR: margins.right,
-            distB: margins.bottom,
-            distL: margins.left,
+            distT: margin.top,
+            distR: margin.right,
+            distB: margin.bottom,
+            distL: margin.left,
         };
     }
     return wrap as docx.ITextWrapping;
@@ -83,7 +83,7 @@ One of the `src` and `data` attributes is required. They are mutually exclusive,
 */
 export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     //* Margins around the image. @@
-    let margins = getMargins(tr, attributes.margins);
+    let margin = getMargin(attributes.margin, (value, mode) => filterLengthUint(value, LengthUnits.emu, mode));
     let options: docx.IImageOptions = {
         //* Image source path. An absolute path or a path relative to main input file.
         data: attributes.src ? tr.filter(':file', attributes.src)
@@ -114,9 +114,9 @@ export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: A
             horizontalPosition: getHVPosition(tr, attributes.horizontal, docx.HorizontalPositionAlign, docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
             //* Vertical position in floating mode. @@:VerticalPositionAlign|VerticalPositionRelativeFrom
             verticalPosition: getHVPosition(tr, attributes.vertical, docx.VerticalPositionAlign, docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
-            margins,
+            margins: margin,
             //* Text wrapping around the image. @@
-            wrap: getWrap(attributes.wrap, margins),
+            wrap: getWrap(attributes.wrap, margin),
         }),
         ...properties,
     };
