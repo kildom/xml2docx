@@ -23,7 +23,7 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, requiredAttribute, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, isTag, requiredAttribute, setTag } from "../common";
 import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt, filterColor } from "../filters";
 import { getBorder } from "./borders";
 import { getIRunStylePropertiesOptions } from "./characters";
@@ -69,7 +69,7 @@ export function getIParagraphStylePropertiesOptions(tr: DocxTranslator, attribut
 export function getILevelParagraphStylePropertiesOptions(tr: DocxTranslator, attributes: Attributes) {
     let options: docx.ILevelParagraphStylePropertiesOptions = {
         //* Text alignment. @enum:AlignmentType+AlignmentTypeAliases
-        alignment: fromEnum(attributes.align, docx.AlignmentType, AlignmentTypeAliases) as docx.AlignmentType,
+        alignment: fromEnum(attributes.align, docx.AlignmentType, AlignmentTypeAliases),
         //* Text indentation. @@
         indent: getIndent(attributes.indent),
         //* Keep text lines. @@
@@ -92,14 +92,14 @@ function getIndent(indent: string | undefined): docx.IIndentAttributesProperties
     let hanging: docx.PositiveUniversalMeasure | undefined = undefined;
     if (arr[2]) {
         if (arr[2].trim().startsWith('-')) {
-            hanging = arr[2].replace('-', '');
+            hanging = arr[2].replace('-', '') as docx.PositiveUniversalMeasure;
         } else {
-            firstLine = arr[2];
+            firstLine = arr[2] as docx.PositiveUniversalMeasure;
         }
     }
     return {
-        left: !arr[0] ? undefined : arr[0],
-        right: !arr[1] ? undefined : arr[1],
+        left: !arr[0] ? undefined : arr[0] as docx.PositiveUniversalMeasure,
+        right: !arr[1] ? undefined : arr[1] as docx.PositiveUniversalMeasure,
         firstLine,
         hanging,
     };
@@ -110,7 +110,7 @@ function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphS
     if (spacing === undefined) return undefined;
     let arr: string[] = spacing.split(/\s+/);
     let ba: number[] = [];
-    let lineRule: docx.LineRuleType | undefined = undefined;
+    let lineRule: (typeof docx.LineRuleType)[keyof typeof docx.LineRuleType] | undefined = undefined;
     let i: number;
     let contextualSpacing: true | undefined = undefined;
     for (i = 0; i < arr.length; i++) {
@@ -118,7 +118,7 @@ function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphS
             contextualSpacing = true;
             continue;
         }
-        lineRule = fromEnum(arr[i], docx.LineRuleType, {}, false) as docx.LineRuleType | undefined;
+        lineRule = fromEnum(arr[i], docx.LineRuleType, {}, false);
         if (lineRule) {
             i++;
             break;
@@ -152,17 +152,17 @@ function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphS
     }
 }
 function getSingleTabStop(tr: DocxTranslator, tab: string): docx.TabStopDefinition | undefined {
-    let type: docx.TabStopType | undefined = undefined;
+    let type: (typeof docx.TabStopType)[keyof typeof docx.TabStopType] | undefined = undefined;
     let position: number | undefined = undefined;
-    let leader: docx.LeaderType | undefined = undefined;
+    let leader: (typeof docx.LeaderType)[keyof typeof docx.LeaderType] | undefined = undefined;
     let arr = tab.split(/\s+/);
     for (let value of arr) {
-        let t = fromEnum(value, docx.TabStopType, {}, false) as docx.TabStopType | undefined;
+        let t = fromEnum(value, docx.TabStopType, {}, false);
         if (t !== undefined) {
             type = t;
             continue;
         }
-        let l = fromEnum(value, docx.LeaderType, {}, false) as docx.LeaderType | undefined;
+        let l = fromEnum(value, docx.LeaderType, {}, false);
         if (l !== undefined) {
             leader = l;
             continue;
@@ -197,7 +197,7 @@ Default font style inside paragraph can be set using
 */
 export function pStyleTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let fonts = tr.copy(undefined, { 'font': pStyleFontTag }).parseObjects(tr.element, SpacesProcessing.IGNORE);
-    if ((fonts.length > 1) || (fonts.length > 0 && fonts[0][symbolInstance] !== 'IRunStylePropertiesOptions')) {
+    if ((fonts.length > 1) || (fonts.length > 0 && !isTag(fonts[0], 'IRunStylePropertiesOptions'))) {
         throw new Error("The <p-style> tag allows only one <font> child tag.");
     }
     let options: docx.IParagraphStyleOptions = {
@@ -213,6 +213,6 @@ export function pStyleTag(tr: DocxTranslator, attributes: Attributes, properties
         run: fonts[0],
         ...properties,
     };
-    (options as any)[symbolInstance] = 'IParagraphStyleOptions';
+    setTag(options, 'IParagraphStyleOptions');
     return [options];
 }

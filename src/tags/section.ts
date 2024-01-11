@@ -19,10 +19,10 @@
  */
 
 import * as docx from "docx";
-import { AnyObject, Attributes, selectFirst, splitListValues, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, setTag, undefEmpty } from "../common";
 import { DocxTranslator } from "../docxTranslator";
 import { filterBool, filterLengthUint, FilterMode, filterPositiveUniversalMeasure, fromEnum, LengthUnits } from "../filters";
-import { getBorder, getMargin, getMargins } from "./borders";
+import { getBorder, getMargin } from "./borders";
 
 
 /*>>>
@@ -31,11 +31,11 @@ Section.
 export function sectionTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let attr = undefEmpty({
         //* On which pages display the borders. @enum:PageBorderDisplay
-        display: fromEnum(attributes.borderDisplay, docx.PageBorderDisplay) as any,
+        display: fromEnum(attributes.borderDisplay, docx.PageBorderDisplay),
         //* The base from the border distance should be calculated. @enum:PageBorderOffsetFrom
-        offsetFrom: fromEnum(attributes.borderOffsetFrom, docx.PageBorderOffsetFrom) as any,
+        offsetFrom: fromEnum(attributes.borderOffsetFrom, docx.PageBorderOffsetFrom),
         //* Defines if border should be above or below content. @enum:PageBorderZOrder
-        zOrder: fromEnum(attributes.borderZOrder, docx.PageBorderZOrder) as any,
+        zOrder: fromEnum(attributes.borderZOrder, docx.PageBorderZOrder),
     });
     //* Page margins. @@
     let margin = getMargin(attributes.margin);
@@ -45,9 +45,9 @@ export function sectionTag(tr: DocxTranslator, attributes: Attributes, propertie
             //* Enable title page in this section. @@
             titlePage: filterBool(attributes.titlePage, FilterMode.UNDEF),
             //* Section type. @enum:SectionType
-            type: fromEnum(attributes.type, docx.SectionType) as any,
+            type: fromEnum(attributes.type, docx.SectionType),
             //* Vertical alignment. @enum:VerticalAlign
-            verticalAlign: fromEnum(attributes.verticalAlign, docx.VerticalAlign) as any,
+            verticalAlign: fromEnum(attributes.verticalAlign, docx.VerticalAlign),
             page: undefEmpty({
                 borders: undefEmpty({
                     //* Page borders. @@
@@ -69,12 +69,14 @@ export function sectionTag(tr: DocxTranslator, attributes: Attributes, propertie
                     //* Page height. @@
                     height: filterPositiveUniversalMeasure(attributes.height, FilterMode.UNDEF),
                     //* Page orientation. @enum:PageOrientation
-                    orientation: fromEnum(attributes.orientation, docx.PageOrientation) as any,
+                    orientation: fromEnum(attributes.orientation, docx.PageOrientation),
                 }),
             }),
         }),
     };
-    return [{ ...options, ...properties, [symbolInstance]: 'ISectionOptions' }];
+    let result = { ...options, ...properties };
+    setTag(result, 'ISectionOptions');
+    return [result];
 };
 
 

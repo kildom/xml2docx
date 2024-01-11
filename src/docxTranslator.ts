@@ -22,7 +22,7 @@ import * as docx from "docx";
 
 import { TranslatorBase } from "./translatorBase";
 import { CData, Text, Element, XMLError, InterceptedXMLError } from "./xml";
-import { AnyObject, Attributes, symbolInstance } from "./common";
+import { AnyObject, Attributes, setTag } from "./common";
 import { brTag, pTag, tabTag } from "./tags/paragraph";
 import { documentTag, headerFooterTag } from "./tags/document";
 import { fallbackStyleChange, fontStyleTag } from "./tags/characters";
@@ -135,13 +135,13 @@ export class DocxTranslator extends TranslatorBase {
         this.element = src;
         try {
             if (name === 'ParagraphStyle') {
-                args[0][symbolInstance] = 'IParagraphStyleOptions';
+                setTag(args[0], 'IParagraphStyleOptions');
                 return args;
             } else if (name === 'CharacterStyle') {
-                args[0][symbolInstance] = 'ICharacterStyleOptions'
+                setTag(args[0], 'ICharacterStyleOptions');
                 return args;
             } else if (name === 'Section') {
-                args[0][symbolInstance] = 'ISectionOptions'
+                setTag(args[0], 'ISectionOptions');
                 args[0].children = args[0].children || [];
                 return args;
             } else if (name === 'TotalPages') {

@@ -23,7 +23,7 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, symbolInstance } from "../common";
+import { AnyObject } from "../common";
 import { fromEnum } from "../filters";
 
 

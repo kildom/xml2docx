@@ -22,7 +22,7 @@ import * as docx from "docx";
 
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
-import { AnyObject, Attributes, requiredAttribute, selectUndef, splitListValues, symbolInstance } from "../common";
+import { AnyObject, Attributes, requiredAttribute, selectUndef, setTag, splitListValues } from "../common";
 import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from "../filters";
 import { getBorder, getBorderOptions } from "./borders";
 import { HighlightColor } from "../enums";
@@ -158,7 +158,7 @@ export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRun
         //* Alias of `font` attribute.
             attributes.face,
         //* Text Highlighting. @enum:HighlightColor
-        highlight: fromEnum(attributes.highlight, HighlightColor, {}, false) as string | undefined,
+        highlight: fromEnum(attributes.highlight, HighlightColor, {}, false),
         shading: selectUndef(attributes.background, {
             type: docx.ShadingType.SOLID,
             //* Background color. @@
@@ -174,6 +174,7 @@ export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRun
             (options as any)[simpleBoolStyleTable[key]] = filterBool(value, FilterMode.EXACT);
         }
     }
+    setTag(options, 'IRunStylePropertiesOptions');
     return removeShallowUndefined(options) as docx.IRunStylePropertiesOptions;
 }
 
@@ -218,6 +219,6 @@ export function fontStyleTag(tr: DocxTranslator, attributes: Attributes, propert
         run: getIRunStylePropertiesOptions(attributes),
         ...properties,
     };
-    (options as any)[symbolInstance] = 'ICharacterStyleOptions';
+    setTag(options, 'ICharacterStyleOptions');
     return [options];
 }
