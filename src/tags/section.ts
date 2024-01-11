@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
-import { AnyObject, Attributes, setTag, undefEmpty } from "../common";
-import { DocxTranslator } from "../docxTranslator";
-import { filterBool, filterLengthUint, FilterMode, filterPositiveUniversalMeasure, fromEnum, LengthUnits } from "../filters";
-import { getBorder, getMargin } from "./borders";
+import * as docx from 'docx';
+import { AnyObject, Attributes, setTag, undefEmpty } from '../common';
+import { DocxTranslator } from '../docxTranslator';
+import { filterBool, filterLengthUint, FilterMode, filterPositiveUniversalMeasure, fromEnum, LengthUnits } from '../filters';
+import { getBorder, getMargin } from './borders';
 
 
 /*>>>
@@ -77,7 +77,7 @@ export function sectionTag(tr: DocxTranslator, attributes: Attributes, propertie
     let result = { ...options, ...properties };
     setTag(result, 'ISectionOptions');
     return [result];
-};
+}
 
 
 function convertBorderToPageBorder(borders: { [key: string]: any; } | undefined): docx.IPageBordersOptions | undefined {

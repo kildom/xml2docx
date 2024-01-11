@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -69,7 +69,7 @@ export class InterceptedXMLError extends InterceptedError {
 interface PathTagState {
     first: Node;
     count: number;
-};
+}
 
 export function addXPathsTo(xml: Element, path: string) {
     let index = 0;
@@ -120,7 +120,7 @@ export function parse(xmlText: string, addXPaths: boolean, singleRoot: boolean):
             name: 'ROOT',
             path: '',
             elements: xml.elements,
-        }
+        };
     }
     if (addXPaths) {
         addXPathsTo(res, '');
@@ -135,10 +135,10 @@ export function stringify(element: Element, singleRoot: boolean) {
             name: 'ROOT',
             path: '',
             elements: [element],
-        }
-        return xmlJs.js2xml(root, { compact: false })
+        };
+        return xmlJs.js2xml(root, { compact: false });
     } else {
-        return xmlJs.js2xml(element, { compact: false })
+        return xmlJs.js2xml(element, { compact: false });
     }
 }
 
@@ -146,7 +146,7 @@ export enum SpacesProcessing {
     PRESERVE,
     IGNORE,
     TRIM,
-};
+}
 
 function trimSpacesAndNewLines(text: string) {
     return text.replace(/(?:^[ \r\n]*|[ \r\n]*$)/g, '');

@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from "docx/build/file/file-child";
-import { DocxTranslator } from "../docxTranslator";
-import { SpacesProcessing } from "../xml";
-import * as docx from "docx";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, Mutable, getTag, isTag, setTag, undefEmpty } from "../common";
-import { FilterMode, filterBool, filterLengthUint, filterPositiveUniversalMeasure, fromEnum } from "../filters";
-import { HeaderFooterPage } from "../enums";
-import { createDummyParagraph } from "./paragraph";
-import { getBorder, getMargin } from "./borders";
+import { FileChild } from 'docx/build/file/file-child';
+import { DocxTranslator } from '../docxTranslator';
+import { SpacesProcessing } from '../xml';
+import * as docx from 'docx';
+import { IPropertiesOptions } from 'docx/build/file/core-properties';
+import { AnyObject, Attributes, Mutable, getTag, isTag, setTag, undefEmpty } from '../common';
+import { FilterMode, filterBool, filterLengthUint, filterPositiveUniversalMeasure, fromEnum } from '../filters';
+import { HeaderFooterPage } from '../enums';
+import { createDummyParagraph } from './paragraph';
+import { getBorder, getMargin } from './borders';
 
 
 function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: docx.Header | docx.Footer) {
@@ -95,7 +95,7 @@ export function documentTag(tr: DocxTranslator, attributes: Attributes, properti
             characterStyles,
         },
         ...properties,
-    }
+    };
     for (let obj of tr.parseObjects(tr.element, SpacesProcessing.IGNORE)) {
         if (isTag(obj, 'ISectionOptions')) {
             sections.push(obj);
@@ -116,8 +116,8 @@ export function documentTag(tr: DocxTranslator, attributes: Attributes, properti
             }
         }
     }
-    return [new docx.Document(options)]
-};
+    return [new docx.Document(options)];
+}
 
 
 /*>>>

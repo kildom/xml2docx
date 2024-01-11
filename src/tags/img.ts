@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing, XMLError } from "../xml";
-import * as docx from "docx";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, undefEmpty } from "../common";
-import { getMargin } from "./borders";
-import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero, filterLengthUint } from "../filters";
+import { DocxTranslator } from '../docxTranslator';
+import { Element, SpacesProcessing, XMLError } from '../xml';
+import * as docx from 'docx';
+import { IPropertiesOptions } from 'docx/build/file/core-properties';
+import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, undefEmpty } from '../common';
+import { getMargin } from './borders';
+import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero, filterLengthUint } from '../filters';
 
 
 function getFlip(value: string | undefined) {

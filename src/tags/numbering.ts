@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from "docx/build/file/file-child";
-import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing, XMLError } from "../xml";
-import * as docx from "docx";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject } from "../common";
-import { fromEnum } from "../filters";
+import { FileChild } from 'docx/build/file/file-child';
+import { DocxTranslator } from '../docxTranslator';
+import { Element, SpacesProcessing, XMLError } from '../xml';
+import * as docx from 'docx';
+import { IPropertiesOptions } from 'docx/build/file/core-properties';
+import { AnyObject } from '../common';
+import { fromEnum } from '../filters';
 
 

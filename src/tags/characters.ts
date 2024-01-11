@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
+import * as docx from 'docx';
 
-import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing, XMLError } from "../xml";
-import { AnyObject, Attributes, requiredAttribute, selectUndef, setTag, splitListValues } from "../common";
-import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from "../filters";
-import { getBorder, getBorderOptions } from "./borders";
-import { HighlightColor } from "../enums";
+import { DocxTranslator } from '../docxTranslator';
+import { Element, SpacesProcessing, XMLError } from '../xml';
+import { AnyObject, Attributes, requiredAttribute, selectUndef, setTag, splitListValues } from '../common';
+import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from '../filters';
+import { getBorder, getBorderOptions } from './borders';
+import { HighlightColor } from '../enums';
 
 
 const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {

@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing, XMLError } from "../xml";
-import * as docx from "docx";
-import { AnyObject, Attributes, selectUndef, undefEmpty } from "../common";
-import { getBorder, getMargin } from "./borders";
-import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint, filterPositiveUniversalMeasure } from "../filters";
-import { TextDirectionAliases, VerticalAlignAliases } from "../enums";
-import { createDummyParagraph } from "./paragraph";
+import { DocxTranslator } from '../docxTranslator';
+import { Element, SpacesProcessing, XMLError } from '../xml';
+import * as docx from 'docx';
+import { AnyObject, Attributes, selectUndef, undefEmpty } from '../common';
+import { getBorder, getMargin } from './borders';
+import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint, filterPositiveUniversalMeasure } from '../filters';
+import { TextDirectionAliases, VerticalAlignAliases } from '../enums';
+import { createDummyParagraph } from './paragraph';
 
 
 /*>>> : anchor absolute|relative
@@ -66,7 +66,7 @@ export function getBorderHV(value: string | undefined) {
         horizontal: borders.top,
         //* `vertical` - Vertical borders.
         vertical: borders.left,
-    }
+    };
     /*> Each type of the border is `@short:getBorderOptions`: @getBorderOptions */
 }
 
@@ -113,7 +113,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
             insideHorizontal: insideBorder?.horizontal,
             insideVertical: insideBorder?.vertical,
         }),
-        margins: attributes.cellMargin ? { // TODO: Rename to margin to be compatible with CSS
+        margins: attributes.cellMargin ? {
             marginUnitType: docx.WidthType.DXA,
             //* Default cell margins. @@
             ...getMargin(attributes.cellMargin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
@@ -182,7 +182,7 @@ export function trTag(tr: DocxTranslator, attributes: Attributes, properties: An
         height: getTableRowHeight(attributes.height),
     };
     return [new docx.TableRow({ ...options, ...properties })];
-};
+}
 
 /*>>>
 Table cell.
@@ -220,4 +220,4 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
         }
     };
     return [new docx.TableCell({ ...options, ...properties })];
-};
+}
