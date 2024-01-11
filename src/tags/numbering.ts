@@ -17,13 +17,3 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import { FileChild } from 'docx/build/file/file-child';
-import { DocxTranslator } from '../docxTranslator';
-import { Element, SpacesProcessing, XMLError } from '../xml';
-import * as docx from 'docx';
-import { IPropertiesOptions } from 'docx/build/file/core-properties';
-import { AnyObject } from '../common';
-import { fromEnum } from '../filters';
-
-

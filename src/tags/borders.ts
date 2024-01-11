@@ -20,8 +20,10 @@
 
 import * as docx from 'docx';
 import { selectFirst, splitListValues } from '../common';
-import { DocxTranslator } from '../docxTranslator';
-import { FilterCallback, FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, filterPositiveUniversalMeasure, fromEnum } from '../filters';
+import {
+    FilterCallback, FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero,
+    filterPositiveUniversalMeasure, fromEnum
+} from '../filters';
 
 /**
  * Returns IBorderOptions from attribute value.

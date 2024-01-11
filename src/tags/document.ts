@@ -23,11 +23,10 @@ import { DocxTranslator } from '../docxTranslator';
 import { SpacesProcessing } from '../xml';
 import * as docx from 'docx';
 import { IPropertiesOptions } from 'docx/build/file/core-properties';
-import { AnyObject, Attributes, Mutable, getTag, isTag, setTag, undefEmpty } from '../common';
-import { FilterMode, filterBool, filterLengthUint, filterPositiveUniversalMeasure, fromEnum } from '../filters';
+import { AnyObject, Attributes, Mutable, getTag, isTag, setTag } from '../common';
+import { fromEnum } from '../filters';
 import { HeaderFooterPage } from '../enums';
 import { createDummyParagraph } from './paragraph';
-import { getBorder, getMargin } from './borders';
 
 
 function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: docx.Header | docx.Footer) {
@@ -129,9 +128,9 @@ export function headerFooterTag(tr: DocxTranslator, attributes: Attributes, prop
     children = createDummyParagraph(tr, children);
     let result: docx.Header | docx.Footer;
     if (tr.element.name === 'header') {
-        result = new docx.Header({ children });
+        result = new docx.Header({ children, ...properties });
     } else {
-        result = new docx.Footer({ children });
+        result = new docx.Footer({ children, ...properties });
     }
     //* On which page this header or footer will be displayed. @enum:HeaderFooterPage
     //*

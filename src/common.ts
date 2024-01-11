@@ -18,16 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { DocxTranslator } from './docxTranslator';
-import { Element, XMLError } from './xml';
-
 export type Dict<T> = { [key: string]: T };
 export type AnyObject = Dict<any>;
 export type Attributes = Dict<string>;
 
 const symbolTag: unique symbol = Symbol('instance');
 
-export function setTag<T extends {}, T2>(obj: T, tag: T2): void {
+export function setTag<T extends object, T2>(obj: T, tag: T2): void {
     (obj as any)[symbolTag] = tag;
 }
 
@@ -43,7 +40,7 @@ export function getTag<T2>(obj: any): T2 | undefined {
     }
 }
 
-export function undefEmpty<T extends {}>(obj: T): T | undefined {
+export function undefEmpty<T extends object>(obj: T): T | undefined {
     for (let value of Object.values(obj)) {
         if (value !== undefined) {
             return obj;
@@ -63,8 +60,9 @@ export function requiredAttribute(attributes: Attributes, name: string): string 
 export type SplitListMatcher = (value: string) => any;
 export type SplitListDefault = () => any;
 
-export function splitListValues(value: string | undefined,
-    matchers: Dict<SplitListMatcher | [SplitListMatcher, SplitListDefault | string]>, split?: ',' | ' '
+export function splitListValues(
+    value: string | undefined, matchers: Dict<SplitListMatcher | [SplitListMatcher, SplitListDefault | string]>,
+    split?: ',' | ' '
 ) {
     if (value === undefined) return undefined;
     let arr = value.trim().split(split === ' ' ? /\s+/ : split === ',' ? /\s*[,;]\s*/ : /(?:\s*[,;]\s*|\s+)/);
