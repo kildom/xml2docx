@@ -74,7 +74,8 @@ function getWrap(value: string | undefined, margins: docx.IMargins | undefined):
 /*>>>
 Adds image to the document.
 
-You must put it into `<p>` element. Supported image formats are: `JPEG`, `BMP`, `GIF`, `PNG`.
+You must put it into `<p>` element. Suggested image formats are: `JPEG` and `PNG`. It also supports `BMP` and `GIF`,
+but those are not recommended.
 
 One of the `src` and `data` attributes is required. They are mutually exclusive, so use exactly one of them.
 
