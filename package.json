@@ -9,7 +9,10 @@
   "devDependencies": {
     "@types/node": "^20.8.2",
     "@types/underscore": "^1.11.10",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
     "esbuild": "0.19.4",
+    "eslint": "^8.56.0",
     "http-server": "^14.1.1",
     "pkg": "^5.8.1",
     "ts-node": "^10.9.1",
@@ -19,6 +22,9 @@
   "scripts": {
     "prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --outfile=dist/xml2docx.js && node scripts/postprocess.js",
     "build": "npx pkg -C Brotli -t node18-win-x64 --public -o dist/xml2docx.exe dist/xml2docx.js",
-    "build-web": "node scripts/build-web.js"
-  }
+    "build-web": "node scripts/build-web.js",
+    "lint": "npx eslint src",
+    "check": "npx tsc -p tsconfig.json"
+  },
+  "type": "module"
 }

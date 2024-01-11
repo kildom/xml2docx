@@ -69,6 +69,9 @@ export enum FilterMode {
     ALL, // all values allowed, undefined or invalid value will return undefined.
 };
 
+
+export type FilterCallback = (value: any, mode: FilterMode) => any;
+
 function returnInvalid(mode: FilterMode, message: string): undefined {
     if (mode === FilterMode.ALL) {
         return undefined;
@@ -184,6 +187,7 @@ function filterLengthIntCommon(value: any, targetUnitsPerPt: number, mode: Filte
 */
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined;
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, -0x80000000, 0x7FFFFFFF);
 }
@@ -193,6 +197,7 @@ export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: Filt
 */
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined;
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, 0, 0x7FFFFFFF);
 }
@@ -202,6 +207,7 @@ export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: Fil
 */
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined;
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, 1, 0x7FFFFFFF);
 }
@@ -238,6 +244,7 @@ function filterUniversalMeasureCommon(value: any, mode: FilterMode, min: number,
 */
 export function filterUniversalMeasure(value: any, mode: FilterMode.EXACT): docx.UniversalMeasure;
 export function filterUniversalMeasure(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): docx.UniversalMeasure | undefined;
+export function filterUniversalMeasure(value: any, mode: FilterMode): docx.UniversalMeasure | undefined;
 export function filterUniversalMeasure(value: any, mode: FilterMode): docx.UniversalMeasure | undefined {
     return filterUniversalMeasureCommon(value, mode, -Number.MAX_VALUE, Number.MAX_VALUE) as docx.UniversalMeasure;
 }
@@ -247,6 +254,7 @@ export function filterUniversalMeasure(value: any, mode: FilterMode): docx.Unive
 */
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode.EXACT): docx.PositiveUniversalMeasure;
 export function filterPositiveUniversalMeasure(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): docx.PositiveUniversalMeasure | undefined;
+export function filterPositiveUniversalMeasure(value: any, mode: FilterMode): docx.PositiveUniversalMeasure | undefined;
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode): docx.PositiveUniversalMeasure | undefined {
     return filterUniversalMeasureCommon(value, mode, 0, Number.MAX_VALUE) as docx.PositiveUniversalMeasure;
 }
@@ -256,6 +264,7 @@ export function filterPositiveUniversalMeasure(value: any, mode: FilterMode): do
 */
 export function filterColor(value: any, mode: FilterMode.EXACT): string;
 export function filterColor(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): string | undefined;
+export function filterColor(value: any, mode: FilterMode): string | undefined;
 export function filterColor(value: any, mode: FilterMode): string | undefined {
     if (mode != FilterMode.EXACT && value === undefined) return undefined;
     let text = ('' + value).trim().toLowerCase();

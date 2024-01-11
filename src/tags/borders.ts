@@ -21,8 +21,12 @@
 import * as docx from "docx";
 import { selectFirst, splitListValues } from "../common";
 import { DocxTranslator } from "../docxTranslator";
-import { FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, fromEnum } from "../filters";
+import { FilterCallback, FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, filterPositiveUniversalMeasure, fromEnum } from "../filters";
 
+/**
+ * Returns IBorderOptions from attribute value.
+ * https://docx.js.org/api/interfaces/IBorderOptions.html
+ */
 /*>>> : color style size space */
 export function getBorderOptions(text: string | undefined): docx.IBorderOptions | undefined {
     return splitListValues(text, {
@@ -30,7 +34,7 @@ export function getBorderOptions(text: string | undefined): docx.IBorderOptions 
         color: (value: string) => filterColor(value, FilterMode.ALL),
         //* `style` - Border style. @enum:BorderStyle
         style: [
-            (value: string) => fromEnum(value, docx.BorderStyle, undefined, false) as docx.BorderStyle,
+            (value: string) => fromEnum(value, docx.BorderStyle, undefined, false),
             () => docx.BorderStyle.SINGLE,
         ],
         //* `size` - Border size. @filterLengthUintNonZero
@@ -40,8 +44,12 @@ export function getBorderOptions(text: string | undefined): docx.IBorderOptions 
     }) as docx.IBorderOptions | undefined;
 }
 
+/**
+ * Returns IBordersOptions from attribute value.
+ * https://docx.js.org/api/interfaces/IBordersOptions.html
+ */
 /*>>> : top, left, bottom, right */
-export function getBorder(value: string | undefined) {
+export function getBorder(value: string | undefined): docx.IBordersOptions | undefined {
     let borders = splitListValues(value, {
         //* `top` - Top border.
         top: [
@@ -59,30 +67,35 @@ export function getBorder(value: string | undefined) {
     borders.right = selectFirst(borders.right, borders.top);
     borders.bottom = selectFirst(borders.bottom, borders.top);
     borders.left = selectFirst(borders.left, borders.right);
-    return borders;
+    return borders as docx.IBordersOptions;
     /*> Each side of the border is `@short:getBorderOptions`: @getBorderOptions */
 }
 
+/**
+ * Returns margins from attribute value. 
+ * https://docx.js.org/api/interfaces/IMargins.html
+ * ITableCellOptions
+ */
 /*>>> : top left bottom right
 @filterLengthUint
 */
-export function getMargins(tr: DocxTranslator, value: string | undefined, filterName = ':emu'): docx.IMargins | undefined { // TODO: Filter callback
-    let margins = splitListValues(value, {
+export function getMargin(value: string | undefined, filter: FilterCallback = filterPositiveUniversalMeasure as any) {
+    let margin = splitListValues(value, {
         //* `top` - Top margin.
         top: [
-            (value: string) => tr.filter(filterName, value),
+            (value: string) => filter(value, FilterMode.ALL),
             'At least one margin is required.'
         ],
         //* `right` - Right margin. Default: the same as top.
-        right: (value: string) => tr.filter(filterName, value),
+        right: (value: string) => filter(value, FilterMode.ALL),
         //* `bottom` - Bottom margin. Default: the same as top.
-        bottom: (value: string) => tr.filter(filterName, value),
+        bottom: (value: string) => filter(value, FilterMode.ALL),
         //* `left` - Left margin. Default: the same as right.
-        left: (value: string) => tr.filter(filterName, value),
+        left: (value: string) => filter(value, FilterMode.ALL),
     });
-    if (margins === undefined) return undefined;
-    margins.right = selectFirst(margins.right, margins.top);
-    margins.bottom = selectFirst(margins.bottom, margins.top);
-    margins.left = selectFirst(margins.left, margins.right);
-    return margins;
+    if (margin === undefined) return undefined;
+    margin.right = selectFirst(margin.right, margin.top);
+    margin.bottom = selectFirst(margin.bottom, margin.top);
+    margin.left = selectFirst(margin.left, margin.right);
+    return margin;
 }
