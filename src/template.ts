@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { template } from "underscore";
+import { CompiledTemplate, template } from "underscore";
 import { InterceptedError, os } from './os';
 
 const commonUtils = {
@@ -41,7 +41,7 @@ const commonUtils = {
 
 export function fromTemplate(templateFile: string, templateText: string, dataFile: string, data: any): string {
 
-    let compiled: _.CompiledTemplate;
+    let compiled: CompiledTemplate;
     try {
         compiled = template(templateText);
     } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`) }

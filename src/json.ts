@@ -19,5 +19,5 @@
  */
 
 export function parseExtendedJSON(text: string): any {
-    return (new Function(`return ${text};`))();
+    return (new Function(`return (${text});`))();
 }
