@@ -21,9 +21,9 @@
 import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
-import { AnyObject, Attributes, selectUndef, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, selectUndef, undefEmpty } from "../common";
 import { getBorder, getMargin } from "./borders";
-import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint } from "../filters";
+import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint, filterPositiveUniversalMeasure } from "../filters";
 import { TextDirectionAliases, VerticalAlignAliases } from "../enums";
 import { createDummyParagraph } from "./paragraph";
 
@@ -33,7 +33,7 @@ import { createDummyParagraph } from "./paragraph";
 function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: string]: string }) {
     if (text === undefined) return undefined;
     //* `anchor` - Archon from which position is relative to. @enum:TableAnchorType
-    let anchor: docx.TableAnchorType | undefined = undefined;
+    let anchor: string | undefined = undefined;
     //* `absolute` - Absolute position. @filterUniversalMeasure
     let absolute: docx.UniversalMeasure | undefined = undefined;
     //* `relative` - Relative position. @enum:@0@
@@ -43,7 +43,7 @@ function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: stri
     for (let part of parts) {
         let a = fromEnum(part, docx.TableAnchorType, {}, false);
         if (a !== undefined) {
-            anchor = a as docx.TableAnchorType;
+            anchor = a as string;
             continue;
         }
         let r = fromEnum(part, enumValue, {}, false);
@@ -80,9 +80,9 @@ Child elements of the row are `<tr>` (or its associated @api class).
 */
 export function tableTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     //* Horizontal floating position. @@:RelativeHorizontalPosition
-    let hFloat = getTableHVPosition<docx.RelativeHorizontalPosition>(attributes.horizontal, docx.RelativeHorizontalPosition);
+    let hFloat = getTableHVPosition<(typeof docx.RelativeHorizontalPosition)[keyof typeof docx.RelativeHorizontalPosition]>(attributes.horizontal, docx.RelativeHorizontalPosition);
     //* Vertical floating position. @@:RelativeVerticalPosition
-    let vFloat = getTableHVPosition<docx.RelativeVerticalPosition>(attributes.vertical, docx.RelativeVerticalPosition);
+    let vFloat = getTableHVPosition<(typeof docx.RelativeVerticalPosition)[keyof typeof docx.RelativeVerticalPosition]>(attributes.vertical, docx.RelativeVerticalPosition);
     //* Distance between table and surrounding text in floating mode. @@
     let floatMargins = getMargin(attributes.floatMargins);
     //* Table border. @@
@@ -92,18 +92,18 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     let options: docx.ITableOptions = {
         rows: tr.copy(undefined, { 'tr': trTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
         //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
-        columnWidths: attributes.columnWidths && (attributes.columnWidths as string)
+        columnWidths: attributes.columnWidths ? (attributes.columnWidths as string)
             .trim()
             .split(/[;, ]+/)
-            .map(x => filterLengthUintNonZero(x, LengthUnits.dxa, FilterMode.EXACT)),
+            .map(x => filterLengthUintNonZero(x, LengthUnits.dxa, FilterMode.EXACT)) : undefined,
         layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
         //* Table alignment. @enum:AlignmentType
-        alignment: fromEnum(attributes.align, docx.AlignmentType) as docx.AlignmentType,
+        alignment: fromEnum(attributes.align, docx.AlignmentType),
         //* Table width. It can be expressed as percentage of entire available space (with `%` sign)
         //* or straightforward distance. @filterPositiveUniversalMeasure
         width: attributes.width ? {
             type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
-            size: attributes.width,
+            size: filterPositiveUniversalMeasure(attributes.width, FilterMode.EXACT),
         } : undefined,
         borders: undefEmpty({
             bottom: border?.bottom,
@@ -119,10 +119,10 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
             ...getMargin(attributes.cellMargin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
         } : undefined,
         float: undefEmpty({
-            horizontalAnchor: hFloat?.anchor,
+            horizontalAnchor: hFloat?.anchor as (typeof docx.TableAnchorType)[keyof typeof docx.TableAnchorType],
             absoluteHorizontalPosition: hFloat?.absolute,
             relativeHorizontalPosition: hFloat?.relative,
-            verticalAnchor: vFloat?.anchor,
+            verticalAnchor: vFloat?.anchor as (typeof docx.TableAnchorType)[keyof typeof docx.TableAnchorType],
             absoluteVerticalPosition: vFloat?.absolute,
             relativeVerticalPosition: vFloat?.relative,
             overlap: !attributes.overlap ? undefined
@@ -144,7 +144,7 @@ function getTableRowHeight(text: string | undefined) {
     let parts = text.split(' ');
     if (parts.length > 1) {
         //* `rule` - Rule how the row height is determined. @enum:HeightRule
-        let e = fromEnum(parts[0], docx.HeightRule, {}, false) as (docx.HeightRule | undefined);
+        let e = fromEnum(parts[0], docx.HeightRule, {}, false);
         if (e) {
             return {
                 rule: e,
@@ -152,7 +152,7 @@ function getTableRowHeight(text: string | undefined) {
             };
         } else {
             return {
-                rule: fromEnum(parts[1], docx.HeightRule, {}) as docx.HeightRule,
+                rule: fromEnum(parts[1], docx.HeightRule),
                 value: parts[0] as /* a small hack */ unknown as number
             };
         }
@@ -210,9 +210,9 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
             ...getMargin(attributes.margin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
         }),
         //* Text direction. @enum:TextDirection+TextDirectionAliases
-        textDirection: fromEnum(attributes.dir, docx.TextDirection, TextDirectionAliases, true) as docx.TextDirection,
+        textDirection: fromEnum(attributes.dir, docx.TextDirection, TextDirectionAliases, true),
         //* Vertical alignment. @enum:VerticalAlign+VerticalAlignAliases
-        verticalAlign: fromEnum(attributes.valign, docx.VerticalAlign, VerticalAlignAliases, true) as docx.VerticalAlign,
+        verticalAlign: fromEnum(attributes.valign, docx.VerticalAlign, VerticalAlignAliases, true),
         shading: attributes.background === undefined ? undefined : {
             type: docx.ShadingType.SOLID,
             //* Background color. @@

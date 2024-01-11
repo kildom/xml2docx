@@ -25,7 +25,9 @@ import { SpacesProcessing } from "../xml";
 import { filterBool, FilterMode } from "../filters";
 import { getIParagraphPropertiesOptions } from "./styles";
 
-const headingTags: { [key: string]: docx.HeadingLevel } = {
+type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
+
+const headingTags: { [key: string]: HeadingLevelType } = {
     'h1': docx.HeadingLevel.HEADING_1,
     'h2': docx.HeadingLevel.HEADING_2,
     'h3': docx.HeadingLevel.HEADING_3,
@@ -52,7 +54,7 @@ You can stop reusing attributes if you specify at least one attribute in new par
 */
 export function pTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let name = tr.element.name;
-    let heading: docx.HeadingLevel | undefined = headingTags[name];
+    let heading: HeadingLevelType | undefined = headingTags[name];
     //* Preserve the attributes. See description above. @@
     let preserve: boolean | undefined = filterBool(attributes.preserve, FilterMode.UNDEF);
     attributes = { ...attributes };

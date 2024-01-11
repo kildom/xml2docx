@@ -22,7 +22,7 @@ import { DocxTranslator } from "../docxTranslator";
 import { Element, SpacesProcessing, XMLError } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, undefEmpty } from "../common";
 import { getMargin } from "./borders";
 import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero, filterLengthUint } from "../filters";
 

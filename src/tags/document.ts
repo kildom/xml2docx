@@ -23,7 +23,7 @@ import { DocxTranslator } from "../docxTranslator";
 import { SpacesProcessing } from "../xml";
 import * as docx from "docx";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, Mutable, symbolInstance, undefEmpty } from "../common";
+import { AnyObject, Attributes, Mutable, getTag, isTag, setTag, undefEmpty } from "../common";
 import { FilterMode, filterBool, filterLengthUint, filterPositiveUniversalMeasure, fromEnum } from "../filters";
 import { HeaderFooterPage } from "../enums";
 import { createDummyParagraph } from "./paragraph";
@@ -32,7 +32,7 @@ import { getBorder, getMargin } from "./borders";
 
 function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: docx.Header | docx.Footer) {
     let isFooter = obj instanceof docx.Footer;
-    let page = obj[symbolInstance] as HeaderFooterPage;
+    let page = getTag<HeaderFooterPage>(obj);
     if (isFooter) {
         let footers = (section.footers || {}) as Mutable<Exclude<typeof section.footers, undefined>>;
         section.footers = footers;
@@ -97,12 +97,12 @@ export function documentTag(tr: DocxTranslator, attributes: Attributes, properti
         ...properties,
     }
     for (let obj of tr.parseObjects(tr.element, SpacesProcessing.IGNORE)) {
-        if (obj[symbolInstance] === 'ISectionOptions') {
+        if (isTag(obj, 'ISectionOptions')) {
             sections.push(obj);
             children = obj.children;
-        } else if (obj[symbolInstance] === 'IParagraphStyleOptions') {
+        } else if (isTag(obj, 'IParagraphStyleOptions')) {
             paragraphStyles.push(obj);
-        } else if (obj[symbolInstance] === 'ICharacterStyleOptions') {
+        } else if (isTag(obj, 'ICharacterStyleOptions')) {
             characterStyles.push(obj);
         } else {
             if (sections.length === 0) {
@@ -136,6 +136,6 @@ export function headerFooterTag(tr: DocxTranslator, attributes: Attributes, prop
     //* On which page this header or footer will be displayed. @enum:HeaderFooterPage
     //*
     //* Using `first` page automatically enables title page in current section.
-    result[symbolInstance] = fromEnum(attributes.page || HeaderFooterPage.DEFAULT, HeaderFooterPage);
+    setTag(result, fromEnum(attributes.page || HeaderFooterPage.DEFAULT, HeaderFooterPage));
     return [result];
 }

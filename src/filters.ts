@@ -26,7 +26,7 @@ import { FileChild } from "docx/build/file/file-child";
 import { IPropertiesOptions } from "docx/build/file/core-properties";
 import { os } from "./os";
 import { parseExtendedJSON } from "./json";
-import { AnyObject, symbolInstance, undefEmpty } from "./common";
+import { AnyObject, undefEmpty } from "./common";
 import { DocxTranslator } from "./docxTranslator";
 
 const boolValues: { [key: string]: boolean } = {
@@ -45,7 +45,7 @@ const boolValues: { [key: string]: boolean } = {
 };
 
 /* unit name => number of points per this unit */
-const units = {
+const units: { [key: string]: number } = {
     mm: 360 / 127,
     cm: 3600 / 127,
     in: 72,
@@ -286,7 +286,11 @@ function enumValueNormalize(text: string | number) {
     return text.toString().toLowerCase().replace(/[_-]/g, '');
 }
 
-export function fromEnum(value: string | undefined, enumValue: { [key: string]: string | number }, aliases?: { [key: string]: string | number }, throws: boolean = true) {
+export function fromEnum<T extends {}>(value: string | undefined, enumValue: T, aliases?: { [key: string]: string | number }, throws: boolean = true): (T)[keyof T] {
+    return fromEnumInternal(value, enumValue, aliases, throws) as (T)[keyof T];
+}
+
+function fromEnumInternal(value: string | undefined, enumValue: { [key: string]: string | number }, aliases?: { [key: string]: string | number }, throws: boolean = true) {
     if (value === undefined) return undefined;
     // By Enum key
     if (enumValue[value] !== undefined) return enumValue[value];

@@ -24,7 +24,23 @@ import { Element, XMLError } from "./xml";
 export type AnyObject = { [key: string]: any };
 export type Attributes = { [key: string]: string };
 
-export const symbolInstance: unique symbol = Symbol('instance');
+const symbolTag: unique symbol = Symbol('instance');
+
+export function setTag<T extends{}, T2>(obj: T, tag: T2): void {
+    (obj as any)[symbolTag] = tag;
+}
+
+export function isTag<T2>(obj: any, tag: T2): boolean {
+    return typeof obj === 'object' && obj[symbolTag] === tag;
+}
+
+export function getTag<T2>(obj: any): T2 | undefined {
+    if (typeof obj === 'object') {
+        return obj[symbolTag] as T2;
+    } else {
+        return undefined;
+    }
+}
 
 export function undefEmpty<T extends {}>(obj: T): T | undefined {
     for (let value of Object.values(obj)) {
