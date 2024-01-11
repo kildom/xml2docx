@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from "docx/build/file/file-child";
-import { DocxTranslator } from "../docxTranslator";
-import { Element, SpacesProcessing, XMLError } from "../xml";
-import * as docx from "docx";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { AnyObject, Attributes, isTag, requiredAttribute, setTag } from "../common";
-import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt, filterColor } from "../filters";
-import { getBorder } from "./borders";
-import { getIRunStylePropertiesOptions } from "./characters";
-import { AlignmentTypeAliases } from "../enums";
+import { FileChild } from 'docx/build/file/file-child';
+import { DocxTranslator } from '../docxTranslator';
+import { Element, SpacesProcessing, XMLError } from '../xml';
+import * as docx from 'docx';
+import { IPropertiesOptions } from 'docx/build/file/core-properties';
+import { AnyObject, Attributes, isTag, requiredAttribute, setTag } from '../common';
+import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt, filterColor } from '../filters';
+import { getBorder } from './borders';
+import { getIRunStylePropertiesOptions } from './characters';
+import { AlignmentTypeAliases } from '../enums';
 
 /*>>>
 @merge:getIParagraphStylePropertiesOptions
@@ -50,7 +50,7 @@ export function getIParagraphPropertiesOptions(tr: DocxTranslator, attributes: A
         // TODO: what is frame?
         wordWrap: filterBool(attributes.wordWrap, FilterMode.UNDEF),
         // TODO: what is scale?
-    }
+    };
     return options;
 }
 
@@ -149,7 +149,7 @@ function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphS
             lineRule,
         },
         contextualSpacing,
-    }
+    };
 }
 function getSingleTabStop(tr: DocxTranslator, tab: string): docx.TabStopDefinition | undefined {
     let type: (typeof docx.TabStopType)[keyof typeof docx.TabStopType] | undefined = undefined;
@@ -198,7 +198,7 @@ Default font style inside paragraph can be set using
 export function pStyleTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     let fonts = tr.copy(undefined, { 'font': pStyleFontTag }).parseObjects(tr.element, SpacesProcessing.IGNORE);
     if ((fonts.length > 1) || (fonts.length > 0 && !isTag(fonts[0], 'IRunStylePropertiesOptions'))) {
-        throw new Error("The <p-style> tag allows only one <font> child tag.");
+        throw new Error('The <p-style> tag allows only one <font> child tag.');
     }
     let options: docx.IParagraphStyleOptions = {
         //* Style id. Use it to identify the style.

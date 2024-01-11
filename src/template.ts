@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { CompiledTemplate, template } from "underscore";
+import { CompiledTemplate, template } from 'underscore';
 import { InterceptedError, os } from './os';
 
 const commonUtils = {
@@ -44,7 +44,7 @@ export function fromTemplate(templateFile: string, templateText: string, dataFil
     let compiled: CompiledTemplate;
     try {
         compiled = template(templateText);
-    } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`) }
+    } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`); }
 
     try {
         let utils: { [key: string]: any } = { ...commonUtils };
@@ -55,6 +55,6 @@ export function fromTemplate(templateFile: string, templateText: string, dataFil
         return compiled({ utils: utils, ...data, __utils__: utils });
     } catch (ex) {
         throw new InterceptedError(ex,
-            `Error evaluating template from "${templateFile}" with data from "${dataFile}".`)
+            `Error evaluating template from "${templateFile}" with data from "${dataFile}".`);
     }
 }

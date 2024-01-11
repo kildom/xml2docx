@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
-import { selectFirst, splitListValues } from "../common";
-import { DocxTranslator } from "../docxTranslator";
-import { FilterCallback, FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, filterPositiveUniversalMeasure, fromEnum } from "../filters";
+import * as docx from 'docx';
+import { selectFirst, splitListValues } from '../common';
+import { DocxTranslator } from '../docxTranslator';
+import { FilterCallback, FilterMode, LengthUnits, filterColor, filterLengthUint, filterLengthUintNonZero, filterPositiveUniversalMeasure, fromEnum } from '../filters';
 
 /**
  * Returns IBorderOptions from attribute value.
@@ -72,7 +72,7 @@ export function getBorder(value: string | undefined): docx.IBordersOptions | und
 }
 
 /**
- * Returns margins from attribute value. 
+ * Returns margins from attribute value.
  * https://docx.js.org/api/interfaces/IMargins.html
  * ITableCellOptions
  */

@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as path from "node:path";
-import * as fs from "node:fs";
-import * as docx from "docx";
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import * as docx from 'docx';
 
-import { os, InterceptedError, setInterface } from "./os";
-import { parseExtendedJSON } from "./json";
-import { fromTemplate } from "./template";
-import { Element, addXPathsTo, parse, stringify } from "./xml";
-import { resolveAliases } from "./aliases";
-import { translate } from "./docxTranslator";
+import { os, InterceptedError, setInterface } from './os';
+import { parseExtendedJSON } from './json';
+import { fromTemplate } from './template';
+import { Element, addXPathsTo, parse, stringify } from './xml';
+import { resolveAliases } from './aliases';
+import { translate } from './docxTranslator';
 
 
 setInterface({
@@ -107,22 +107,22 @@ async function exec(templateFile: string, dataFile: string, docxFile: string, ba
 
     try {
         root = parse(xmlText, true, true);
-    } catch (err) { throw new InterceptedError(err, `Error parsing XML.`) }
+    } catch (err) { throw new InterceptedError(err, 'Error parsing XML.'); }
 
     try {
         resolveAliases(root);
-    } catch (err) { throw new InterceptedError(err, `Error resolving aliases.`) }
+    } catch (err) { throw new InterceptedError(err, 'Error resolving aliases.'); }
 
     os.fs.writeFileSync('a.xml', stringify(root, true));
     addXPathsTo(root, '');
 
     try {
         document = translate(root, os.path.dirname(templateFile));
-    } catch (err) { throw new InterceptedError(err, `Error translating XML to docx.js API.`) }
+    } catch (err) { throw new InterceptedError(err, 'Error translating XML to docx.js API.'); }
 
     try {
         return base64 ? await docx.Packer.toBase64String(document) : await docx.Packer.toBuffer(document);
-    } catch (err) { throw new InterceptedError(err, `Error packing content to docx.`) }
+    } catch (err) { throw new InterceptedError(err, 'Error packing content to docx.'); }
 
     // TODO: In debug mode, generate JS file that creates document using docx.js API.
     //       Creating a new object: obj = new docx.SomeClass(...args); obj[constructInfoSymbol] = { className: 'SomeClass', args }

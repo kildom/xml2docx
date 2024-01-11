@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
+import * as docx from 'docx';
 import { template } from 'underscore';
 import { convert } from './converter';
 import { fromTemplate } from './template';
@@ -277,8 +277,8 @@ Aliases, see README.md
 
 let data = {
     // Superset of JSON is allowed, any JavaScript expression can be used here.
-    title: "Random movies",
-    description: "List of <b>random</b> movies.",
+    title: 'Random movies',
+    description: 'List of <b>random</b> movies.',
     movies: [
         {
             title: 'The Green Mile',
@@ -379,7 +379,7 @@ setInterface({
 
 window.onload = () => {
     console.log('loaded');
-    document.getElementById('btn')!.onclick = () => { download() };
+    document.getElementById('btn')!.onclick = () => { download(); };
     /*monacode({
         container: document.getElementById('editor') as HTMLElement,
         value: '<aaa>Download</aaa>',
@@ -387,8 +387,8 @@ window.onload = () => {
     });*/
     monaco.editor.create(document.getElementById('editor') as HTMLElement, {
         value: templateText,
-        language: "xml",
-        theme: "vs-dark",
+        language: 'xml',
+        theme: 'vs-dark',
         automaticLayout: true,
     });
 

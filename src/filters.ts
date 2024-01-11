@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
+import * as docx from 'docx';
 
-import { TranslatorBase } from "./translatorBase";
-import { CData, Text, Element, XMLError, InterceptedXMLError, SpacesProcessing } from "./xml";
-import { FileChild } from "docx/build/file/file-child";
-import { IPropertiesOptions } from "docx/build/file/core-properties";
-import { os } from "./os";
-import { parseExtendedJSON } from "./json";
-import { AnyObject, undefEmpty } from "./common";
-import { DocxTranslator } from "./docxTranslator";
+import { TranslatorBase } from './translatorBase';
+import { CData, Text, Element, XMLError, InterceptedXMLError, SpacesProcessing } from './xml';
+import { FileChild } from 'docx/build/file/file-child';
+import { IPropertiesOptions } from 'docx/build/file/core-properties';
+import { os } from './os';
+import { parseExtendedJSON } from './json';
+import { AnyObject, undefEmpty } from './common';
+import { DocxTranslator } from './docxTranslator';
 
 const boolValues: { [key: string]: boolean } = {
     'true': true,
@@ -67,7 +67,7 @@ export enum FilterMode {
     EXACT, // exact value required, undefined or invalid value will cause exception.
     UNDEF, // undefined value allowed (it will return undefined), invalid value will cause exception.
     ALL, // all values allowed, undefined or invalid value will return undefined.
-};
+}
 
 
 export type FilterCallback = (value: any, mode: FilterMode) => any;
@@ -408,19 +408,19 @@ export const filters: { [key: string]: (value: any, tr: DocxTranslator) => any }
     },
     'first': (value: any) => {
         if (typeof (value) !== 'object' || !(value instanceof Array) || value.length === 0)
-            throw new Error(`Input value for ":first" filter must be a non-empty array.`);
+            throw new Error('Input value for ":first" filter must be a non-empty array.');
         return value[0];
     },
     'emptyArray': (value: any) => {
-        if (value !== '') throw new Error(`The ":emptyArray" filter requires empty input.`);
+        if (value !== '') throw new Error('The ":emptyArray" filter requires empty input.');
         return [];
     },
     'emptyObject': (value: any) => {
-        if (value !== '') throw new Error(`The ":emptyObject" filter requires empty input.`);
+        if (value !== '') throw new Error('The ":emptyObject" filter requires empty input.');
         return {};
     },
     'base64': (value: any) => {
-        if (typeof (value) !== 'string') throw new Error(`The ":base64" filter requires string input.`);
+        if (typeof (value) !== 'string') throw new Error('The ":base64" filter requires string input.');
         return os.convert.fromBase64(value);
     }
 };

@@ -1,5 +1,5 @@
 
-import * as docx from "docx";
+import * as docx from 'docx';
 
 export const VerticalAlignAliases = {
     middle: docx.VerticalAlign.CENTER,
@@ -32,13 +32,13 @@ export enum HighlightColor {
     RED = 'red',
     WHITE = 'white',
     YELLOW = 'yellow',
-};
+}
 
 export enum HeaderFooterPage {
     DEFAULT = 'default',
     EVEN = 'even',
     FIRST = 'first',
-};
+}
 
 export enum SectionPropertiesOptionsType {
     CONTINUOUS = 'continuous',
@@ -46,4 +46,4 @@ export enum SectionPropertiesOptionsType {
     NEXT_COLUMN = 'nextColumn',
     EVEN_PAGE = 'evenPage',
     ODD_PAGE = 'oddPage',
-};
+}

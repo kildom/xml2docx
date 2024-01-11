@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,19 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
+import * as docx from 'docx';
 
-import { TranslatorBase } from "./translatorBase";
-import { CData, Text, Element, XMLError, InterceptedXMLError } from "./xml";
-import { AnyObject, Attributes, setTag } from "./common";
-import { brTag, pTag, tabTag } from "./tags/paragraph";
-import { documentTag, headerFooterTag } from "./tags/document";
-import { fallbackStyleChange, fontStyleTag } from "./tags/characters";
-import { tableTag } from "./tags/table";
-import { imgTag } from "./tags/img";
-import { filters } from "./filters";
-import { pStyleTag } from "./tags/styles";
-import { sectionTag } from "./tags/section";
+import { TranslatorBase } from './translatorBase';
+import { CData, Text, Element, XMLError, InterceptedXMLError } from './xml';
+import { AnyObject, Attributes, setTag } from './common';
+import { brTag, pTag, tabTag } from './tags/paragraph';
+import { documentTag, headerFooterTag } from './tags/document';
+import { fallbackStyleChange, fontStyleTag } from './tags/characters';
+import { tableTag } from './tags/table';
+import { imgTag } from './tags/img';
+import { filters } from './filters';
+import { pStyleTag } from './tags/styles';
+import { sectionTag } from './tags/section';
 
 export type TagsSet = { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] };
 
@@ -67,7 +67,7 @@ const tags: TagsSet = {
     'br': brTag,
     'p-style': pStyleTag,
     'font-style': fontStyleTag,
-}
+};
 
 export class DocxTranslator extends TranslatorBase {
 
@@ -188,7 +188,7 @@ export class DocxTranslator extends TranslatorBase {
     public translate(root: Element): docx.Document {
         let document = this.createTagObject(root);
         if (!document || document.length !== 1 || !(document[0] instanceof docx.Document)) {
-            throw new Error(`Expecting exactly one <document> root element.`);
+            throw new Error('Expecting exactly one <document> root element.');
         }
         return document[0];
     }

@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
-import { AnyObject, Attributes } from "../common";
-import { DocxTranslator } from "../docxTranslator";
-import { SpacesProcessing } from "../xml";
-import { filterBool, FilterMode } from "../filters";
-import { getIParagraphPropertiesOptions } from "./styles";
+import * as docx from 'docx';
+import { AnyObject, Attributes } from '../common';
+import { DocxTranslator } from '../docxTranslator';
+import { SpacesProcessing } from '../xml';
+import { filterBool, FilterMode } from '../filters';
+import { getIParagraphPropertiesOptions } from './styles';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
@@ -35,7 +35,7 @@ const headingTags: { [key: string]: HeadingLevelType } = {
     'h5': docx.HeadingLevel.HEADING_5,
     'h6': docx.HeadingLevel.HEADING_6,
     'title': docx.HeadingLevel.TITLE,
-}
+};
 
 /*>>>
 Paragraph.
@@ -76,7 +76,7 @@ export function pTag(tr: DocxTranslator, attributes: Attributes, properties: Any
         tr.paragraphStylePreserved[name] = undefined;
     }
     return [new docx.Paragraph({ ...options, ...properties })];
-};
+}
 
 /*>>>
 Adds tabulation.

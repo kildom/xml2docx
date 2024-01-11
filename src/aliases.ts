@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -108,10 +108,10 @@ export function resolveAliases(parentElement: Element, parentAliases: Map<string
             if (alias.hasAttributes
                 || (!!node.attributes && Object.keys(node.attributes).length)
                 || (!!node.elements && Object.keys(node.elements).length)) {
-                throw new XMLError(node, `Inline aliases cannot have attributes or children.`);
+                throw new XMLError(node, 'Inline aliases cannot have attributes or children.');
             }
             resolveAlias(alias);
-            filtered2.push(...deepCopy(alias.element.elements || []))
+            filtered2.push(...deepCopy(alias.element.elements || []));
         } else if (node.type === 'element' && aliases.has(node.name.split(':').at(-1) as string)) {
             resolveAliases(node, aliases);
             let names = node.name.split(':');
