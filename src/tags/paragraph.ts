@@ -19,7 +19,7 @@
  */
 
 import * as docx from 'docx';
-import { AnyObject, Attributes } from '../common';
+import { AnyObject, Attributes, Dict } from '../common';
 import { DocxTranslator } from '../docxTranslator';
 import { SpacesProcessing } from '../xml';
 import { filterBool, FilterMode } from '../filters';
@@ -27,7 +27,7 @@ import { getIParagraphPropertiesOptions } from './styles';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
-const headingTags: { [key: string]: HeadingLevelType } = {
+const headingTags: Dict<HeadingLevelType> = {
     'h1': docx.HeadingLevel.HEADING_1,
     'h2': docx.HeadingLevel.HEADING_2,
     'h3': docx.HeadingLevel.HEADING_3,

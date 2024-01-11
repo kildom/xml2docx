@@ -80,7 +80,7 @@ export function sectionTag(tr: DocxTranslator, attributes: Attributes, propertie
 }
 
 
-function convertBorderToPageBorder(borders: { [key: string]: any; } | undefined): docx.IPageBordersOptions | undefined {
+function convertBorderToPageBorder(borders: AnyObject | undefined): docx.IPageBordersOptions | undefined {
     if (!borders) return undefined;
     return undefEmpty({
         pageBorderTop: borders.top,

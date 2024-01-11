@@ -21,12 +21,13 @@
 import { DocxTranslator } from './docxTranslator';
 import { Element, XMLError } from './xml';
 
-export type AnyObject = { [key: string]: any };
-export type Attributes = { [key: string]: string };
+export type Dict<T> = { [key: string]: T };
+export type AnyObject = Dict<any>;
+export type Attributes = Dict<string>;
 
 const symbolTag: unique symbol = Symbol('instance');
 
-export function setTag<T extends{}, T2>(obj: T, tag: T2): void {
+export function setTag<T extends {}, T2>(obj: T, tag: T2): void {
     (obj as any)[symbolTag] = tag;
 }
 
@@ -62,15 +63,17 @@ export function requiredAttribute(attributes: Attributes, name: string): string 
 export type SplitListMatcher = (value: string) => any;
 export type SplitListDefault = () => any;
 
-export function splitListValues(value: string | undefined, matchers: { [key: string]: SplitListMatcher | [SplitListMatcher, SplitListDefault | string] }, split?: ',' | ' ') {
+export function splitListValues(value: string | undefined,
+    matchers: Dict<SplitListMatcher | [SplitListMatcher, SplitListDefault | string]>, split?: ',' | ' '
+) {
     if (value === undefined) return undefined;
     let arr = value.trim().split(split === ' ' ? /\s+/ : split === ',' ? /\s*[,;]\s*/ : /(?:\s*[,;]\s*|\s+)/);
-    let result: { [key: string]: any } = {};
+    let result: AnyObject = {};
     outerLoop:
     for (let item of arr) {
         for (let [name, matcher] of Object.entries(matchers)) {
             if (name in result) continue;
-            matcher = typeof(matcher) === 'function' ? [ matcher, '' ] : matcher;
+            matcher = typeof (matcher) === 'function' ? [matcher, ''] : matcher;
             let m = matcher[0](item);
             if (m !== undefined) {
                 result[name] = m;
@@ -80,18 +83,18 @@ export function splitListValues(value: string | undefined, matchers: { [key: str
         throw new Error(`Invalid list item ${item}.`);
     }
     for (let [name, matcher] of Object.entries(matchers)) {
-        if ((name in result) || typeof(matcher) === 'function') {
+        if ((name in result) || typeof (matcher) === 'function') {
             continue;
-        } else if (typeof(matcher[1]) === 'string') {
+        } else if (typeof (matcher[1]) === 'string') {
             throw new Error(matcher[1]);
-        } else if (typeof(matcher[1]) === 'function') {
+        } else if (typeof (matcher[1]) === 'function') {
             result[name] = matcher[1]();
         }
     }
     return result; // TODO: Use more this function in more places
 }
 
-export function selectFirst<T>(...args: (T| undefined)[]): T | undefined {
+export function selectFirst<T>(...args: (T | undefined)[]): T | undefined {
     for (let a of args) {
         if (a !== undefined) {
             return a;
@@ -103,7 +106,7 @@ export function selectFirst<T>(...args: (T| undefined)[]): T | undefined {
 export function selectUndef<T>(a: any, b: T): T | undefined;
 export function selectUndef<T>(a: any, b: any, c: T): T | undefined;
 export function selectUndef<T>(a: any, b: any, c: any, d: T): T | undefined;
-export function selectUndef<T>(...args: (T| undefined)[]): T | undefined {
+export function selectUndef<T>(...args: (T | undefined)[]): T | undefined {
     let last: T | undefined = undefined;
     for (let a of args) {
         last = a;
@@ -117,3 +120,4 @@ export function selectUndef<T>(...args: (T| undefined)[]): T | undefined {
 export type Mutable<T> = {
     -readonly [P in keyof T]: T[P];
 };
+

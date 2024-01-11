@@ -19,12 +19,12 @@
  */
 
 import { DocxTranslator } from '../docxTranslator';
-import { Element, SpacesProcessing, XMLError } from '../xml';
 import * as docx from 'docx';
-import { IPropertiesOptions } from 'docx/build/file/core-properties';
-import { AnyObject, Attributes, requiredAttribute, selectFirst, splitListValues, undefEmpty } from '../common';
+import { AnyObject, Attributes, Dict, requiredAttribute, splitListValues, undefEmpty } from '../common';
 import { getMargin } from './borders';
-import { fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero, filterLengthUint } from '../filters';
+import {
+    fromEnum, filterBool, filterInt, FilterMode, filterLengthInt, LengthUnits, filterLengthUintNonZero, filterLengthUint
+} from '../filters';
 
 
 function getFlip(value: string | undefined) {
@@ -37,7 +37,7 @@ function getFlip(value: string | undefined) {
 }
 
 /*>>> : anchor align|offset */
-function getHVPosition(tr: DocxTranslator, value: string, alignEnum: { [key: string]: string | number }, relEnum: { [key: string]: string | number }) {
+function getHVPosition(tr: DocxTranslator, value: string, alignEnum: Dict<string | number>, relEnum: Dict<string | number>) {
     return splitListValues(value, {
         //* `anchor` - Archon from which position is relative to. @enum:@1@
         relative: (value: string) => fromEnum(value, relEnum, {}, false),

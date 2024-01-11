@@ -21,7 +21,7 @@
 import { DocxTranslator } from '../docxTranslator';
 import { Element, SpacesProcessing, XMLError } from '../xml';
 import * as docx from 'docx';
-import { AnyObject, Attributes, selectUndef, undefEmpty } from '../common';
+import { AnyObject, Attributes, Dict, selectUndef, undefEmpty } from '../common';
 import { getBorder, getMargin } from './borders';
 import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint, filterPositiveUniversalMeasure } from '../filters';
 import { TextDirectionAliases, VerticalAlignAliases } from '../enums';
@@ -30,7 +30,7 @@ import { createDummyParagraph } from './paragraph';
 
 /*>>> : anchor absolute|relative
 */
-function getTableHVPosition<T>(text: string | undefined, enumValue: { [key: string]: string }) {
+function getTableHVPosition<T>(text: string | undefined, enumValue: Dict<string>) {
     if (text === undefined) return undefined;
     //* `anchor` - Archon from which position is relative to. @enum:TableAnchorType
     let anchor: string | undefined = undefined;

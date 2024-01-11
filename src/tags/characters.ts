@@ -22,13 +22,13 @@ import * as docx from 'docx';
 
 import { DocxTranslator } from '../docxTranslator';
 import { Element, SpacesProcessing, XMLError } from '../xml';
-import { AnyObject, Attributes, requiredAttribute, selectUndef, setTag, splitListValues } from '../common';
+import { AnyObject, Attributes, Dict, requiredAttribute, selectUndef, setTag, splitListValues } from '../common';
 import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from '../filters';
 import { getBorder, getBorderOptions } from './borders';
 import { HighlightColor } from '../enums';
 
 
-const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {
+const simpleBoolTagsTable: Dict<docx.IRunOptions> = {
     'allCaps': { allCaps: true },
     'all-caps': { allCaps: true },
     'b': { bold: true },
@@ -71,7 +71,7 @@ const simpleBoolTagsTable: { [key: string]: docx.IRunOptions } = {
 
 /*>>> simpleBoolStyleTable
 */
-const simpleBoolStyleTable: { [key: string]: string } = {
+const simpleBoolStyleTable: Dict<string> = {
     /*>
 
     The following attributes are optional
@@ -123,7 +123,7 @@ const simpleBoolStyleTable: { [key: string]: string } = {
     math: 'math',
 };
 
-export function removeShallowUndefined(object: { [key: string]: any }) {
+export function removeShallowUndefined(object: AnyObject) {
     object = { ...object };
     for (let key of [...Object.keys(object)]) {
         if (object[key] === undefined) {

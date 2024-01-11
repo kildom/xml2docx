@@ -22,7 +22,7 @@ import * as docx from 'docx';
 
 import { TranslatorBase } from './translatorBase';
 import { CData, Text, Element, XMLError, InterceptedXMLError } from './xml';
-import { AnyObject, Attributes, setTag } from './common';
+import { AnyObject, Attributes, Dict, setTag } from './common';
 import { brTag, pTag, tabTag } from './tags/paragraph';
 import { documentTag, headerFooterTag } from './tags/document';
 import { fallbackStyleChange, fontStyleTag } from './tags/characters';
@@ -32,7 +32,7 @@ import { filters } from './filters';
 import { pStyleTag } from './tags/styles';
 import { sectionTag } from './tags/section';
 
-export type TagsSet = { [key: string]: (tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[] };
+export type TagsSet = Dict<(tr: DocxTranslator, attributes: Attributes, properties: AnyObject) => any[]>;
 
 function normalizeAttributes(attributes: Attributes): AnyObject {
     let result: AnyObject = {};

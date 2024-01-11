@@ -20,6 +20,7 @@
 
 import { CompiledTemplate, template } from 'underscore';
 import { InterceptedError, os } from './os';
+import { AnyObject } from './common';
 
 const commonUtils = {
     templateFile: '',
@@ -47,7 +48,7 @@ export function fromTemplate(templateFile: string, templateText: string, dataFil
     } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`); }
 
     try {
-        let utils: { [key: string]: any } = { ...commonUtils };
+        let utils: AnyObject = { ...commonUtils };
         utils.templateFile = templateFile;
         utils.dataFile = dataFile;
         utils.data = data;
