@@ -21,7 +21,7 @@
 import * as docx from 'docx';
 import { AnyObject, Attributes, setTag, undefEmpty } from '../common';
 import { DocxTranslator } from '../docxTranslator';
-import { filterBool, filterLengthUint, FilterMode, filterPositiveUniversalMeasure, fromEnum, LengthUnits } from '../filters';
+import { filterBool, FilterMode, filterPositiveUniversalMeasure, fromEnum } from '../filters';
 import { getBorder, getMargin } from './borders';
 
 

@@ -21,10 +21,12 @@
 import * as docx from 'docx';
 
 import { DocxTranslator } from '../docxTranslator';
-import { Element, SpacesProcessing, XMLError } from '../xml';
+import { SpacesProcessing } from '../xml';
 import { AnyObject, Attributes, Dict, requiredAttribute, selectUndef, setTag, splitListValues } from '../common';
-import { filterFloat, fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat } from '../filters';
-import { getBorder, getBorderOptions } from './borders';
+import {
+    fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat
+} from '../filters';
+import { getBorderOptions } from './borders';
 import { HighlightColor } from '../enums';
 
 
@@ -136,7 +138,7 @@ export function removeShallowUndefined(object: AnyObject) {
 /*>>>
 @merge:simpleBoolStyleTable
 */
-export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRunStylePropertiesOptions {
+export function getIRunStylePropertiesOptions(attributes: Attributes, properties?: AnyObject): docx.IRunStylePropertiesOptions {
     let options: docx.IRunStylePropertiesOptions = {
         //* "type color" Text underline.
         //* * `type` - Underline type. @enum:UnderlineType
@@ -155,7 +157,7 @@ export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRun
         size: filterPositiveUniversalMeasure(attributes.size, FilterMode.UNDEF),
         //* Font name.
         font: attributes.font ||
-        //* Alias of `font` attribute.
+            //* Alias of `font` attribute.
             attributes.face,
         //* Text Highlighting. @enum:HighlightColor
         highlight: fromEnum(attributes.highlight, HighlightColor, {}, false),
@@ -174,6 +176,7 @@ export function getIRunStylePropertiesOptions(attributes: Attributes): docx.IRun
             (options as any)[simpleBoolStyleTable[key]] = filterBool(value, FilterMode.EXACT);
         }
     }
+    options = { ...options, ...properties };
     setTag(options, 'IRunStylePropertiesOptions');
     return removeShallowUndefined(options) as docx.IRunStylePropertiesOptions;
 }

@@ -19,7 +19,7 @@
  */
 
 import { AnyObject } from './common';
-import { CData, Element, InterceptedXMLError, Text, SpacesProcessing, XMLError, processSpaces, Node } from './xml';
+import { CData, Element, Text, SpacesProcessing, XMLError, processSpaces, Node } from './xml';
 
 export abstract class TranslatorBase {
 

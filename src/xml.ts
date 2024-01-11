@@ -73,7 +73,6 @@ interface PathTagState {
 }
 
 export function addXPathsTo(xml: Element, path: string) {
-    let index = 0;
     let tagStates = new Map<string, PathTagState>();
     for (let node of xml.elements || []) {
         let name = node.type === 'element' ? node.name : node.type.toUpperCase();

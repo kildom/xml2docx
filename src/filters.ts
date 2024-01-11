@@ -20,13 +20,9 @@
 
 import * as docx from 'docx';
 
-import { TranslatorBase } from './translatorBase';
-import { CData, Text, Element, XMLError, InterceptedXMLError, SpacesProcessing } from './xml';
-import { FileChild } from 'docx/build/file/file-child';
-import { IPropertiesOptions } from 'docx/build/file/core-properties';
 import { os } from './os';
 import { parseExtendedJSON } from './json';
-import { AnyObject, Dict, undefEmpty } from './common';
+import { AnyObject, Dict } from './common';
 import { DocxTranslator } from './docxTranslator';
 
 const boolValues: Dict<boolean> = {
@@ -162,7 +158,9 @@ function splitUnits(value: string, mode: FilterMode): [number | undefined, strin
     return [num, m[3].toLowerCase()];
 }
 
-function filterLengthIntCommon(value: any, targetUnitsPerPt: number, mode: FilterMode, min: number, max: number): number | undefined {
+function filterLengthIntCommon(
+    value: any, targetUnitsPerPt: number, mode: FilterMode, min: number, max: number
+): number | undefined {
     let [num, unit] = splitUnits(value, mode);
     if (num === undefined) return undefined;
     if (units[unit] === undefined) {
@@ -186,7 +184,8 @@ function filterLengthIntCommon(value: any, targetUnitsPerPt: number, mode: Filte
 *[Universal measure](attributes.md#universal-measure)*.
 */
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
-export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthInt(value: any, targetUnitsPerPt: number,
+    mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined;
 export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, -0x80000000, 0x7FFFFFFF);
@@ -196,7 +195,8 @@ export function filterLengthInt(value: any, targetUnitsPerPt: number, mode: Filt
 *[Positive universal measure](attributes.md#positive-universal-measure)*.
 */
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
-export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthUint(value: any, targetUnitsPerPt: number,
+    mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined;
 export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, 0, 0x7FFFFFFF);
@@ -206,7 +206,8 @@ export function filterLengthUint(value: any, targetUnitsPerPt: number, mode: Fil
 *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
 */
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode.EXACT): number;
-export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
+export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number,
+    mode: Exclude<FilterMode, FilterMode.EXACT>): number | undefined;
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined;
 export function filterLengthUintNonZero(value: any, targetUnitsPerPt: number, mode: FilterMode): number | undefined {
     return filterLengthIntCommon(value, targetUnitsPerPt, mode, 1, 0x7FFFFFFF);
@@ -243,7 +244,8 @@ function filterUniversalMeasureCommon(value: any, mode: FilterMode, min: number,
 *[Universal measure](attributes.md#universal-measure)*.
 */
 export function filterUniversalMeasure(value: any, mode: FilterMode.EXACT): docx.UniversalMeasure;
-export function filterUniversalMeasure(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): docx.UniversalMeasure | undefined;
+export function filterUniversalMeasure(value: any,
+    mode: Exclude<FilterMode, FilterMode.EXACT>): docx.UniversalMeasure | undefined;
 export function filterUniversalMeasure(value: any, mode: FilterMode): docx.UniversalMeasure | undefined;
 export function filterUniversalMeasure(value: any, mode: FilterMode): docx.UniversalMeasure | undefined {
     return filterUniversalMeasureCommon(value, mode, -Number.MAX_VALUE, Number.MAX_VALUE) as docx.UniversalMeasure;
@@ -253,7 +255,8 @@ export function filterUniversalMeasure(value: any, mode: FilterMode): docx.Unive
 *[Positive universal measure](attributes.md#positive-universal-measure)*.
 */
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode.EXACT): docx.PositiveUniversalMeasure;
-export function filterPositiveUniversalMeasure(value: any, mode: Exclude<FilterMode, FilterMode.EXACT>): docx.PositiveUniversalMeasure | undefined;
+export function filterPositiveUniversalMeasure(value: any,
+    mode: Exclude<FilterMode, FilterMode.EXACT>): docx.PositiveUniversalMeasure | undefined;
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode): docx.PositiveUniversalMeasure | undefined;
 export function filterPositiveUniversalMeasure(value: any, mode: FilterMode): docx.PositiveUniversalMeasure | undefined {
     return filterUniversalMeasureCommon(value, mode, 0, Number.MAX_VALUE) as docx.PositiveUniversalMeasure;
@@ -272,10 +275,9 @@ export function filterColor(value: any, mode: FilterMode): string | undefined {
     if (colorTable[normalized] !== undefined) {
         return colorTable[normalized];
     }
-    let m: RegExpMatchArray | null;
-    if ((m = text.match(/^#[0-9a-f]{6}$/))) {
+    if (text.match(/^#[0-9a-f]{6}$/)) {
         return text;
-    } else if ((m = text.match(/^#[0-9a-f]{3}$/))) {
+    } else if (text.match(/^#[0-9a-f]{3}$/)) {
         return `#${text[1]}${text[1]}${text[2]}${text[2]}${text[3]}${text[3]}`;
     } else {
         return returnInvalid(mode, `Invalid color value "${text}".`);
@@ -286,11 +288,15 @@ function enumValueNormalize(text: string | number) {
     return text.toString().toLowerCase().replace(/[_-]/g, '');
 }
 
-export function fromEnum<T extends {}>(value: string | undefined, enumValue: T, aliases?: Dict<string | number>, throws: boolean = true): (T)[keyof T] {
+export function fromEnum<T extends Dict<string | number>>(
+    value: string | undefined, enumValue: T, aliases?: Dict<string | number>, throws: boolean = true
+): (T)[keyof T] {
     return fromEnumInternal(value, enumValue, aliases, throws) as (T)[keyof T];
 }
 
-function fromEnumInternal(value: string | undefined, enumValue: Dict<string | number>, aliases?: Dict<string | number>, throws: boolean = true) {
+function fromEnumInternal(
+    value: string | undefined, enumValue: Dict<string | number>, aliases?: Dict<string | number>, throws: boolean = true
+) {
     if (value === undefined) return undefined;
     // By Enum key
     if (enumValue[value] !== undefined) return enumValue[value];
@@ -389,7 +395,7 @@ export const filters: Dict<(value: any, tr: DocxTranslator) => any> = {
         }
     },
     'enum': (value: any) => {
-        let arr = ('' + value).split(/[:.=>\\\/,;|-]+/);
+        let arr = ('' + value).split(/[:.=>\\/,;|-]+/);
         if (arr.length != 2) {
             throw new Error(`Invalid ":enum" filter input "${value}".`);
         }

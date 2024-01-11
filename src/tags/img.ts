@@ -37,7 +37,7 @@ function getFlip(value: string | undefined) {
 }
 
 /*>>> : anchor align|offset */
-function getHVPosition(tr: DocxTranslator, value: string, alignEnum: Dict<string | number>, relEnum: Dict<string | number>) {
+function getHVPosition(value: string, alignEnum: Dict<string | number>, relEnum: Dict<string | number>) {
     return splitListValues(value, {
         //* `anchor` - Archon from which position is relative to. @enum:@1@
         relative: (value: string) => fromEnum(value, relEnum, {}, false),
@@ -111,9 +111,11 @@ export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: A
             //* Image z-index. Decides which image is on top another. @@
             zIndex: filterInt(attributes.zIndex, FilterMode.UNDEF),
             //* Horizontal position in floating mode. @@:HorizontalPositionAlign|HorizontalPositionRelativeFrom
-            horizontalPosition: getHVPosition(tr, attributes.horizontal, docx.HorizontalPositionAlign, docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
+            horizontalPosition: getHVPosition(attributes.horizontal, docx.HorizontalPositionAlign,
+                docx.HorizontalPositionRelativeFrom) as docx.IHorizontalPositionOptions,
             //* Vertical position in floating mode. @@:VerticalPositionAlign|VerticalPositionRelativeFrom
-            verticalPosition: getHVPosition(tr, attributes.vertical, docx.VerticalPositionAlign, docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
+            verticalPosition: getHVPosition(attributes.vertical, docx.VerticalPositionAlign,
+                docx.VerticalPositionRelativeFrom) as docx.IVerticalPositionOptions,
             margins: margin,
             //* Text wrapping around the image. @@
             wrap: getWrap(attributes.wrap, margin),

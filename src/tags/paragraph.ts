@@ -100,7 +100,9 @@ export function createDummyParagraph(tr: DocxTranslator, children: any) {
                 path: tr.element.path + '/p[auto]',
                 type: 'element',
                 attributes: {},
-                elements: tr.element.elements?.filter(element => element.type !== 'element' || !element.name.endsWith(':property')),
+                elements: tr.element.elements?.filter(
+                    element => element.type !== 'element' || !element.name.endsWith(':property')
+                ),
             }], SpacesProcessing.IGNORE);
         }
     }

@@ -19,25 +19,28 @@
  */
 
 import { DocxTranslator } from '../docxTranslator';
-import { Element, SpacesProcessing, XMLError } from '../xml';
+import { SpacesProcessing } from '../xml';
 import * as docx from 'docx';
 import { AnyObject, Attributes, Dict, selectUndef, undefEmpty } from '../common';
 import { getBorder, getMargin } from './borders';
-import { filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor, filterLengthUint, filterPositiveUniversalMeasure } from '../filters';
+import {
+    filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor,
+    filterLengthUint, filterPositiveUniversalMeasure
+} from '../filters';
 import { TextDirectionAliases, VerticalAlignAliases } from '../enums';
 import { createDummyParagraph } from './paragraph';
 
 
 /*>>> : anchor absolute|relative
 */
-function getTableHVPosition<T>(text: string | undefined, enumValue: Dict<string>) {
+function getTableHVPosition<T extends Dict<string>>(text: string | undefined, enumValue: T) {
     if (text === undefined) return undefined;
     //* `anchor` - Archon from which position is relative to. @enum:TableAnchorType
     let anchor: string | undefined = undefined;
     //* `absolute` - Absolute position. @filterUniversalMeasure
     let absolute: docx.UniversalMeasure | undefined = undefined;
     //* `relative` - Relative position. @enum:@0@
-    let relative: T | undefined = undefined;
+    let relative: T[keyof T] | undefined = undefined;
     /*> The `absolute` and `relative` fields are mutually exclusive. Specify just one of them. */
     let parts = text.split(' ');
     for (let part of parts) {
@@ -48,7 +51,7 @@ function getTableHVPosition<T>(text: string | undefined, enumValue: Dict<string>
         }
         let r = fromEnum(part, enumValue, {}, false);
         if (r !== undefined) {
-            relative = r as T;
+            relative = r as T[keyof T];
             continue;
         }
         absolute = part as docx.UniversalMeasure;
@@ -80,9 +83,9 @@ Child elements of the row are `<tr>` (or its associated @api class).
 */
 export function tableTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     //* Horizontal floating position. @@:RelativeHorizontalPosition
-    let hFloat = getTableHVPosition<(typeof docx.RelativeHorizontalPosition)[keyof typeof docx.RelativeHorizontalPosition]>(attributes.horizontal, docx.RelativeHorizontalPosition);
+    let hFloat = getTableHVPosition(attributes.horizontal, docx.RelativeHorizontalPosition);
     //* Vertical floating position. @@:RelativeVerticalPosition
-    let vFloat = getTableHVPosition<(typeof docx.RelativeVerticalPosition)[keyof typeof docx.RelativeVerticalPosition]>(attributes.vertical, docx.RelativeVerticalPosition);
+    let vFloat = getTableHVPosition(attributes.vertical, docx.RelativeVerticalPosition);
     //* Distance between table and surrounding text in floating mode. @@
     let floatMargins = getMargin(attributes.floatMargins);
     //* Table border. @@

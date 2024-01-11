@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from 'docx/build/file/file-child';
 import { DocxTranslator } from '../docxTranslator';
-import { Element, SpacesProcessing, XMLError } from '../xml';
+import { SpacesProcessing } from '../xml';
 import * as docx from 'docx';
-import { IPropertiesOptions } from 'docx/build/file/core-properties';
 import { AnyObject, Attributes, isTag, requiredAttribute, setTag } from '../common';
-import { filterFloat, filterInt, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits, filterLengthInt, filterColor } from '../filters';
+import {
+    filterFloat, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits,
+    filterLengthInt, filterColor
+} from '../filters';
 import { getBorder } from './borders';
 import { getIRunStylePropertiesOptions } from './characters';
 import { AlignmentTypeAliases } from '../enums';
@@ -184,7 +185,7 @@ function getTabStops(tr: DocxTranslator, tabs: string | undefined): docx.TabStop
 }
 
 function pStyleFontTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
-    return [getIRunStylePropertiesOptions(attributes)];
+    return [getIRunStylePropertiesOptions(attributes, properties)];
 }
 
 /*>>>

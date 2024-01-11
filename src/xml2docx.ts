@@ -55,7 +55,9 @@ async function main() {
     try {
         try {
             fs.mkdirSync('test/outputs');
-        } catch (err) {}
+        } catch (err) {
+            // ignore this error
+        }
         for (let file of fs.readdirSync('test/inputs')) {
             if (file.endsWith('.xml')) {
                 let out = 'test/outputs/' + file.replace('.xml', '.docx');
