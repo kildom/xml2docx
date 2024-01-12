@@ -46,17 +46,17 @@ jobs:
       run: |
         npm run test
         npx ts-node-esm --swc test/testInputs.ts -win
-        dir test/outputs
+        dir test\outputs
     - name: Full test
       if: "${{ github.event.inputs.full_test == 'yes' }}"
-      shell: cmd
+      shell: bash
       run: |
         choco install officeproplus2013
         pip install docx2pdf
         for i in test/outputs/*.docx; do
           docx2pdf $i
         done
-        dir test/outputs
+        ls -la test/outputs
     - name: Release
       uses: softprops/action-gh-release@v1
       if: "${{ github.event.inputs.tag_name != '' }}"
