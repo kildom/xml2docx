@@ -119,7 +119,9 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
         margins: attributes.cellMargin ? {
             marginUnitType: docx.WidthType.DXA,
             //* Default cell margins. @@
-            ...getMargin(attributes.cellMargin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
+            ...getMargin(attributes.cellMargin,
+                (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)
+            ),
         } : undefined,
         float: undefEmpty({
             horizontalAnchor: hFloat?.anchor as (typeof docx.TableAnchorType)[keyof typeof docx.TableAnchorType],
@@ -210,7 +212,9 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
         margins: selectUndef(attributes.margin, {
             marginUnitType: docx.WidthType.DXA,
             //* Cell inner margins. @@
-            ...getMargin(attributes.margin, (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)),
+            ...getMargin(attributes.margin,
+                (value, mode) => filterLengthUint(value, LengthUnits.dxa, mode)
+            ),
         }),
         //* Text direction. @enum:TextDirection+TextDirectionAliases
         textDirection: fromEnum(attributes.dir, docx.TextDirection, TextDirectionAliases, true),

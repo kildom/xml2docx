@@ -158,7 +158,7 @@ Child elements of the row are `<tr>` (or its associated [docx.js API](https://do
   Table width. It can be expressed as percentage of entire available space (with `%` sign)
   or straightforward distance. *[Positive universal measure](attributes.md#positive-universal-measure)*.
 
-* `cell-margins="top left bottom right"` *[optional]*
+* `cell-margin="top left bottom right"` *[optional]*
   
   Default cell margins. *[Positive universal measure](attributes.md#positive-universal-measure)*.
   * `top` - Top margin.
@@ -261,7 +261,7 @@ If they are not, then the content of the cell will be put into automatically gen
   
   Number of spanning rows.
 
-* `margins="top left bottom right"` *[optional]*
+* `margin="top left bottom right"` *[optional]*
   
   Cell inner margins. *[Positive universal measure](attributes.md#positive-universal-measure)*.
   * `top` - Top margin.

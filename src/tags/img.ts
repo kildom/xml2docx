@@ -46,7 +46,12 @@ function getHVPosition(value: string, alignEnum: Dict<string | number>, relEnum:
         //* `offset` - Offset of absolute position from the archon. @filterLengthInt
         offset: (value: string) => filterLengthInt(value, LengthUnits.emu, FilterMode.ALL),
     });
-    /*> The `align` and `offset` fields are mutually exclusive. Specify just one of them. */
+    /*>
+    The `align` and `offset` fields are mutually exclusive. Specify just one of them.
+
+    You must provide both `vertical` and `horizontal` attributes or none.
+    Specifying just one of them is an error.
+    */
 }
 
 /*>>> : side type */
@@ -83,7 +88,9 @@ One of the `src` and `data` attributes is required. They are mutually exclusive,
 */
 export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     //* Margins around the image. @@
-    let margin = getMargin(attributes.margin, (value, mode) => filterLengthUint(value, LengthUnits.emu, mode));
+    let margin = getMargin(attributes.margin,
+        (value, mode) => filterLengthUint(value, LengthUnits.emu, mode)
+    );
     let options: docx.IImageOptions = {
         //* Image source path. An absolute path or a path relative to main input file.
         data: attributes.src ? tr.filter(':file', attributes.src)

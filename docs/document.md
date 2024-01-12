@@ -74,7 +74,7 @@ Section.
   * `back`
   * `front`
 
-* `margins="top left bottom right"` *[optional]*
+* `margin="top left bottom right"` *[optional]*
   
   Page margins. *[Positive universal measure](attributes.md#positive-universal-measure)*.
   * `top` - Top margin.

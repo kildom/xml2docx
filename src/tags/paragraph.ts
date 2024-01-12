@@ -81,15 +81,29 @@ export function pTag(tr: DocxTranslator, attributes: Attributes, properties: Any
 /*>>>
 Adds tabulation.
 */
-export function tabTag(): any[] {
-    return [new docx.TextRun({ children: [new docx.Tab()] })];
+export function tabTag(tr: DocxTranslator): any[] {
+    return [new docx.TextRun({  ...tr.runOptions, children: [new docx.Tab()] })];
 }
 
 /*>>>
 Adds line break without breaking the paragraph.
 */
-export function brTag(): any[] {
-    return [new docx.TextRun({ children: [new docx.CarriageReturn()] })];
+export function brTag(tr: DocxTranslator): any[] {
+    return [new docx.TextRun({ ...tr.runOptions, children: [new docx.CarriageReturn()] })];
+}
+
+/*>>>
+Adds total pages count. Can be used only in header and footer.
+*/
+export function totalPagesTag(tr: DocxTranslator): any[] {
+    return [new docx.TextRun({ ...tr.runOptions, children: [docx.PageNumber.TOTAL_PAGES] })];
+}
+
+/*>>>
+Adds current page number. Can be used only in header and footer.
+*/
+export function pageNumberTag(tr: DocxTranslator): any[] {
+    return [new docx.TextRun({ ...tr.runOptions, children: [docx.PageNumber.CURRENT] })];
 }
 
 export function createDummyParagraph(tr: DocxTranslator, children: any) {
