@@ -159,13 +159,15 @@ class Commands {
 
     static enum(cmd: string, param: string, entry: Entry, item?: Item): string {
         let enumValues: { [key: string]: string[] } = {};
-        for (let enumName of param.split('+')) {
+        let [enumNames, indentParam] = param.split('|');
+        let indent = indentParam ? ' '.repeat(parseInt(indentParam)) : '';
+        for (let enumName of enumNames.split('+')) {
             let enumObj: { [key: string]: string } = (docx as any)[enumName];
             if (!enumObj) {
                 enumObj = (enums as any)[enumName];
             }
             if (!enumObj) {
-                throw new Error(`Unknown enum ${enumName} in @enum:${param}`);
+                throw new Error(`Unknown enum ${enumName} in @enum:${enumNames}`);
             }
             for (let [key, value] of Object.entries(enumObj)) {
                 if (key.match(/^[0-9]+$/)) continue;
@@ -190,7 +192,7 @@ class Commands {
                 docList.push(`\`${names[0]}\` (aliases: \`${names.slice(1).join('`, `')}\`)`);
             }
         }
-        return `Enumeration values:\n* ${docList.join('\n* ')}`;
+        return `Enumeration values:\n${indent}* ${docList.join(`\n${indent}* `)}`;
     }
 
     static short(cmd: string, param: string, entry: Entry, item?: Item): string {
@@ -237,7 +239,7 @@ class Commands {
         let res = cmdEntry.text.trim() + '\n';
         for (let cmdItem of cmdEntry.items) {
             if (cmdItem.type === 'item') {
-                res += '* ' + addIndent(cmdItem.text.trim(), '  ').trimStart();
+                res += '* ' + addIndent(cmdItem.text.trim(), '    ').trimStart();
             } else {
                 res += '\n' + cmdItem.text;
             }
@@ -302,7 +304,7 @@ function generateAttrDoc(entry: Entry, item: Item) {
     }
     res += `\` *[${item.required ? 'required' : 'optional'}]*`;
     res += `\n\n${item.text}`;
-    return '* ' + addIndent(res, '  ').trimStart();
+    return '* ' + addIndent(res, '    ').trimStart();
 }
 
 function generateTagDoc(entry: Entry) {
