@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- *
+ * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,6 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import * as docx from "docx";
+import { template } from 'underscore';
 import { convert } from './converter';
 import { fromTemplate } from './template';
 import { os, setInterface } from './os';
@@ -282,8 +284,8 @@ Aliases, see README.md
 
 let data = {
     // Superset of JSON is allowed, any JavaScript expression can be used here.
-    title: 'Random movies',
-    description: 'List of <b>random</b> movies.',
+    title: "Random movies",
+    description: "List of <b>random</b> movies.",
     movies: [
         {
             title: 'The Green Mile',
@@ -448,12 +450,8 @@ function App() {
 
 window.onload = () => {
     console.log('loaded');
-<<<<<<<< HEAD:src/xml2docx-web.ts_old
-    document.getElementById('btn')!.onclick = () => { download(); };
-========
     if (document.getElementById('btn'))
         document.getElementById('btn')!.onclick = () => { download() };
->>>>>>>> c945fce (Add react and blueprint.js to web version):src/xml2docx-web.tsx
     /*monacode({
         container: document.getElementById('editor') as HTMLElement,
         value: '<aaa>Download</aaa>',
@@ -461,8 +459,8 @@ window.onload = () => {
     });*/
     monaco.editor.create(document.getElementById('editor') as HTMLElement, {
         value: templateText,
-        language: 'xml',
-        theme: 'vs-dark',
+        language: "xml",
+        theme: "vs-dark",
         automaticLayout: true,
     });
 
