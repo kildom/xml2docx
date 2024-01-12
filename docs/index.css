@@ -1,0 +1,113 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
+
+body {
+    font-family: "Roboto", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Rosarivo", serif;
+}
+
+code {
+    padding: 0.2em 0.4em;
+    margin: 0px;
+    font-size: 85%;
+    white-space: break-spaces;
+    background-color: #EEE;
+    border-radius: 6px;
+}
+
+blockquote {
+    border-left: 5px solid #DDD;
+    padding: 10px 20px;
+    margin: 10px 5px;
+}
+
+a {
+    color: #001d9c;
+}
+
+a:hover {
+    color: #7340c5;
+}
+
+li {
+    margin-top: 0.35em;
+}
+
+blockquote:has(> div.gitHubAlert-note),
+blockquote:has(> div.gitHubAlert-tip),
+blockquote:has(> div.gitHubAlert-important),
+blockquote:has(> div.gitHubAlert-warning),
+blockquote:has(> div.gitHubAlert-caution) {
+    border-left: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+div.gitHubAlert-note,
+div.gitHubAlert-tip,
+div.gitHubAlert-important,
+div.gitHubAlert-warning,
+div.gitHubAlert-caution {
+    padding: 6px 0px 10px 20px;
+    margin: 15px 5px;
+}
+
+div.gitHubAlert-note {
+    border-left: 5px solid #223fbd;
+    --color-alert: #223fbd;
+    --char-alert: "ⓘ";
+}
+
+div.gitHubAlert-tip {
+    border-left: 5px solid #1b9c51;
+    --color-alert: #1b9c51;
+    --char-alert: "⚐";
+}
+
+div.gitHubAlert-important {
+    border-left: 5px solid #8f1374;
+    --color-alert: #8f1374;
+    --char-alert: "!!";
+}
+
+div.gitHubAlert-warning {
+    border-left: 5px solid #e27c08;
+    --color-alert: #e27c08;
+    --char-alert: "⚠";
+}
+
+div.gitHubAlert-caution {
+    border-left: 5px solid #be1919;
+    --color-alert: #be1919;
+    --char-alert: "☒";
+}
+
+div.gitHubAlert-title {
+    padding: 0px 0px 10px;
+    font-weight: bold;
+    color: var(--color-alert);
+}
+
+div.gitHubAlert-title::before {
+    content: var(--char-alert);
+    margin: 0px 10px 0px 0px;
+    padding: 2px;
+    font-size: 130%;
+    display: inline-block;
+    position: relative;
+    top: 0.1em;
+}
+
+div.gitHubAlert-text>p:first-child {
+    margin-top: 0px;
+}
+
+div.gitHubAlert-text>p:last-child {
+    margin-bottom: 0px;
+}
+

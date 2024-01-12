@@ -12,11 +12,6 @@ Highlights:
 * Builtin templating allows customizing the output based on
   arbitrary input data.
 
-
-&nbsp;
-
---------------
 > [!CAUTION]
-> The input files contains a JavaScript code that is executed without
-> restrictions. You must trust the files in order safely to use this tool.
-
+> If you use templates, the input files contains a JavaScript code that is executed without
+> restrictions. You must trust the files in order safely use the templates.

@@ -141,7 +141,7 @@ export function removeShallowUndefined(object: AnyObject) {
 export function getIRunStylePropertiesOptions(attributes: Attributes, properties?: AnyObject): docx.IRunStylePropertiesOptions {
     let options: docx.IRunStylePropertiesOptions = {
         //* "type color" Text underline.
-        //* * `type` - Underline type. @enum:UnderlineType
+        //* * `type` - Underline type. @enum:UnderlineType|4
         //* * `color` - Underline color. @filterColor
         underline: splitListValues(attributes.underline, {
             type: (value: string) => fromEnum(value, docx.UnderlineType),

@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="index.css" type="text/css" media="all" />
+        <script src="index.js"></script>
+    </head>
+    <body>
+        <div style="margin: 0px auto; width: 900px;">
+        <% for (let file in markdownTexts) { text = markdownTexts[file]; %>
+            <div class="page" id="<%- fileNameToId(file) %>"><%= text %></div>
+        <% } %>
+        </div>
+    </body>
+</html>
