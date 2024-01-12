@@ -152,29 +152,35 @@ function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphS
         contextualSpacing,
     };
 }
+
+/*>>> : position type leader, ...
+*/
 function getSingleTabStop(tr: DocxTranslator, tab: string): docx.TabStopDefinition | undefined {
     let type: (typeof docx.TabStopType)[keyof typeof docx.TabStopType] | undefined = undefined;
     let position: number | undefined = undefined;
     let leader: (typeof docx.LeaderType)[keyof typeof docx.LeaderType] | undefined = undefined;
     let arr = tab.split(/\s+/);
     for (let value of arr) {
+        //* `type` *[optional]* - Type of tab. @enum:TabStopType
         let t = fromEnum(value, docx.TabStopType, {}, false);
         if (t !== undefined) {
             type = t;
             continue;
         }
+        //* `leader` *[optional]* - Type of tab leader. @enum:LeaderType
         let l = fromEnum(value, docx.LeaderType, {}, false);
         if (l !== undefined) {
             leader = l;
             continue;
         }
+        //* `position` *[required]* - Tab position. @@
         position = filterLengthInt(value, LengthUnits.dxa, FilterMode.EXACT);
     }
     return position !== undefined ? { type: type || docx.TabStopType.LEFT, position, leader } : undefined;
 }
 
 /*>>>
-TODO: tabstops
+@merge:getSingleTabStop
 */
 function getTabStops(tr: DocxTranslator, tabs: string | undefined): docx.TabStopDefinition[] | undefined {
     if (tabs === undefined) return undefined;

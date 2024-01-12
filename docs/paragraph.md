@@ -65,9 +65,26 @@ You can stop reusing attributes if you specify at least one attribute in new par
   
   Force page break before this paragraph. *[Boolean value](attributes.md#boolean-value)*.
 
-* `tabs` *[optional]*
+* `tabs="position type leader, ..."` *[optional]*
   
-  Tabulator stops. TODO: tabstops
+  Tabulator stops. 
+  * `type` *[optional]* - Type of tab. Enumeration values:
+    * `bar`
+    * `center`
+    * `clear`
+    * `decimal`
+    * `end`
+    * `left`
+    * `num`
+    * `right`
+    * `start`
+  * `leader` *[optional]* - Type of tab leader. Enumeration values:
+    * `dot`
+    * `hyphen`
+    * `middle-dot`
+    * `none`
+    * `underscore`
+  * `position` *[required]* - Tab position. *[Universal measure](attributes.md#universal-measure)*.
 
 * `align` *[optional]*
   

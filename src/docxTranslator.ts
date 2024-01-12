@@ -23,7 +23,7 @@ import * as docx from 'docx';
 import { TranslatorBase } from './translatorBase';
 import { CData, Text, Element, XMLError, InterceptedXMLError } from './xml';
 import { AnyObject, Attributes, Dict, setTag } from './common';
-import { brTag, pTag, tabTag } from './tags/paragraph';
+import { brTag, pTag, pageNumberTag, tabTag, totalPagesTag } from './tags/paragraph';
 import { documentTag, headerFooterTag } from './tags/document';
 import { fallbackStyleChange, fontStyleTag } from './tags/characters';
 import { tableTag } from './tags/table';
@@ -67,6 +67,8 @@ const tags: TagsSet = {
     'br': brTag,
     'p-style': pStyleTag,
     'font-style': fontStyleTag,
+    'total-pages': totalPagesTag,
+    'page-number': pageNumberTag,
 };
 
 export class DocxTranslator extends TranslatorBase {
@@ -80,7 +82,7 @@ export class DocxTranslator extends TranslatorBase {
 
     constructor(
         public baseDir: string,
-        private runOptions: docx.IRunOptions,
+        public runOptions: docx.IRunOptions,
         public element: Element,
         public customTags?: TagsSet
     ) {

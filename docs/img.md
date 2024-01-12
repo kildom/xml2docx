@@ -13,7 +13,7 @@ One of the `src` and `data` attributes is required. They are mutually exclusive,
 
 [ImageRun](https://docx.js.org/api/classes/ImageRun.html)
 
-* `margins="top left bottom right"` *[optional]*
+* `margin="top left bottom right"` *[optional]*
   
   Margins around the image. *[Positive universal measure](attributes.md#positive-universal-measure)*.
   * `top` - Top margin.
@@ -85,7 +85,11 @@ One of the `src` and `data` attributes is required. They are mutually exclusive,
     * `right`
   * `offset` - Offset of absolute position from the archon. *[Universal measure](attributes.md#universal-measure)*.
   
+  
   The `align` and `offset` fields are mutually exclusive. Specify just one of them.
+  
+  You must provide both `vertical` and `horizontal` attributes or none.
+  Specifying just one of them is an error.
 
 * `vertical="anchor align|offset"` *[optional]*
   
@@ -107,7 +111,11 @@ One of the `src` and `data` attributes is required. They are mutually exclusive,
     * `top`
   * `offset` - Offset of absolute position from the archon. *[Universal measure](attributes.md#universal-measure)*.
   
+  
   The `align` and `offset` fields are mutually exclusive. Specify just one of them.
+  
+  You must provide both `vertical` and `horizontal` attributes or none.
+  Specifying just one of them is an error.
 
 * `wrap="side type"` *[optional]*
   
