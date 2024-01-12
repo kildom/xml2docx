@@ -26,6 +26,8 @@
     "prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --outfile=dist/xml2docx.cjs && node scripts/postprocess.cjs",
     "build": "npx pkg -C Brotli -t node18-win-x64 --public -o dist/xml2docx.exe dist/xml2docx.cjs",
     "build-web": "node scripts/build-web.js",
-    "check": "npx tsc -p tsconfig.json && npx eslint src"
+    "check": "npx tsc -p tsconfig.json && npx eslint src",
+    "test": "npx ts-node-esm --swc test/testInputs.ts",
+    "docs": "npx ts-node-esm --swc scripts/gen-docs.ts && npx ts-node-esm --swc scripts/build-docs.ts"
   }
 }

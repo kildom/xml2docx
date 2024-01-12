@@ -21,7 +21,6 @@
 import * as docx from 'docx';
 
 import { os } from './os';
-import { parseExtendedJSON } from './json';
 import { AnyObject, Dict } from './common';
 import { DocxTranslator } from './docxTranslator';
 
@@ -408,7 +407,7 @@ export const filters: Dict<(value: any, tr: DocxTranslator) => any> = {
     },
     'color': (value: any) => filterColor(value, FilterMode.EXACT),
     'json': (value: any) => {
-        return parseExtendedJSON(value);
+        return JSON.parse(value);
     },
     'first': (value: any) => {
         if (typeof (value) !== 'object' || !(value instanceof Array) || value.length === 0)

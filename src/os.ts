@@ -44,3 +44,18 @@ export class InterceptedError extends Error {
         super(message);
     }
 }
+
+export function printError(err: any, debug: boolean, callback?: (message: any) => void): void {
+    callback = callback || console.error;
+    while (err instanceof InterceptedError) {
+        callback(err.message);
+        err = err.previous;
+    }
+    if (err) {
+        if (debug) {
+            callback(err);
+        } else {
+            callback(err.message);
+        }
+    }
+}

@@ -35,19 +35,28 @@ jobs:
     - name: Build
       shell: cmd
       run: npm run build
-    - name: Simple test
+    - name: Source code analysis
+      shell: cmd
+      run: npm run check
+    - name: Generate docs
+      shell: cmd
+      run: npm run docs
+    - name: Simple tests
       shell: cmd
       run: |
-        dist\xml2docx.exe demo\demo.docx demo\demo.xml demo\demo.json
-        dir demo\demo.docx
+        npm run test
+        npx ts-node-esm --swc test/testInputs.ts -win
+        dir test/outputs
     - name: Full test
       if: "${{ github.event.inputs.full_test == 'yes' }}"
       shell: cmd
       run: |
         choco install officeproplus2013
         pip install docx2pdf
-        docx2pdf demo\demo.docx
-        dir demo\demo.pdf
+        for i in test/outputs/*.docx; do
+          docx2pdf $i
+        done
+        dir test/outputs
     - name: Release
       uses: softprops/action-gh-release@v1
       if: "${{ github.event.inputs.tag_name != '' }}"
@@ -64,5 +73,5 @@ jobs:
       with:
         path: |
           dist/xml2docx.exe
-          demo/demo.docx
-          demo/demo.pdf
+          test/outputs
+          docs/index.*
