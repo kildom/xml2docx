@@ -18,123 +18,106 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as path from 'node:path';
-import * as fs from 'node:fs';
-import * as docx from 'docx';
-
-import { os, InterceptedError, setInterface } from './os';
-import { parseExtendedJSON } from './json';
-import { fromTemplate } from './template';
-import { Element, addXPathsTo, parse, stringify } from './xml';
-import { resolveAliases } from './aliases';
-import { translate } from './docxTranslator';
+import { printError } from './os';
+import { setNodeJsOsInterface } from './osNode';
+import { ExecOptions, exec } from './exec';
 
 
-setInterface({
-    path: {
-        resolve: path.resolve,
-        dirname: path.dirname,
-    },
-    fs: {
-        readFileSync: (path: string, encoding?: 'utf-8') => fs.readFileSync(path, encoding),
-        writeFileSync: fs.writeFileSync,
-    },
-    error: (...args: any[]) => {
-        console.error(args);
-    },
-    convert: {
-        fromBase64: (str: string): Uint8Array => {
-            return Buffer.from(str, 'base64');
-        }
-    },
-});
+const USAGE = `
+USAGE:
+    xml2docx [options] input.xml [output.docx]
 
-let debug: boolean = true;
+Convert XML file to docx file. See https://kildom.github.io/xml2docx/ for
+XML file format documentation.
 
-async function main() {
-    try {
-        try {
-            fs.mkdirSync('test/outputs');
-        } catch (err) {
-            // ignore this error
-        }
-        for (let file of fs.readdirSync('test/inputs')) {
-            if (file.endsWith('.xml')) {
-                let out = 'test/outputs/' + file.replace('.xml', '.docx');
-                fs.writeFileSync(out, await exec(`test/inputs/${file}`, 'test/inputs/empty.json', out));
-            }
-        }
-    } catch (err) {
-        let cur: any = err;
+Options:
 
-        if (err instanceof InterceptedError) {
-            while (cur instanceof InterceptedError) {
-                console.error(cur.message);
-                cur = cur.previous;
-            }
-        }
+    -d <data.json>
+        Tread the input file as a template and use <data.json> file as
+        a template input data. The data file is in JSON format. See the
+        documentation for more details about template syntax.
+        WARNING: Setting this option will execute arbitrary code from the
+                 <input.xml> file without any restrictions. You must have
+                 this file from a trusted source.
 
-        if (cur) {
-            if (debug) {
-                console.error(cur);
-            } else {
-                console.error(cur.message);
-            }
-        }
+    -x
+        Execute <data.json> as a JavaScript expression. This gives the data
+        file more flexibility, e.g. you can use comments.
+        WARNING: Setting this option will execute arbitrary code from the
+                 <data.json> file without any restrictions. You must have
+                 this file from a trusted source.
+
+    --debug
+        Dump intermediate files alongside the output after each step of
+        processing and show more verbose output in case of errors. This
+        option is mainly useful when debugging the template or the tool.
+
+    --help
+        Show this message.
+`;
+
+function printUsage(failed?: string): void {
+    if (failed) {
+        console.error(failed);
+        console.error(USAGE);
+        process.exit(3);
+    } else {
+        console.log(USAGE);
     }
 }
 
-main();
-
-async function exec(templateFile: string, dataFile: string, docxFile: string, base64: boolean = false) {
-    let templateText: string;
-    let dataText: string;
-    let data: any;
-    let root: Element;
-    let document: docx.Document;
-
-    try {
-        dataText = os.fs.readFileSync(dataFile, 'utf-8') as string;
-    } catch (err) { throw new InterceptedError(err, `Error reading file "${dataFile}".`); }
-
-    try {
-        data = parseExtendedJSON(dataText);
-    } catch (err) { throw new InterceptedError(err, `Error parsing file "${dataFile}".`); }
-
-    try {
-        templateText = os.fs.readFileSync(templateFile, 'utf-8') as string;
-    } catch (err) { throw new InterceptedError(err, `Error reading file "${templateFile}".`); }
-
-    let xmlText = fromTemplate(templateFile, templateText, dataFile, data);
-
-    try {
-        root = parse(xmlText, true, true);
-    } catch (err) { throw new InterceptedError(err, 'Error parsing XML.'); }
-
-    try {
-        resolveAliases(root);
-    } catch (err) { throw new InterceptedError(err, 'Error resolving aliases.'); }
-
-    os.fs.writeFileSync('a.xml', stringify(root, true));
-    addXPathsTo(root, '');
-
-    try {
-        document = translate(root, os.path.dirname(templateFile));
-    } catch (err) { throw new InterceptedError(err, 'Error translating XML to docx.js API.'); }
-
-    try {
-        return base64 ? await docx.Packer.toBase64String(document) : await docx.Packer.toBuffer(document);
-    } catch (err) { throw new InterceptedError(err, 'Error packing content to docx.'); }
-
-    // TODO: In debug mode, generate JS file that creates document using docx.js API.
-    //       Creating a new object: obj = new docx.SomeClass(...args); obj[constructInfoSymbol] = { className: 'SomeClass', args }
-    // TODO: Filters for multiline text:
-    //       1) trim, remove new lines and replace repeating whitespace
-    //       2) removes common indentation and trim
-    // TODO: Special type of element ":attr", that works similar to ":property", but adds string value to attributes.
-    //       Useful for multiline attributes and attributes with CDATA.
-    // TODO: reconsider renaming ":property" (maybe also ":attr")
-    // TODO: Simplify sections, footers, headers, styles by adding new tags for it.
-    //       header and footer can have attribute that tells if it is just for first page in section.
-    // TODO: Check if docx.js allows reusing the same image data
+function parseArguments(): ExecOptions {
+    let input: string | undefined;
+    let output: string | undefined;
+    let data: string | undefined;
+    let extData = false;
+    let debug = false;
+    let argCounter = 0;
+    let dataJsonArg = false;
+    for (let arg of process.argv.slice(2)) {
+        if (dataJsonArg) {
+            data = arg;
+            dataJsonArg = false;
+        } else if (arg === '-d') {
+            if (data) {
+                throw printUsage('Only one data file allowed.');
+            }
+            dataJsonArg = true;
+        } else if (arg === '-x') {
+            extData = true;
+        } else if (arg === '--debug') {
+            debug = true;
+        } else if (arg === '--help' || arg === '/?' || arg === '-h') {
+            printUsage();
+            process.exit(0);
+        } else if (argCounter === 0) {
+            input = arg;
+            argCounter++;
+        } else if (argCounter === 1) {
+            output = arg;
+            argCounter++;
+        } else {
+            throw printUsage('Too many arguments.');
+        }
+    }
+    if (!input) {
+        throw printUsage('No input file provided.');
+    }
+    if (!output) {
+        output = input.replace(/\.xml$/, '') + '.docx';
+    }
+    return { input, output, data, extData, debug };
 }
+
+async function main() {
+    let args = parseArguments();
+    try {
+        await exec(args);
+    } catch (err) {
+        printError(err, args.debug);
+        process.exit(1);
+    }
+}
+
+setNodeJsOsInterface();
+main();

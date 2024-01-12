@@ -18,6 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export function parseExtendedJSON(text: string): any {
-    return (new Function(`return (${text});`))();
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+
+import { setInterface } from './os';
+
+
+export function setNodeJsOsInterface() {
+    setInterface({
+        path: {
+            resolve: path.resolve,
+            dirname: path.dirname,
+        },
+        fs: {
+            readFileSync: (path: string, encoding?: 'utf-8') => fs.readFileSync(path, encoding),
+            writeFileSync: fs.writeFileSync,
+        },
+        error: (...args: any[]) => {
+            console.error(args);
+        },
+        convert: {
+            fromBase64: (str: string): Uint8Array => {
+                return Buffer.from(str, 'base64');
+            }
+        },
+    });
 }
