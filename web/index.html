@@ -26,17 +26,17 @@
             align-items: stretch;
         }
 
+        div#content>div:nth-child(1) {
+            order: 0;
+            flex: 0 0 400px;
+            align-self: auto;
+        }
+
         div#content>div:nth-child(2) {
             order: 0;
             flex: 1 1 auto;
             align-self: auto;
             overflow: hidden;
-        }
-
-        div#content>div:nth-child(1) {
-            order: 0;
-            flex: 0 0 400px;
-            align-self: auto;
         }
 
         div#side {
@@ -70,6 +70,20 @@
             width: 100%;
         }
 
+        div#reactRoot {
+            display: flex;
+            flex-direction: column;
+        }
+
+        div#reactRoot>div:nth-child(3) {
+            flex-grow:1;
+        }
+
+        div.editor {
+            height: 100vh;
+            padding: 0px;
+        }
+
     </style>
 </head>
 
@@ -78,7 +92,7 @@
     
 
     <div id="content">
-        <div id="reactRoot">
+        <div id="reactRoot" style="height: 100vh; padding: 0px;">
             <!--<div>
                 Export docx<br/>
                 Save as ZIP (docx with sources)<br/>
@@ -92,8 +106,7 @@
                 error message if present
             </div>-->
         </div>
-        <div>
-            <div style="height: 100vh; padding: 0px;" id="editor"></div>
+        <div id="editorPanel">
         </div>
     </div>
 

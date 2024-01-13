@@ -1,6 +1,6 @@
 /*!
  * Copyright 2023 Dominik Kilian
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -18,354 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { exec } from './exec';
-import { setInterface } from './os';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
-//import * as monaco from 'monaco-editor';
-//import monacode from 'https://unpkg.com/monacode/index.min.js';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-    Alignment, Button, Callout, Intent, Navbar, Tree, ButtonGroup, Icon, IconName, Popover, Classes, InputGroup,
-    Alert, HotkeysProvider, HotkeysTarget2, HotkeyConfig
+    Alignment, Button, Callout, Intent, Navbar, Tree, ButtonGroup, Icon, IconName, Popover, Classes, InputGroup, Alert, Spinner
 } from '@blueprintjs/core';
-
 
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
+import { FrontEndEvent, RequestResultType, WorkerEvent, WorkerFile, normalizeFileName } from './web-common';
 
-let templateText = `
-<?xml version="1.0" encoding="UTF-8"?>
-<document>
+type Timeout = ReturnType<typeof setTimeout>;
 
-  
-<!--
-Paragraph styles, documentation:
-https://docx.js.org/api/interfaces/IParagraphStyleOptions.html
--->
+const WORKER_UPDATE_DELAY = 1000;
 
-<ParagraphStyle id="Normal" name="Normal">
-<run font="Arial" size="12pt"  />
-<paragraph>
-  <spacing after:pt20="4mm" />
-</paragraph>
-</ParagraphStyle>
-
-<ParagraphStyle id="WithIndent" name="With Indent" basedOn="Normal">
-<paragraph alignment="both">
-  <indent firstLine="9mm" />
-</paragraph>
-</ParagraphStyle>
-
-<ParagraphStyle id="InTable" name="In Table" basedOn="Normal">
-<paragraph>
-  <spacing after:pt20="0mm" />
-</paragraph>
-</ParagraphStyle>
-
-<ParagraphStyle id="HeaderParagraph" name="Footer Paragraph" basedOn="Normal">
-<paragraph alignment="center">
-  <spacing after:pt20="4mm" />
-  <border>
-    <bottom size:pt8="0.25mm" space:pt="4mm" style="single" />
-  </border>
-</paragraph>
-</ParagraphStyle>
-
-<ParagraphStyle id="FooterParagraph" name="Footer Paragraph" basedOn="Normal">
-<paragraph>
-  <spacing before:pt20="4mm" />
-  <tabStops>
-    <_ position:dxa="1cm" type="left" />
-    <_ position:dxa="9cm" type="center" />
-    <_ position:dxa="17cm" type="right" />
-  </tabStops>
-  <border>
-    <top size:pt8="0.25mm" space:pt="4mm" style="single" />
-  </border>
-</paragraph>
-</ParagraphStyle>
-
-<ParagraphStyle id="Heading1" name="Heading 1" basedOn="Normal">
-<paragraph alignment="center" />
-<run size="24pt" bold:bool="true" />
-</ParagraphStyle>
-
-<ParagraphStyle id="Heading2" name="Heading 2" basedOn="Normal">
-<paragraph alignment="center" />
-<run size="18pt" bold:bool="true" color="#4466EE" />
-</ParagraphStyle>
-
-<!--
-Character styles, documentation:
-https://docx.js.org/api/interfaces/ICharacterStyleOptions.html
--->
-
-<CharacterStyle id="Important" name="Important">
-<run size="14pt" bold:bool="true" />
-</CharacterStyle>
-
-<!--
-Aliases, see README.md
--->
-
-<Alias id="LCRTabs">
-<_ position:dxa="1cm" type="left" />
-<_ position:dxa="9cm" type="center" />
-<_ position:dxa="17cm" type="right" />
-</Alias>
-
-  <Alias id="border">
-    <bottom size:pt8="0.25mm" space:pt="5mm" style="single" />
-  </Alias>
-
-  <Section>
-    <properties>
-      <page>
-        <size orientation="portrait" width="210mm" height="297mm" />
-        <margin top="1.5cm" right="1.5cm" bottom="1.5cm" left="1.5cm" />
-        <borders>
-          <pageBorders display="allPages" offsetFrom="page" />
-          <pageBorderTop style="single" size:pt8="0.3mm" space:pt="1cm" />
-          <pageBorderBottom style="single" size:pt8="0.3mm" space:pt="1cm" />
-          <pageBorderLeft style="single" size:pt8="0.3mm" space:pt="1cm" />
-          <pageBorderRight style="single" size:pt8="0.3mm" space:pt="1cm" />
-        </borders>
-      </page>
-    </properties>
-    <headers>
-      <default>
-        <Header:new>
-          <children:FileChildren>
-            <p style="HeaderParagraph">Demo Document</p>
-          </children:FileChildren>
-        </Header:new>
-      </default>
-    </headers>
-    <footers>
-      <default>
-        <Footer:new>
-          <children:FileChildren>
-            <p style="FooterParagraph">&#9;<a href="https://github.com/kildom/xml2docx">See on GitHub</a>&#9;<b>xml2docx</b>&#9;Page <CurrentPageNumber /> of <TotalPages /></p>
-          </children:FileChildren>
-        </Footer:new>
-      </default>
-    </footers>
-  </Section>
-
-  <h1>Demo Document</h1>
-
-  <h2>Paragraphs</h2>
-
-  <p style="WithIndent">Lorem ipsum dolor sit amet, magna et tincidunt varius. Donec et viverra leo. Nunc nec velit sed quam
-    lobortis enim. Maecenas id dignissim leo. Cras imperdiet purus sit amet mi pellentesque, eget porttitor nisl
-    tincidunt. Curabitur orci erat, laoreet eget felis at, pretium ornare augue.</p>
-  <p style="WithIndent">Nunc enim odio, lobortis ut turpis et, auctor aliquam eros. Mauris justo ante, auctor quis condimentum vitae,
-    eleifend eu augue. Duis ut mattis nisi. Phasellus sodales, quam nec varius blandit, sem erat tristique mi, ac
-    placerat lacus ante a ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames.</p>
-  
-  <h2>Formatting</h2>
-
-  <p><b>Bold</b>, <i>italics</i>, <u>underline</u>, <s>strike through</s>,
-    <super>super</super>script, <sub>sub</sub>script, <allCaps>all caps</allCaps>,
-    <smallCaps>Small Caps</smallCaps>, <doubleStrike>double strike through</doubleStrike>,
-    <emboss>emboss</emboss>, <font name="Times New Roman">Times New Roman</font>,
-    <font size="24pt">bigger</font>, <font color="#008800">green</font>,
-    <font highlight="yellow">highlight</font>, <font style="Important">style</font>,
-    <font scale="200">scale</font>, <font spacing="3mm">spacing</font>
-  </p>
-
-  <h2><img src="cat.jpg" width="3.333cm" height="5cm"
-    horizontalOffset="0cm" horizontalRelative="margin" horizontalAlign="right"
-    verticalOffset="0cm" verticalRelative="line" verticalAlign="top"
-    wrapType="square" marginBottom="4mm" marginLeft="4mm" marginTop="4mm" marginRight="4mm" wrapSide="bothSides"
-    />Image</h2>
-
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt, augue eu mattis auctor, ante sem aliquet
-    dolor, at efficitur enim sem sit amet mauris. Donec at porta ligula, non ornare diam. Integer eleifend lacinia
-    nulla non auctor. In id leo posuere augue aliquam auctor. Suspendisse non finibus libero.</p>
-  <p>Maecenas congue nisl id felis vehicula, quis hendrerit nisi tincidunt. Fusce hendrerit turpis quam, vitae
-    laoreet arcu egestas et. Duis tempor scelerisque elit, vel euismod erat varius et.</p>
-  
-  <h2>Tab stops</h2>
-
-  <p tabStops:alias="LCRTabs">&#9;Left&#9;Center&#9;Right</p>
-  <p><__>
-    <tabStops>
-      <_ position:dxa="4cm" type="left" />
-      <_ position:dxa="9cm" type="center" />
-      <_ position:dxa="14cm" type="right" />
-    </tabStops>
-  </__><tab/>Left<tab/>Center<tab/>Right</p>
-
-  <h2>Breaks</h2>
-  <p>Before page break.<PageBreak/>After page break.</p>
-  <p>Before line break.<br/>After line break.</p>
-
-  <h2>Table</h2>
-
-  <Alias id="tdWithMargins">
-    <margins marginUnitType="dxa" top:dxa="2mm" bottom:dxa="2mm" left:dxa="2mm" right:dxa="2mm" />
-  </Alias>
-
-  <Alias id="headWithMargins" _="tdWithMargins">
-    <shading color="#EEEEEE" type="solid"/>
-  </Alias>
-
-  <table>
-    <tr>
-      <td _="headWithMargins"><p style="InTable"><b>Column 1</b></p></td>
-      <td _="headWithMargins"><p style="InTable"><b>Column 2</b></p></td>
-      <td _="headWithMargins"><p style="InTable"><b>Column 3</b></p></td>
-    </tr>
-    <tr>
-      <td _="tdWithMargins"><p style="InTable">This is</p></td>
-      <td _="tdWithMargins"><p style="InTable">a flexible</p></td>
-      <td _="tdWithMargins"><p style="InTable">table.</p></td>
-    </tr>
-  </table>
-
-  <p></p>
-  
-  <table layout="fixed" columnWidths="5cm, 5cm, 3cm">
-    <tr>
-      <td _="headWithMargins"><p style="InTable"><b>Column 1</b></p></td>
-      <td _="headWithMargins"><p style="InTable"><b>Column 2</b></p></td>
-      <td _="headWithMargins"><p style="InTable"><b>Column 3</b></p></td>
-    </tr>
-    <tr>
-      <td _="tdWithMargins"><p style="InTable">This is</p></td>
-      <td _="tdWithMargins"><p style="InTable">a fixed</p></td>
-      <td _="tdWithMargins"><p style="InTable">table.</p></td>
-    </tr>
-  </table>
-
-  <p></p>
-
-  <h2>Template</h2>
-
-  <p>Title from template data: <font color="#EE0000"><%- title %></font></p>
-  <p>Description with formatting: <%= description %></p>
-  <p>Description escaped: <%- description %></p>
-
-  <table layout="fixed" columnWidths="8cm, 3cm, 3cm">
-    <tr>
-      <td _="headWithMargins"><p style="InTable"><b>Title</b></p></td>
-      <td _="headWithMargins"><p style="InTable"><b>Year</b></p></td>
-      <td _="headWithMargins"><p style="InTable"><b>Rating</b></p></td>
-    </tr>
-    <tr>
-      <td _="tdWithMargins" columnSpan:int="3"><p style="InTable" alignment="center"><b>Without sorting</b></p></td>
-    </tr>
-    <% for (let m of movies) { %>
-    <tr>
-      <td _="tdWithMargins"><p style="InTable"><%- m.title %></p></td>
-      <td _="tdWithMargins"><p style="InTable"><%- m.year %></p></td>
-      <td _="tdWithMargins"><p style="InTable"><%- m.rating %></p></td>
-    </tr>
-    <% } %>
-    <tr>
-      <td _="tdWithMargins" columnSpan:int="3"><p style="InTable" alignment="center"><b>Sorted by rating</b></p></td>
-    </tr>
-    <% movies.sort((a, b) => b.rating - a.rating); %>
-    <% for (let m of movies) { %>
-    <tr>
-      <td _="tdWithMargins"><p style="InTable"><%- m.title %></p></td>
-      <td _="tdWithMargins"><p style="InTable"><%- m.year %></p></td>
-      <td _="tdWithMargins"><p style="InTable"><%- m.rating %></p></td>
-    </tr>
-    <% } %>
-  </table>
-
-  <p></p>
-
-</document>
-`;
-
-let data = {
-    // Superset of JSON is allowed, any JavaScript expression can be used here.
-    title: "Random movies",
-    description: "List of <b>random</b> movies.",
-    movies: [
-        {
-            title: 'The Green Mile',
-            year: 1999,
-            rating: 8.6,
-        },
-        {
-            title: 'The Shawshank Redemption',
-            year: 1994,
-            rating: 8.8,
-        },
-        {
-            title: 'Forrest Gump',
-            year: 1994,
-            rating: 8.5,
-        },
-        {
-            title: 'Requiem for a Dream',
-            year: 2000,
-            rating: 7.8,
-        },
-        {
-            title: 'The Matrix',
-            year: 1999,
-            rating: 7.6,
-        },
-        {
-            title: 'The Silence of the Lambs',
-            year: 1991,
-            rating: 8.2,
-        },
-    ]
-};
-
-let output: string;
-
-/*
-async function main() {
-    let templateFile = 'in.xml';
-    let dataFile = 'in.json';
-    let xmlText = fromTemplate(templateFile, templateText, dataFile || '[no data]', data);
-    output = await convert(templateFile, xmlText, true);
-}
-
-async function download() {
-    console.log('Compiling...');
-    await main();
-    await new Promise(r => setTimeout(r, 2000));
-    console.log('Downloading...');
-    let element = document.createElement('a');
-    element.setAttribute('href', 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + encodeURIComponent(output));
-    //element.setAttribute('href', 'data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==');
-    element.setAttribute('download', 'demo.docx');
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-}
-
-setInterface({
-    error: [],
-    path: {
-        resolve: (...paths: string[]) => {
-            return paths.join('/');
-        },
-        dirname: (path: string) => {
-            return path;
-        },
-    },
-    fs: {
-        readFileSync: (path: string, encoding?: 'utf-8') => {
-            console.log(`reading file ${path}`);
-            return encoding ? '' : new Uint8Array(0);
-        },
-        writeFileSync: (path: string, data: string | Uint8Array) => {
-            console.log(`writing file ${path}`, data);
-        },
-    }
-});*/
+const worker = new Worker('xml2docx-worker.js');
 
 (self as any).MonacoEnvironment = {
     getWorkerUrl: function (moduleId, label) {
@@ -385,113 +54,121 @@ setInterface({
     }
 };
 
-export enum TranslationState {
-    PROGRESS = 'progress',
-    ERROR = 'error',
-    READY = 'ready',
+export interface StateFile {
+    readonly name: string;
+    readonly mutable: {
+        content: Uint8Array | string | monaco.editor.IStandaloneCodeEditor;
+        dirty: boolean;
+        container?: HTMLElement;
+    }
 }
 
-export interface StateFile {
-    name: string;
-    dynamic: {
-        content: Uint8Array | string;
-        dirty: boolean;
-    }
+export interface MutableStateContainer<T> {
+    value: T;
 }
 
 export interface State {
-    files: StateFile[];
-    selectedFile: string;
-    mainFile: string;
-    translationState: TranslationState;
-    errors: string[];
-    reset: boolean;
-    alert?: {
-        intent: Intent;
-        icon: IconName;
-        message: string;
-        callback?: (result: boolean) => void;
+    readonly files: StateFile[];
+    readonly selectedFile: string;
+    readonly mainFile: string;
+    readonly errors: string[];
+    readonly reset: boolean;
+    readonly currentEventId: number;
+    readonly receivedEventId: number;
+    readonly workerUpdateTimer?: MutableStateContainer<Timeout>;
+    readonly alert?: {
+        readonly intent: Intent;
+        readonly icon: IconName;
+        readonly message: string;
+        readonly callback?: (result: boolean) => void;
     }
 }
 
-export enum RequestResultType {
-    NONE,
-    DOCX,
-    ZIP,
-    DEBUG, // TODO: Add debug to GUI
+function toWorkerFile(file: StateFile): WorkerFile {
+    let name = file.name;
+    let content = file.mutable.content;
+    if (typeof content !== 'string' && !(content instanceof Uint8Array)) {
+        content = content.getValue();
+    }
+    return { name, content };
 }
-
-export interface WorkerEvent {
-    eventId: number;
-    files: StateFile[];
-    mainFile: string;
-    reset: boolean;
-    requestResult: RequestResultType;
-}
-
-export interface FrontEndEvent {
-    eventId: number;
-    errors: string[];
-    result?: Uint8Array;
-}
-
-let currentEventId = 0;
 
 function workerReset(state: State) {
-    currentEventId++;
-    console.log('worker', {
-        eventId: currentEventId,
-        files: state.files,
+    state = { ...state, currentEventId: state.currentEventId + 1 };
+    let event: WorkerEvent = {
+        eventId: state.currentEventId,
+        files: state.files.map(toWorkerFile),
         mainFile: state.mainFile,
         reset: true,
         requestResult: RequestResultType.NONE,
-    });
-    state.files.forEach(file => file.dynamic.dirty = false);
+    };
+    //console.log('worker', event);
+    worker.postMessage(event);
+    state.files.forEach(file => file.mutable.dirty = false);
+    setState(state);
 }
 
 function workerUpdate(state: State, requestResult: RequestResultType = RequestResultType.NONE) {
-    let workerFiles = state.files.filter(file => file.dynamic.dirty);
-    if (workerFiles.length === 0) {
-        return;
+    let workerFiles = state.files.filter(file => file.mutable.dirty);
+    if (workerFiles.length !== 0 || requestResult !== RequestResultType.NONE) {
+        state = { ...state, currentEventId: state.currentEventId + 1 };
+        let event: WorkerEvent = {
+            eventId: state.currentEventId,
+            files: workerFiles.map(toWorkerFile),
+            mainFile: state.mainFile,
+            reset: false,
+            requestResult,
+        };
+        //console.log('worker', event);
+        worker.postMessage(event);
+        state.files.forEach(file => file.mutable.dirty = false);
     }
-    currentEventId++;
-    console.log('worker', {
-        eventId: currentEventId,
-        files: workerFiles,
-        mainFile: state.mainFile,
-        reset: false,
-        requestResult,
-    });
-    state.files.forEach(file => file.dynamic.dirty = false);
+    if (state.workerUpdateTimer) {
+        clearTimeout(state.workerUpdateTimer.value);
+        state = { ...state, workerUpdateTimer: undefined };
+    }
+    setState(state);
+}
+
+function scheduleWorkerUpdate(state: State) {
+    if (state.workerUpdateTimer) {
+        clearTimeout(state.workerUpdateTimer.value);
+        state.workerUpdateTimer.value = setTimeout(() => workerUpdate(getState()), WORKER_UPDATE_DELAY);
+    } else {
+        state = {...state, workerUpdateTimer: {
+            value: setTimeout(() => workerUpdate(getState()), WORKER_UPDATE_DELAY),
+        }};
+    }
+    setState(state);
 }
 
 const initialState: State = {
     files: sortFiles([
-        {name: 'main.xml', dynamic: { content: '', dirty: true } },
-        {name: 'other.xml', dynamic: { content: '', dirty: true } },
-        {name: 'data.json', dynamic: { content: '', dirty: true } },
-        {name: 'cat.jpeg', dynamic: { content: new Uint8Array(), dirty: true } },
+        {name: 'main.xml', mutable: { content: '<?xml version="1.0" encoding="UTF-8"?>\n<document>\n</document>', dirty: true } },
+        {name: 'other.xml', mutable: { content: '<b>Some additional file</b>', dirty: true } },
+        {name: 'data.json', mutable: { content: '{\n "some": true\n}', dirty: true } },
+        {name: 'cat.jpeg', mutable: { content: new Uint8Array(), dirty: true } },
     ]),
-    errors: [],
+    errors: ['Waiting for initialization....'],
     selectedFile: 'data.json',
     mainFile: 'main.xml',
-    translationState: TranslationState.PROGRESS,
     reset: true,
+    currentEventId: 0,
+    receivedEventId: -1,
 };
 
 let curState: State;
 let tempState: State | undefined = undefined;
-let setState2: React.Dispatch<React.SetStateAction<State>>;
+let setStateReal: React.Dispatch<React.SetStateAction<State>>;
 
 function setState(state: State) {
-    /*console.log('SET STATE:', state);
-    try {
-        throw new Error();
-    } catch (err) {
-        console.error(err);
-    }*/
+    if (tempState) {
+        if (state === tempState) return; // ignore - this is recently set state
+    } else {
+        if (state === curState) return; // ignore - this is current state
+    }
     tempState = state;
-    setState2(state);
+    setStateReal(state);
 }
 
 function getState(): State {
@@ -506,14 +183,8 @@ function iconFromFileName(fileName: string): IconName {
 }
 
 function showAlert(message: string, icon: IconName, intent: Intent = Intent.NONE, callback?: (result: boolean) => void): void {
-    let newstate: State = {...getState(), alert: {
-        intent,
-        icon,
-        message,
-        callback,
-    }};
-    console.log('NEW', newstate);
-    setState(newstate);
+    let state: State = {...getState(), alert: { intent, icon, message, callback, }};
+    setState(state);
 }
 
 function hideAlert() {
@@ -527,9 +198,55 @@ function selectMainFile(index: number) {
     let file = state.files[index];
     if (state.mainFile !== file.name) {
         state = {...state, mainFile: file.name};
-        setState(state);
         workerReset(state);
     }
+}
+
+function showEditor(file: StateFile) {
+    let panel = document.querySelector('#editorPanel') as HTMLElement;
+    [...panel.childNodes].forEach(child => panel.removeChild(child));
+    if (!file.mutable.container) {
+        let editor: monaco.editor.IStandaloneCodeEditor | undefined = undefined;
+        let language: string | undefined = undefined;
+        let n = file.name.toLowerCase();
+        if (n.endsWith('.xml')) {
+            language = 'xml';
+        } else if (n.endsWith('.js')) {
+            language = 'javascript';
+        } else if (n.endsWith('.json')) {
+            language = 'json';
+        }
+        let container = document.createElement('div');
+        container.className = 'editor';
+        panel.appendChild(container);
+        if (language) {
+            let content = file.mutable.content;
+            if (content instanceof Uint8Array) {
+                content = new TextDecoder().decode(content);
+            } else if (typeof content === 'string') {
+                // no need to convert
+            } else {
+                let oldEditor = content;
+                content = oldEditor.getValue();
+                oldEditor.dispose();
+            }
+            editor = monaco.editor.create(container, {
+                value: content,
+                language: language,
+                theme: 'vs-dark',
+                automaticLayout: true,
+            });
+            editor.onDidChangeModelContent(() => {
+                file.mutable.dirty = true;
+                scheduleWorkerUpdate(getState());
+            });
+            file.mutable.content = editor;
+        } else {
+            container.innerHTML = 'TODO: image loading';
+        }
+        file.mutable.container = container;
+    }
+    panel.appendChild(file.mutable.container);
 }
 
 function selectFile(index: number) {
@@ -538,12 +255,21 @@ function selectFile(index: number) {
     if (state.selectedFile !== file.name) {
         setState({...state, selectedFile: file.name});
     }
+    showEditor(file);
 }
 
 function sortFiles(files: StateFile[]) {
     const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
     files.sort((a, b) => collator.compare(a.name, b.name));
     return files;
+}
+
+function disposeFile(file: StateFile) {
+    let content = file.mutable.content;
+    if (!(content instanceof Uint8Array) && typeof content !== 'string') {
+        content.dispose();
+    }
+    file.mutable.content = '';
 }
 
 function deleteFile(index: number) {
@@ -556,9 +282,9 @@ function deleteFile(index: number) {
         if (result) {
             let state = getState();
             let files = [...state.files];
+            disposeFile(files[index]);
             files.splice(index, 1);
             state = { ...state, files };
-            setState(state);
             workerReset(state);
         }
     });
@@ -566,12 +292,8 @@ function deleteFile(index: number) {
 
 function setFileName(index: number, name: string) {
     let state = getState();
-    let parts = name
-        .split(/[\\/]+/)
-        .map(p => p.trim())
-        .filter(p => p);
-    name = parts.join('/');
-    if (name === '' || parts.at(-1)!.indexOf('.') < 0) {
+    name = normalizeFileName(name);
+    if (name === '' || name.split('/').at(-1)!.indexOf('.') < 0) {
         console.log(name);
         showAlert('Invalid file name!', 'issue', Intent.WARNING);
         console.log(state);
@@ -592,11 +314,14 @@ function setFileName(index: number, name: string) {
         newState.mainFile = name;
     }
     newState.files = sortFiles(files);
-    setState(newState);
     workerReset(newState);
 }
 
-function FileProperties({file, index }:{file: StateFile, index: number}) {
+function download(state: State, reqType: RequestResultType) {
+    workerUpdate(state, reqType);
+}
+
+function FileProperties({file, index }: { file: StateFile, index: number }) {
     const [name, setName] = React.useState<string>(file.name);
     return (<Popover
         interactionKind="click"
@@ -613,12 +338,9 @@ function FileProperties({file, index }:{file: StateFile, index: number}) {
                             onClick={() => deleteFile(index)} />
                         <Button text="Main file" intent={Intent.SUCCESS} icon="rocket" className={Classes.POPOVER_DISMISS}
                             onClick={() => selectMainFile(index)} />
-                    </ButtonGroup> &nbsp;
+                    </ButtonGroup>
                     <ButtonGroup>
-                        <Button text="  Cancel  " intent={Intent.NONE} className={Classes.POPOVER_DISMISS} />
-                    </ButtonGroup> &nbsp;
-                    <ButtonGroup>
-                        <Button text="   OK   " intent={Intent.PRIMARY} className={Classes.POPOVER_DISMISS}
+                        <Button text="  Rename  " intent={Intent.PRIMARY} className={Classes.POPOVER_DISMISS}
                             onClick={() => setFileName(index, name)} />
                     </ButtonGroup>
                 </div>
@@ -629,15 +351,22 @@ function FileProperties({file, index }:{file: StateFile, index: number}) {
     </Popover>);
 }
 
+let firstTime = true;
+
 function App() {
     let arr = React.useState<State>({...initialState});
     let state = arr[0];
-    setState2 = arr[1];
+    setStateReal = arr[1];
     curState = state;
     tempState = undefined;
+    let inProgress = state.workerUpdateTimer || state.currentEventId !== state.receivedEventId;
     console.log('CURRENT STATE:', state);
+    if (firstTime) {
+        setTimeout(() => scheduleWorkerUpdate(getState()), 300);
+        firstTime = false;
+    }
     return (
-        <div>
+        <>
             <Alert
                 confirmButtonText='   OK   '
                 cancelButtonText={state.alert?.callback ? '  Cancel  ' : undefined}
@@ -653,29 +382,38 @@ function App() {
                 </Callout>
             </Alert>
             <div style={{ paddingTop: 0 }}>
-                { state.errors.length ? (
-                    <Callout title="Convertion result - Error" icon="error" intent={Intent.DANGER}>
-                    <div style={{ overflowY: "auto", height: 170 }}>
+                { inProgress
+                    ? <div style={{ display: 'block', position: 'absolute', paddingLeft: 1, paddingTop: 3, zIndex: 100000}}>
+                        <Spinner size={43} intent={Intent.DANGER}/>
+                    </div>
+                    : <></>
+                }
+                { state.errors.length
+                    ? <Callout title={`Conversion result: ${state.receivedEventId >= 0 ? 'Error' : 'Initialization'}`}
+                        icon={ inProgress ? 'more' : 'error' } intent={Intent.DANGER}>
+                        <div style={{ overflowY: 'auto', height: 170 }}>
                             <div style={{ paddingTop: 20, paddingBottom: 30 }}>
-                            Invalid new element "SomeUnexpectedElement".
-                                Invalid new element "SomeUnexpectedElement".
-                                Invalid new element "SomeUnexpectedElement".
-                                </div>
-                        </div>
-                    </Callout>
-                ) : (
-                    <Callout title="Convertion result - Success" icon="tick-circle" intent={Intent.PRIMARY}>
-                        <div style={{ overflowY: "auto", height: 170 }}>
-                            <div style={{ paddingTop: 20, paddingBottom: 30 }}>Convertion was successful. You can now download the output.</div>
-                            <div style={{ width: 315 }}>
-                            <ButtonGroup fill={true}>
-                            <Button icon="document" text="Download document" intent={Intent.SUCCESS} />
-                            <Button icon="compressed" text="Download all" intent={Intent.NONE} />
-                            </ButtonGroup>
+                                {state.errors.map(m => (<>{m}<br/></>))}
                             </div>
                         </div>
                     </Callout>
-                ) }
+                    : <Callout title="Conversion result: Success" icon={ inProgress ? 'more' : 'tick-circle' }
+                        intent={Intent.PRIMARY}>
+                        <div style={{ overflowY: 'auto', height: 170 }}>
+                            <div style={{ paddingTop: 20, paddingBottom: 30 }}>
+                                Conversion was successful. You can now download the output.
+                            </div>
+                            <div style={{ width: 315 }}>
+                                <ButtonGroup fill={true}>
+                                    <Button icon="document" text="Download document" intent={Intent.SUCCESS}
+                                        onClick={() => download(state, RequestResultType.DOCX)} />
+                                    <Button icon="compressed" text="Download all" intent={Intent.NONE}
+                                        onClick={() => download(state, RequestResultType.ZIP)} />
+                                </ButtonGroup>
+                            </div>
+                        </div>
+                    </Callout>
+                }
             </div>
             <Navbar>
                 <Navbar.Group align={Alignment.LEFT}>
@@ -688,7 +426,7 @@ function App() {
                     <Button className="bp5-minimal" icon="document-share" text="Download" />
                 </Navbar.Group>
             </Navbar>
-            <div style={{ height: 400, overflowY: 'auto' }}>
+            <div style={{ overflowY: 'auto' }}>
                 <Tree contents={state.files.map((file, i) => ({
                     secondaryLabel: (<FileProperties file={file} index={i}/>),
                     depth: 0,
@@ -708,34 +446,36 @@ function App() {
                 onNodeDoubleClick={(node, path) => selectMainFile(path[0])}
                 />
             </div>
-        </div>
+        </>
     );
 }
 
+function onWorkerEvent(event: FrontEndEvent) {
+    let state = getState();
+    state = { ...state, receivedEventId: event.eventId, errors: event.errors };
+    setState(state);
+    if (event.result && event.resultType !== RequestResultType.NONE) {
+        let url = URL.createObjectURL(new Blob([event.result]));
+        let element = document.createElement('a');
+        element.setAttribute('href', url);
+        switch (event.resultType) {
+        case RequestResultType.DOCX:
+            element.setAttribute('download', 'xml2docx-output.docx');
+            break;
+        case RequestResultType.DEBUG:
+        case RequestResultType.ZIP:
+            element.setAttribute('download', 'xml2docx-bundle.zip');
+            break;
+        }
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+}
+
 window.onload = () => {
-    console.log('loaded');
-    if (document.getElementById('btn'))
-        document.getElementById('btn')!.onclick = () => { download() };
-    /*monacode({
-        container: document.getElementById('editor') as HTMLElement,
-        value: '<aaa>Download</aaa>',
-        theme: "vs-dark",
-    });*/
-    monaco.editor.create(document.getElementById('editor') as HTMLElement, {
-        value: templateText,
-        language: "xml",
-        theme: "vs-dark",
-        automaticLayout: true,
-    });
-
-    /*monaco.editor.create(document.getElementById('container') as HTMLElement, {
-        value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
-        language: 'javascript'
-    });*/
-
-    ReactDOM.render(<App />, document.getElementById("reactRoot"));
-
-    main();
+    worker.onmessage = (e) => { onWorkerEvent(e.data as FrontEndEvent); };
+    ReactDOM.render(<App />, document.getElementById('reactRoot'));
 };
-
 
