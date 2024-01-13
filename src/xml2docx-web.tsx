@@ -18,21 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from "docx";
-import { template } from 'underscore';
-import { convert } from './converter';
-import { fromTemplate } from './template';
-import { os, setInterface } from './os';
+import { exec } from './exec';
+import { setInterface } from './os';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
 //import * as monaco from 'monaco-editor';
 //import monacode from 'https://unpkg.com/monacode/index.min.js';
-import React from "react";
-import ReactDOM from "react-dom";
-import { Alignment, Button, Callout, Intent, Navbar, Section, Tree } from "@blueprintjs/core";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+    Alignment, Button, Callout, Intent, Navbar, Tree, ButtonGroup, Icon, IconName, Popover, Classes, InputGroup,
+    Alert, HotkeysProvider, HotkeysTarget2, HotkeyConfig
+} from '@blueprintjs/core';
 
-import "normalize.css/normalize.css";
-import "@blueprintjs/core/lib/css/blueprint.css";
-import "@blueprintjs/icons/lib/css/blueprint-icons.css";
+
+import 'normalize.css/normalize.css';
+import '@blueprintjs/core/lib/css/blueprint.css';
+import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 
 let templateText = `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -322,6 +323,7 @@ let data = {
 
 let output: string;
 
+/*
 async function main() {
     let templateFile = 'in.xml';
     let dataFile = 'in.json';
@@ -363,7 +365,7 @@ setInterface({
             console.log(`writing file ${path}`, data);
         },
     }
-});
+});*/
 
 (self as any).MonacoEnvironment = {
     getWorkerUrl: function (moduleId, label) {
@@ -383,10 +385,298 @@ setInterface({
     }
 };
 
+export enum TranslationState {
+    PROGRESS = 'progress',
+    ERROR = 'error',
+    READY = 'ready',
+}
+
+export interface StateFile {
+    name: string;
+    dynamic: {
+        content: Uint8Array | string;
+        dirty: boolean;
+    }
+}
+
+export interface State {
+    files: StateFile[];
+    selectedFile: string;
+    mainFile: string;
+    translationState: TranslationState;
+    errors: string[];
+    reset: boolean;
+    alert?: {
+        intent: Intent;
+        icon: IconName;
+        message: string;
+        callback?: (result: boolean) => void;
+    }
+}
+
+export enum RequestResultType {
+    NONE,
+    DOCX,
+    ZIP,
+    DEBUG, // TODO: Add debug to GUI
+}
+
+export interface WorkerEvent {
+    eventId: number;
+    files: StateFile[];
+    mainFile: string;
+    reset: boolean;
+    requestResult: RequestResultType;
+}
+
+export interface FrontEndEvent {
+    eventId: number;
+    errors: string[];
+    result?: Uint8Array;
+}
+
+let currentEventId = 0;
+
+function workerReset(state: State) {
+    currentEventId++;
+    console.log('worker', {
+        eventId: currentEventId,
+        files: state.files,
+        mainFile: state.mainFile,
+        reset: true,
+        requestResult: RequestResultType.NONE,
+    });
+    state.files.forEach(file => file.dynamic.dirty = false);
+}
+
+function workerUpdate(state: State, requestResult: RequestResultType = RequestResultType.NONE) {
+    let workerFiles = state.files.filter(file => file.dynamic.dirty);
+    if (workerFiles.length === 0) {
+        return;
+    }
+    currentEventId++;
+    console.log('worker', {
+        eventId: currentEventId,
+        files: workerFiles,
+        mainFile: state.mainFile,
+        reset: false,
+        requestResult,
+    });
+    state.files.forEach(file => file.dynamic.dirty = false);
+}
+
+const initialState: State = {
+    files: sortFiles([
+        {name: 'main.xml', dynamic: { content: '', dirty: true } },
+        {name: 'other.xml', dynamic: { content: '', dirty: true } },
+        {name: 'data.json', dynamic: { content: '', dirty: true } },
+        {name: 'cat.jpeg', dynamic: { content: new Uint8Array(), dirty: true } },
+    ]),
+    errors: [],
+    selectedFile: 'data.json',
+    mainFile: 'main.xml',
+    translationState: TranslationState.PROGRESS,
+    reset: true,
+};
+
+let curState: State;
+let tempState: State | undefined = undefined;
+let setState2: React.Dispatch<React.SetStateAction<State>>;
+
+function setState(state: State) {
+    /*console.log('SET STATE:', state);
+    try {
+        throw new Error();
+    } catch (err) {
+        console.error(err);
+    }*/
+    tempState = state;
+    setState2(state);
+}
+
+function getState(): State {
+    return tempState ? tempState : curState;
+}
+
+function iconFromFileName(fileName: string): IconName {
+    let n = fileName.toLowerCase();
+    if (n.endsWith('.xml')) return 'code';
+    if (n.endsWith('.json') || n.endsWith('.js')) return 'database';
+    return 'media';
+}
+
+function showAlert(message: string, icon: IconName, intent: Intent = Intent.NONE, callback?: (result: boolean) => void): void {
+    let newstate: State = {...getState(), alert: {
+        intent,
+        icon,
+        message,
+        callback,
+    }};
+    console.log('NEW', newstate);
+    setState(newstate);
+}
+
+function hideAlert() {
+    let state = { ...getState() };
+    delete state.alert;
+    setState(state);
+}
+
+function selectMainFile(index: number) {
+    let state = getState();
+    let file = state.files[index];
+    if (state.mainFile !== file.name) {
+        state = {...state, mainFile: file.name};
+        setState(state);
+        workerReset(state);
+    }
+}
+
+function selectFile(index: number) {
+    let state = getState();
+    let file = state.files[index];
+    if (state.selectedFile !== file.name) {
+        setState({...state, selectedFile: file.name});
+    }
+}
+
+function sortFiles(files: StateFile[]) {
+    const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
+    files.sort((a, b) => collator.compare(a.name, b.name));
+    return files;
+}
+
+function deleteFile(index: number) {
+    let state = getState();
+    if (state.files[index].name === state.mainFile) {
+        showAlert('You cannot delete main file. Set different file as a main file and retry.', 'info-sign', Intent.PRIMARY);
+        return;
+    }
+    showAlert(`Are you sure you want to delete "${state.files[index].name}"?`, 'trash', Intent.DANGER, result => {
+        if (result) {
+            let state = getState();
+            let files = [...state.files];
+            files.splice(index, 1);
+            state = { ...state, files };
+            setState(state);
+            workerReset(state);
+        }
+    });
+}
+
+function setFileName(index: number, name: string) {
+    let state = getState();
+    let parts = name
+        .split(/[\\/]+/)
+        .map(p => p.trim())
+        .filter(p => p);
+    name = parts.join('/');
+    if (name === '' || parts.at(-1)!.indexOf('.') < 0) {
+        console.log(name);
+        showAlert('Invalid file name!', 'issue', Intent.WARNING);
+        console.log(state);
+        return;
+    }
+    state.files.forEach((file, i) => console.log(file.name, name, i, index));
+    if (state.files.some((file, i) => file.name === name && i !== index)) {
+        showAlert('File already exists!', 'issue', Intent.WARNING);
+        return;
+    }
+    let files = [...state.files];
+    files[index] = { ...files[index], name };
+    let newState = { ...state, files };
+    if (state.files[index].name === state.selectedFile) {
+        newState.selectedFile = name;
+    }
+    if (state.files[index].name === state.mainFile) {
+        newState.mainFile = name;
+    }
+    newState.files = sortFiles(files);
+    setState(newState);
+    workerReset(newState);
+}
+
+function FileProperties({file, index }:{file: StateFile, index: number}) {
+    const [name, setName] = React.useState<string>(file.name);
+    return (<Popover
+        interactionKind="click"
+        popoverClassName={Classes.POPOVER_CONTENT_SIZING}
+        placement="bottom"
+        content={
+            <>
+                <div style={{paddingBottom: 16, width: 300}}>
+                    <InputGroup defaultValue={file.name} onValueChange={text => setName(text)}/>
+                </div>
+                <div style={{textAlign: 'right', width: 300}}>
+                    <ButtonGroup style={{float: 'left'}}>
+                        <Button intent={Intent.DANGER} icon="trash" className={Classes.POPOVER_DISMISS}
+                            onClick={() => deleteFile(index)} />
+                        <Button text="Main file" intent={Intent.SUCCESS} icon="rocket" className={Classes.POPOVER_DISMISS}
+                            onClick={() => selectMainFile(index)} />
+                    </ButtonGroup> &nbsp;
+                    <ButtonGroup>
+                        <Button text="  Cancel  " intent={Intent.NONE} className={Classes.POPOVER_DISMISS} />
+                    </ButtonGroup> &nbsp;
+                    <ButtonGroup>
+                        <Button text="   OK   " intent={Intent.PRIMARY} className={Classes.POPOVER_DISMISS}
+                            onClick={() => setFileName(index, name)} />
+                    </ButtonGroup>
+                </div>
+            </>
+        }
+    >
+        <Button className="bp5-minimal" icon="more" />
+    </Popover>);
+}
 
 function App() {
+    let arr = React.useState<State>({...initialState});
+    let state = arr[0];
+    setState2 = arr[1];
+    curState = state;
+    tempState = undefined;
+    console.log('CURRENT STATE:', state);
     return (
         <div>
+            <Alert
+                confirmButtonText='   OK   '
+                cancelButtonText={state.alert?.callback ? '  Cancel  ' : undefined}
+                intent={state.alert?.intent}
+                isOpen={!!state.alert}
+                canEscapeKeyCancel={true}
+                canOutsideClickCancel={true}
+                onConfirm={() => { state.alert?.callback?.(true); hideAlert(); }}
+                onCancel={() => { state.alert?.callback?.(false); hideAlert(); }}
+            >
+                <Callout intent={state.alert?.intent} icon={state.alert?.icon}>
+                    {state.alert?.message}
+                </Callout>
+            </Alert>
+            <div style={{ paddingTop: 0 }}>
+                { state.errors.length ? (
+                    <Callout title="Convertion result - Error" icon="error" intent={Intent.DANGER}>
+                    <div style={{ overflowY: "auto", height: 170 }}>
+                            <div style={{ paddingTop: 20, paddingBottom: 30 }}>
+                            Invalid new element "SomeUnexpectedElement".
+                                Invalid new element "SomeUnexpectedElement".
+                                Invalid new element "SomeUnexpectedElement".
+                                </div>
+                        </div>
+                    </Callout>
+                ) : (
+                    <Callout title="Convertion result - Success" icon="tick-circle" intent={Intent.PRIMARY}>
+                        <div style={{ overflowY: "auto", height: 170 }}>
+                            <div style={{ paddingTop: 20, paddingBottom: 30 }}>Convertion was successful. You can now download the output.</div>
+                            <div style={{ width: 315 }}>
+                            <ButtonGroup fill={true}>
+                            <Button icon="document" text="Download document" intent={Intent.SUCCESS} />
+                            <Button icon="compressed" text="Download all" intent={Intent.NONE} />
+                            </ButtonGroup>
+                            </div>
+                        </div>
+                    </Callout>
+                ) }
+            </div>
             <Navbar>
                 <Navbar.Group align={Alignment.LEFT}>
                     <Navbar.Heading>xml2docx</Navbar.Heading>
@@ -399,50 +689,24 @@ function App() {
                 </Navbar.Group>
             </Navbar>
             <div style={{ height: 400, overflowY: 'auto' }}>
-                <Tree contents={new Array(80).fill(0).map((x, i) => ({
+                <Tree contents={state.files.map((file, i) => ({
+                    secondaryLabel: (<FileProperties file={file} index={i}/>),
                     depth: 0,
-                    id: i,
-                    isSelected: i == 20,
-                    label: 'abc ' + i,
+                    id: file.name,
+                    isSelected: state.selectedFile === file.name,
+                    label: state.mainFile === file.name
+                        ? (<span style={{color: state.selectedFile === file.name
+                            ? '#8F9' : '#5A6', fontWeight: 'bold'}}>{file.name}</span>)
+                        : file.name,
                     path: [i],
-                    icon: i < 4 ? 'code' : i < 5 ? 'database' : i < 7 ? 'document' : 'media',
-                }))} />
-            </div>
-            <div style={{ paddingTop: 0 }}>
-                <Callout title="Convertion result - Error" icon="error" intent={Intent.DANGER}>
-                <div style={{ overflowY: "auto", height: 170 }}>
-                        <div style={{ paddingTop: 20, paddingBottom: 30 }}>
-                        Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            Invalid new element "SomeUnexpectedElement".
-                            </div>
-                    </div>
-                </Callout>
-                <Callout title="Convertion result - Success" icon="tick-circle" intent={Intent.PRIMARY}>
-                    <div style={{ overflowY: "auto", height: 170 }}>
-                        <div style={{ paddingTop: 20, paddingBottom: 30 }}>Convertion was successful. You can now download the output.</div>
-                        <Button icon="download" text="Download" intent={Intent.SUCCESS} large={true} style={{ width: 315 }} />
-                    </div>
-                </Callout>
+                    icon: state.mainFile === file.name
+                        ? (<Icon icon={iconFromFileName(file.name)} size={16} className="bp5-tree-node-icon"
+                            color={state.selectedFile === file.name ? '#8F9' : '#5A6'}/>)
+                        : iconFromFileName(file.name),
+                }))}
+                onNodeClick={(node, path) => selectFile(path[0])}
+                onNodeDoubleClick={(node, path) => selectMainFile(path[0])}
+                />
             </div>
         </div>
     );

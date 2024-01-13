@@ -30,7 +30,7 @@ export interface OS {
     convert: {
         fromBase64(str: string): Uint8Array;
     },
-    error: (...args: string[]) => void;
+    error: (...args: string[]) => void; // TODO: use it instead of console or callbacks
 }
 
 export let os: OS;
