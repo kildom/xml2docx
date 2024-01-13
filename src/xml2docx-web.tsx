@@ -28,7 +28,7 @@ import {
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import { FrontEndEvent, RequestResultType, WorkerEvent, WorkerFile, normalizeFileName } from './web-common';
+import { FileType, FrontEndEvent, RequestResultType, WorkerEvent, WorkerFile, getFileType, normalizeFileName } from './web-common';
 
 type Timeout = ReturnType<typeof setTimeout>;
 
@@ -71,6 +71,7 @@ export interface State {
     readonly files: StateFile[];
     readonly selectedFile: string;
     readonly mainFile: string;
+    readonly dataFile?: string;
     readonly errors: string[];
     readonly reset: boolean;
     readonly currentEventId: number;
@@ -99,6 +100,7 @@ function workerReset(state: State) {
         eventId: state.currentEventId,
         files: state.files.map(toWorkerFile),
         mainFile: state.mainFile,
+        dataFile: state.dataFile,
         reset: true,
         requestResult: RequestResultType.NONE,
     };
@@ -116,6 +118,7 @@ function workerUpdate(state: State, requestResult: RequestResultType = RequestRe
             eventId: state.currentEventId,
             files: workerFiles.map(toWorkerFile),
             mainFile: state.mainFile,
+            dataFile: state.dataFile,
             reset: false,
             requestResult,
         };
@@ -144,14 +147,17 @@ function scheduleWorkerUpdate(state: State) {
 
 const initialState: State = {
     files: sortFiles([
-        {name: 'main.xml', mutable: { content: '<?xml version="1.0" encoding="UTF-8"?>\n<document>\n</document>', dirty: true } },
+        {name: 'main.xml', mutable: {
+            content: '<?xml version="1.0" encoding="UTF-8"?>\n<document>\n  Hello <%- name %>!\n</document>', dirty: true}
+        },
         {name: 'other.xml', mutable: { content: '<b>Some additional file</b>', dirty: true } },
-        {name: 'data.json', mutable: { content: '{\n "some": true\n}', dirty: true } },
+        {name: 'data.json5', mutable: { content: '{\n "name": "World"\n}', dirty: true } },
         {name: 'cat.jpeg', mutable: { content: new Uint8Array(), dirty: true } },
     ]),
     errors: ['Waiting for initialization....'],
     selectedFile: 'data.json',
     mainFile: 'main.xml',
+    dataFile: 'data.json5',
     reset: true,
     currentEventId: 0,
     receivedEventId: -1,
@@ -175,11 +181,16 @@ function getState(): State {
     return tempState ? tempState : curState;
 }
 
+const fileIcons: { [key in FileType]: IconName } = {
+    [FileType.UNKNOWN]: 'disable',
+    [FileType.IMAGE]: 'media',
+    [FileType.JSON]: 'database',
+    [FileType.JSON5]: 'data-connection',
+    [FileType.XML]: 'code',
+};
+
 function iconFromFileName(fileName: string): IconName {
-    let n = fileName.toLowerCase();
-    if (n.endsWith('.xml')) return 'code';
-    if (n.endsWith('.json') || n.endsWith('.js')) return 'database';
-    return 'media';
+    return fileIcons[getFileType(fileName)];
 }
 
 function showAlert(message: string, icon: IconName, intent: Intent = Intent.NONE, callback?: (result: boolean) => void): void {
@@ -193,29 +204,39 @@ function hideAlert() {
     setState(state);
 }
 
-function selectMainFile(index: number) {
+function selectMainOrDataFile(index: number) {
     let state = getState();
     let file = state.files[index];
-    if (state.mainFile !== file.name) {
-        state = {...state, mainFile: file.name};
+    let type = getFileType(file.name);
+    if (type === FileType.JSON || type === FileType.JSON5) {
+        if (state.dataFile !== file.name) {
+            state = {...state, dataFile: file.name};
+        } else {
+            state = {...state, dataFile: undefined};
+        }
         workerReset(state);
+    } else if (type === FileType.XML) {
+        if (state.mainFile !== file.name) {
+            state = {...state, mainFile: file.name};
+            workerReset(state);
+        }
     }
 }
+
+const fileLanguage: { [key in FileType]: string | undefined } = {
+    [FileType.UNKNOWN]: undefined,
+    [FileType.IMAGE]: undefined,
+    [FileType.JSON]: 'json',
+    [FileType.JSON5]: 'javascript',
+    [FileType.XML]: 'xml',
+};
 
 function showEditor(file: StateFile) {
     let panel = document.querySelector('#editorPanel') as HTMLElement;
     [...panel.childNodes].forEach(child => panel.removeChild(child));
     if (!file.mutable.container) {
         let editor: monaco.editor.IStandaloneCodeEditor | undefined = undefined;
-        let language: string | undefined = undefined;
-        let n = file.name.toLowerCase();
-        if (n.endsWith('.xml')) {
-            language = 'xml';
-        } else if (n.endsWith('.js')) {
-            language = 'javascript';
-        } else if (n.endsWith('.json')) {
-            language = 'json';
-        }
+        let language = fileLanguage[getFileType(file.name)];
         let container = document.createElement('div');
         container.className = 'editor';
         panel.appendChild(container);
@@ -282,9 +303,10 @@ function deleteFile(index: number) {
         if (result) {
             let state = getState();
             let files = [...state.files];
+            let dataFileClear = (files[index].name === state.dataFile) ? { dataFile: undefined } : {};
             disposeFile(files[index]);
             files.splice(index, 1);
-            state = { ...state, files };
+            state = { ...state, ...dataFileClear, files };
             workerReset(state);
         }
     });
@@ -313,6 +335,9 @@ function setFileName(index: number, name: string) {
     if (state.files[index].name === state.mainFile) {
         newState.mainFile = name;
     }
+    if (state.files[index].name === state.dataFile) {
+        newState.dataFile = name;
+    }
     newState.files = sortFiles(files);
     workerReset(newState);
 }
@@ -321,8 +346,23 @@ function download(state: State, reqType: RequestResultType) {
     workerUpdate(state, reqType);
 }
 
-function FileProperties({file, index }: { file: StateFile, index: number }) {
+enum SetDefaultButtonType {
+    NONE,
+    SET_MAIN,
+    SET_DATA,
+    UNSET_DATA,
+}
+
+function FileProperties({file, index, btnText }:
+    { file: StateFile, index: number, btnText: string }
+) {
     const [name, setName] = React.useState<string>(file.name);
+
+    let btn = btnText
+        ? <Button text={btnText} intent={Intent.SUCCESS} icon="rocket" className={Classes.POPOVER_DISMISS}
+            onClick={() => selectMainOrDataFile(index)} />
+        : <></>;
+
     return (<Popover
         interactionKind="click"
         popoverClassName={Classes.POPOVER_CONTENT_SIZING}
@@ -336,8 +376,7 @@ function FileProperties({file, index }: { file: StateFile, index: number }) {
                     <ButtonGroup style={{float: 'left'}}>
                         <Button intent={Intent.DANGER} icon="trash" className={Classes.POPOVER_DISMISS}
                             onClick={() => deleteFile(index)} />
-                        <Button text="Main file" intent={Intent.SUCCESS} icon="rocket" className={Classes.POPOVER_DISMISS}
-                            onClick={() => selectMainFile(index)} />
+                        {btn}
                     </ButtonGroup>
                     <ButtonGroup>
                         <Button text="  Rename  " intent={Intent.PRIMARY} className={Classes.POPOVER_DISMISS}
@@ -349,6 +388,43 @@ function FileProperties({file, index }: { file: StateFile, index: number }) {
     >
         <Button className="bp5-minimal" icon="more" />
     </Popover>);
+}
+
+function fileToTree(state: State, file: StateFile, index: number) {
+    let isSelected = (state.selectedFile === file.name);
+    let isMainFile = (state.mainFile === file.name);
+    let isDataFile = (state.dataFile === file.name);
+    let type = getFileType(file.name);
+
+    return {
+        secondaryLabel: (<FileProperties file={file} index={index}
+            btnText={
+                (type === FileType.XML && file.name !== state.mainFile)
+                    ? 'Main file'
+                    : (file.name === state.dataFile)
+                        ? 'Unset data file'
+                        : (type === FileType.JSON5 || type === FileType.JSON)
+                            ? 'Data file'
+                            : ''
+            }
+        />),
+        depth: 0,
+        id: file.name,
+        isSelected,
+        label: isMainFile
+            ? (<span style={{color: isSelected ? '#8F9' : '#5A6', fontWeight: 'bold'}}>{file.name}</span>)
+            : isDataFile
+                ? (<span style={{color: isSelected ? '#db82e8' : '#b25cbf', fontWeight: 'bold'}}>{file.name}</span>)
+                : file.name,
+        path: [index],
+        icon: isMainFile
+            ? (<Icon icon={iconFromFileName(file.name)} size={16} className="bp5-tree-node-icon"
+                color={isSelected ? '#8F9' : '#5A6'}/>)
+            : isDataFile
+                ? (<Icon icon={iconFromFileName(file.name)} size={16} className="bp5-tree-node-icon"
+                    color={isSelected ? '#db82e8' : '#b25cbf'}/>)
+                : iconFromFileName(file.name),
+    };
 }
 
 let firstTime = true;
@@ -427,23 +503,8 @@ function App() {
                 </Navbar.Group>
             </Navbar>
             <div style={{ overflowY: 'auto' }}>
-                <Tree contents={state.files.map((file, i) => ({
-                    secondaryLabel: (<FileProperties file={file} index={i}/>),
-                    depth: 0,
-                    id: file.name,
-                    isSelected: state.selectedFile === file.name,
-                    label: state.mainFile === file.name
-                        ? (<span style={{color: state.selectedFile === file.name
-                            ? '#8F9' : '#5A6', fontWeight: 'bold'}}>{file.name}</span>)
-                        : file.name,
-                    path: [i],
-                    icon: state.mainFile === file.name
-                        ? (<Icon icon={iconFromFileName(file.name)} size={16} className="bp5-tree-node-icon"
-                            color={state.selectedFile === file.name ? '#8F9' : '#5A6'}/>)
-                        : iconFromFileName(file.name),
-                }))}
-                onNodeClick={(node, path) => selectFile(path[0])}
-                onNodeDoubleClick={(node, path) => selectMainFile(path[0])}
+                <Tree contents={state.files.map((f, i) => fileToTree(state, f, i))}
+                    onNodeClick={(node, path) => selectFile(path[0])}
                 />
             </div>
         </>

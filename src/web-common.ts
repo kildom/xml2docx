@@ -34,6 +34,7 @@ export interface WorkerEvent {
     eventId: number;
     files: WorkerFile[];
     mainFile: string;
+    dataFile?: string;
     reset: boolean;
     requestResult: RequestResultType;
 }
@@ -51,4 +52,34 @@ export function normalizeFileName(name: string) {
         .map(p => p.trim())
         .filter(p => p);
     return parts.join('/');
+}
+
+export enum FileType {
+    UNKNOWN,
+    XML,
+    JSON,
+    JSON5,
+    IMAGE,
+}
+
+const fileExtensions: {[key:string]:FileType} = {
+    '.png': FileType.IMAGE,
+    '.gif': FileType.IMAGE,
+    '.bmp': FileType.IMAGE,
+    '.jpeg': FileType.IMAGE,
+    '.jpg': FileType.IMAGE,
+    '.jif': FileType.IMAGE,
+    '.xml': FileType.XML,
+    '.json': FileType.JSON,
+    '.json5': FileType.JSON5,
+    '.js': FileType.JSON,
+};
+
+export function getFileType(name: string): FileType {
+    name = normalizeFileName(name);
+    name = name.split('/').at(-1) as string;
+    let pos = name.lastIndexOf('.');
+    if (pos < 0) return FileType.UNKNOWN;
+    let ext = name.substring(pos).toLowerCase();
+    return fileExtensions[ext] || FileType.UNKNOWN;
 }
