@@ -50,7 +50,7 @@ export function normalizeFileName(name: string) {
     let parts = name
         .split(/[\\/]+/)
         .map(p => p.trim())
-        .filter(p => p);
+        .filter(p => p && p !== '.');
     return parts.join('/');
 }
 
@@ -58,7 +58,6 @@ export enum FileType {
     UNKNOWN,
     XML,
     JSON,
-    JSON5,
     IMAGE,
 }
 
@@ -71,7 +70,7 @@ const fileExtensions: {[key:string]:FileType} = {
     '.jif': FileType.IMAGE,
     '.xml': FileType.XML,
     '.json': FileType.JSON,
-    '.json5': FileType.JSON5,
+    '.json5': FileType.JSON,
     '.js': FileType.JSON,
 };
 

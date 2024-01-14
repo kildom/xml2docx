@@ -40,13 +40,6 @@ Options:
                  <input.xml> file without any restrictions. You must have
                  this file from a trusted source.
 
-    -x
-        Execute <data.json> as a JavaScript expression. This gives the data
-        file more flexibility, e.g. you can use comments.
-        WARNING: Setting this option will execute arbitrary code from the
-                 <data.json> file without any restrictions. You must have
-                 this file from a trusted source.
-
     --debug
         Dump intermediate files alongside the output after each step of
         processing and show more verbose output in case of errors. This
@@ -70,7 +63,6 @@ function parseArguments(): ExecOptions {
     let input: string | undefined;
     let output: string | undefined;
     let data: string | undefined;
-    let extData = false;
     let debug = false;
     let argCounter = 0;
     let dataJsonArg = false;
@@ -83,8 +75,6 @@ function parseArguments(): ExecOptions {
                 throw printUsage('Only one data file allowed.');
             }
             dataJsonArg = true;
-        } else if (arg === '-x') {
-            extData = true;
         } else if (arg === '--debug') {
             debug = true;
         } else if (arg === '--help' || arg === '/?' || arg === '-h') {
@@ -106,7 +96,7 @@ function parseArguments(): ExecOptions {
     if (!output) {
         output = input.replace(/\.xml$/, '') + '.docx';
     }
-    return { input, output, data, extData, debug };
+    return { input, output, data, debug };
 }
 
 async function main() {

@@ -18,17 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FrontEndEvent, RequestResultType, WorkerEvent, WorkerFile, normalizeFileName } from './web-common';
+import JSZip from 'jszip';
 
+import {
+    FrontEndEvent, RequestResultType, WorkerEvent, WorkerFile, normalizeFileName
+} from './web-common';
 import { exec } from './exec';
 import { printError, OS, setInterface } from './os';
-import JSZip from 'jszip';
 
 
 const OUTPUT_DIR = 'output/';
 
 let files: WorkerFile[] = [];
 let mainFile: string = '';
+let dataFile: string | undefined = undefined;
 let messageQueue: WorkerEvent[] | undefined = undefined;
 let modified: boolean = false;
 let errors: string[] = [];
@@ -54,60 +57,11 @@ function writeFile(name: string, content: string | Uint8Array) {
     }
 }
 
-const os: OS = {
-    path: {
-        resolve: (...paths: string[]) => {
-            return normalizeFileName(paths.join('/'));
-        },
-        dirname: (path: string) => {
-            path = normalizeFileName(path);
-            let parts = path.split('/');
-            if (parts.length === 1) {
-                return '.';
-            } else {
-                parts.pop();
-                return parts.join('/');
-            }
-        },
-    },
-    fs: {
-        readFileSync: (path: string, encoding?: 'utf-8') => {
-            path = normalizeFileName(path);
-            let file = files.find(f => f.name === path);
-            if (!file) {
-                throw new Error(`Cannot find file "${path}".`);
-            }
-            let content = file.content;
-            if (encoding === 'utf-8' && typeof content !== 'string') {
-                content = new TextDecoder().decode(content);
-            } else if (encoding !== 'utf-8' && typeof content === 'string') {
-                content = new TextEncoder().encode(content);
-            }
-            return content;
-        },
-        writeFileSync: (path: string, data: Uint8Array | string) => {
-            path = normalizeFileName(path);
-            writeFile(path, data);
-        },
-    },
-    convert: {
-        fromBase64: (str: string) => {
-            let binary = atob(str);
-            return Uint8Array.from(binary, (m) => m.codePointAt(0) as number);
-        }
-    },
-    error: (...args: string[]) => {
-        console.error(...args);
-    }
-};
-
-setInterface(os);
-
-
 async function onFrontEndEvent(event: WorkerEvent) {
     console.log(event);
-    modified = mainFile !== event.mainFile;
+    modified = (mainFile !== event.mainFile) || (dataFile !== event.dataFile);
     mainFile = event.mainFile;
+    dataFile = event.dataFile;
 
     if (event.reset) {
         files.splice(0);
@@ -124,8 +78,8 @@ async function onFrontEndEvent(event: WorkerEvent) {
         try {
             await exec({
                 input: mainFile,
+                data: dataFile,
                 output: OUTPUT_DIR + 'output.docx',
-                extData: false,
                 debug: false,
             });
         } catch (err) {
@@ -180,6 +134,55 @@ async function onFrontEndEventWrapper(event: WorkerEvent) {
         messageQueue = undefined;
     }
 }
+
+const os: OS = {
+    path: {
+        resolve: (...paths: string[]) => {
+            return normalizeFileName(paths.join('/'));
+        },
+        dirname: (path: string) => {
+            path = normalizeFileName(path);
+            let parts = path.split('/');
+            if (parts.length === 1) {
+                return '.';
+            } else {
+                parts.pop();
+                return parts.join('/');
+            }
+        },
+    },
+    fs: {
+        readFileSync: (path: string, encoding?: 'utf-8') => {
+            path = normalizeFileName(path);
+            let file = files.find(f => f.name === path);
+            if (!file) {
+                throw new Error(`Cannot find file "${path}".`);
+            }
+            let content = file.content;
+            if (encoding === 'utf-8' && typeof content !== 'string') {
+                content = new TextDecoder().decode(content);
+            } else if (encoding !== 'utf-8' && typeof content === 'string') {
+                content = new TextEncoder().encode(content);
+            }
+            return content;
+        },
+        writeFileSync: (path: string, data: Uint8Array | string) => {
+            path = normalizeFileName(path);
+            writeFile(path, data);
+        },
+    },
+    convert: {
+        fromBase64: (str: string) => {
+            let binary = atob(str);
+            return Uint8Array.from(binary, (m) => m.codePointAt(0) as number);
+        }
+    },
+    error: (...args: string[]) => {
+        console.error(...args);
+    }
+};
+
+setInterface(os);
 
 onmessage = (e) => {
     console.log(e.data);

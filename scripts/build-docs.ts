@@ -31,6 +31,7 @@ showdown.extension('gitHubAlerts', function () {
 
 
 let docsDir = 'docs';
+let webDir = 'web';
 let markdownFiles: string[] = [];
 
 try {
@@ -48,7 +49,7 @@ let templateText = fs.readFileSync(`${docsDir}/template.html`, 'utf-8');
 let compiled = template(templateText);
 let output = compiled({ markdownTexts, fileNameToId });
 
-fs.writeFileSync(`${docsDir}/index.html`, output);
+fs.writeFileSync(`${webDir}/docs.html`, output);
 
 function fileNameToId(name: string): string {
     return name.toLowerCase().replace(/[^a-z0-9_-]/g, '-');

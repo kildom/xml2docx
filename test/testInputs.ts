@@ -59,7 +59,6 @@ async function main() {
                         input: `test/inputs/${file}`,
                         output,
                         data,
-                        extData: false,
                         debug: true,
                     });
                 } else {

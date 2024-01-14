@@ -19,6 +19,7 @@
  */
 
 import * as docx from 'docx';
+import JSON5 from 'json5';
 
 import { os, InterceptedError } from './os';
 import { fromTemplate } from './template';
@@ -35,13 +36,7 @@ export interface ExecOptions {
     input: string;
     output: string | ReturnOutput;
     data?: string;
-    extData: boolean;
     debug: boolean;
-}
-
-
-function parseExtendedJSON(text: string): any {
-    return (new Function(`return (${text});`))();
 }
 
 export async function exec(args: ExecOptions): Promise<string | Uint8Array> {
@@ -60,10 +55,10 @@ export async function exec(args: ExecOptions): Promise<string | Uint8Array> {
         } catch (err) { throw new InterceptedError(err, `Error reading data file "${args.data}".`); }
 
         try {
-            data = (args.extData ? parseExtendedJSON : JSON.parse)(dataText);
+            data = JSON5.parse(dataText);
         } catch (err) { throw new InterceptedError(err, `Error parsing file "${args.data}".`); }
 
-        if (args.debug && args.extData) {
+        if (args.debug) {
             os.fs.writeFileSync(args.output + '.json', JSON.stringify(data, null, 4));
         }
 
