@@ -45,11 +45,14 @@ markdownFiles = markdownFiles
     .sort((a, b) => a.startsWith('README') ? -1 : 1);
 let markdownTexts = Object.fromEntries(markdownFiles.map(name => [name, convertMarkdown(name)]));
 
-let templateText = fs.readFileSync(`${docsDir}/template.html`, 'utf-8');
-let compiled = template(templateText);
-let output = compiled({ markdownTexts, fileNameToId });
-
-fs.writeFileSync(`${webDir}/docs.html`, output);
+for (let file of fs.readdirSync(docsDir)) {
+    if (file.indexOf('.template.') > 0) {
+        let templateText = fs.readFileSync(`${docsDir}/${file}`, 'utf-8');
+        let compiled = template(templateText);
+        let output = compiled({ markdownTexts, fileNameToId });
+        fs.writeFileSync(`${webDir}/${file.replace('.template.', '.')}`, output);
+    }
+}
 
 function fileNameToId(name: string): string {
     return name.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
