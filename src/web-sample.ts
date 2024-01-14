@@ -36,7 +36,7 @@ export const HELLO_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <document>
     <p>
         <img src="globe.png" width="5mm" height="5mm" />
-        Hello <%- name %>!
+        Hello <% name %>!
     </p>
 </document>
 `;
