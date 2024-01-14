@@ -91,13 +91,11 @@ export async function exec(args: ExecOptions): Promise<string | Uint8Array> {
     try {
         if (args.output === ':base64') {
             result = await docx.Packer.toBase64String(document);
+        } else if (typeof Buffer !== 'undefined') {
+            result = await docx.Packer.toBuffer(document);
         } else {
-            try {
-                result = await docx.Packer.toBuffer(document);
-            } catch (err) {
-                let blob = await docx.Packer.toBlob(document);
-                result = new Uint8Array(await blob.arrayBuffer());
-            }
+            let blob = await docx.Packer.toBlob(document);
+            result = new Uint8Array(await blob.arrayBuffer());
         }
     } catch (err) { throw new InterceptedError(err, 'Error packing content to docx.'); }
 

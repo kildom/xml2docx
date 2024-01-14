@@ -62,6 +62,7 @@ async function onFrontEndEvent(event: WorkerEvent) {
     modified = (mainFile !== event.mainFile) || (dataFile !== event.dataFile);
     mainFile = event.mainFile;
     dataFile = event.dataFile;
+    let mainFileNameBase = mainFile.split('/')[0].replace(/\.xml$/i, '');
 
     if (event.reset) {
         files.splice(0);
@@ -79,7 +80,7 @@ async function onFrontEndEvent(event: WorkerEvent) {
             await exec({
                 input: mainFile,
                 data: dataFile,
-                output: OUTPUT_DIR + 'output.docx',
+                output: OUTPUT_DIR + mainFileNameBase + '.docx',
                 debug: false,
             });
         } catch (err) {
@@ -97,7 +98,7 @@ async function onFrontEndEvent(event: WorkerEvent) {
     };
 
     if (event.requestResult === RequestResultType.DOCX) {
-        res.result = os.fs.readFileSync(OUTPUT_DIR + 'output.docx') as Uint8Array;
+        res.result = os.fs.readFileSync(OUTPUT_DIR + mainFileNameBase + '.docx') as Uint8Array;
         res.resultType = RequestResultType.DOCX;
     } else if (event.requestResult === RequestResultType.ZIP) {
         let zip = new JSZip();

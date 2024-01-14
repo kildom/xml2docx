@@ -32,6 +32,7 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import {
     FileType, FrontEndEvent, RequestResultType, WorkerEvent, WorkerFile, getFileType, normalizeFileName
 } from './web-common';
+import { DATA_JSON5, GLOBE_PNG, HELLO_XML } from './web-sample';
 
 type Timeout = ReturnType<typeof setTimeout>;
 
@@ -159,17 +160,14 @@ function scheduleWorkerUpdate(state: State) {
 
 const initialState: State = {
     files: sortFiles([
-        {name: 'main.xml', mutable: {
-            content: '<?xml version="1.0" encoding="UTF-8"?>\n<document>\n  <p>Hello <%- name %>!</p>\n</document>', dirty: true}
-        },
-        {name: 'other.xml', mutable: { content: '<b>Some additional file</b>', dirty: true } },
-        {name: 'data.json', mutable: { content: '{\n "name": "World"\n}', dirty: true } },
-        {name: 'cat2.jpeg', mutable: { content: new Uint8Array(), dirty: true } },
+        {name: 'hello.xml', mutable: { content: HELLO_XML, dirty: true} },
+        {name: 'data.json5', mutable: { content: DATA_JSON5, dirty: true } },
+        {name: 'globe.png', mutable: { content: GLOBE_PNG, dirty: true } },
     ]),
     errors: ['Waiting for initialization....'],
-    selectedFile: 'data.json',
-    mainFile: 'main.xml',
-    dataFile: 'data.json',
+    selectedFile: 'hello.xml',
+    mainFile: 'hello.xml',
+    dataFile: 'data.json5',
     reset: true,
     currentEventId: 0,
     receivedEventId: -1,
@@ -279,7 +277,7 @@ function showEditor() {
             if (file.mutable.content instanceof Uint8Array) {
                 let blob = new Blob([file.mutable.content]);
                 let url = URL.createObjectURL(blob);
-                container.innerHTML = `<img class="preview" src="${url}">`;
+                container.innerHTML = `<div class="preview" style="background-image: url('${url}')"></div>`;
             } else {
                 container.innerHTML = '<div class="preview">Preview not available</div>';
             }
@@ -475,7 +473,10 @@ function App() {
     let inProgress = state.workerUpdateTimer || state.currentEventId !== state.receivedEventId;
     console.log('CURRENT STATE:', state);
     if (firstTime) {
-        setTimeout(() => scheduleWorkerUpdate(getState()), 300);
+        setTimeout(() => {
+            showEditor();
+            scheduleWorkerUpdate(getState());
+        }, 150);
         firstTime = false;
     }
 
@@ -610,16 +611,17 @@ function onWorkerEvent(event: FrontEndEvent) {
     state = { ...state, receivedEventId: event.eventId, errors: event.errors };
     setState(state);
     if (event.result && event.resultType !== RequestResultType.NONE) {
+        let mainFileNameBase = state.mainFile.split('/')[0].replace(/\.xml$/i, '');
         let url = URL.createObjectURL(new Blob([event.result]));
         let element = document.createElement('a');
         element.setAttribute('href', url);
         switch (event.resultType) {
         case RequestResultType.DOCX:
-            element.setAttribute('download', 'xml2docx-output.docx');
+            element.setAttribute('download', `${mainFileNameBase}.docx`);
             break;
         case RequestResultType.DEBUG:
         case RequestResultType.ZIP:
-            element.setAttribute('download', 'xml2docx-bundle.zip');
+            element.setAttribute('download', `${mainFileNameBase}-bundle.zip`);
             break;
         }
         element.style.display = 'none';
