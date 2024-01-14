@@ -47,7 +47,7 @@ export function fromTemplate(templateFile: string, templateText: string, dataFil
         compiled = template(templateText, {
             evaluate: /<%!([\s\S]+?)%>/g,
             interpolate: /<%=([\s\S]+?)%>/g,
-            escape: /<%([\s\S]+?)%>/g
+            escape: /<%(?![!=])([\s\S]+?)%>/g
         });
     } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`); }
 
