@@ -37,6 +37,8 @@ import { DATA_JSON5, GLOBE_PNG, HELLO_XML } from './web-sample';
 type Timeout = ReturnType<typeof setTimeout>;
 
 const helpUrl = 'docs.html';
+const licenseUrl = 'license.html';
+const gitHubUrl = 'https://github.com/kildom/xml2docx';
 const WORKER_UPDATE_DELAY = 1000;
 
 const worker = new Worker('xml2docx-worker.js');
@@ -574,12 +576,6 @@ function App() {
             </div>
             <Navbar>
                 <Navbar.Group align={Alignment.LEFT}>
-                    <Button icon="help" intent={Intent.PRIMARY} minimal={false} text="Help"
-                        onClick={() => window.open(helpUrl, '_blank')}/>
-                    <Navbar.Divider />
-                    <Navbar.Heading>xml2docx</Navbar.Heading>
-                </Navbar.Group>
-                <Navbar.Group align={Alignment.RIGHT}>
                     <FileProperties
                         btnText=""
                         file={{name: 'new-file.xml', mutable: {content:'', dirty: false}}}
@@ -587,6 +583,10 @@ function App() {
                         hideDelBtn={true}
                         icon="add"
                         okText='Create new file'/>
+                    {/*<Button icon="star" minimal={false} text="Load example"
+                        onClick={() => window.open(helpUrl, '_blank')}/>*/}
+                </Navbar.Group>
+                <Navbar.Group align={Alignment.RIGHT}>
                     <Button icon="compressed" text="Download" intent={Intent.NONE}
                         onClick={() => download(state, RequestResultType.ZIP)} />
                 </Navbar.Group>
@@ -602,6 +602,20 @@ function App() {
                     className={isDragActive ? 'tree-dragging' : ''}
                 />
             </div>
+            <Navbar>
+                <Navbar.Group align={Alignment.LEFT}>
+                    <Button icon="help" minimal={false} text="Help" intent={Intent.PRIMARY}
+                        onClick={() => window.open(helpUrl, '_blank')}/>
+                    <Navbar.Divider/>
+                    <Navbar.Heading>xml2docx</Navbar.Heading>
+                </Navbar.Group>
+                <Navbar.Group align={Alignment.RIGHT}>
+                    <Button minimal={true} text="GitHub"
+                        onClick={() => window.open(gitHubUrl, '_blank')}/>
+                    <Button minimal={true} text="License"
+                        onClick={() => window.open(licenseUrl, '_blank')}/>
+                </Navbar.Group>
+            </Navbar>
         </>
     );
 }

@@ -37,3 +37,10 @@ export function writeSources() {
         console.log(`Written to ${file}, bytes: ${(content as string).length}`);
     }
 }
+
+export function getLicense() {
+    let eaDsfsDe9f='./map.js';
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require(eaDsfsDe9f);
+    return mod.license;
+}

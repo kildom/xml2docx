@@ -1,9 +1,22 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
-//@ts-check
+/*!
+ * Copyright 2023 Dominik Kilian
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *    following disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 const esbuild = require('esbuild');
 const path = require('path');
@@ -27,8 +40,9 @@ build({
     target: ['es2020', 'chrome80', 'edge80', 'firefox78'],
     format: 'iife',
     outbase: './node_modules/monaco-editor/esm/',
-    outdir: path.join(__dirname, '../web')
-}, false);
+    outdir: path.join(__dirname, '../web'),
+    metafile: true,
+}, false, 'dist/web-monaco.json');
 
 build({
     entryPoints: ['src/xml2docx-worker.ts'],
@@ -37,7 +51,8 @@ build({
     minify: true,
     format: 'iife',
     outdir: path.join(__dirname, '../web'),
-}, false);
+    metafile: true,
+}, false, 'dist/web-worker.json');
 
 build({
     entryPoints: ['src/xml2docx-web.tsx'],
@@ -46,6 +61,7 @@ build({
     minify: true,
     format: 'iife',
     outdir: path.join(__dirname, '../web'),
+    metafile: true,
     loader: {
         '.ttf': 'file',
         '.svg': 'file',
@@ -54,12 +70,12 @@ build({
         '.eot': 'file',
     },
 
-}, true);
+}, true, 'dist/web-main.json');
 
 /**
  * @param {import ('esbuild').BuildOptions} opts
  */
-async function build(opts, startServer) {
+async function build(opts, startServer, metaFileName) {
     /** @type {'s'| 'w'| ''} */
     let mode = (process.argv[2] || '').substring(0, 1).toLowerCase();
     let ctx = await esbuild.context(opts);
@@ -85,6 +101,10 @@ async function build(opts, startServer) {
             console.log('Build done.');
         }
         ctx.dispose();
+        if (!mode && metaFileName) {
+            fs.mkdirSync(path.dirname(metaFileName), { recursive: true });
+            fs.writeFileSync(metaFileName, JSON.stringify(result.metafile, null, 4));
+        }
     }
 }
 

@@ -20,25 +20,37 @@
 
 const fs = require('node:fs');
 
+const sourceExt = [
+    '.ts',
+    '.js',
+    '.mts',
+    '.cjs',
+    '.mjs',
+];
+
 let files = {
+    'dist/map.js': fs.readFileSync('src/map.js', 'utf-8'),
     'dist/xml2docx.cjs': fs.readFileSync('dist/xml2docx.cjs', 'utf-8'),
     'dist/xml2docx.cjs.map': fs.readFileSync('dist/xml2docx.cjs.map', 'utf-8'),
     'package.json': fs.readFileSync('package.json', 'utf-8'),
 };
 
-for (let file of fs.readdirSync('src')) {
-    if (file.endsWith('.ts') || file.endsWith('.js')) {
+for (let file of fs.readdirSync('src', { recursive: true })) {
+    if (sourceExt.some(e => file.toLowerCase().endsWith(e))) {
         files[`src/${file}`] = fs.readFileSync(`src/${file}`, 'utf-8');
     }
 }
 
-for (let file of fs.readdirSync('scripts')) {
-    if (file.endsWith('.ts') || file.endsWith('.js')) {
+for (let file of fs.readdirSync('scripts', { recursive: true })) {
+    if (sourceExt.some(e => file.toLowerCase().endsWith(e))) {
         files[`scripts/${file}`] = fs.readFileSync(`scripts/${file}`, 'utf-8');
     }
 }
 
-fs.writeFileSync('dist/map.js', `exports.files = ${JSON.stringify(files)};`);
+fs.writeFileSync('dist/map.js', `
+    exports.files = ${JSON.stringify(files)};
+    exports.license = ${JSON.stringify(fs.readFileSync('dist/xml2docx-license.txt', 'utf-8'))};
+`);
 
-let src = files['dist/xml2docx.cjs'].replace('(eaDsfsDe9f)', '("./map.js")');
+let src = files['dist/xml2docx.cjs'].replace(/\(eaDsfsDe9f\)/g, '("./map.js")');
 fs.writeFileSync('dist/xml2docx.cjs', src);

@@ -3,7 +3,7 @@
 The `xml2docx` is a command line tool that creates a **Word Document**
 (with the `.docx` extension) from simple XML file.
 
-There is also web version available: http://kildom.github.io/xml2docx/web/
+There is also web version available: http://kildom.github.io/xml2docx/
 
 Highlights:
 * **HTML-like syntax** in the input file, so it easier for people

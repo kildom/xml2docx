@@ -21,32 +21,42 @@
 import { printError } from './os';
 import { setNodeJsOsInterface } from './osNode';
 import { ExecOptions, exec } from './exec';
+import { getLicense, writeSources } from './dev';
 
 
 const USAGE = `
 USAGE:
     xml2docx [options] input.xml [output.docx]
 
-Convert XML file to docx file. See https://kildom.github.io/xml2docx/ for
-XML file format documentation.
+Transform an XML file into a docx file.
+
+For detailed XML file format specifications, please see the documentation
+at https://kildom.github.io/xml2docx/.
 
 Options:
 
-    -d <data.json>
-        Tread the input file as a template and use <data.json> file as
-        a template input data. The data file is in JSON format. See the
-        documentation for more details about template syntax.
-        WARNING: Setting this option will execute arbitrary code from the
-                 <input.xml> file without any restrictions. You must have
-                 this file from a trusted source.
+-d <data.json>
+    Interpret the input file as a template and use the <data.json> file for
+    template input data. The data file should be formatted in JSON5 which is
+    backward compatible with standard JSON format. Detailed information on
+    the template syntax can be found within the documentation.
+    CAUTION! ACTIVATING THIS OPTION WILL PERMIT THE EXECUTION OF ARBITRARY
+             CODE FROM THE <input.xml> FILE WITHOUT LIMITATIONS. USE ONLY
+             XML FILES FROM A TRUSTED SOURCE.
 
-    --debug
-        Dump intermediate files alongside the output after each step of
-        processing and show more verbose output in case of errors. This
-        option is mainly useful when debugging the template or the tool.
+--debug
+    Dump intermediate files alongside the output after each step of
+    processing and show more verbose output in case of errors. This option
+    is mainly useful when debugging the template or the tool.
 
-    --help
-        Show this message.
+--help
+    Show this message.
+
+--license
+    Show license information.
+
+--sources
+    Dump source files to a '_src' directory (for debug only).
 `;
 
 function printUsage(failed?: string): void {
@@ -79,6 +89,12 @@ function parseArguments(): ExecOptions {
             debug = true;
         } else if (arg === '--help' || arg === '/?' || arg === '-h') {
             printUsage();
+            process.exit(0);
+        } else if (arg === '--license') {
+            console.log(getLicense());
+            process.exit(0);
+        } else if (arg === '--sources') {
+            writeSources();
             process.exit(0);
         } else if (argCounter === 0) {
             input = arg;
