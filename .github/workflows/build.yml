@@ -32,24 +32,27 @@ jobs:
     - name: Install, build, check and test
       shell: cmd
       run: |
-        npm install
-        npm run build
-        npm run check
-        npm run docs
-        npm run build-web
-        npm run test
-        npm run test win32
-        dir test\\outputs
+        call npm install
+        call npm run build
+        call npm run check
+        call npm run docs
+        call npm run build-web
+        call npm run test
+        call npm run test win32
+        dir .
+        dir test
+        dir test\outputs
     - name: Full test
       if: "${{ github.event.inputs.full_test == 'yes' }}"
-      shell: bash
+      shell: cmd
       run: |
         choco install officeproplus2013
         pip install docx2pdf
-        for i in test/outputs/*.docx; do
-          docx2pdf $i
-        done
-        ls -la test/outputs
+        cd test\outputs
+        cd
+        for /r %%i in (*.docx) do echo %%i
+        for /r %%i in (*.docx) do docx2pdf %%i
+        dir .
     - name: Prepare release packages
       if: "${{ github.event.inputs.tag_name != '' || github.event.inputs.upload == 'yes' }}"
       run: |
