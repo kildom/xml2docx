@@ -45,8 +45,8 @@ jobs:
       shell: cmd
       run: |
         npm run test
-        npx ts-node-esm --swc test/testInputs.ts -win
-        dir test\outputs
+        npm run test win32
+        dir test\\outputs
     - name: Full test
       if: "${{ github.event.inputs.full_test == 'yes' }}"
       shell: bash
@@ -72,6 +72,8 @@ jobs:
       uses: actions/upload-artifact@v3.1.3
       with:
         path: |
-          dist/xml2docx.exe
+          dist/xml2docx-win.exe
+          dist/xml2docx-linux
+          dist/xml2docx-macos
           test/outputs
           docs/index.*

@@ -12,10 +12,12 @@
 
 ## Key Features
 
-* [**HTML-like syntax**](https://kildom.github.io/xml2docx/docs.html#xml-md)
-  of the input file makes it easier for users with a fundamental
-  understanding of HTML.
-* [**Commonly used features**](https://kildom.github.io/xml2docx/docs.html#tags-md)
+* [**Command line**](https://kildom.github.io/xml2docx/docs.html#cli-md) interface
+  and [**web**](https://kildom.github.io/xml2docx/) interface
+  are available.
+* [**HTML-like syntax**](https://kildom.github.io/xml2docx/docs.html#syntax-md)
+  of the input file makes it easier for users with a basic understanding of HTML.
+* [**Commonly used features**](https://kildom.github.io/xml2docx/docs.html#document-md)
   of the Word Document are available.
 * [**Templating**](https://kildom.github.io/xml2docx/docs.html#template-md)
-  allows ues to customize the output using a JSON input data.
+  allows you to customize the output using a JSON input data.

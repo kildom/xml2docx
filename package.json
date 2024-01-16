@@ -36,7 +36,7 @@
   "scripts": {
     "_lic": "npx license-checker --json --out dist/licenses.json && npx ts-node --swc scripts/gen-licenses.ts dist/licenses.json",
     "prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/xml2docx.json --outfile=dist/xml2docx.cjs && npm run _lic -- dist/xml2docx-license.txt dist/xml2docx.json && node scripts/postprocess.cjs",
-    "build": "npx pkg -C Brotli -t node18-win-x64 --public -o dist/xml2docx.exe dist/xml2docx.cjs",
+    "build": "npx pkg -C Brotli -t node18-linux-x64,node18-win-x64,node18-macos-x64 --public -o dist/xml2docx dist/xml2docx.cjs",
     "build-web": "node scripts/build-web.js",
     "postbuild-web": "npm run _lic -- web/license.html dist/web-main.json dist/web-monaco.json dist/web-worker.json",
     "check": "npx tsc -p tsconfig.json && npx eslint src",

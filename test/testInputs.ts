@@ -24,6 +24,31 @@ import { exec } from '../src/exec';
 import { printError } from '../src/os';
 import { setNodeJsOsInterface } from '../src/osNode';
 
+type Platform = 'win32' | 'darwin' | 'linux';
+
+const compatibilityMatrix: { [platform in Platform]: { [arg in Platform]: string[] } } = {
+    win32: {
+        win32: ['dist/xml2docx-win.exe'],
+        darwin: [],
+        linux: [],
+    },
+    darwin: {
+        win32: ['wine', 'dist/xml2docx-win.exe'],
+        darwin: ['dist/xml2docx-macos'],
+        linux: [],
+    },
+    linux: {
+        win32: ['wine', 'dist/xml2docx-win.exe'],
+        darwin: [],
+        linux: ['dist/xml2docx-linux'],
+    },
+};
+
+function getPlatform(text?:string): Platform {
+    text = (text || process.platform).toLowerCase();
+    return (text === 'win32' || text === 'darwin') ? text : 'linux';
+}
+
 async function main() {
     try {
         try {
@@ -38,23 +63,7 @@ async function main() {
                 if (fs.existsSync(`test/inputs/${file}.json`)) {
                     data = `test/inputs/${file}.json`;
                 }
-                if (process.argv[2] === '-win') {
-                    let args: string[] = [];
-                    let env = process.env;
-                    if (process.platform !== 'win32') {
-                        env = { ...process.env, NODE_SKIP_PLATFORM_CHECK: '1' };
-                        args.push('wine', 'dist/xml2docx.exe');
-                    } else {
-                        args.push('dist/xml2docx.exe');
-                    }
-                    args.push('--debug', '-d', data, `test/inputs/${file}`, output);
-                    let res = child_process.spawnSync(args[0], args.slice(1), { env, stdio: 'inherit' });
-                    if (res.error) {
-                        throw res.error;
-                    } else if (res.status) {
-                        throw new Error(`Process exit code ${res.status}`);
-                    }
-                } else if (!process.argv[2]) {
+                if (!process.argv[2]) {
                     await exec({
                         input: `test/inputs/${file}`,
                         output,
@@ -62,7 +71,18 @@ async function main() {
                         debug: true,
                     });
                 } else {
-                    throw new Error(`Unknown platform to test "${process.platform}"`);
+                    let args = [...compatibilityMatrix[getPlatform()][getPlatform(process.argv[2])]];
+                    if (args.length === 0) {
+                        throw new Error('Unsupported platform!');
+                    }
+                    let env = { ...process.env, NODE_SKIP_PLATFORM_CHECK: '1' };
+                    args.push('--debug', '-d', data, `test/inputs/${file}`, output);
+                    let res = child_process.spawnSync(args[0], args.slice(1), { env, stdio: 'inherit' });
+                    if (res.error) {
+                        throw res.error;
+                    } else if (res.status) {
+                        throw new Error(`Process exit code ${res.status}`);
+                    }
                 }
 
             }
