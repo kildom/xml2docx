@@ -288,3 +288,35 @@ pre code.hljs {
     color: #bd0d18;
     background-color: #ffeef0
 }
+
+table, th, td {
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid silver;
+    padding: 10px;
+}
+
+th {
+    background-color: #e7e7e7;
+}
+
+
+tr:nth-child(2n) {
+    background-color: #F5F5F5;
+}
+
+div.color {
+    font-family: monospace;
+    padding: 2px;
+}
+
+div.color>b {
+    display: inline-block;
+    width: 30px;
+    height: 20px;
+    vertical-align: middle;
+    margin: 0px 8px 0px 0px;
+}

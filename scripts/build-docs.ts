@@ -101,6 +101,7 @@ function convertMarkdown(fileName: string): string {
         //openLinksInNewWindow: true,
         prefixHeaderId: `${fileNameToId(fileName)}---`,
         simplifiedAutoLink: true,
+        tables: true,
     });
     let html = mdConverter.makeHtml(markdown);
     html = html
