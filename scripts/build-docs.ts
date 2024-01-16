@@ -22,6 +22,7 @@ import * as fs from 'node:fs';
 
 import * as showdown from 'showdown';
 import { template } from 'underscore';
+const showdownHighlight = require('showdown-highlight');
 
 showdown.extension('gitHubAlerts', function () {
     let myext1 = {
@@ -59,16 +60,25 @@ try {
     docsDir = `../${docsDir}`;
     markdownFiles = fs.readdirSync(docsDir);
 }
+let toc = markdownFiles.find(file => file === 'toc.md') as string;
+
+let orderedFiles = [...fs.readFileSync(`${docsDir}/${toc}`, 'utf-8').matchAll(/\(([a-z0-9_/\\-]+\.md)[#)]/gi)].map(m => m[1]);
+orderedFiles = Object.keys(Object.fromEntries(orderedFiles.map(x => [x, null])));
+let tocText = convertMarkdown(toc);
+
 markdownFiles = markdownFiles
     .filter(name => name.endsWith('.md'))
-    .sort((a, b) => a.startsWith('README') ? -1 : 1);
+    .filter(name => name !== toc)
+    .filter(name => fileSortKey(name) >= 0)
+    .sort((a, b) => fileSortKey(a) - fileSortKey(b));
+
 let markdownTexts = Object.fromEntries(markdownFiles.map(name => [name, convertMarkdown(name)]));
 
 for (let file of fs.readdirSync(docsDir)) {
     if (file.indexOf('.template.') > 0) {
         let templateText = fs.readFileSync(`${docsDir}/${file}`, 'utf-8');
         let compiled = template(templateText);
-        let output = compiled({ markdownTexts, fileNameToId });
+        let output = compiled({ markdownTexts, tocText, fileNameToId });
         fs.writeFileSync(`${webDir}/${file.replace('.template.', '.')}`, output);
     }
 }
@@ -80,7 +90,13 @@ function fileNameToId(name: string): string {
 function convertMarkdown(fileName: string): string {
     let markdown = fs.readFileSync(`${docsDir}/${fileName}`, 'utf-8');
     let mdConverter = new showdown.Converter({
-        extensions: ['gitHubAlerts'],
+        extensions: [
+            showdownHighlight({
+                pre: true,
+                auto_detection: true,
+            }),
+            'gitHubAlerts',
+        ],
         ghCompatibleHeaderId: true,
         //openLinksInNewWindow: true,
         prefixHeaderId: `${fileNameToId(fileName)}---`,
@@ -89,6 +105,16 @@ function convertMarkdown(fileName: string): string {
     let html = mdConverter.makeHtml(markdown);
     html = html
         .replace(/href="#(.*?)"/gi, (_, frag) => `href="#${fileNameToId(fileName)}---${frag}"`)
-        .replace(/href="([a-z0-9_/\\-]+\.md)#(.*?)"/gi, (_, name, frag) => `href="#${fileNameToId(name)}---${frag}"`);
+        .replace(/href="([a-z0-9_/\\-]+\.md)#(.*?)"/gi, (_, name, frag) => `href="#${fileNameToId(name)}---${frag}"`)
+        .replace(/href="([a-z0-9_/\\-]+\.md)"/gi, (_, name) => `href="#${fileNameToId(name)}"`);
     return html;
+}
+
+function fileSortKey(fileName: string): number {
+    for (let i = 0; i < orderedFiles.length; i++) {
+        if (fileName === orderedFiles[i]) {
+            return i;
+        }
+    }
+    return -1;
 }

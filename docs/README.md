@@ -1,17 +1,9 @@
 # xml2docx
 
-The `xml2docx` is a command line tool that creates a **Word Document**
-(with the `.docx` extension) from simple XML file.
+The `xml2docx` is a command line tool and a web tool that creates a **Word Document** (with the `.docx` extension) from a simple XML file.
 
-There is also web version available: http://kildom.github.io/xml2docx/
+You can start with the [tutorial](tutorial.md) that will guide you through all basic features of this tool.
 
-Highlights:
-* **HTML-like syntax** in the input file, so it easier for people
-  with basic knowledge of HTML.
-* Covers mostly used features of the Word Documents.
-* Builtin templating allows customizing the output based on
-  arbitrary input data.
-
-> [!CAUTION]
-> If you use templates, the input files contains a JavaScript code that is executed without
-> restrictions. You must trust the files in order safely use the templates.
+There are two version of `xml2docx`:
+ * command line tool - see [command line arguments](cli.md),
+ * on-line web tool - go to [web editor](https://kildom.github.io/xml2docx/).

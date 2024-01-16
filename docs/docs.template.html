@@ -1,13 +1,27 @@
 <html>
-    <head>
-        <link rel="stylesheet" href="docs.css" type="text/css" media="all" />
-        <script src="docs.js"></script>
-    </head>
-    <body>
-        <div style="margin: 0px auto; width: 900px;">
-        <% for (let file in markdownTexts) { text = markdownTexts[file]; %>
-            <div class="page" id="<%- fileNameToId(file) %>"><%= text %></div>
-        <% } %>
+
+<head>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="all" />
+    <script src="docs.js"></script>
+</head>
+
+<body>
+    <div id="content">
+        <div id="toc">
+            <div>
+                <%= tocText %>
+            </div>
         </div>
-    </body>
+        <div id="text">
+            <div id="text-content" style="margin: 0px auto; max-width: 900px;">
+                <% for (let file in markdownTexts) { text=markdownTexts[file]; %>
+                    <div class="page" id="<%- fileNameToId(file) %>">
+                        <%= text %>
+                    </div>
+                    <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>

@@ -1,13 +1,45 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
 
 body {
     font-family: "Roboto", sans-serif;
     font-size: 16px;
     line-height: 1.5;
+    padding: 0px;
+    margin: 0px;
+    min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+div#content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: stretch;
+    align-items: stretch;
+}
+
+div#content>div:nth-child(1) {
+    order: 0;
+    flex: 0 0 300px;
+    align-self: auto;
+    overflow: auto;
+    height: 100vh;
+}
+
+div#content>div:nth-child(2) {
+    order: 0;
+    flex: 1 1 auto;
+    align-self: auto;
+    overflow: auto;
+    height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: "Rosarivo", serif;
 }
 
@@ -111,3 +143,148 @@ div.gitHubAlert-text>p:last-child {
     margin-bottom: 0px;
 }
 
+div#toc {
+    background-color: #e7ebee;
+    box-shadow: 0px 0px 7px rgba(66, 68, 90, 1);
+}
+
+div#toc>div {
+    padding: 16px 0px 40px 6px;
+}
+
+div#toc ul {
+    margin: 0px;
+    padding: 0px 0px 0px 20px;
+    list-style-type: none;
+}
+
+div#toc li {
+    margin: 0px;
+    padding: 2px 0px;
+}
+
+div#toc li a {
+    text-decoration: none;
+    color: #424242;
+}
+
+div#toc li a:hover {
+    text-decoration: none;
+    color: #373b4b;
+    text-shadow: 0px 0px 4px #42445a80;
+}
+
+div#toc li li {
+    font-size: 96%;
+    padding: 1px 0px;
+}
+
+div#toc li li li {
+    font-size: 90%;
+    padding: 1px 0px;
+}
+
+div#text-content {
+    padding-bottom: 100px;
+}
+
+pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 16px;
+    background-color: #F2F2F2;
+    margin: 0px;
+    white-space: pre;
+}
+
+.hljs {
+    color: #24292e;
+    background: #ffffff
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+    color: #d33343
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+    color: #683bbd
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id {
+    color: #006cc5
+}
+
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string {
+    color: #002d61
+}
+
+.hljs-built_in,
+.hljs-symbol {
+    color: #a35623
+}
+
+.hljs-comment,
+.hljs-code,
+.hljs-formula {
+    color: #5d6a79
+}
+
+.hljs-name,
+.hljs-quote,
+.hljs-selector-tag,
+.hljs-selector-pseudo {
+    color: #22863a
+}
+
+.hljs-subst {
+    color: #2b3238
+}
+
+.hljs-section {
+    color: #004fc5;
+    font-weight: bold
+}
+
+.hljs-bullet {
+    color: #73530f
+}
+
+.hljs-emphasis {
+    color: #24282e;
+    font-style: italic
+}
+
+.hljs-strong {
+    color: #262b31;
+    font-weight: bold
+}
+
+.hljs-addition {
+    color: #1d7431;
+    background-color: #f0fff4
+}
+
+.hljs-deletion {
+    color: #bd0d18;
+    background-color: #ffeef0
+}

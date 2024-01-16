@@ -19,6 +19,7 @@
  */
 
 import * as docx from 'docx';
+import JSON5 from 'json5';
 
 import { os } from './os';
 import { AnyObject, Dict } from './common';
@@ -406,9 +407,8 @@ export const filters: Dict<(value: any, tr: DocxTranslator) => any> = {
         return fromEnum(arr[1], enumValue);
     },
     'color': (value: any) => filterColor(value, FilterMode.EXACT),
-    'json': (value: any) => {
-        return JSON.parse(value);
-    },
+    'json': (value: any) => JSON5.parse(value),
+    'json5': (value: any) => JSON5.parse(value),
     'first': (value: any) => {
         if (typeof (value) !== 'object' || !(value instanceof Array) || value.length === 0)
             throw new Error('Input value for ":first" filter must be a non-empty array.');
