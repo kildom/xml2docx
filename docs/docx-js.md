@@ -37,6 +37,34 @@ They will be added to appropriate place in the document structure.
 * `ParagraphStyle` - implements `IParagraphStyleOptions`,
 * `CharacterStyle` - implements `ICharacterStyleOptions`.
 
+### Property
+
+You can use docx.js API on normal tags by adding properties to them.
+A property is a child element with `:property` appended to its name.
+The context is switched to API context on this element.
+All properties must be placed before any other child element.
+Property overrides corresponding attribute of the parent element.
+
+For example, the `emphasisMark` property of the [IRunOptions](https://docx.js.org/api/interfaces/IRunOptions.html)
+interface is not exposed in the `<font>` tag, but you can set it with the `:property`.
+
+```xml
+<font><emphasisMark:property type="dot"/>DOTS</font>
+```
+
+The property element is already in API context, so you can also use filters in
+it. See [Filters](#filters) for details.
+
+```xml
+<img data="" width="1cm" height="1cm">
+    <data:base64:textFile:property>picture.png.b64</data:base64:textFile:property>
+</img>
+```
+
+The image data above is read from a text file, decoded with BASE-64,
+and passed to the data of the image. Dummy attribute `data=""`
+will be overwritten, but it must be there since `<img>` tag requires it.
+
 ### API context
 
 When you create an object from the API class, you switching to API context.

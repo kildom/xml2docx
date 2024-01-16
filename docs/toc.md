@@ -30,8 +30,8 @@
         * [&lt;td>](table.md#td)
     * [Lists](list.md)
 * [Templates](template.md)
-    * [Interpolate &lt;% … %>, &lt;%= … %>](template.md#interpolate)
-    * [Execute &lt;%! … %>](template.md#execute)
+    * [Interpolate &lt;% … %>, &lt;%= … %>](template.md#interpolate--…---…-)
+    * [Execute &lt;%! … %>](template.md#execute--…-)
     * [Utils](template.md#utils)
 * [Advanced XML file syntax](syntax-adv.md)
     * [Aliases](alias.md)
@@ -40,6 +40,7 @@
         * [Merge](alias.md#merge)
     * [Raw docx.js access](docx-js.md)
         * [Class creation](docx-js.md#class-creation)
+        * [Property](docx-js.md#property)
         * [API context](docx-js.md#api-context)
         * [Filters](docx-js.md#filters)
 
