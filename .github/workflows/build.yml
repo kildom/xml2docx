@@ -24,26 +24,19 @@ on:
         - 'no'
         - 'yes'
 jobs:
-  build:
+  build-win32:
     runs-on: windows-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
-    - name: Get modules
-      shell: cmd
-      run: npm install
-    - name: Build
-      shell: cmd
-      run: npm run build
-    - name: Source code analysis
-      shell: cmd
-      run: npm run check
-    - name: Generate docs
-      shell: cmd
-      run: npm run docs
-    - name: Simple tests
+    - name: Install, build, check and test
       shell: cmd
       run: |
+        npm install
+        npm run build
+        npm run check
+        npm run docs
+        npm run build-web
         npm run test
         npm run test win32
         dir test\\outputs
@@ -57,11 +50,22 @@ jobs:
           docx2pdf $i
         done
         ls -la test/outputs
+    - name: Prepare release packages
+      if: "${{ github.event.inputs.tag_name != '' || github.event.inputs.upload == 'yes' }}"
+      run: |
+        cd dist
+        ren xml2docx-win.exe xml2docx.exe
+        7z a -tzip -mx=9 xml2docx-win.zip xml2docx.exe
+        ren xml2docx-linux xml2docx
+        7z a -tzip -mx=9 xml2docx-linux.zip xml2docx
+        del xml2docx
+        ren xml2docx-macos xml2docx
+        7z a -tzip -mx=9 xml2docx-macos.zip xml2docx
     - name: Release
       uses: softprops/action-gh-release@v1
       if: "${{ github.event.inputs.tag_name != '' }}"
       with:
-        files: dist/xml2docx.exe
+        files: dist/*.zip
         draft: false
         tag_name: ${{ github.event.inputs.tag_name }}
         fail_on_unmatched_files: true
@@ -71,9 +75,52 @@ jobs:
       if: "${{ github.event.inputs.upload == 'yes' }}"
       uses: actions/upload-artifact@v3.1.3
       with:
+        name: win32
         path: |
-          dist/xml2docx-win.exe
-          dist/xml2docx-linux
-          dist/xml2docx-macos
+          dist/*.zip
           test/outputs
-          docs/index.*
+          web
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
+    - name: Install, build, check and test
+      run: |
+        npm install
+        npm run build
+        npm run check
+        npm run docs
+        npm run build-web
+        npm run test
+        npm run test linux
+        ls -la test/outputs
+    - name: Upload a Build Artifact
+      if: "${{ github.event.inputs.upload == 'yes' }}"
+      uses: actions/upload-artifact@v3.1.3
+      with:
+        name: linux
+        path: test/outputs
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
+    - name: Install, build, check and test
+      run: |
+        npm install
+        npm run build
+        npm run check
+        npm run docs
+        npm run build-web
+        npm run test
+        npm run test darwin
+        ls -la test/outputs
+    - name: Upload a Build Artifact
+      if: "${{ github.event.inputs.upload == 'yes' }}"
+      uses: actions/upload-artifact@v3.1.3
+      with:
+        name: macos
+        path: test/outputs
