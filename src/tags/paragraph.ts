@@ -24,6 +24,8 @@ import { DocxTranslator } from '../docxTranslator';
 import { SpacesProcessing } from '../xml';
 import { filterBool, FilterMode } from '../filters';
 import { getIParagraphPropertiesOptions } from './styles';
+import { simpleStyleChange } from './characters';
+import { filterPreserved } from './table';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
@@ -48,6 +50,9 @@ Paragraphs can preserve its attributes if `preserve` attribute is set to true.
 All following paragraphs without any attributes will reuse the preserved attributes.
 You can stop reusing attributes if you specify at least one attribute in new paragraph.
 
+Default text format in the paragraph can be changed using attributes with the
+the `font-` prefix from the [`<font>`](format.md#font) tag.
+
 @api:Paragraph
 
 @merge:getIParagraphPropertiesOptions
@@ -59,21 +64,22 @@ export function pTag(tr: DocxTranslator, attributes: Attributes, properties: Any
     let preserve: boolean | undefined = filterBool(attributes.preserve, FilterMode.UNDEF);
     attributes = { ...attributes };
     delete attributes.preserve;
-    if (Object.keys(attributes).length === 0 && Object.keys(properties).length === 0 && tr.paragraphStylePreserved[name]) {
-        attributes = tr.paragraphStylePreserved[name]!.attributes;
-        properties = tr.paragraphStylePreserved[name]!.properties;
+    if (Object.keys(attributes).length === 0 && Object.keys(properties).length === 0 && tr.preserved[name]) {
+        attributes = tr.preserved[name]!.attributes;
+        properties = tr.preserved[name]!.properties;
     } else {
-        tr.paragraphStylePreserved[name] = undefined;
+        tr.preserved[name] = undefined;
     }
+    let trCopy = simpleStyleChange(tr, {}, filterPreserved('font', attributes));
     let options: docx.IParagraphOptions = {
         ...getIParagraphPropertiesOptions(tr, attributes),
-        children: tr.copy().parseObjects(tr.element, SpacesProcessing.TRIM),
+        children: trCopy.parseObjects(tr.element, SpacesProcessing.TRIM),
         heading,
     };
     if (preserve === true) {
-        tr.paragraphStylePreserved[name] = { attributes, properties };
+        tr.preserved[name] = { attributes, properties };
     } else if (preserve === false) {
-        tr.paragraphStylePreserved[name] = undefined;
+        tr.preserved[name] = undefined;
     }
     return [new docx.Paragraph({ ...options, ...properties })];
 }

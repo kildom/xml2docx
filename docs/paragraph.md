@@ -14,6 +14,9 @@ Paragraphs can preserve its attributes if `preserve` attribute is set to true.
 All following paragraphs without any attributes will reuse the preserved attributes.
 You can stop reusing attributes if you specify at least one attribute in new paragraph.
 
+Default text format in the paragraph can be changed using attributes with the
+the `font-` prefix from the [`<font>`](format.md#font) tag.
+
 [Paragraph](https://docx.js.org/api/Paragraph.html)
 
 * `preserve` *[optional]*

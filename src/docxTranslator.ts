@@ -73,10 +73,11 @@ const tags: TagsSet = {
 
 export class DocxTranslator extends TranslatorBase {
 
-    public paragraphStylePreserved: {
+    public preserved: {
         [key: string]: {
             attributes: Attributes,
             properties: AnyObject,
+            data?: any,
         } | undefined
     } = {};
 
@@ -122,7 +123,7 @@ export class DocxTranslator extends TranslatorBase {
                 let attr = normalizeAttributes(this.getAttributes(src));
                 return fallbackStyleChange(this, attr);
             }
-        } catch(err) {
+        } catch (err) {
             if (err instanceof XMLError) {
                 throw err;
             }
@@ -157,7 +158,7 @@ export class DocxTranslator extends TranslatorBase {
                 throw new XMLError(src, `Unknown tag "${name}".`);
             }
             return [new construct(...args)];
-        } catch(err) {
+        } catch (err) {
             if (err instanceof XMLError) {
                 throw err;
             }

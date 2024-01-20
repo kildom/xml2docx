@@ -27,6 +27,7 @@
     * [Tables](table.md)
         * [&lt;table>](table.md#table)
         * [&lt;tr>](table.md#tr)
+        * [&lt;tc>](table.md#tc)
         * [&lt;td>](table.md#td)
     * [Lists](list.md)
 * [Templates](template.md)

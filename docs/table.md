@@ -6,7 +6,11 @@
 
 Table.
 
-Child elements of the row are `<tr>` (or its associated [docx.js API](https://docx.js.org/api/) class).
+Child elements of the row are `<tr>` (or its associated [docx.js API](https://docx.js.org/api/) class) or `<tc>`.
+
+All attributes starting with `td-`, `tr-`, `tc-`, `p-` and `font-` prefixes will be passed to
+all cells, rows, columns, paragraphs (as preserved attributes) and paragraphs default
+text format.
 
 [Table](https://docx.js.org/api/classes/Table.html).
 
@@ -180,6 +184,10 @@ Table row.
 
 Child elements of the row are `<td>` (or its associated [docx.js API](https://docx.js.org/api/) class).
 
+All attributes starting with `td-`, `p-` and `font-` prefixes will be passed to
+all cells, paragraphs (as preserved attributes) and paragraphs default
+text format.
+
 [TableRow](https://docx.js.org/api/classes/TableRow.html).
 
 * `cant-split` *[optional]*
@@ -201,6 +209,29 @@ Child elements of the row are `<td>` (or its associated [docx.js API](https://do
 
 <!-- <<< -->
 
+## `<tc>`
+
+<!-- >>> tcTag -->
+
+Table column.
+
+This element has no children, instead it defines a column of a table.
+Actual cells are located in rows.
+
+All attributes starting with `td-`, `p-` and `font-` prefixes will be passed to
+all cells, paragraphs (as preserved attributes) and paragraphs default
+text format.
+
+* `colspan="non-zero positive integer"` *[optional]*
+    
+    Tells for how many columns this element applies to.
+
+* `width` *[optional]*
+    
+    Sets width of the column. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+
+<!-- <<< -->
+
 ## `<td>`
 
 <!-- >>> tdTag -->
@@ -209,6 +240,15 @@ Table cell.
 
 Child elements of the cell must be `<p>` or `<table>` (or its associated [docx.js API](https://docx.js.org/api/) classes).
 If they are not, then the content of the cell will be put into automatically generated `<p>` element.
+
+The cell will inherit all attributes from associated `<table>`, `<tc>`, and `<tr>` elements
+that are prefixed by `td-`. If single attribute comes from different sources, then the priority
+is following: current `<td>` element, inherited from `<tr>` element,
+inherited from `<tc>` element, inherited from `<table>` element.
+
+All attributes starting with `p-` and `font-` prefixes will be passed to
+all paragraphs (as preserved attributes) and paragraphs default
+text format.
 
 [TableCell](https://docx.js.org/api/classes/TableCell.html).
 

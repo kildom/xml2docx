@@ -87,6 +87,10 @@ The shorthand tags are:
     
     Alias of `font` attribute.
 
+* `family` *[optional]*
+    
+    Alias of `font` attribute.
+
 * `highlight` *[optional]*
     
     Text Highlighting. Enumeration values:

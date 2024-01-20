@@ -73,15 +73,29 @@ export function getBorderHV(value: string | undefined) {
     /*> Each type of the border is `@short:getBorderOptions`: @getBorderOptions */
 }
 
+interface TablePreservedData {
+    columnIndex: number;
+    columns: {
+        width?: number,
+        attributes: Attributes,
+    }[];
+}
 
 /*>>>
 Table.
 
-Child elements of the row are `<tr>` (or its associated @api class).
+Child elements of the row are `<tr>` (or its associated @api class) or `<tc>`.
+
+All attributes starting with `td-`, `tr-`, `tc-`, `p-` and `font-` prefixes will be passed to
+all cells, rows, columns, paragraphs (as preserved attributes) and paragraphs default
+text format.
 
 @api:classes/Table.
 */
 export function tableTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    tr = tr.copy(undefined, { 'tr': trTag, 'tc': tcTag });
+    let tableData: TablePreservedData = { columnIndex: 0, columns: [] };
+    tr.preserved.table = { attributes, properties: {}, data: tableData };
     //* Horizontal floating position. @@:RelativeHorizontalPosition
     let hFloat = getTableHVPosition(attributes.horizontal, docx.RelativeHorizontalPosition);
     //* Vertical floating position. @@:RelativeVerticalPosition
@@ -93,13 +107,22 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     //* Default border between cells. @@
     let insideBorder = getBorderHV(attributes.insideBorder);
     let percentage = attributes.width?.endsWith('%');
+    //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
+    let columnWidths = attributes.columnWidths ? (attributes.columnWidths as string)
+        .trim()
+        .split(/[;, ]+/)
+        .map(x => filterLengthUintNonZero(x, LengthUnits.dxa, FilterMode.EXACT)) : undefined;
+    let rows = tr.parseObjects(tr.element, SpacesProcessing.IGNORE);
+    for (let i = 0; i < tableData.columns.length; i++) {
+        let col = tableData.columns[i];
+        if (col?.width !== undefined) {
+            columnWidths = columnWidths || [];
+            columnWidths[i] = col?.width;
+        }
+    }
     let options: docx.ITableOptions = {
-        rows: tr.copy(undefined, { 'tr': trTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
-        //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
-        columnWidths: attributes.columnWidths ? (attributes.columnWidths as string)
-            .trim()
-            .split(/[;, ]+/)
-            .map(x => filterLengthUintNonZero(x, LengthUnits.dxa, FilterMode.EXACT)) : undefined,
+        rows,
+        columnWidths,
         layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
         //* Table alignment. @enum:AlignmentType
         alignment: fromEnum(attributes.align, docx.AlignmentType),
@@ -172,16 +195,70 @@ function getTableRowHeight(text: string | undefined) {
     }
 }
 
+
+export function filterPreserved(tag: string, input?: Attributes, keepPrefix?: boolean): Attributes {
+    let result: Attributes = {};
+    for (let [key, value] of Object.entries(input || {})) {
+        let m = key.match(/^(t[dr]|p|font)([A-Z])(.*)$/);
+        if (!m || m[1] !== tag) continue;
+        if (keepPrefix) {
+            result[m[1] + m[2] + m[3]] = value;
+        } else {
+            result[m[2].toLowerCase() + m[3]] = value;
+        }
+    }
+    return result;
+}
+
+/*>>>
+Table column.
+
+This element has no children, instead it defines a column of a table.
+Actual cells are located in rows.
+
+All attributes starting with `td-`, `p-` and `font-` prefixes will be passed to
+all cells, paragraphs (as preserved attributes) and paragraphs default
+text format.
+
+*/
+function tcTag(tr: DocxTranslator, attributes: Attributes): any[] {
+    attributes = { ...filterPreserved('tc', tr.preserved.table?.attributes), ...attributes };
+    //* Tells for how many columns this element applies to. @@
+    let colSpan = filterUintNonZero(attributes.colspan, FilterMode.UNDEF) || 1;
+    let tableData = (tr.preserved.table?.data || {}) as TablePreservedData;
+    for (let i = 0; i < colSpan; i++) {
+        tableData.columns.push({
+            attributes,
+            //* Sets width of the column. @@
+            width: filterLengthUintNonZero(attributes.width, LengthUnits.dxa, FilterMode.UNDEF),
+        });
+    }
+    return [];
+}
+
 /*>>>
 Table row.
 
 Child elements of the row are `<td>` (or its associated @api class).
 
+All attributes starting with `td-`, `p-` and `font-` prefixes will be passed to
+all cells, paragraphs (as preserved attributes) and paragraphs default
+text format.
+
 @api:classes/TableRow.
 */
-export function trTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+function trTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
+    let trCopy = tr.copy(undefined, { 'td': tdTag });
+    trCopy.preserved = {
+        ...tr.preserved,
+        tr: { attributes, properties: {} },
+    };
+    if (trCopy.preserved.table?.data) {
+        trCopy.preserved.table.data.columnIndex = 0;
+    }
+    attributes = { ...filterPreserved('tr', tr.preserved.table?.attributes), ...attributes };
     let options: docx.ITableRowOptions = {
-        children: tr.copy(undefined, { 'td': tdTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
+        children: trCopy.parseObjects(trCopy.element, SpacesProcessing.IGNORE),
         //* Row can be splitted into multiple pages. @@
         cantSplit: filterBool(attributes.cantSplit, FilterMode.UNDEF),
         //* This row is a table header. @@
@@ -198,12 +275,45 @@ Table cell.
 Child elements of the cell must be `<p>` or `<table>` (or its associated @api classes).
 If they are not, then the content of the cell will be put into automatically generated `<p>` element.
 
+The cell will inherit all attributes from associated `<table>`, `<tc>`, and `<tr>` elements
+that are prefixed by `td-`. If single attribute comes from different sources, then the priority
+is following: current `<td>` element, inherited from `<tr>` element,
+inherited from `<tc>` element, inherited from `<table>` element.
+
+All attributes starting with `p-` and `font-` prefixes will be passed to
+all paragraphs (as preserved attributes) and paragraphs default
+text format.
+
 @api:classes/TableCell.
 */
 export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
-    tr = tr.copy();
-    let children = tr.parseObjects(tr.element, SpacesProcessing.IGNORE);
-    children = createDummyParagraph(tr, children);
+    // Fetch or keep preserved attributes and properties
+    let tableData = (tr.preserved.table?.data || {}) as TablePreservedData;
+    // Fetch inherited properties and attributes
+    attributes = {
+        ...filterPreserved('td', tr.preserved.table?.attributes),
+        ...filterPreserved('td', tableData.columns[tableData.columnIndex]?.attributes),
+        ...filterPreserved('td', tr.preserved.tr?.attributes),
+        ...attributes
+    };
+    let pAttributes = {
+        ...filterPreserved('p', tr.preserved.table?.attributes),
+        ...filterPreserved('font', tr.preserved.table?.attributes, true),
+        ...filterPreserved('p', tableData.columns[tableData.columnIndex]?.attributes),
+        ...filterPreserved('font', tableData.columns[tableData.columnIndex]?.attributes, true),
+        ...filterPreserved('p', tr.preserved.tr?.attributes),
+        ...filterPreserved('font', tr.preserved.tr?.attributes, true),
+        ...filterPreserved('p', attributes),
+        ...filterPreserved('font', attributes, true),
+    };
+    let trCopy = tr.copy();
+    trCopy.preserved.p = {
+        attributes: pAttributes,
+        properties: {},
+    };
+    // Parse children and prepare options
+    let children = trCopy.parseObjects(trCopy.element, SpacesProcessing.IGNORE);
+    children = createDummyParagraph(trCopy, children);
     let options: docx.ITableCellOptions = {
         children,
         //* Cell border. @@
@@ -229,5 +339,7 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
             color: filterColor(attributes.background, FilterMode.EXACT),
         }
     };
+    // Increment current column index
+    tableData.columnIndex += options.columnSpan || 1;
     return [new docx.TableCell({ ...options, ...properties })];
 }

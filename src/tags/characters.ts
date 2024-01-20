@@ -158,7 +158,9 @@ export function getIRunStylePropertiesOptions(attributes: Attributes, properties
         //* Font name.
         font: attributes.font ||
             //* Alias of `font` attribute.
-            attributes.face,
+            attributes.face ||
+            //* Alias of `font` attribute.
+            attributes.family,
         //* Text Highlighting. @enum:HighlightColor
         highlight: fromEnum(attributes.highlight, HighlightColor, {}, false),
         shading: selectUndef(attributes.background, {
@@ -184,22 +186,22 @@ export function getIRunStylePropertiesOptions(attributes: Attributes, properties
 /*>>> fontTag
 @merge:getIRunStylePropertiesOptions
 */
-function simpleStyleChange(tr: DocxTranslator, styleChange: docx.IRunOptions, attributes: Attributes) {
+export function simpleStyleChange(tr: DocxTranslator, styleChange: docx.IRunOptions, attributes: Attributes) {
     styleChange = {
         ...styleChange,
         //* Font style id.
         style: attributes.style,
         ...getIRunStylePropertiesOptions(attributes),
     };
-    let newTranslator = tr.copy(styleChange);
-    let properties = newTranslator.getProperties(tr.element);
-    newTranslator = newTranslator.copy(properties);
-    return newTranslator.parseObjects(tr.element, SpacesProcessing.PRESERVE);
+    return tr.copy(styleChange);
 }
 
 export function fallbackStyleChange(tr: DocxTranslator, attributes: Attributes): any[] | null {
     if (simpleBoolTagsTable[tr.element.name] !== undefined) {
-        return simpleStyleChange(tr, simpleBoolTagsTable[tr.element.name], attributes);
+        let newTranslator = simpleStyleChange(tr, simpleBoolTagsTable[tr.element.name], attributes);
+        let properties = newTranslator.getProperties(tr.element);
+        newTranslator = newTranslator.copy(properties);
+        return newTranslator.parseObjects(tr.element, SpacesProcessing.PRESERVE);
     }
     return null;
 }
