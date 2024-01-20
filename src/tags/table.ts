@@ -92,7 +92,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     let border = getBorder(attributes.border);
     //* Default border between cells. @@
     let insideBorder = getBorderHV(attributes.insideBorder);
-    let percentage = attributes.width.endsWith('%');
+    let percentage = attributes.width?.endsWith('%');
     let options: docx.ITableOptions = {
         rows: tr.copy(undefined, { 'tr': trTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
         //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
