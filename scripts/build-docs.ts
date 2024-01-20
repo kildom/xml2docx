@@ -79,7 +79,11 @@ for (let file of fs.readdirSync(docsDir)) {
         let templateText = fs.readFileSync(`${docsDir}/${file}`, 'utf-8');
         let compiled = template(templateText);
         let output = compiled({ markdownTexts, tocText, fileNameToId });
-        fs.writeFileSync(`${webDir}/${file.replace('.template.', '.')}`, output);
+        let outputFile = `${webDir}/${file.replace('.template.', '.')}`;
+        fs.writeFileSync(outputFile, output);
+        if (file.endsWith('.html')) {
+            console.log(`file:///${fs.realpathSync(outputFile).replace(/\\/g, '/').replace(/^\/+/g, '')}`);
+        }
     }
 }
 

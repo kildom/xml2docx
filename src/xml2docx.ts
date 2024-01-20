@@ -26,7 +26,7 @@ import { getLicense, writeSources } from './dev';
 
 const USAGE = `
 USAGE:
-    xml2docx [options] input.xml [output.docx]
+    xml2docx [options] <input.xml> [output.docx]
 
 Transform an XML file into a docx file.
 
@@ -34,6 +34,12 @@ For detailed XML file format specifications, please see the documentation
 at https://kildom.github.io/xml2docx/.
 
 Options:
+
+<input.xml>
+    Input XML file.
+
+[output.docx]
+    Output document. By default it is <input> with the ".docx" extension.
 
 -d <data.json>
     Interpret the input file as a template and use the <data.json> file for

@@ -25,7 +25,7 @@ import { AnyObject, Attributes, Dict, selectUndef, undefEmpty } from '../common'
 import { getBorder, getMargin } from './borders';
 import {
     filterUintNonZero, fromEnum, filterBool, FilterMode, LengthUnits, filterLengthUintNonZero, filterColor,
-    filterLengthUint, filterPositiveUniversalMeasure
+    filterLengthUint, filterPositiveUniversalMeasure, filterInt
 } from '../filters';
 import { TextDirectionAliases, VerticalAlignAliases } from '../enums';
 import { createDummyParagraph } from './paragraph';
@@ -92,6 +92,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     let border = getBorder(attributes.border);
     //* Default border between cells. @@
     let insideBorder = getBorderHV(attributes.insideBorder);
+    let percentage = attributes.width.endsWith('%');
     let options: docx.ITableOptions = {
         rows: tr.copy(undefined, { 'tr': trTag }).parseObjects(tr.element, SpacesProcessing.IGNORE),
         //* List of columns widths for fixed table layout. @filterPositiveUniversalMeasure
@@ -105,8 +106,10 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
         //* Table width. It can be expressed as percentage of entire available space (with `%` sign)
         //* or straightforward distance. @filterPositiveUniversalMeasure
         width: attributes.width ? {
-            type: attributes.width.endsWith('%') ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
-            size: filterPositiveUniversalMeasure(attributes.width, FilterMode.EXACT),
+            type: percentage ? docx.WidthType.PERCENTAGE : docx.WidthType.DXA,
+            size: percentage
+                ? filterInt(attributes.width.substring(0, attributes.width.length - 1), FilterMode.EXACT)
+                : filterPositiveUniversalMeasure(attributes.width, FilterMode.EXACT),
         } : undefined,
         borders: undefEmpty({
             bottom: border?.bottom,

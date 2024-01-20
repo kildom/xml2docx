@@ -28,15 +28,15 @@ Example:
 Universal measures are represented as number followed by unit name.
 All allowed units are summarized below.
 
- Unit | Unit length in millimeters | Unit length in inches
-------|----------------------------|-----------------------
- mm   | 1                          | 5/127 ≈ 0.03937
- cm   | 10                         | 50/127 ≈ 0.3937
- in   | 127/5 = 25.4               | 1
- pt   | 127/360 ≈ 0.3528           | 1/72 ≈ 0.01389
- pi   | 127/30 ≈ 4.233             | 1/6 ≈ 0.1667
- pc   | 127/30 ≈ 4.233             | 1/6 ≈ 0.1667
- px   | 127/480 ≈ 0.2646           | 1/96 ≈ 0.01042
+   Unit   | Unit length in millimeters | Unit length in inches
+----------|----------------------------|-----------------------
+ **mm**   | 1                          | 5/127 ≈ 0.03937
+ **cm**   | 10                         | 50/127 ≈ 0.3937
+ **in**   | 127/5 = 25.4               | 1
+ **pt**   | 127/360 ≈ 0.3528           | 1/72 ≈ 0.01389
+ **pi**   | 127/30 ≈ 4.233             | 1/6 ≈ 0.1667
+ **pc**   | 127/30 ≈ 4.233             | 1/6 ≈ 0.1667
+ **px**   | 127/480 ≈ 0.2646           | 1/96 ≈ 0.01042
 
 Example:
 

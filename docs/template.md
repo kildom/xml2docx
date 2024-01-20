@@ -3,6 +3,11 @@
 When you using JSON5 data file input, the XML file becomes a template.
 You can use JavaScript expressions and statements there.
 
+> [!CAUTION]
+> ACTIVATING THIS OPTION WILL PERMIT THE EXECUTION OF ARBITRARY
+> CODE FROM THE TEMPLATE FILE WITHOUT LIMITATIONS. USE ONLY
+> XML FILES FROM A TRUSTED SOURCE.
+
 ## Data file
 
 The data file is a file containing [JSON5](https://json5.org/).

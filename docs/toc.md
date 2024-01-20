@@ -19,7 +19,7 @@
         * [&lt;tab>](paragraph.md#tab)
         * [&lt;br>](paragraph.md#br)
     * [Text formatting](format.md)
-        * [&lt;b>, &lt;i>, &lt;u> …](paragraph.md#b-i-u-)
+        * [&lt;b>, &lt;i>, &lt;u> …](format.md#b-i-u-)
         * [&lt;font>](format.md#font)
         * [&lt;font-style>](format.md#font-style)
     * [Images](image.md)
