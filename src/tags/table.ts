@@ -78,6 +78,7 @@ interface TablePreservedData {
     columns: {
         width?: number,
         attributes: Attributes,
+        rowSpanRemaining?: number,
     }[];
 }
 
@@ -253,8 +254,12 @@ function trTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject
         ...tr.preserved,
         tr: { attributes, properties: {} },
     };
-    if (trCopy.preserved.table?.data) {
-        trCopy.preserved.table.data.columnIndex = 0;
+    let tableData = trCopy.preserved.table?.data as TablePreservedData;
+    if (tableData) {
+        tableData.columnIndex = 0;
+        for (let col of tableData.columns) {
+            col.rowSpanRemaining = (col.rowSpanRemaining || 1) - 1;
+        }
     }
     attributes = { ...filterPreserved('tr', tr.preserved.table?.attributes), ...attributes };
     let options: docx.ITableRowOptions = {
@@ -289,6 +294,12 @@ text format.
 export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
     // Fetch or keep preserved attributes and properties
     let tableData = (tr.preserved.table?.data || {}) as TablePreservedData;
+    // Skip columns that are still inside row span
+    while (tableData.columnIndex < tableData.columns.length
+        && (tableData.columns[tableData.columnIndex]?.rowSpanRemaining || 0) > 0
+    ) {
+        tableData.columnIndex++;
+    }
     // Fetch inherited properties and attributes
     attributes = {
         ...filterPreserved('td', tr.preserved.table?.attributes),
@@ -339,6 +350,9 @@ export function tdTag(tr: DocxTranslator, attributes: Attributes, properties: An
             color: filterColor(attributes.background, FilterMode.EXACT),
         }
     };
+    // Set remaining rows span in current column
+    tableData.columns[tableData.columnIndex] = tableData.columns[tableData.columnIndex] || { attributes: {} };
+    tableData.columns[tableData.columnIndex].rowSpanRemaining = options.rowSpan || 1;
     // Increment current column index
     tableData.columnIndex += options.columnSpan || 1;
     return [new docx.TableCell({ ...options, ...properties })];

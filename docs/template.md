@@ -100,4 +100,8 @@ It contains some utility properties and functions:
 
   `<%= utils.include("my_file.xml") %>`
 
+  Or, you can include JavaScript file using `eval()` function.
+
+  `<%! eval(utils.include("my_script.js")) %>`
+
 If your data file overrides `utils` object, you can use alias name `__utils__`.
