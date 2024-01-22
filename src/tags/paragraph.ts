@@ -95,7 +95,7 @@ export function tabTag(tr: DocxTranslator): any[] {
 Adds line break without breaking the paragraph.
 */
 export function brTag(tr: DocxTranslator): any[] {
-    return [new docx.TextRun({ ...tr.runOptions, children: [new docx.CarriageReturn()] })];
+    return [new docx.TextRun({ ...tr.runOptions, children: [new docx.EmptyElement('w:br')] })];
 }
 
 /*>>>
