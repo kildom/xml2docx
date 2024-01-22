@@ -42,8 +42,9 @@ The shorthand tags are:
 * `avoid-orphans="positive integer"` *[optional]*
     
     Avoid orphans at the end of line by replacing space after them with the
-    "variable width no-break space" sequences. The value is maximum number of orphan characters,
-    mostly `1` or `2`. The `0` value disables it.
+    "no-break space". The value is maximum number of orphan characters,
+    mostly `1` or `2`. The `0` value disables it. If `vwnbsp` font attribute or tag is active
+    "variable width no-break space" sequence will be used instead of "no-break space".
 
 * `underline="type color"` *[optional]*
     
@@ -184,7 +185,7 @@ defining the text format.
 * `size-complex-script`
 * `highlight-complex-script`
 * `right-to-left`
-* `nbvwsp` - see [`<nbvwsp>` tag](paragraph.md#nbvwsp)
+* `vwnbsp` - see [`<vwnbsp>` tag](paragraph.md#vwnbsp)
 
 <!-- <<< -->
 

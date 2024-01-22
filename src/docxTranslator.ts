@@ -23,7 +23,7 @@ import * as docx from 'docx';
 import { TranslatorBase } from './translatorBase';
 import { CData, Text, Element, XMLError, InterceptedXMLError } from './xml';
 import { AnyObject, Attributes, Dict, setTag } from './common';
-import { brTag, nbvwspTag, pTag, pageNumberTag, tabTag, totalPagesTag } from './tags/paragraph';
+import { brTag, vwnbspTag, pTag, pageNumberTag, tabTag, totalPagesTag } from './tags/paragraph';
 import { documentTag, headerFooterTag } from './tags/document';
 import { TextFormat, fallbackStyleChange, fontStyleTag } from './tags/characters';
 import { tableTag } from './tags/table';
@@ -65,14 +65,15 @@ const tags: TagsSet = {
     'img': imgTag,
     'tab': tabTag,
     'br': brTag,
-    'nbvwsp': nbvwspTag,
+    'vwnbsp': vwnbspTag,
     'p-style': pStyleTag,
     'font-style': fontStyleTag,
     'total-pages': totalPagesTag,
     'page-number': pageNumberTag,
 };
 
-const avoidOrphansRegExp: RegExp[] = [];
+const avoidOrphansVarRegExp: RegExp[] = [];
+const avoidOrphansFixedRegExp: RegExp[] = [];
 
 export class DocxTranslator extends TranslatorBase {
 
@@ -103,10 +104,17 @@ export class DocxTranslator extends TranslatorBase {
         }
         if (this.runOptions.avoidOrphans && this.runOptions.avoidOrphans > 0) {
             let count = this.runOptions.avoidOrphans;
-            if (!avoidOrphansRegExp[count]) {
-                avoidOrphansRegExp[count] = new RegExp(`(?<=(?:^|\\s)\\p{Letter}{1,${count}})(?=\\s|$)`, 'gmu');
+            if (this.runOptions.useVarWidthNoBreakSpace) {
+                if (!avoidOrphansVarRegExp[count]) {
+                    avoidOrphansVarRegExp[count] = new RegExp(`(?<=(?:^|\\s)\\p{Letter}{1,${count}})(?=\\s|$)`, 'gmu');
+                }
+                text = text.replace(avoidOrphansVarRegExp[count], '\uFEFF');
+            } else {
+                if (!avoidOrphansFixedRegExp[count]) {
+                    avoidOrphansFixedRegExp[count] = new RegExp(`(?<=(?:^|\\s)\\p{Letter}{1,${count}})\\s+`, 'gu');
+                }
+                text = text.replace(avoidOrphansFixedRegExp[count], '\xA0');
             }
-            text = text.replace(avoidOrphansRegExp[count], '\uFEFF');
         }
         let options: TextFormat = { ...this.runOptions, text };
         return [new docx.TextRun(options)];

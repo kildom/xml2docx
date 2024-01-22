@@ -99,11 +99,13 @@ export function brTag(tr: DocxTranslator): any[] {
 }
 
 /*>>>
-If used alone `<nbvwsp/>`, adds "zero width no-break space" and "normal space" characters which
+If used alone `<vwnbsp/>`, adds "zero width no-break space" and "normal space" characters which
 is workaround to achieve "variable width no-break space" in docx.
 If used with content inside, replaces all "no-break spaces" with "variable width no-break space" sequences.
+This workaround works with a desktop Word application. It will not work in browsers and probably in other
+applications.
 */
-export function nbvwspTag(tr: DocxTranslator): any[] {
+export function vwnbspTag(tr: DocxTranslator): any[] {
     let children = tr.copy({ useVarWidthNoBreakSpace: true }).parseObjects(tr.element, SpacesProcessing.PRESERVE);
     if (children.length === 0) {
         return [new docx.TextRun({ ...tr.runOptions, text: '\uFEFF ' })];

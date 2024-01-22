@@ -106,7 +106,7 @@ const simpleBoolStyleTable: Dict<string> = {
     * `size-complex-script`
     * `highlight-complex-script`
     * `right-to-left`
-    * `nbvwsp` - see [`<nbvwsp>` tag](paragraph.md#nbvwsp)
+    * `vwnbsp` - see [`<vwnbsp>` tag](paragraph.md#vwnbsp)
     */
     noProof: 'noProof',
     bold: 'bold',
@@ -130,7 +130,7 @@ const simpleBoolStyleTable: Dict<string> = {
     vanish: 'vanish',
     specVanish: 'specVanish',
     math: 'math',
-    nbvwsp: 'useVarWidthNoBreakSpace',
+    vwnbsp: 'useVarWidthNoBreakSpace',
 };
 
 export function removeShallowUndefined(object: AnyObject) {
@@ -199,8 +199,9 @@ export function simpleStyleChange(tr: DocxTranslator, styleChange: TextFormat, a
         //* Font style id.
         style: attributes.style,
         //* Avoid orphans at the end of line by replacing space after them with the
-        //* "variable width no-break space" sequences. The value is maximum number of orphan characters,
-        //* mostly `1` or `2`. The `0` value disables it. @@
+        //* "no-break space". The value is maximum number of orphan characters,
+        //* mostly `1` or `2`. The `0` value disables it. If `vwnbsp` font attribute or tag is active
+        //* "variable width no-break space" sequence will be used instead of "no-break space". @@
         avoidOrphans: filterUint(attributes.avoidOrphans, FilterMode.UNDEF),
         ...styleChange,
         ...getIRunStylePropertiesOptions(attributes),

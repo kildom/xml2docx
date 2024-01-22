@@ -17,7 +17,7 @@
         * [&lt;title>, &lt;h1>, &lt;h2>, &lt;h3> …](paragraph.md#title-h1-h2-h3-)
         * [&lt;tab/>](paragraph.md#tab)
         * [&lt;br/>](paragraph.md#br)
-        * [&lt;nbvwsp>](paragraph.md#nbvwsp)
+        * [&lt;vwnbsp>](paragraph.md#vwnbsp)
         * [&lt;p-style>](paragraph.md#p-style)
     * [Text formatting](format.md)
         * [&lt;b>, &lt;i>, &lt;u> …](format.md#b-i-u-)
