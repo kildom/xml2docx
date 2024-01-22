@@ -23,9 +23,9 @@ import * as docx from 'docx';
 import { TranslatorBase } from './translatorBase';
 import { CData, Text, Element, XMLError, InterceptedXMLError } from './xml';
 import { AnyObject, Attributes, Dict, setTag } from './common';
-import { brTag, pTag, pageNumberTag, tabTag, totalPagesTag } from './tags/paragraph';
+import { brTag, nbvwspTag, pTag, pageNumberTag, tabTag, totalPagesTag } from './tags/paragraph';
 import { documentTag, headerFooterTag } from './tags/document';
-import { fallbackStyleChange, fontStyleTag } from './tags/characters';
+import { TextFormat, fallbackStyleChange, fontStyleTag } from './tags/characters';
 import { tableTag } from './tags/table';
 import { imgTag } from './tags/img';
 import { filters } from './filters';
@@ -65,11 +65,14 @@ const tags: TagsSet = {
     'img': imgTag,
     'tab': tabTag,
     'br': brTag,
+    'nbvwsp': nbvwspTag,
     'p-style': pStyleTag,
     'font-style': fontStyleTag,
     'total-pages': totalPagesTag,
     'page-number': pageNumberTag,
 };
+
+const avoidOrphansRegExp: RegExp[] = [];
 
 export class DocxTranslator extends TranslatorBase {
 
@@ -83,19 +86,29 @@ export class DocxTranslator extends TranslatorBase {
 
     constructor(
         public baseDir: string,
-        public runOptions: docx.IRunOptions,
+        public runOptions: TextFormat,
         public element: Element,
         public customTags?: TagsSet
     ) {
         super();
     }
 
-    public copy(runOptionsChanges?: docx.IRunOptions, customTags?: TagsSet) {
+    public copy(runOptionsChanges?: TextFormat, customTags?: TagsSet) {
         return new DocxTranslator(this.baseDir, { ...this.runOptions, ...runOptionsChanges }, this.element, customTags);
     }
 
     private createFromText(text: string) {
-        let options: docx.IRunOptions = { ...this.runOptions, text };
+        if (this.runOptions.useVarWidthNoBreakSpace) {
+            text = text.replace(/\xA0/g, '\uFEFF ');
+        }
+        if (this.runOptions.avoidOrphans && this.runOptions.avoidOrphans > 0) {
+            let count = this.runOptions.avoidOrphans;
+            if (!avoidOrphansRegExp[count]) {
+                avoidOrphansRegExp[count] = new RegExp(`(?<=(?:^|\\s)\\p{Letter}{1,${count}})(?=\\s|$)`, 'gmu');
+            }
+            text = text.replace(avoidOrphansRegExp[count], '\uFEFF');
+        }
+        let options: TextFormat = { ...this.runOptions, text };
         return [new docx.TextRun(options)];
     }
 
@@ -147,10 +160,6 @@ export class DocxTranslator extends TranslatorBase {
                 setTag(args[0], 'ISectionOptions');
                 args[0].children = args[0].children || [];
                 return args;
-            } else if (name === 'TotalPages') {
-                return [new docx.TextRun({ ...this.runOptions, children: [docx.PageNumber.TOTAL_PAGES] })];
-            } else if (name == 'CurrentPageNumber') {
-                return [new docx.TextRun({ ...this.runOptions, children: [docx.PageNumber.CURRENT] })];
             }
 
             let construct = (docx as any)[name];

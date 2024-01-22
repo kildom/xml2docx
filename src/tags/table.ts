@@ -124,7 +124,7 @@ export function tableTag(tr: DocxTranslator, attributes: Attributes, properties:
     let options: docx.ITableOptions = {
         rows,
         columnWidths,
-        layout: attributes.columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
+        layout: columnWidths ? docx.TableLayoutType.FIXED : docx.TableLayoutType.AUTOFIT,
         //* Table alignment. @enum:AlignmentType
         alignment: fromEnum(attributes.align, docx.AlignmentType),
         //* Table width. It can be expressed as percentage of entire available space (with `%` sign)

@@ -24,13 +24,18 @@ import { DocxTranslator } from '../docxTranslator';
 import { SpacesProcessing } from '../xml';
 import { AnyObject, Attributes, Dict, requiredAttribute, selectUndef, setTag, splitListValues } from '../common';
 import {
-    fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure, filterUniversalMeasure, filterUfloat
+    fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure,
+    filterUniversalMeasure, filterUfloat, filterUint
 } from '../filters';
 import { getBorderOptions } from './borders';
 import { HighlightColor } from '../enums';
 
+export interface TextFormat extends docx.IRunOptions {
+    avoidOrphans?: number;
+    useVarWidthNoBreakSpace?: boolean;
+}
 
-const simpleBoolTagsTable: Dict<docx.IRunOptions> = {
+const simpleBoolTagsTable: Dict<TextFormat> = {
     'allCaps': { allCaps: true },
     'all-caps': { allCaps: true },
     'b': { bold: true },
@@ -69,6 +74,7 @@ const simpleBoolTagsTable: Dict<docx.IRunOptions> = {
     'vanish': { vanish: true },
     'span': {},
     'font': {},
+    'avoid-orphans': { avoidOrphans: 1 },
 };
 
 /*>>> simpleBoolStyleTable
@@ -100,6 +106,7 @@ const simpleBoolStyleTable: Dict<string> = {
     * `size-complex-script`
     * `highlight-complex-script`
     * `right-to-left`
+    * `nbvwsp` - see [`<nbvwsp>` tag](paragraph.md#nbvwsp)
     */
     noProof: 'noProof',
     bold: 'bold',
@@ -123,6 +130,7 @@ const simpleBoolStyleTable: Dict<string> = {
     vanish: 'vanish',
     specVanish: 'specVanish',
     math: 'math',
+    nbvwsp: 'useVarWidthNoBreakSpace',
 };
 
 export function removeShallowUndefined(object: AnyObject) {
@@ -186,11 +194,15 @@ export function getIRunStylePropertiesOptions(attributes: Attributes, properties
 /*>>> fontTag
 @merge:getIRunStylePropertiesOptions
 */
-export function simpleStyleChange(tr: DocxTranslator, styleChange: docx.IRunOptions, attributes: Attributes) {
+export function simpleStyleChange(tr: DocxTranslator, styleChange: TextFormat, attributes: Attributes) {
     styleChange = {
-        ...styleChange,
         //* Font style id.
         style: attributes.style,
+        //* Avoid orphans at the end of line by replacing space after them with the
+        //* "variable width no-break space" sequences. The value is maximum number of orphan characters,
+        //* mostly `1` or `2`. The `0` value disables it. @@
+        avoidOrphans: filterUint(attributes.avoidOrphans, FilterMode.UNDEF),
+        ...styleChange,
         ...getIRunStylePropertiesOptions(attributes),
     };
     return tr.copy(styleChange);

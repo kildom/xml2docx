@@ -170,3 +170,19 @@ Section.
     * `portrait`
 
 <!-- <<< -->
+
+## `<total-pages/>`
+
+<!-- >>> totalPagesTag -->
+
+Adds total pages count. Can be used only in header and footer.
+
+<!-- <<< -->
+
+## `<page-number/>`
+
+<!-- >>> pageNumberTag -->
+
+Adds current page number. Can be used only in header and footer.
+
+<!-- <<< -->

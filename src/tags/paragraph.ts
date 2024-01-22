@@ -88,7 +88,7 @@ export function pTag(tr: DocxTranslator, attributes: Attributes, properties: Any
 Adds tabulation.
 */
 export function tabTag(tr: DocxTranslator): any[] {
-    return [new docx.TextRun({  ...tr.runOptions, children: [new docx.Tab()] })];
+    return [new docx.TextRun({ ...tr.runOptions, children: [new docx.Tab()] })];
 }
 
 /*>>>
@@ -96,6 +96,20 @@ Adds line break without breaking the paragraph.
 */
 export function brTag(tr: DocxTranslator): any[] {
     return [new docx.TextRun({ ...tr.runOptions, children: [new docx.CarriageReturn()] })];
+}
+
+/*>>>
+If used alone `<nbvwsp/>`, adds "zero width no-break space" and "normal space" characters which
+is workaround to achieve "variable width no-break space" in docx.
+If used with content inside, replaces all "no-break spaces" with "variable width no-break space" sequences.
+*/
+export function nbvwspTag(tr: DocxTranslator): any[] {
+    let children = tr.copy({ useVarWidthNoBreakSpace: true }).parseObjects(tr.element, SpacesProcessing.PRESERVE);
+    if (children.length === 0) {
+        return [new docx.TextRun({ ...tr.runOptions, text: '\uFEFF ' })];
+    } else {
+        return children;
+    }
 }
 
 /*>>>

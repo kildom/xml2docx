@@ -151,6 +151,16 @@ Adds line break without breaking the paragraph.
 
 <!-- <<< -->
 
+## `<nbvwsp>`
+
+<!-- >>> nbvwspTag -->
+
+If used alone `<nbvwsp/>`, adds "zero width no-break space" and "normal space" characters which
+is workaround to achieve "variable width no-break space" in docx.
+If used with content inside, replaces all "no-break spaces" with "variable width no-break space" sequences.
+
+<!-- <<< -->
+
 ## `<p-style>`
 
 <!-- >>> pStyleTag -->
