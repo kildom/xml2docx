@@ -57,7 +57,7 @@ async function main() {
             // ignore this error
         }
         for (let file of fs.readdirSync('test/inputs')) {
-            if (file.endsWith('.xml')) {
+            if (file.endsWith('.xml') && !file.endsWith('.inc.xml')) {
                 let output = 'test/outputs/' + file.replace('.xml', '.docx');
                 let data = 'test/inputs/data.json';
                 if (fs.existsSync(`test/inputs/${file}.json`)) {

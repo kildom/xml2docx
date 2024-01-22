@@ -3,7 +3,7 @@
     <p-style id="MyStyle" name="My Style" based-on="Normal" next="MyStyle"
     align="justify"
     indent="5mm 2cm 10mm"
-    spacing="3mm 3mm exactly 1.3" />
+    spacing="3mm 3mm" line-spacing="exactly 1.3" />
 
     <title>Paragraph style tests</title>
 

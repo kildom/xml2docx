@@ -89,6 +89,22 @@ the `font-` prefix from the [`<font>`](format.md#font) tag.
         * `underscore`
     * `position` *[required]* - Tab position. *[Universal measure](attributes.md#universal-measure)*.
 
+* `spacing="before after contextual"` *[optional]*
+    
+    Vertical spacing of the paragraph. 
+    * `before` *[optional]* - Space before paragraph. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `after` *[optional]* - Space after paragraph. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `contextual` *[optional]* - Use contextual spacing. If set, it is literal `contextual`.
+
+* `line-spacing="exactly|at-least distance|multiple"` *[optional]*
+    
+    Spacing between lines. 
+    * `exactly|at-least` *[optional]* - Use exactly or at least the value. `at-least` by default.
+    * `distance` *[optional]* - Absolute distance. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+    * `multiple` *[optional]* - Multiple of one line, fractions allowed.
+    
+    Provide exactly one of `distance` or `multiple`.
+
 * `align` *[optional]*
     
     Text alignment. Enumeration values:
@@ -105,9 +121,12 @@ the `font-` prefix from the [`<font>`](format.md#font) tag.
     * `start`
     * `thai-distribute`
 
-* `indent` *[optional]*
+* `indent="left right first-line"` *[optional]*
     
-    Text indentation.
+    Text indentation. 
+    * `left` *[optional]* - Left indent. Zero by default. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `right` *[optional]* - Right indent. Zero by default. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `first-line` *[optional]* - First line offset relative to `left`. Zero by default. *[Universal measure](attributes.md#universal-measure)*.
 
 * `keep-lines` *[optional]*
     
@@ -120,10 +139,6 @@ the `font-` prefix from the [`<font>`](format.md#font) tag.
 * `outline="positive integer"` *[optional]*
     
     Outline level if this paragraph should be part of document outline.
-
-* `spacing` *[optional]*
-    
-    Vertical spacing of the paragraph.
 
 <!-- <<< -->
 
@@ -188,6 +203,22 @@ Default font style inside paragraph can be set using
     
     Id if style for new paragraphs following this style.
 
+* `spacing="before after contextual"` *[optional]*
+    
+    Vertical spacing of the paragraph. 
+    * `before` *[optional]* - Space before paragraph. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `after` *[optional]* - Space after paragraph. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `contextual` *[optional]* - Use contextual spacing. If set, it is literal `contextual`.
+
+* `line-spacing="exactly|at-least distance|multiple"` *[optional]*
+    
+    Spacing between lines. 
+    * `exactly|at-least` *[optional]* - Use exactly or at least the value. `at-least` by default.
+    * `distance` *[optional]* - Absolute distance. *[Positive universal measure](attributes.md#positive-universal-measure) without zero*.
+    * `multiple` *[optional]* - Multiple of one line, fractions allowed.
+    
+    Provide exactly one of `distance` or `multiple`.
+
 * `align` *[optional]*
     
     Text alignment. Enumeration values:
@@ -204,9 +235,12 @@ Default font style inside paragraph can be set using
     * `start`
     * `thai-distribute`
 
-* `indent` *[optional]*
+* `indent="left right first-line"` *[optional]*
     
-    Text indentation.
+    Text indentation. 
+    * `left` *[optional]* - Left indent. Zero by default. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `right` *[optional]* - Right indent. Zero by default. *[Positive universal measure](attributes.md#positive-universal-measure)*.
+    * `first-line` *[optional]* - First line offset relative to `left`. Zero by default. *[Universal measure](attributes.md#universal-measure)*.
 
 * `keep-lines` *[optional]*
     
@@ -219,9 +253,5 @@ Default font style inside paragraph can be set using
 * `outline="positive integer"` *[optional]*
     
     Outline level if this paragraph should be part of document outline.
-
-* `spacing` *[optional]*
-    
-    Vertical spacing of the paragraph.
 
 <!-- <<< -->

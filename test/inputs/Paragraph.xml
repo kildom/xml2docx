@@ -1,80 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
+    <%= utils.include("Common.inc.xml") %>
+
     <!-- TODO: styles -->
     <!-- TODO: numbering in seperate file -->
 
-    <title>Paragraph tests</title>
+    <section width="148mm" height="210mm" margin="14mm"/>
 
-    <h1 spacing="9mm 5mm" preserve="y">Simplest</h1>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <!--===============================================================-->
+    <h1:MARKER>heading</h1:MARKER>
+    <title>Title</title>
+    <h1>Heading 1</h1>
+    <h2>Heading 2</h2>
+    <h3>Heading 3</h3>
+    <h4>Heading 4</h4>
+    <h5>Heading 5</h5>
+    <h6>Heading 6</h6>
 
-    <h1>align</h1>
-    <p align="right">[align="right"] Right aligned</p>
-    <p align="left">[align="left"] Left aligned</p>
-    <p align="center">[align="center"] Centered</p>
-    <p align="both">[align="both"] Aligned to both sides. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p align="justify">[align="justify"] Justified (alias of both). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
 
-    <h1>indent</h1>
-    <p indent="5mm">[indent="5mm"] Small indent</p>
-    <p indent="15mm">[indent="15mm"] Bigger indent</p>
-    <p indent="0mm 20mm" align="justify">[indent="0mm 20mm"] Right indent. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p indent="15mm 20mm" align="justify">[indent="15mm 20mm"] Both sides indent. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p indent="5mm 0mm 10mm" align="justify">[indent="5mm 0mm 10mm"] First line indent. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p indent="10mm 0mm -10mm" align="justify">[indent="0mm 0mm -10mm"] Hanging. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-
-    <h1>page-break</h1>
-    <p page-break="y">[page-break="y"] This paragraph should start at the next page.</p>
-
-    <h1>border</h1>
-    <p border="0.3mm" spacing="3mm 3mm">Simplest border</p>
-    <p border="0.3mm" spacing="3mm 3mm">for two paragraphs.</p>
-    <p border="0.3mm 3mm" spacing="3mm 3mm">Adding gap between text and border.</p>
-    <p border="blue, lime" spacing="3mm 3mm">Different on horizontal and vertical.</p>
-    <p border="double red 0.3mm 3mm, blue, 1mm 3mm, none" spacing="3mm 3mm">Different border on each side.</p>
-
-    <h1>spacing</h1>
-    <p>No spacing</p>
-    <p spacing="1cm">[spacing="1cm"] 1 cm before</p>
-    <p>No spacing</p>
-    <p spacing="5mm 1cm">[spacing="5mm 1cm"] 5 mm before, 1 cm after</p>
-    <p>No spacing</p>
-    <p spacing="at-least 1cm">[spacing="at-least 1cm"] At least 1 cm between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="at-least 2mm">[spacing="at-least 2mm"] At least 3 mm between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="exact 2mm">[spacing="exact 2mm"] Exact 3 mm between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="exactly 1.2">[spacing="exactly 1.2"] 1.2 line spacing. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="exactly 2">[spacing="exactly 2"] 2 line spacing. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p>No spacing</p>
-    <p spacing="1cm 1cm exactly 1.2 contextual">[spacing="1cm 1cm exactly 1.2 contextual"] 1cm before and after (contextual), and 1.2 between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="1cm 1cm exactly 1.2 contextual">[spacing="1cm 1cm exactly 1.2 contextual"] 1cm before and after (contextual), and 1.2 between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="1cm 1cm exactly 1.2 contextual">[spacing="1cm 1cm exactly 1.2 contextual"] 1cm before and after (contextual), and 1.2 between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p spacing="1cm 1cm exactly 1.2 contextual">[spacing="1cm 1cm exactly 1.2 contextual"] 1cm before and after (contextual), and 1.2 between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
-    <p>No spacing</p>
-
-    <h1>tabs</h1>
-    <p tabs="left 2cm, center 5cm, decimal 9cm, right 13cm" preserve="y">Begin<tab/>Left<tab/>Center<tab/>123.456<tab/>Right</p>
-    <p>B&#9;L&#9;C&#9;1.55555&#9;R</p>
-    <p preserve="n">Begin	Left	Center	123.456	Right</p>
-    <p tabs="12cm dot">Leader Type:<tab/>dot</p>
-    <p tabs="12cm hyphen">Leader Type:<tab/>hyphen</p>
-    <p tabs="12cm middle-dot">Leader Type:<tab/>middle-dot</p>
-    <p tabs="12cm none">Leader Type:<tab/>none</p>
-    <p tabs="12cm underscore">Leader Type:<tab/>underscore</p>
-    <p tabs="underscore">Leader Type:<tab/>none</p>
-
-    <h1>background</h1>
-    <p background="aliceblue">[background="aliceblue"] "Alice in Wonderland" blue.</p>
-    <p background="#FEA" spacing="5mm 5mm">First paragraph with background and spacing.</p>
-    <p background="#AEF" spacing="5mm 5mm">Second paragraph with background and spacing.</p>
-    <p background="#FAE" spacing="5mm 5mm">Third paragraph with background and spacing.</p>
-
-    <h1>Style preservation</h1>
+    <!--===============================================================-->
+    <h1:MARKER>preserve</h1:MARKER>
     <p background="aliceblue" preserve="y">Paragraph with blue background.</p>
     <p>It is still blue.</p>
     <p>The style is preserved from the previous paragraph.</p>
     <p preserve="n">This is the last blue paragraph.</p>
     <p>And we're back to normal paragraph.</p>
-    
     <h2 background="yellow" preserve="y">Heading 2 is now yellow</h2>
     <h3>Heading 3 is unaffected</h3>
     <p>Normal paragraph.</p>
@@ -82,7 +32,110 @@
     <h2 preserve="n">Last yellow heading 2</h2>
     <h2>Not yellow</h2>
 
-    <h1>Outline</h1>
+
+    <!--===============================================================-->
+    <h1:MARKER>border</h1:MARKER>
+    <p border="0.3mm" spacing="3mm 3mm">Simplest border</p>
+    <p border="0.3mm" spacing="3mm 3mm">for two paragraphs.</p>
+    <p border="0.3mm 3mm" spacing="3mm 3mm">Adding gap between text and border.</p>
+    <p border="blue, lime" spacing="3mm 3mm">Different on horizontal and vertical.</p>
+    <p border="double red 0.3mm 3mm, blue, 1mm 3mm, none" spacing="3mm 3mm">Different border on each side.</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>tabs</h1:MARKER>
+    <p tabs="left 2cm, center 4cm, decimal 8cm, right 12cm" preserve="y">Begin<tab/>Left<tab/>Center<tab/>123.456<tab/>Right</p>
+    <p>B&#9;L&#9;C&#9;1.55555&#9;R</p>
+    <p preserve="n">Begin	Left	Center	123.456	Right</p>
+    <p tabs="8cm dot">Leader Type:<tab/>dot</p>
+    <p tabs="8cm hyphen">Leader Type:<tab/>hyphen</p>
+    <p tabs="8cm middle-dot">Leader Type:<tab/>middle-dot</p>
+    <p tabs="8cm none">Leader Type:<tab/>none</p>
+    <p tabs="8cm underscore">Leader Type:<tab/>underscore</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>align</h1:MARKER>
+    <p align="right">Right</p>
+    <p align="left">Left</p>
+    <p align="center">Center</p>
+    <p align="both">Both. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p align="justify">Justified (alias of both). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>indent</h1:MARKER>
+    <p indent="5mm">Small indent</p>
+    <p indent="15mm"> Bigger indent</p>
+    <p indent="0mm 20mm" align="justify">Right indent. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae.</p>
+    <p indent="15mm 20mm" align="justify">Both sides indent. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra.</p>
+    <p indent="5mm 0mm 10mm" align="justify">Small indent with bigger first line indent. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra.</p>
+    <p indent="10mm 0mm -10mm" align="justify">Indent except first line. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis.</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>keep-lines</h1:MARKER>
+    <p spacing="16cm 0cm"></p>
+    <p keep-lines="y">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra.</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>keep-next</h1:MARKER>
+    <p spacing="13cm 0cm"></p>
+    <p keep-next="y">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. <b>The end of first paragraph.</b></p>
+    <p keep-lines="y"><b>The beginning of second paragraph.</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra.</p>
+
+
+    <!--===============================================================-->
+    <p-style id="ContextualTest" name="ContextualTest" based-on="Normal"/>
+    <h1:MARKER>spacing</h1:MARKER>
+    <p>No spacing</p>
+    <p spacing="1cm">1 cm before</p>
+    <p>No spacing</p>
+    <p spacing="5mm 1cm">5 mm before, 1 cm after</p>
+    <p>No spacing</p>
+    <p line-spacing="at-least 7mm">At least 7 mm between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p line-spacing="at-least 2mm">At least 2 mm between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p line-spacing="exactly 2mm">Exactly 2 mm between lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p line-spacing="at-least 1.2">At least 1.2 line spacing. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p line-spacing="at-least 0.7">At least 0.7 line spacing. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p line-spacing="exactly 0.7">Exactly 0.7 line spacing. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p page-break="y">No spacing</p>
+    <p style="ContextualTest" spacing="1cm 1cm contextual" line-spacing="exactly 1.2">Contextual. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p style="ContextualTest" spacing="1cm 1cm contextual" line-spacing="exactly 1.2">Contextual. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p style="ContextualTest" spacing="1cm 1cm contextual" line-spacing="exactly 1.2">Contextual. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque. In venenatis a nisi quis pharetra. Mauris in elit volutpat, laoreet dolor vitae, feugiat turpis. Mauris eget mi neque.</p>
+    <p>No spacing</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>background</h1:MARKER>
+    <p background="aliceblue">CSS color name.</p>
+    <p background="#FEA" spacing="5mm 5mm">First paragraph with background and spacing.</p>
+    <p background="#AEF" spacing="5mm 5mm">Second paragraph with background and spacing.</p>
+    <p background="#F0A0E0" spacing="5mm 5mm">Third paragraph with background and spacing.</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>&lt;br&gt;</h1:MARKER>
+    <p>This<br/>is<br/>one<br/>paragraph.</p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>vwnbsp</h1:MARKER>
+    <p align="justify">
+        <vwnbsp>This is just a dummy beginning of the line that moves next sentence right.
+        This sentence will be in one line.
+        All spaces in this paragraph are non‑breaking except ones near comma and dot.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam et mi quam. Donec eleifend ultrices neque.</vwnbsp>
+    </p>
+    <p align="justify">
+        This<vwnbsp/>is just a dummy beginning of the line that moves next sentence right.
+        This sentence will be in one line.
+    </p>
+
+
+    <!--===============================================================-->
+    <h1:MARKER>outline</h1:MARKER>
     <p outline="0">This paragraph is in outline0.</p>
     <p outline="1">This paragraph is in outline1.</p>
     <p outline="2">This paragraph is in outline2.</p>
@@ -91,5 +144,5 @@
     <p outline="2">This paragraph is in outline2.</p>
     <p outline="0">This paragraph is in outline0.</p>
     <p outline="1">This paragraph is in outline1.</p>
-    <!-- TODO: add TOC -->
+
 </document>

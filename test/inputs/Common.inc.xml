@@ -1,0 +1,11 @@
+
+<DEF:MARKER
+    page-break="y"
+    spacing="0mm 4mm"
+    border="0.2mm red, none, 0.2mm red"
+    align="center"
+    background="#EEE"
+    font-color="black">
+    <img width="16px" height="16px" vertical="paragraph 2.5mm" horizontal="page left"
+        data="iVBORw0KGgoAAAANSUhEUgAAABkAAAAZBAMAAAA2x5hQAAAAGFBMVEXKyv/K/8r/ysrKysr//8r/////yv/K///L6+ZhAAAAGklEQVQY02MQcC5iCDJyShNkdTYQGOVRlwcAihM/e01qIOsAAAAASUVORK5CYII="/>
+</DEF:MARKER>

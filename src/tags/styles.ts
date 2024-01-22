@@ -21,10 +21,10 @@
 import { DocxTranslator } from '../docxTranslator';
 import { SpacesProcessing } from '../xml';
 import * as docx from 'docx';
-import { AnyObject, Attributes, isTag, requiredAttribute, setTag } from '../common';
+import { AnyObject, Attributes, isTag, requiredAttribute, setTag, splitListValues, undefEmpty } from '../common';
 import {
-    filterFloat, filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits,
-    filterLengthInt, filterColor
+    filterUint, fromEnum, filterBool, FilterMode, filterLengthUint, LengthUnits,
+    filterLengthInt, filterColor, filterLengthUintNonZero, filterUfloat
 } from '../filters';
 import { getBorder } from './borders';
 import { getIRunStylePropertiesOptions } from './characters';
@@ -68,6 +68,10 @@ export function getIParagraphStylePropertiesOptions(tr: DocxTranslator, attribut
 
 /*>>> */
 export function getILevelParagraphStylePropertiesOptions(tr: DocxTranslator, attributes: Attributes) {
+    //* Vertical spacing of the paragraph. @@
+    let spacing = getSpacing(tr, attributes.spacing);
+    //* Spacing between lines. @@
+    let lineSpacing = getLineSpacing(tr, attributes.lineSpacing);
     let options: docx.ILevelParagraphStylePropertiesOptions = {
         //* Text alignment. @enum:AlignmentType+AlignmentTypeAliases
         alignment: fromEnum(attributes.align, docx.AlignmentType, AlignmentTypeAliases),
@@ -79,13 +83,17 @@ export function getILevelParagraphStylePropertiesOptions(tr: DocxTranslator, att
         keepNext: filterBool(attributes.keepNext, FilterMode.UNDEF),
         //* Outline level if this paragraph should be part of document outline. @@
         outlineLevel: filterUint(attributes.outline, FilterMode.UNDEF),
-        //* Vertical spacing of the paragraph. @@
-        ...getSpacing(tr, attributes.spacing),
+        contextualSpacing: spacing?.contextualSpacing,
+        spacing: undefEmpty({
+            ...spacing?.spacing,
+            ...lineSpacing,
+        })
     };
     return options;
 }
 
-/*>>> */
+/*>>> : left right first-line
+*/
 function getIndent(indent: string | undefined): docx.IIndentAttributesProperties | undefined {
     if (indent === undefined) return undefined;
     let arr = indent.split(/\s+/);
@@ -99,58 +107,69 @@ function getIndent(indent: string | undefined): docx.IIndentAttributesProperties
         }
     }
     return {
+        //* `left` *[optional]* - Left indent. Zero by default. @filterPositiveUniversalMeasure
         left: !arr[0] ? undefined : arr[0] as docx.PositiveUniversalMeasure,
+        //* `right` *[optional]* - Right indent. Zero by default. @filterPositiveUniversalMeasure
         right: !arr[1] ? undefined : arr[1] as docx.PositiveUniversalMeasure,
+        //* `first-line` *[optional]* - First line offset relative to `left`. Zero by default. @filterUniversalMeasure
         firstLine,
         hanging,
     };
 }
 
-/*>>> */
-function getSpacing(tr: DocxTranslator, spacing?: string): docx.ILevelParagraphStylePropertiesOptions | undefined {
-    if (spacing === undefined) return undefined;
-    let arr: string[] = spacing.split(/\s+/);
-    let ba: number[] = [];
-    let lineRule: (typeof docx.LineRuleType)[keyof typeof docx.LineRuleType] | undefined = undefined;
-    let i: number;
-    let contextualSpacing: true | undefined = undefined;
-    for (i = 0; i < arr.length; i++) {
-        if (arr[i] === 'contextual') {
-            contextualSpacing = true;
-            continue;
-        }
-        lineRule = fromEnum(arr[i], docx.LineRuleType, {}, false);
-        if (lineRule) {
-            i++;
-            break;
-        }
-        ba.push(filterLengthUint(arr[i], LengthUnits.dxa, FilterMode.EXACT));
+/*>>> : exactly|at-least distance|multiple
+*/
+function getLineSpacing(tr: DocxTranslator, text?: string): docx.ISpacingProperties | undefined {
+    let spacing = splitListValues(text, {
+        //* `exactly|at-least` *[optional]* - Use exactly or at least the value. `at-least` by default.
+        exactly: (value: string) => value.toLowerCase()[0] === 'e' ? true : undefined,
+        atLeast: (value: string) => value.toLowerCase()[0] === 'a' ? true : undefined,
+        //* `distance` *[optional]* - Absolute distance. @@
+        distance: (value: string) => filterLengthUintNonZero(value, LengthUnits.dxa, FilterMode.ALL),
+        //* `multiple` *[optional]* - Multiple of one line, fractions allowed. @@
+        multiple: (value: string) => filterUfloat(value, FilterMode.ALL),
+    }) as { distance: number, multiple: number, exactly: boolean } | undefined;
+    /*> Provide exactly one of `distance` or `multiple`.
+    */
+
+    if (spacing?.distance !== undefined) {
+        return {
+            line: spacing.distance,
+            lineRule: spacing.exactly ? docx.LineRuleType.EXACT : docx.LineRuleType.AT_LEAST,
+        };
+    } else if (spacing?.multiple !== undefined) {
+        return {
+            line: Math.round(240 * Math.max((spacing.exactly ? 0 : 1), spacing.multiple)),
+            lineRule: docx.LineRuleType.EXACTLY,
+        };
+    } else {
+        return undefined;
     }
-    let lineStr: string | undefined = undefined;
-    for (; i < arr.length; i++) {
-        if (arr[i] === 'contextual') {
-            contextualSpacing = true;
-            continue;
-        }
-        lineStr = arr[i];
+}
+
+/*>>> : before after contextual
+*/
+function getSpacing(tr: DocxTranslator, text?: string): docx.ILevelParagraphStylePropertiesOptions | undefined {
+    let spacing = splitListValues(text, {
+        //* `before` *[optional]* - Space before paragraph. @@
+        before: (value: string) => filterLengthUint(value, LengthUnits.dxa, FilterMode.ALL),
+        //* `after` *[optional]* - Space after paragraph. @@
+        after: (value: string) => filterLengthUint(value, LengthUnits.dxa, FilterMode.ALL),
+        //* `contextual` *[optional]* - Use contextual spacing. If set, it is literal `contextual`.
+        contextual: (value: string) => value.toLowerCase()[0] === 'c' ? true : undefined,
+    }) as { before: number, after: number, contextual: boolean } | undefined;
+
+    if (spacing) {
+        return {
+            spacing: {
+                before: spacing.before,
+                after: spacing.after,
+            },
+            contextualSpacing: spacing.contextual,
+        };
+    } else {
+        return undefined;
     }
-    let line: number | undefined = undefined;
-    if (lineStr !== undefined && lineRule !== undefined) {
-        if (lineRule === docx.LineRuleType.AT_LEAST || lineRule === docx.LineRuleType.EXACT) {
-            line = filterLengthUint(lineStr, LengthUnits.dxa, FilterMode.EXACT);
-        } else {
-            line = Math.round(240 * filterFloat(lineStr, FilterMode.EXACT));
-        }
-    }
-    return {
-        spacing: {
-            before: ba[0],
-            after: ba[1],
-            line,
-            lineRule,
-        },
-        contextualSpacing,
-    };
 }
 
 /*>>> : position type leader, ...
