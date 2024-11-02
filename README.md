@@ -1,5 +1,5 @@
 
-# xml2docx
+# DocTML (Document Text Mark-up Language)
 
 <a href="https://github.com/kildom/xml2docx/actions/workflows/build.yml"><img src="https://github.com/kildom/xml2docx/actions/workflows/build.yml/badge.svg" alt="Build for Cortex-M4" align="right"/></a>
 

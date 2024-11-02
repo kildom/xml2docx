@@ -1,0 +1,10 @@
+{
+    "xml.format.maxLineWidth": 0,
+    "xml.validation.namespaces.enabled": "never",
+    "editor.rulers": [
+        120
+    ],
+    "cSpell.words": [
+        "Doctml"
+    ],
+}

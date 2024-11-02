@@ -18,128 +18,154 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as xmlJs from 'xml-js';
+import * as sax from 'sax';
 import { InterceptedError } from './os';
-import { Attributes } from './common';
+import { AnyObject, Attributes, Dict, error } from './common';
 
-export interface Element {
+export interface NodeBase {
+    type: 'element' | 'text' | 'cdata' | 'instruction';
+    line: number;
+    column: number;
+}
+
+export interface Element extends NodeBase {
     type: 'element';
     name: string;
-    attributes?: Attributes;
-    elements?: Node[];
-    path: string;
+    attributes: Attributes;
+    properties: Dict<Element>;
+    elements: Node[];
 }
 
-export interface Text {
+export interface Text extends NodeBase {
     type: 'text';
     text: string;
-    path: string;
 }
 
-export interface CData {
+export interface CData extends NodeBase {
     type: 'cdata';
     cdata: string;
-    path: string;
 }
 
-export interface Instruction {
-    type: 'instruction';
-    name: string;
-    instruction: string;
-    path: string;
-}
+export type Node = Element | Text | CData;
 
-export type Node = Element | Text | CData | Instruction;
-
-export class XMLError extends Error {
+export class XMLError extends Error { // TODO: Remove this
     constructor(node: Node | { element: Node } | { node: Node } | undefined, message: string) {
         if (node) {
-            super(message + ` [at ${(node as any)?.path || (node as any)?.element?.path || (node as any)?.node?.path}]`);
+            super(message + ` [at ${(node as any)?.line || (node as any)?.element?.line || (node as any)?.node?.line}]`);
         } else {
             super(message);
         }
     }
 }
 
-export class InterceptedXMLError extends InterceptedError {
+export class InterceptedXMLError extends InterceptedError { // TODO: Remove this
     public constructor(node: Node, previous: any, message: string) {
-        super(previous, message + ` [at ${node.path}]`);
+        super(previous, message + ` [at ${node.line}]`);
     }
 }
 
-interface PathTagState {
-    first: Node;
-    count: number;
-}
+export function parse(input: string): Element {
 
-export function addXPathsTo(xml: Element, path: string) {
-    let tagStates = new Map<string, PathTagState>();
-    for (let node of xml.elements || []) {
-        let name = node.type === 'element' ? node.name : node.type.toUpperCase();
-        if (tagStates.has(name)) {
-            let state = tagStates.get(name);
-            node.path = `${path}/${name}[${state!.count}]`;
-            if (state!.count === 1) {
-                state!.first.path += '[0]';
-            }
-            state!.count++;
-        } else {
-            node.path = path + '/' + name;
-            tagStates.set(name, {
-                first: node,
-                count: 1,
-            });
-        }
-    }
-    for (let node of xml.elements || []) {
-        if (node.type === 'element') {
-            addXPathsTo(node, node.path);
-        }
-    }
-}
+    let parser = sax.parser(true, {
+        trim: false,
+        normalize: true,
+        lowercase: true,
+        xmlns: false,
+        position: true,
+        noscript: true,
+        unquotedAttributeValues: true,
+    } as any);
 
-export function parse(xmlText: string, addXPaths: boolean, singleRoot: boolean): Element {
-    let xml = xmlJs.xml2js(xmlText, {
-        ignoreComment: true,
-        captureSpacesBetweenElements: true,
-    });
-    let res: Element;
-    if (singleRoot) {
-        let elements = (xml.elements as Node[]).filter(node => !(node.type === 'text' && node.text.trim() === ''));
-        if (elements.length > 1) {
-            throw new XMLError(elements[1], 'Only one root element expected.');
-        } else if (elements.length === 0) {
-            throw new XMLError({ type: 'text', path: '', text: '' }, 'Only one root element expected.');
-        } else if (elements[0].type !== 'element') {
-            throw new XMLError(elements[0], 'XML element expected at the root of document.');
-        }
-        res = elements[0];
-    } else {
-        res = {
+    let root: Element = {
+        type: 'element',
+        name: 'ROOT',
+        attributes: {},
+        properties: {},
+        elements: [],
+        line: 1,
+        column: 1,
+    };
+
+    let stack = [root];
+    let tagStart = {
+        line: 1,
+        column: 1,
+    };
+
+    parser.onopentagstart = (tag) => {
+        tagStart.line = parser.line;
+        tagStart.column = Math.max(1, parser.column - tag.name.length - 1);
+    };
+
+    parser.onopentag = (tag: sax.Tag) => {
+        let element: Element = {
             type: 'element',
-            name: 'ROOT',
-            path: '',
-            elements: xml.elements,
+            name: tag.name,
+            attributes: tag.attributes,
+            properties: {},
+            elements: [],
+            ...tagStart,
         };
+        stack.at(-1)!.elements.push(element);
+        stack.push(element);
+    };
+
+    parser.onclosetag = () => {
+        stack.pop();
+    };
+
+    parser.ontext = (t: string) => {
+        let text: Text = {
+            type: 'text',
+            text: t,
+            line: parser.line,
+            column: parser.column,
+        };
+        stack.at(-1)!.elements.push(text);
+    };
+
+    parser.oncdata = (t: string) => {
+        let cdata: CData = {
+            type: 'cdata',
+            cdata: t,
+            line: parser.line,
+            column: parser.column,
+        };
+        stack.at(-1)!.elements.push(cdata);
+    };
+
+    parser.onerror = (e) => {
+        error(e.message, parser);
+        parser.resume();
+    };
+
+    parser.onprocessinginstruction = () => {
+        error('Unexpected XML instruction', parser);
+    };
+
+    parser.write(input);
+    parser.close();
+
+    if (stack.length !== 1 || stack[0] !== root) {
+        error('Invalid XML parsing result');
     }
-    if (addXPaths) {
-        addXPathsTo(res, '');
-    }
-    return res;
+
+    return root;
 }
 
 export function stringify(element: Element, singleRoot: boolean) {
-    if (singleRoot) {
-        let root: Element = {
-            type: 'element',
-            name: 'ROOT',
-            path: '',
-            elements: [element],
-        };
-        return xmlJs.js2xml(root, { compact: false });
-    } else {
-        return xmlJs.js2xml(element, { compact: false });
-    }
+    return ''; // TODO: is it really necessary?
+    // if (singleRoot) {
+    //     let root: Element = {
+    //         type: 'element',
+    //         name: 'ROOT',
+    //         path: '',
+    //         elements: [element],
+    //     };
+    //     return xmlJs.js2xml(root, { compact: false });
+    // } else {
+    //     return xmlJs.js2xml(element, { compact: false });
+    // }
 }
 
 export enum SpacesProcessing {
@@ -158,6 +184,13 @@ function trimStartSpacesAndNewLines(text: string) {
 
 function trimEndSpacesAndNewLines(text: string) {
     return text.replace(/[ \r\n]*$/, '');
+}
+
+export function processSpacesInPlace(nodes: Node[], textProcessing: SpacesProcessing) {
+    if (nodes !== undefined) {
+        let ret = processSpaces(nodes, textProcessing);
+        nodes.splice(0, nodes.length, ...ret);
+    }
 }
 
 export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesProcessing) {
@@ -183,7 +216,7 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
                     i++;
                     break;
                 }
-            } else if (node.type === 'element' && node.name.endsWith(':property')) {
+            } else if (node.type === 'element' && (node.name.endsWith(':property') || node.name.startsWith('group#'))) {
                 result.push(node);
             } else {
                 break;
@@ -205,7 +238,7 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
                     i++;
                     break;
                 }
-            } else if (node.type === 'element' && node.name.endsWith(':property')) {
+            } else if (node.type === 'element' && (node.name.endsWith(':property') || node.name.startsWith('group#'))) {
                 result.push(node);
             } else {
                 break;
@@ -220,6 +253,7 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
         return result;
     }
 }
+
 
 export function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
@@ -236,4 +270,46 @@ export function mergeElements(base: Element, addition: Element): Element {
         base.elements.push(deepCopy(node));
     }
     return base;
+}
+
+export function normalizeDocxContext(node: Node) {
+    if (node.type !== 'element') return;
+    /* TODO: doctml context switch
+    Return children of p element, This element may have attributes and properties just like <p> element.
+        <children:doctml.p>Content</children:doctml.p>
+    Return single element:
+        <children:doctml><p>Content</p></children:doctml>
+    */
+    if (node.name.match(/:doctml(?:\.[A-Z0-9a-z_-]+)?$/)) {
+        for (let sub of node.elements) {
+            normalizeDoctmlContext(sub);
+        }
+    } else {
+        for (let sub of node.elements) {
+            normalizeDocxContext(sub);
+        }
+    }
+}
+
+export function normalizeDoctmlContext(node: Node) {
+    if (node.type !== 'element') return;
+    if (node.name.startsWith('docx.')) {
+        for (let sub of node.elements) {
+            normalizeDocxContext(sub);
+        }
+    } else if (node.name.endsWith(':property')) {
+        for (let sub of node.elements) {
+            normalizeDocxContext(sub);
+        }
+    } else {
+        node.name = node.name.replace(/[_-]/g, '').toLowerCase();
+        let attributes = Object.create(null);
+        for (let [name, value] of Object.entries(node.attributes)) {
+            attributes[name.replace(/[_-]/g, '').toLowerCase()] = value;
+        }
+        node.attributes = attributes;
+        for (let sub of node.elements) {
+            normalizeDoctmlContext(sub);
+        }
+    }
 }

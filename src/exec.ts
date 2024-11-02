@@ -23,9 +23,9 @@ import JSON5 from 'json5';
 
 import { os, InterceptedError } from './os';
 import { fromTemplate } from './template';
-import { addXPathsTo, parse, stringify } from './xml';
+import { Element, normalizeDoctmlContext, parse, stringify } from './xml';
 import { resolveAliases } from './aliases';
-import { translate } from './docxTranslator';
+import { translate } from './new/translate';
 
 export enum ReturnOutput {
     BUFFER = ':buffer',
@@ -69,16 +69,19 @@ export async function exec(args: ExecOptions): Promise<string | Uint8Array> {
         }
     }
 
-    let xmlRoot = parse(inputText, true, true);
+    let xmlRoot = parse(inputText);
+
+    xmlRoot = rootToDocument(xmlRoot);
 
     try {
         resolveAliases(xmlRoot);
-        addXPathsTo(xmlRoot, '');
     } catch (err) { throw new InterceptedError(err, 'Error resolving aliases.'); }
 
     if (args.debug) {
-        os.fs.writeFileSync(args.output + '.executed.xml', stringify(xmlRoot, true));
+        os.fs.writeFileSync(args.output + '.aliased.xml', stringify(xmlRoot, true));
     }
+
+    normalizeDoctmlContext(xmlRoot);
 
     let document: docx.Document;
 
@@ -107,3 +110,21 @@ export async function exec(args: ExecOptions): Promise<string | Uint8Array> {
 
     return result;
 }
+
+function rootToDocument(xmlRoot: Element): Element {
+    if (xmlRoot.elements.length === 1 && xmlRoot.elements[0].type === 'element' && xmlRoot.elements[0].name === 'document') {
+        return xmlRoot.elements[0];
+    } else {
+        let document: Element = {
+            type: 'element',
+            name: 'document',
+            attributes: {},
+            properties: {},
+            elements: xmlRoot.elements,
+            line: 0,
+            column: 1,
+        };
+        return document;
+    }
+}
+

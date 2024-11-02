@@ -119,3 +119,11 @@ export type Mutable<T> = {
     -readonly [P in keyof T]: T[P];
 };
 
+
+export function error(message: string, location?: { line: number; column: number; }) {
+    if (location) {
+        console.error(`${message} at line ${location.line} column ${location.column}.`);
+    } else {
+        console.error(message);
+    }
+}
