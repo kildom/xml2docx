@@ -237,7 +237,7 @@ export function fontTag(ts: TranslatorState, element: Element, captureChildren?:
         ...simpleBoolTagsTable[element.name],
         ...getIRunStylePropertiesOptions(attributes, properties),
         style: attributes.style,
-        avoidOrphans: convertUint(attributes.avoidOrphans),
+        avoidOrphans: convertUint(attributes.avoidorphans),
     };
     tsInner = tsInner.applyFormat(format);
     let children = translateNodes(tsInner, element.elements, paragraphContextTags);

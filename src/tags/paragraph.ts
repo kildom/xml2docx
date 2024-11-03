@@ -19,10 +19,16 @@
  */
 
 import * as docx from 'docx';
-import { Dict } from '../common';
+import { Attributes, Dict, splitListValues, undefEmpty } from '../common';
 import { CaptureChildren, getDocxConstructor, normalizeElement, translateNodes, TranslatorState } from '../translate';
 import { Element, Node, SpacesProcessing } from '../xml';
 import { paragraphContextTags } from './text';
+import { getBorders } from './borders';
+import {
+    convertBool, convertColor, convertEnum, convertPositiveUniversalMeasure, convertPositiveUniversalMeasureInt,
+    convertUfloat, convertUint, convertUniversalMeasure, convertUniversalMeasureInt, UnitsPerPt
+} from '../converters';
+import { AlignmentTypeAliases } from '../enums';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
@@ -37,6 +43,180 @@ export const headingTags: Dict<HeadingLevelType | undefined> = {
     'title': docx.HeadingLevel.TITLE,
 };
 
+/*>>>
+@merge:getIParagraphStylePropertiesOptions
+*/
+export function getIParagraphPropertiesOptions(attributes: Attributes) {
+    let options: docx.IParagraphPropertiesOptions = {
+        ...getIParagraphStylePropertiesOptions(attributes),
+        //* Paragraph border. @@
+        border: getBorders(attributes.border),
+        //* Force page break before this paragraph. @@
+        pageBreakBefore: convertBool(attributes.pagebreak),
+        //* Tabulator stops. @@
+        tabStops: getTabStops(attributes.tabs),
+        style: attributes.style,
+        // TODO: bullet - numbering
+        shading: attributes.background === undefined ? undefined : {
+            type: docx.ShadingType.SOLID,
+            color: convertColor(attributes.background),
+        },
+        // TODO: what is frame?
+        wordWrap: convertBool(attributes.wordwrap),
+        // TODO: what is scale?
+    };
+    return options;
+}
+
+/*>>>
+@merge:getILevelParagraphStylePropertiesOptions
+*/
+export function getIParagraphStylePropertiesOptions(attributes: Attributes) {
+    let options: docx.IParagraphStylePropertiesOptions = {
+        ...getILevelParagraphStylePropertiesOptions(attributes),
+        // TODO: numbering
+    };
+    return options;
+}
+
+/*>>> */
+export function getILevelParagraphStylePropertiesOptions(attributes: Attributes) {
+    //* Vertical spacing of the paragraph. @@
+    let spacing = getSpacing(attributes.spacing);
+    //* Spacing between lines. @@
+    let lineSpacing = getLineSpacing(attributes.linespacing);
+    let options: docx.ILevelParagraphStylePropertiesOptions = {
+        //* Text alignment. @enum:AlignmentType+AlignmentTypeAliases
+        alignment: convertEnum(attributes.align, docx.AlignmentType, AlignmentTypeAliases),
+        //* Text indentation. @@
+        indent: getIndent(attributes.indent),
+        //* Keep text lines. @@
+        keepLines: convertBool(attributes.keeplines),
+        //* Keep next. @@
+        keepNext: convertBool(attributes.keepnext),
+        //* Outline level if this paragraph should be part of document outline. @@
+        outlineLevel: convertUint(attributes.outline),
+        contextualSpacing: spacing?.contextualSpacing,
+        spacing: undefEmpty({
+            ...spacing?.spacing,
+            ...lineSpacing,
+        })
+    };
+    return options;
+}
+
+
+/*>>> : before after contextual
+*/
+function getSpacing(text: string | undefined): docx.ILevelParagraphStylePropertiesOptions | undefined {
+    let spacing = splitListValues(text, {
+        //* `before` *[optional]* - Space before paragraph. @@
+        before: (value: string) => convertPositiveUniversalMeasureInt.noErr(value, UnitsPerPt.dxa),
+        //* `after` *[optional]* - Space after paragraph. @@
+        after: (value: string) => convertPositiveUniversalMeasureInt.noErr(value, UnitsPerPt.dxa),
+        //* `contextual` *[optional]* - Use contextual spacing. If set, it is literal `contextual`.
+        contextual: (value: string) => value.toLowerCase()[0] === 'c' ? true : undefined,
+    }) as { before: number, after: number, contextual: boolean } | undefined;
+
+    if (spacing) {
+        return {
+            spacing: {
+                before: spacing.before,
+                after: spacing.after,
+            },
+            contextualSpacing: spacing.contextual,
+        };
+    } else {
+        return undefined;
+    }
+}
+
+/*>>> : exactly|at-least distance|multiple
+*/
+function getLineSpacing(text?: string): docx.ISpacingProperties | undefined {
+    // TODO: beforeAutoSpacing?: boolean; afterAutoSpacing?: boolean;
+    let spacing = splitListValues(text, {
+        //* `exactly|at-least` *[optional]* - Use exactly or at least the value. `at-least` by default.
+        exactly: (value: string) => value.toLowerCase()[0] === 'e' ? true : undefined,
+        atLeast: (value: string) => value.toLowerCase()[0] === 'a' ? true : undefined,
+        //* `distance` *[optional]* - Absolute distance. @@
+        distance: (value: string) => convertPositiveUniversalMeasureInt.noErr(value, UnitsPerPt.dxa),
+        //* `multiple` *[optional]* - Multiple of one line, fractions allowed. @@
+        multiple: (value: string) => convertUfloat.noErr(value),
+    }) as { distance: number, multiple: number, exactly: boolean } | undefined;
+    /*> Provide exactly one of `distance` or `multiple`.
+    */
+
+    if (spacing?.distance !== undefined) {
+        return {
+            line: spacing.distance,
+            lineRule: spacing.exactly ? docx.LineRuleType.EXACT : docx.LineRuleType.AT_LEAST,
+        };
+    } else if (spacing?.multiple !== undefined) {
+        return {
+            line: Math.round(240 * Math.max((spacing.exactly ? 0 : 1), spacing.multiple)),
+            lineRule: docx.LineRuleType.EXACTLY,
+        };
+    } else {
+        return undefined;
+    }
+}
+
+/*>>> : left right first-line
+*/
+function getIndent(indent: string | undefined): docx.IIndentAttributesProperties | undefined {
+
+    let result = splitListValues(indent, {
+        //* `left` *[optional]* - Left indent. Zero by default. @filterPositiveUniversalMeasure
+        left: (value: string) => convertPositiveUniversalMeasure.noErr(value),
+        //* `right` *[optional]* - Right indent. Zero by default. @filterPositiveUniversalMeasure
+        right: (value: string) => convertPositiveUniversalMeasure.noErr(value),
+        //* `first-line` *[optional]* - First line offset relative to `left`. Zero by default. @filterUniversalMeasure
+        firstLine: (value: string) => convertUniversalMeasure.noErr(value),
+    });
+
+    if (result?.firstLine?.startsWith('-')) {
+        result.hanging = (result.firstLine as string).replace(/^-/, '');
+        delete result.firstLine;
+    }
+
+    return result;
+}
+
+/*>>> : position type leader, ...
+*/
+function getSingleTabStop(tab: string): docx.TabStopDefinition | undefined {
+
+
+    let result = splitListValues(tab, {
+        //* `type` *[optional]* - Type of tab. @enum:TabStopType
+        type: (value: string) => [
+            convertEnum.noErr(value, docx.TabStopType),
+            () => docx.TabStopType.LEFT,
+        ],
+        //* `leader` *[optional]* - Type of tab leader. @enum:LeaderType
+        leader: (value: string) => convertEnum.noErr(value, docx.LeaderType),
+        //* `position` *[required]* - Tab position. @@
+        position: [
+            (value: string) => convertUniversalMeasureInt.noErr(value, UnitsPerPt.dxa),
+            () => 0,
+            'Invalid tab position.',
+        ]
+    });
+
+    return result as docx.TabStopDefinition | undefined;
+}
+
+/*>>>
+@merge:getSingleTabStop
+*/
+function getTabStops(tabs: string | undefined): docx.TabStopDefinition[] | undefined {
+    if (tabs === undefined) return undefined;
+    return tabs.split(/\s*[,;]\s*/)
+        .map(tab => getSingleTabStop(tab))
+        .filter(tab => tab)
+        .sort((a, b) => a!.position - b!.position) as docx.TabStopDefinition[];
+}
 
 export function pTag(ts: TranslatorState, element: Element, captureChildren?: CaptureChildren): docx.Paragraph[] {
 
@@ -44,7 +224,7 @@ export function pTag(ts: TranslatorState, element: Element, captureChildren?: Ca
 
     let heading: HeadingLevelType | undefined = headingTags[element.name];
     let options: docx.IParagraphOptions = {
-        //...getIParagraphPropertiesOptions(tr, attributes),
+        ...getIParagraphPropertiesOptions(attributes),
         children: translateNodes(tsInner, element.elements, paragraphContextTags),
         heading,
     };
