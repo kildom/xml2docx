@@ -18,6 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { getActiveNode } from "./translate";
+
 export type Dict<T> = { [key: string]: T };
 export type AnyObject = Dict<any>;
 export type Attributes = Dict<string>;
@@ -133,8 +135,9 @@ export type Mutable<T> = {
 
 
 export function error(message: string, location?: { line: number; column: number; }) {
-    if (location) {
-        console.error(`${message} at line ${location.line} column ${location.column}.`);
+    let loc = location ?? getActiveNode();
+    if (loc) {
+        console.error(`${message} at line ${loc.line + 1} column ${loc.column}.`);
     } else {
         console.error(message);
     }
@@ -149,7 +152,3 @@ export function removeShallowUndefined(object: AnyObject) {
 }
 
 export type FirstConstructorParam<T> = T extends new (arg1: infer P, ...args: any[]) => any ? P : never;
-
-export type Writable<T> = {
-    -readonly [P in keyof T]: T[P];
-};

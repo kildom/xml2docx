@@ -18,6 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { error } from './common';
 import { Node, Element, XMLError, mergeElements, deepCopy } from './xml';
 
 enum AliasState {
@@ -37,12 +38,15 @@ interface Alias {
 
 function resolveAlias(alias: Alias) {
     if (alias.state === AliasState.RESOLVED) return;
-    if (alias.state === AliasState.RESOLVING) throw new XMLError(alias.element, 'Infinite alias loop detected.');
+    if (alias.state === AliasState.RESOLVING) {
+        error('Infinite alias loop detected.', alias.element);
+    }
     alias.state = AliasState.RESOLVING;
     resolveAliases(alias.element, alias.parentAliases);
     for (let inheritName of alias.inherits) {
         if (!alias.parentAliases.has(inheritName)) {
-            throw new XMLError(alias.element, `Alias '${inheritName}' not defined.`);
+            error(`Alias '${inheritName}' not defined.`, alias.element);
+            continue;
         }
         let inherit = alias.parentAliases.get(inheritName) as Alias;
         resolveAlias(inherit);
@@ -59,26 +63,6 @@ export function resolveAliases(parentElement: Element, parentAliases: Map<string
     let defined = new Set<string>();
     let filtered: Node[] = [];
 
-    /* Properties from aliases are probably overcomplication: they can be replaced
-    by <ALIAS> or <element:ALIAS> where the alias has ":property" already inside.
-    for (let [fullName, value] of Object.entries(parentElement.attributes || {})) {
-        let names = fullName.split(':');
-        if (names.length > 1 && names.at(-1) == 'alias') {
-            if (!parentAliases.has(value)) {
-                throw new XMLError(parentElement, `Undefined alias "${value}"`);
-            }
-            let alias = parentAliases.get(value) as Alias;
-            delete (parentElement.attributes as any)[fullName];
-            resolveAlias(alias);
-            let element: Element = deepCopy(alias.element);
-            names[names.length - 1] = 'property';
-            element.name = names.join(':');
-            parentElement.elements = parentElement.elements || [];
-            parentElement.elements.unshift(element);
-        }
-    }
-    */
-
     for (let node of (parentElement.elements || [])) {
         if (node.type === 'element' && node.name.startsWith('DEF:')) {
             let names = node.name.substring(4).split(':');
@@ -91,7 +75,8 @@ export function resolveAliases(parentElement: Element, parentAliases: Map<string
                 inherits: names,
             };
             if (defined.has(name)) {
-                throw new XMLError(node, `Alias '${name}' already defined.`);
+                error(`Alias '${name}' already defined.`, node);
+                continue;
             }
             defined.add(name);
             aliases.set(name, alias);
@@ -108,7 +93,8 @@ export function resolveAliases(parentElement: Element, parentAliases: Map<string
             if (alias.hasAttributes
                 || (!!node.attributes && Object.keys(node.attributes).length)
                 || (!!node.elements && Object.keys(node.elements).length)) {
-                throw new XMLError(node, 'Inline aliases cannot have attributes or children.');
+                error('Inline aliases cannot have attributes or children.', node);
+                continue;
             }
             resolveAlias(alias);
             filtered2.push(...deepCopy(alias.element.elements || []));

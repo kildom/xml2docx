@@ -23,7 +23,7 @@ import * as docx from 'docx';
 import { normalizeElement, translateNodes, TranslatorState } from '../translate';
 import { Element, SpacesProcessing } from '../xml';
 import { addImplicitParagraphs, headingTags, pTag } from './paragraph';
-import { FirstConstructorParam, Writable } from '../common';
+import { FirstConstructorParam, Mutable } from '../common';
 
 export class ObjectContainer {
     public constructor(
@@ -48,7 +48,7 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
     let sections: docx.ISectionOptions[] = [];
     let paragraphStyles: docx.IParagraphStyleOptions[] = [];
     let characterStyles: docx.ICharacterStyleOptions[] = [];
-    let children: Writable<docx.ISectionOptions['children']> = [];
+    let children: Mutable<docx.ISectionOptions['children']> = [];
     let options: FirstConstructorParam<typeof docx.Document> = {
         sections: sections,
         //* Title in document properties.

@@ -29,16 +29,63 @@ type TextHandler = (ts: TranslatorState, text: Text) => any[];
 type CDataHandler = (ts: TranslatorState, cdata: CData) => any[];
 type NodeHandler = TextHandler | CDataHandler | ElementHandler;
 
+let activeNodeStack: Node[] = [];
+
+export function getActiveNode() {
+    return activeNodeStack.at(-1);
+}
+
+export function pushActiveNode(node: Node) {
+    activeNodeStack.push(node);
+}
+
+export function popActiveNode() {
+    activeNodeStack.pop();
+}
+
 export class TranslatorState {
 
     format: TextFormat;
+    common: {[tagName: string]: Attributes};
 
     public applyCommonAttributes(element: Element): TranslatorState {
-        return this;
+        if (!this.common[element.name]) return this;
+        for (let [attributeName, value] of Object.entries(this.common[element.name])) {
+            element.attributes[attributeName] = value;
+        }
+        let copy = new TranslatorState(this.baseDir, this.format);
+        copy.copyCommon(this.common);
+        delete copy.common[element.name];
+        return copy;
     }
 
     public fetchCommonAttributes(element: Element): TranslatorState {
-        return this;
+        let common: undefined | typeof this.common = undefined;
+        for (let [name, value] of Object.entries(element.attributes)) {
+            let pos = name.indexOf('.');
+            if (pos > 0) {
+                let tagName = name.substring(0, pos);
+                let attributeName = name.substring(pos + 1);
+                common = common ?? {};
+                common[tagName] = common[tagName] ?? {};
+                common[tagName][attributeName] = value;
+                delete element.attributes[name];
+            }
+        }
+        if (!common) return this;
+        let copy = new TranslatorState(this.baseDir, this.format);
+        copy.copyCommon(this.common);
+        copy.copyCommon(common);
+        return copy;
+    }
+
+    private copyCommon(common: { [tagName: string]: Attributes; }) {
+        for (let [tagName, attributes] of Object.entries(common)) {
+            for (let [attributeName, value] of Object.entries(attributes)) {
+                this.common[tagName] = this.common[tagName] ?? {};
+                this.common[tagName][attributeName] = value;
+            }
+        }
     }
 
     public applyFormat(format?: TextFormat): TranslatorState {
@@ -55,6 +102,7 @@ export class TranslatorState {
         format: TextFormat = {}
     ) {
         this.format = { ...format };
+        this.common = Object.create(null);
     }
 
 }
@@ -147,11 +195,18 @@ export function translate(root: Element, baseDir: string): docx.Document {
 
     let ts = new TranslatorState(baseDir);
 
-    let list = translateNodes(ts, [root], {
-        'document': documentTag,
-    });
+    activeNodeStack.splice(0, activeNodeStack.length, root);
 
-    return list[0];
+    try {
+        let list = translateNodes(ts, [root], {
+            'document': documentTag,
+        });
+
+        return list[0];
+
+    } finally {
+        activeNodeStack.splice(0);
+    }
 }
 
 export function translateNodes(ts: TranslatorState, nodes: Node[], tags: Dict<NodeHandler>): any[] {
@@ -159,29 +214,34 @@ export function translateNodes(ts: TranslatorState, nodes: Node[], tags: Dict<No
     let tsStack = [ts];
 
     for (let node of nodes) {
-        if (node.type === 'text') {
-            if (tags['#text']) {
-                result.push(...(tags['#text'] as TextHandler)(tsStack.at(-1)!, node));
+        pushActiveNode(node);
+        try {
+            if (node.type === 'text') {
+                if (tags['#text']) {
+                    result.push(...(tags['#text'] as TextHandler)(tsStack.at(-1)!, node));
+                } else {
+                    error('Text is not allowed in this context', node);
+                }
+            } else if (node.type === 'cdata') {
+                if (tags['#cdata']) {
+                    result.push(...(tags['#cdata'] as CDataHandler)(tsStack.at(-1)!, node));
+                } else {
+                    error('CDATA is not allowed in this context', node);
+                }
+            } else if (node.name === 'group#begin') {
+                tsStack.push(tsStack.at(-1)!.fetchCommonAttributes(node));
+            } else if (node.name === 'group#end') {
+                tsStack.pop();
+            } else if (tags[node.name]) {
+                result.push(...(tags[node.name] as ElementHandler)(tsStack.at(-1)!, node));
+            } else if (getDocxConstructor(node.name)) {
+                //let constructor = getDocxConstructor(node.name);
+                throw new Error('Not implemented');
             } else {
-                error('Text is not allowed in this context', node);
+                error(`Unexpected tag '${node.name}'`, node);
             }
-        } else if (node.type === 'cdata') {
-            if (tags['#cdata']) {
-                result.push(...(tags['#cdata'] as CDataHandler)(tsStack.at(-1)!, node));
-            } else {
-                error('CDATA is not allowed in this context', node);
-            }
-        } else if (node.name === 'group#begin') {
-            tsStack.push(tsStack.at(-1)!.fetchCommonAttributes(node));
-        } else if (node.name === 'group#end') {
-            tsStack.pop();
-        } else if (tags[node.name]) {
-            result.push(...(tags[node.name] as ElementHandler)(tsStack.at(-1)!, node));
-        } else if (getDocxConstructor(node.name)) {
-            //let constructor = getDocxConstructor(node.name);
-            throw new Error('Not implemented');
-        } else {
-            error(`Unexpected tag '${node.name}'`, node);
+        } finally {
+            popActiveNode();
         }
     }
 
