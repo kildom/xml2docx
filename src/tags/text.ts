@@ -20,61 +20,49 @@
 
 import * as docx from 'docx';
 
-import { DocxTranslator } from '../docxTranslator';
-import { SpacesProcessing } from '../xml';
-import { AnyObject, Attributes, Dict, requiredAttribute, selectUndef, setTag, splitListValues } from '../common';
-import {
-    fromEnum, filterBool, FilterMode, filterColor, filterPositiveUniversalMeasure,
-    filterUniversalMeasure, filterUfloat, filterUint
-} from '../filters';
-import { getBorderOptions } from './borders';
+import { CaptureChildren, normalizeElement, translateNodes, TranslatorState } from '../translate';
+import { AnyObject, Attributes, Dict, removeShallowUndefined, selectUndef, splitListValues } from '../common';
+import { CData, Element, SpacesProcessing, Text } from '../xml';
 import { HighlightColor } from '../enums';
+import {
+    convertBool, convertColor, convertEnum, convertPositiveUniversalMeasure,
+    convertUfloat, convertUint, convertUniversalMeasure
+} from '../converters';
+import { getSingleBorder } from './borders';
 
-export interface TextFormat extends docx.IRunOptions {
-    avoidOrphans?: number;
-    useVarWidthNoBreakSpace?: boolean;
-}
+
+// #region Tables
 
 const simpleBoolTagsTable: Dict<TextFormat> = {
-    'allCaps': { allCaps: true },
-    'all-caps': { allCaps: true },
+    'allcaps': { allCaps: true },
     'b': { bold: true },
     'bold': { bold: true },
-    'boldComplexScript': { boldComplexScript: true },
-    'bold-complex-script': { boldComplexScript: true },
-    'doubleStrike': { doubleStrike: true },
-    'double-strike': { doubleStrike: true },
+    'boldcomplexscript': { boldComplexScript: true },
+    'doublestrike': { doubleStrike: true },
     'emboss': { emboss: true },
     'imprint': { imprint: true },
     'i': { italics: true },
     'italics': { italics: true },
-    'italicsComplexScript': { italicsComplexScript: true },
-    'italics-complex-script': { italicsComplexScript: true },
+    'italicscomplexscript': { italicsComplexScript: true },
     'math': { math: true },
-    'noProof': { noProof: true },
-    'no-proof': { noProof: true },
-    'rightToLeft': { rightToLeft: true },
-    'right-to-left': { rightToLeft: true },
-    'smallCaps': { smallCaps: true },
-    'small-caps': { smallCaps: true },
-    'snapToGrid': { snapToGrid: true },
-    'snap-to-grid': { snapToGrid: true },
-    'specVanish': { specVanish: true },
-    'spec-vanish': { specVanish: true },
+    'noproof': { noProof: true },
+    'righttoleft': { rightToLeft: true },
+    'smallcaps': { smallCaps: true },
+    'snaptogrid': { snapToGrid: true },
+    'specvanish': { specVanish: true },
     's': { strike: true },
     'strike': { strike: true },
     'sub': { subScript: true },
-    'subScript': { subScript: true },
-    'sub-script': { subScript: true },
+    'subscript': { subScript: true },
     'sup': { superScript: true },
-    'superScript': { superScript: true },
-    'super-script': { superScript: true },
+    'super': { superScript: true },
+    'superscript': { superScript: true },
     'u': { underline: { type: docx.UnderlineType.SINGLE } },
     'underline': { underline: { type: docx.UnderlineType.SINGLE } },
     'vanish': { vanish: true },
     'span': {},
     'font': {},
-    'avoid-orphans': { avoidOrphans: 1 },
+    'avoidorphans': { avoidOrphans: 1 },
 };
 
 /*>>> simpleBoolStyleTable
@@ -133,15 +121,26 @@ const simpleBoolStyleTable: Dict<string> = {
     vwnbsp: 'useVarWidthNoBreakSpace',
 };
 
-export function removeShallowUndefined(object: AnyObject) {
-    object = { ...object };
-    for (let key of [...Object.keys(object)]) {
-        if (object[key] === undefined) {
-            delete object[key];
-        }
-    }
-    return object;
+// #endregion
+
+
+export interface TextFormat extends docx.IRunOptions {
+    avoidOrphans?: number;
+    useVarWidthNoBreakSpace?: boolean;
 }
+
+const avoidOrphansVarRegExp: RegExp[] = [];
+const avoidOrphansFixedRegExp: RegExp[] = [];
+
+export const paragraphContextTags = {
+    ...Object.fromEntries(Object.keys(simpleBoolTagsTable).map(tag => [tag, fontTag])),
+    'vwnbsp': vwnbspTag,
+    '#text': textNode,
+    '#cdata': textNode,
+};
+
+
+// #region IRunStylePropertiesOptions
 
 /*>>>
 @merge:simpleBoolStyleTable
@@ -152,17 +151,17 @@ export function getIRunStylePropertiesOptions(attributes: Attributes, properties
         //* * `type` - Underline type. @enum:UnderlineType|4
         //* * `color` - Underline color. @filterColor
         underline: splitListValues(attributes.underline, {
-            type: (value: string) => fromEnum(value, docx.UnderlineType),
-            color: (value: string) => filterColor(value, FilterMode.ALL),
+            type: value => convertEnum.noErr(value, docx.UnderlineType),
+            color: value => convertColor.noErr(value),
         }),
         //* Text color. @@
-        color: filterColor(attributes.color, FilterMode.UNDEF),
+        color: convertColor(attributes.color),
         //* Text kerning. @@
-        kern: filterPositiveUniversalMeasure(attributes.kern, FilterMode.UNDEF),
+        kern: convertPositiveUniversalMeasure(attributes.kern),
         //* Position. @@
-        position: filterUniversalMeasure(attributes.position, FilterMode.UNDEF),
+        position: convertUniversalMeasure(attributes.position),
         //* Font size. @@
-        size: filterPositiveUniversalMeasure(attributes.size, FilterMode.UNDEF),
+        size: convertPositiveUniversalMeasure(attributes.size),
         //* Font name.
         font: attributes.font ||
             //* Alias of `font` attribute.
@@ -170,73 +169,100 @@ export function getIRunStylePropertiesOptions(attributes: Attributes, properties
             //* Alias of `font` attribute.
             attributes.family,
         //* Text Highlighting. @enum:HighlightColor
-        highlight: fromEnum(attributes.highlight, HighlightColor, {}, false),
+        highlight: convertEnum(attributes.highlight, HighlightColor),
         shading: selectUndef(attributes.background, {
             type: docx.ShadingType.SOLID,
             //* Background color. @@
-            color: filterColor(attributes.background, FilterMode.UNDEF),
+            color: convertColor(attributes.background),
         }),
         //* Border around the text. @@
-        border: getBorderOptions(attributes.border),
+        border: getSingleBorder(attributes.border),
         //* Font scale. @@
-        scale: filterUfloat(attributes.scale, FilterMode.UNDEF),
+        scale: convertUfloat(attributes.scale),
     };
     for (let [key, value] of Object.entries(attributes)) {
         if (simpleBoolStyleTable[key] !== undefined) {
-            (options as any)[simpleBoolStyleTable[key]] = filterBool(value, FilterMode.EXACT);
+            (options as any)[simpleBoolStyleTable[key]] = convertBool(value);
         }
     }
     options = { ...options, ...properties };
-    setTag(options, 'IRunStylePropertiesOptions');
-    return removeShallowUndefined(options) as docx.IRunStylePropertiesOptions;
+    removeShallowUndefined(options);
+    return options;
 }
 
-/*>>> fontTag
-@merge:getIRunStylePropertiesOptions
-*/
-export function simpleStyleChange(tr: DocxTranslator, styleChange: TextFormat, attributes: Attributes) {
-    styleChange = {
-        //* Font style id.
-        style: attributes.style,
-        //* Avoid orphans at the end of line by replacing space after them with the
-        //* "no-break space". The value is maximum number of orphan characters,
-        //* mostly `1` or `2`. The `0` value disables it. If `vwnbsp` font attribute or tag is active
-        //* "variable width no-break space" sequence will be used instead of "no-break space". @@
-        avoidOrphans: filterUint(attributes.avoidOrphans, FilterMode.UNDEF),
-        ...styleChange,
-        ...getIRunStylePropertiesOptions(attributes),
-    };
-    return tr.copy(styleChange);
-}
+// #endregion
 
-export function fallbackStyleChange(tr: DocxTranslator, attributes: Attributes): any[] | null {
-    if (simpleBoolTagsTable[tr.element.name] !== undefined) {
-        let newTranslator = simpleStyleChange(tr, simpleBoolTagsTable[tr.element.name], attributes);
-        let properties = newTranslator.getProperties(tr.element);
-        newTranslator = newTranslator.copy(properties);
-        return newTranslator.parseObjects(tr.element, SpacesProcessing.PRESERVE);
+
+// #region #text
+
+export function textNode(ts: TranslatorState, text: Text | CData): docx.TextRun[] {
+
+    let value = (text.type === 'text') ? text.text : text.cdata;
+
+    if (ts.format.useVarWidthNoBreakSpace) {
+        value = value.replace(/\xA0/g, '\uFEFF ');
     }
-    return null;
+
+    if (ts.format.avoidOrphans && ts.format.avoidOrphans > 0) {
+        let count = ts.format.avoidOrphans;
+        if (ts.format.useVarWidthNoBreakSpace) {
+            if (!avoidOrphansVarRegExp[count]) {
+                avoidOrphansVarRegExp[count] = new RegExp(`(?<=(?:^|\\s)\\p{Letter}{1,${count}})(?=\\s|$)`, 'gmu');
+            }
+            value = value.replace(avoidOrphansVarRegExp[count], '\uFEFF');
+        } else {
+            if (!avoidOrphansFixedRegExp[count]) {
+                avoidOrphansFixedRegExp[count] = new RegExp(`(?<=(?:^|\\s)\\p{Letter}{1,${count}})\\s+`, 'gu');
+            }
+            value = value.replace(avoidOrphansFixedRegExp[count], '\xA0');
+        }
+    }
+
+    return [new docx.TextRun({
+        ...ts.format,
+        text: value,
+    })];
 }
 
-/*>>>
-Define a font style.
+// #endregion
 
-This tag inherits all the attributes from the [`<font>` tag](#font)
-except `style` attribute.
-It also defines the following own attributes:
-*/
-export function fontStyleTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
-    let options: docx.ICharacterStyleOptions = {
-        //* Style id. Use it to identify the style.
-        id: requiredAttribute(attributes, 'id'),
-        //* Style id of the parent style.
-        basedOn: attributes.basedOn,
-        //* User friendly name of the style.
-        name: requiredAttribute(attributes, 'name'),
-        run: getIRunStylePropertiesOptions(attributes),
-        ...properties,
+
+// #region <font>
+
+export function fontTag(ts: TranslatorState, element: Element, captureChildren?: CaptureChildren): docx.TextRun[] {
+
+    let [tsInner, attributes, properties] = normalizeElement(ts, element, SpacesProcessing.PRESERVE);
+
+    let format: TextFormat = {
+        ...simpleBoolTagsTable[element.name],
+        ...getIRunStylePropertiesOptions(attributes, properties),
+        style: attributes.style,
+        avoidOrphans: convertUint(attributes.avoidOrphans),
     };
-    setTag(options, 'ICharacterStyleOptions');
-    return [options];
+    tsInner = tsInner.applyFormat(format);
+    let children = translateNodes(tsInner, element.elements, paragraphContextTags);
+    captureChildren?.(children);
+    return children;
 }
+
+// #endregion
+
+
+// #region <vwnbsp>
+
+export function vwnbspTag(ts: TranslatorState, element: Element): docx.TextRun[] {
+
+    if (element.elements.length > 0) {
+        return fontTag(ts.applyFormat({ useVarWidthNoBreakSpace: true }), {
+            ...element,
+            name: 'font',
+        });
+    } else {
+        return [new docx.TextRun({
+            ...ts.format,
+            text: '\uFEFF ',
+        })];
+    }
+}
+
+// #endregion

@@ -19,17 +19,15 @@
  */
 
 import * as docx from 'docx';
-import { AnyObject, Attributes, Dict } from '../common';
-import { DocxTranslator } from '../docxTranslator';
-import { SpacesProcessing } from '../xml';
-import { filterBool, FilterMode } from '../filters';
-import { getIParagraphPropertiesOptions } from './styles';
-import { simpleStyleChange } from './characters';
-import { filterPreserved } from './table';
+import { Dict } from '../common';
+import { CaptureChildren, getDocxConstructor, normalizeElement, translateNodes, TranslatorState } from '../translate';
+import { Element, Node, SpacesProcessing } from '../xml';
+import { paragraphContextTags } from './text';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
-const headingTags: Dict<HeadingLevelType> = {
+export const headingTags: Dict<HeadingLevelType | undefined> = {
+    'p': undefined,
     'h1': docx.HeadingLevel.HEADING_1,
     'h2': docx.HeadingLevel.HEADING_2,
     'h3': docx.HeadingLevel.HEADING_3,
@@ -39,108 +37,54 @@ const headingTags: Dict<HeadingLevelType> = {
     'title': docx.HeadingLevel.TITLE,
 };
 
-/*>>>
-Paragraph.
 
-The paragraph contains formatted text and images.
-Any whitespaces at the beginning and end of the paragraph are removed.
+export function pTag(ts: TranslatorState, element: Element, captureChildren?: CaptureChildren): docx.Paragraph[] {
 
-You can avoid repeating the same attributes with `preserve` attribute.
-Paragraphs can preserve its attributes if `preserve` attribute is set to true.
-All following paragraphs without any attributes will reuse the preserved attributes.
-You can stop reusing attributes if you specify at least one attribute in new paragraph.
+    let [tsInner, attributes, properties] = normalizeElement(ts, element, SpacesProcessing.TRIM);
 
-Default text format in the paragraph can be changed using attributes with the
-the `font-` prefix from the [`<font>`](format.md#font) tag.
-
-@api:Paragraph
-
-@merge:getIParagraphPropertiesOptions
-*/
-export function pTag(tr: DocxTranslator, attributes: Attributes, properties: AnyObject): any[] {
-    let name = tr.element.name;
-    let heading: HeadingLevelType | undefined = headingTags[name];
-    //* Preserve the attributes. See description above. @@
-    let preserve: boolean | undefined = filterBool(attributes.preserve, FilterMode.UNDEF);
-    attributes = { ...attributes };
-    delete attributes.preserve;
-    if (Object.keys(attributes).length === 0 && Object.keys(properties).length === 0 && tr.preserved[name]) {
-        attributes = tr.preserved[name]!.attributes;
-        properties = tr.preserved[name]!.properties;
-    } else {
-        tr.preserved[name] = undefined;
-    }
-    let trCopy = simpleStyleChange(tr, {}, filterPreserved('font', attributes));
+    let heading: HeadingLevelType | undefined = headingTags[element.name];
     let options: docx.IParagraphOptions = {
-        ...getIParagraphPropertiesOptions(tr, attributes),
-        children: trCopy.parseObjects(tr.element, SpacesProcessing.TRIM),
+        //...getIParagraphPropertiesOptions(tr, attributes),
+        children: translateNodes(tsInner, element.elements, paragraphContextTags),
         heading,
     };
-    if (preserve === true) {
-        tr.preserved[name] = { attributes, properties };
-    } else if (preserve === false) {
-        tr.preserved[name] = undefined;
-    }
+
+    captureChildren?.(options.children); // TODO: For docx->doctml context switch (<...:doctml.p> tag)
+
+    /*unused*/ attributes;
+
     return [new docx.Paragraph({ ...options, ...properties })];
 }
 
-/*>>>
-Adds tabulation.
-*/
-export function tabTag(tr: DocxTranslator): any[] {
-    return [new docx.TextRun({ ...tr.runOptions, children: [new docx.Tab()] })];
-}
 
-/*>>>
-Adds line break without breaking the paragraph.
-*/
-export function brTag(tr: DocxTranslator): any[] {
-    return [new docx.TextRun({ ...tr.runOptions, children: [new docx.EmptyElement('w:br')] })];
-}
-
-/*>>>
-If used alone `<vwnbsp/>`, adds "zero width no-break space" and "normal space" characters which
-is workaround to achieve "variable width no-break space" in docx.
-If used with content inside, replaces all "no-break spaces" with "variable width no-break space" sequences.
-This workaround works with a desktop Word application. It will not work in browsers and probably in other
-applications.
-*/
-export function vwnbspTag(tr: DocxTranslator): any[] {
-    let children = tr.copy({ useVarWidthNoBreakSpace: true }).parseObjects(tr.element, SpacesProcessing.PRESERVE);
-    if (children.length === 0) {
-        return [new docx.TextRun({ ...tr.runOptions, text: '\uFEFF ' })];
-    } else {
-        return children;
-    }
-}
-
-/*>>>
-Adds total pages count. Can be used only in header and footer.
-*/
-export function totalPagesTag(tr: DocxTranslator): any[] {
-    return [new docx.TextRun({ ...tr.runOptions, children: [docx.PageNumber.TOTAL_PAGES] })];
-}
-
-/*>>>
-Adds current page number. Can be used only in header and footer.
-*/
-export function pageNumberTag(tr: DocxTranslator): any[] {
-    return [new docx.TextRun({ ...tr.runOptions, children: [docx.PageNumber.CURRENT] })];
-}
-
-export function createDummyParagraph(tr: DocxTranslator, children: any) {
-    for (let child of children) {
-        if (!(child instanceof docx.Paragraph) && !(child instanceof docx.Table)) {
-            return tr.parseObjects([{
-                name: 'p',
-                path: tr.element.path + '/p[auto]',
-                type: 'element',
-                attributes: {},
-                elements: tr.element.elements?.filter(
-                    element => element.type !== 'element' || !element.name.endsWith(':property')
-                ),
-            }], SpacesProcessing.IGNORE);
+export function addImplicitParagraphs(nodes: Node[], allowedTags: string[]): void {
+    let result: Node[] = [];
+    let allowed = new Set(allowedTags);
+    let chunk: Node[] = [];
+    for (let i = 0; i <= nodes.length; i++) {
+        let node = nodes[i];
+        if (node && (node.type !== 'element'
+            || !(allowed.has(node.name) || getDocxConstructor(node.name) || node.name.startsWith('group#')))
+        ) {
+            chunk.push(node);
+        } else {
+            if (chunk.length > 0) {
+                let paragraph: Element = {
+                    type: 'element',
+                    name: 'p',
+                    attributes: {},
+                    properties: {},
+                    elements: chunk,
+                    line: chunk[0].line,
+                    column: chunk[0].column,
+                };
+                chunk = [];
+                result.push(paragraph);
+            }
+            if (node) {
+                result.push(node);
+            }
         }
     }
-    return children;
+    nodes.splice(0, nodes.length, ...result);
 }

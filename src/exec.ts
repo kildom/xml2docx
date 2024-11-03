@@ -25,7 +25,7 @@ import { os, InterceptedError } from './os';
 import { fromTemplate } from './template';
 import { Element, normalizeDoctmlContext, parse, stringify } from './xml';
 import { resolveAliases } from './aliases';
-import { translate } from './new/translate';
+import { translate } from './translate';
 
 export enum ReturnOutput {
     BUFFER = ':buffer',

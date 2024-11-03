@@ -6,9 +6,9 @@ export const VerticalAlignAliases = {
 };
 
 export const TextDirectionAliases = {
-    topToBottom: docx.TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT,
-    leftToRight: docx.TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
-    bottomToTop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
+    toptobottom: docx.TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT,
+    lefttoright: docx.TextDirection.LEFT_TO_RIGHT_TOP_TO_BOTTOM,
+    bottomtotop: docx.TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT,
 };
 
 export const AlignmentTypeAliases = {

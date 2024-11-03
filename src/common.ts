@@ -49,9 +49,10 @@ export function undefEmpty<T extends object>(obj: T): T | undefined {
     return undefined;
 }
 
-export function requiredAttribute(attributes: Attributes, name: string): string {
+export function requiredAttribute(attributes: Attributes, name: string, def: string): string {
     if (attributes[name] === undefined) {
-        throw new Error(`This element requires "${name}" attribute.`);
+        error(`This element requires "${name}" attribute.`);
+        return def;
     }
     return attributes[name];
 }
@@ -60,8 +61,27 @@ export function requiredAttribute(attributes: Attributes, name: string): string 
 export type SplitListMatcher = (value: string) => any;
 export type SplitListDefault = () => any;
 
+/** Split a list of values into an object.
+ *
+ * The matchers will convert list items into properties.
+ *
+ * If the matcher is a function, it will be used to convert list item into output property value.
+ * It returns undefined if the value does not match current property.
+ * If there are no matches for this property, the property will not be present in the output object.
+ *
+ * If the matcher is an array of two functions, the second will be used as default value for the property.
+ *
+ * If the matcher is as array of two functions and a string, and there are no matches, the string will be used
+ * as an error message.
+ *
+ * @param value Value to convert
+ * @param matchers Dictionary of matchers
+ * @param split List splitter character
+ * @returns New object
+ */
 export function splitListValues(
-    value: string | undefined, matchers: Dict<SplitListMatcher | [SplitListMatcher, SplitListDefault | string]>,
+    value: string | undefined,
+    matchers: Dict<SplitListMatcher | [SplitListMatcher, SplitListDefault] | [SplitListMatcher, SplitListDefault, string]>,
     split?: ',' | ' '
 ) {
     if (value === undefined) return undefined;
@@ -71,34 +91,26 @@ export function splitListValues(
     for (let item of arr) {
         for (let [name, matcher] of Object.entries(matchers)) {
             if (name in result) continue;
-            matcher = typeof (matcher) === 'function' ? [matcher, ''] : matcher;
-            let m = matcher[0](item);
+            let matcherFunc = typeof (matcher) === 'function' ? matcher : matcher[0];
+            let m = matcherFunc(item);
             if (m !== undefined) {
                 result[name] = m;
                 continue outerLoop;
             }
         }
-        throw new Error(`Invalid list item ${item}.`);
+        error(`Invalid list item '${item}' in attribute.`);
     }
     for (let [name, matcher] of Object.entries(matchers)) {
         if ((name in result) || typeof (matcher) === 'function') {
             continue;
-        } else if (typeof (matcher[1]) === 'string') {
-            throw new Error(matcher[1]);
+        } else if (typeof (matcher[2]) === 'string') {
+            error(matcher[2]);
+            result[name] = matcher[1]();
         } else if (typeof (matcher[1]) === 'function') {
             result[name] = matcher[1]();
         }
     }
-    return result; // TODO: Use more this function in more places
-}
-
-export function selectFirst<T>(...args: (T | undefined)[]): T | undefined {
-    for (let a of args) {
-        if (a !== undefined) {
-            return a;
-        }
-    }
-    return undefined;
+    return result;
 }
 
 export function selectUndef<T>(a: any, b: T): T | undefined;
@@ -127,3 +139,17 @@ export function error(message: string, location?: { line: number; column: number
         console.error(message);
     }
 }
+
+export function removeShallowUndefined(object: AnyObject) {
+    for (let key of [...Object.keys(object)]) {
+        if (object[key] === undefined) {
+            delete object[key];
+        }
+    }
+}
+
+export type FirstConstructorParam<T> = T extends new (arg1: infer P, ...args: any[]) => any ? P : never;
+
+export type Writable<T> = {
+    -readonly [P in keyof T]: T[P];
+};
