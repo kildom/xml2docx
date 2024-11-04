@@ -26,7 +26,7 @@ import { CData, Element, SpacesProcessing, Text } from '../xml';
 import { HighlightColor } from '../enums';
 import {
     convertBool, convertColor, convertEnum, convertPositiveUniversalMeasure,
-    convertUfloat, convertUint, convertUniversalMeasure
+    convertUFloat, convertUInt, convertUniversalMeasure
 } from '../converters';
 import { getSingleBorder } from './borders';
 
@@ -178,7 +178,7 @@ export function getIRunStylePropertiesOptions(attributes: Attributes, properties
         //* Border around the text. @@
         border: getSingleBorder(attributes.border),
         //* Font scale. @@
-        scale: convertUfloat(attributes.scale),
+        scale: convertUFloat(attributes.scale),
     };
     for (let [key, value] of Object.entries(attributes)) {
         if (simpleBoolStyleTable[key] !== undefined) {
@@ -237,7 +237,7 @@ export function fontTag(ts: TranslatorState, element: Element, captureChildren?:
         ...simpleBoolTagsTable[element.name],
         ...getIRunStylePropertiesOptions(attributes, properties),
         style: attributes.style,
-        avoidOrphans: convertUint(attributes.avoidorphans),
+        avoidOrphans: convertUInt(attributes.avoidorphans),
     };
     tsInner = tsInner.applyFormat(format);
     let children = translateNodes(tsInner, element.elements, paragraphContextTags);

@@ -51,3 +51,35 @@ export function getBorders(value: string | undefined): docx.IBordersOptions | un
     return borders as docx.IBordersOptions;
     /*> Each side of the border is `@short:getSingleBorder`: @getSingleBorder */
 }
+
+/**
+ * Returns margins from attribute value.
+ * https://docx.js.org/api/interfaces/IMargins.html
+ * ITableCellOptions
+ */
+/*>>> : top left bottom right
+@filterLengthUint
+*/
+export function getMargin(
+    value: string | undefined, converterNoErr: any
+) {
+    let margin = splitListValues(value, {
+        //* `top` - Top margin.
+        top: [
+            (value: string) => converterNoErr(value),
+            () => converterNoErr('0mm'),
+            'At least one margin length is required.'
+        ],
+        //* `right` - Right margin. Default: the same as top.
+        right: (value: string) => converterNoErr(value),
+        //* `bottom` - Bottom margin. Default: the same as top.
+        bottom: (value: string) => converterNoErr(value),
+        //* `left` - Left margin. Default: the same as right.
+        left: (value: string) => converterNoErr(value),
+    });
+    if (margin === undefined) return undefined;
+    margin.right = margin.right ?? margin.top;
+    margin.bottom = margin.bottom ?? margin.top;
+    margin.left = margin.left ?? margin.right;
+    return margin;
+}

@@ -22,6 +22,7 @@ import * as docx from 'docx';
 import { CData, Element, Node, processSpacesInPlace, SpacesProcessing, Text } from './xml';
 import { AnyObject, Attributes, Dict, error } from './common';
 import { TextFormat } from './tags/text';
+import { TableData } from './tags/table';
 import { documentTag } from './tags/document';
 
 type ElementHandler = (ts: TranslatorState, element: Element) => any[];
@@ -45,16 +46,22 @@ export function popActiveNode() {
 
 export class TranslatorState {
 
+    tableData: TableData;
     format: TextFormat;
-    common: {[tagName: string]: Attributes};
+    common: { [tagName: string]: Attributes };
+
+    public newTableData(): TranslatorState {
+        let copy = this.copy();
+        copy.tableData = new TableData();
+        return copy;
+    }
 
     public applyCommonAttributes(element: Element): TranslatorState {
         if (!this.common[element.name]) return this;
         for (let [attributeName, value] of Object.entries(this.common[element.name])) {
             element.attributes[attributeName] = value;
         }
-        let copy = new TranslatorState(this.baseDir, this.format);
-        copy.copyCommon(this.common);
+        let copy = this.copy();
         delete copy.common[element.name];
         return copy;
     }
@@ -73,8 +80,7 @@ export class TranslatorState {
             }
         }
         if (!common) return this;
-        let copy = new TranslatorState(this.baseDir, this.format);
-        copy.copyCommon(this.common);
+        let copy = this.copy();
         copy.copyCommon(common);
         return copy;
     }
@@ -90,19 +96,34 @@ export class TranslatorState {
 
     public applyFormat(format?: TextFormat): TranslatorState {
         if (!format) return this;
-        let copy = new TranslatorState(this.baseDir, this.format);
+        let copy = this.copy();
         for (let [name, value] of Object.entries(format)) {
             (copy.format as any)[name] = value;
         }
         return copy;
     }
 
+    public copy(): TranslatorState {
+        let copy = new TranslatorState(this.baseDir, this.format, this.tableData);
+        copy.copyCommon(this.common);
+        return copy;
+    }
+
+    public setCommon(common?: { [tagName: string]: Attributes }): TranslatorState {
+        if (!common || Object.keys(common).length === 0) return this;
+        let copy = this.copy();
+        copy.copyCommon(common);
+        return copy;
+    }
+
     public constructor(
         public baseDir: string,
-        format: TextFormat = {}
+        format: TextFormat = {},
+        tableData?: TableData,
     ) {
-        this.format = { ...format };
+        this.format = { ...format }; // TODO: make format readonly, so copying can be avoided
         this.common = Object.create(null);
+        this.tableData = tableData ?? new TableData();
     }
 
 }

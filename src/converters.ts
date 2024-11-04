@@ -67,7 +67,7 @@ export const convertPositiveUint = converterVariants((value: string | undefined)
     return res;
 }, 1);
 
-export const convertUint = converterVariants((value: string | undefined) => {
+export const convertUInt = converterVariants((value: string | undefined) => {
     if (value === undefined) return undefined;
     let res = parseInt(value.toString().trim());
     if (res.toString() !== value) throw new ConvertError('Invalid integer value');
@@ -85,7 +85,7 @@ export const convertInt = converterVariants((value: string | undefined) => {
     return res;
 }, 0);
 
-export const convertUfloat = converterVariants((value: string | undefined) => {
+export const convertUFloat = converterVariants((value: string | undefined) => {
     if (value === undefined) return undefined;
     let res = Number(value.toString().trim());
     if (Number.isNaN(res) || !Number.isFinite(res)) {
@@ -157,6 +157,7 @@ export const UnitsPerPt = {
 };
 
 function splitUnits(value: string): [number, string] {
+    if (Number(value) === 0) return [0, 'mm'];
     let m = value
         .toString()
         .toLowerCase()
@@ -197,10 +198,13 @@ function convertUniversalMeasureIntCommon(value: string | undefined, min: number
     let [num, unit] = convertUniversalMeasureCommon(value, -Number.MAX_VALUE, Number.MAX_VALUE);
     num = num * units[unit]; // input_unit * pt/input_unit = pt
     num = num * unitsPerPt; // pt * output_unit/pt = output_unit
-    num = Math.round(num); // round to nearest integer
-    if (num < min) throw new ConvertError(`Length to small "${value}".`);
-    if (num > max) throw new ConvertError(`Length to big "${value}".`);
-    return num;
+    let rounded = Math.round(num); // round to nearest integer
+    if (rounded === 0 && num != 0) {
+        rounded = Math.sign(num); // very small numbers should be interpreted as 1 or -1.
+    }
+    if (rounded < min) throw new ConvertError(`Length to small "${value}"`);
+    if (rounded > max) throw new ConvertError(`Length to big "${value}"`);
+    return rounded;
 }
 
 export const convertUniversalMeasure = converterVariants(

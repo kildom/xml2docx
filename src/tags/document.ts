@@ -24,6 +24,7 @@ import { normalizeElement, translateNodes, TranslatorState } from '../translate'
 import { Element, SpacesProcessing } from '../xml';
 import { addImplicitParagraphs, headingTags, pTag } from './paragraph';
 import { FirstConstructorParam, Mutable } from '../common';
+import { tableTag } from './table';
 
 export class ObjectContainer {
     public constructor(
@@ -43,6 +44,7 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
 
     let list = translateNodes(tsInner, element.elements, {
         ...Object.fromEntries(Object.keys(headingTags).map(name => [name, pTag])),
+        table: tableTag,
     });
 
     let sections: docx.ISectionOptions[] = [];

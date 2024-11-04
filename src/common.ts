@@ -18,32 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { getActiveNode } from "./translate";
+import { getActiveNode } from './translate';
 
 export type Dict<T> = { [key: string]: T };
 export type AnyObject = Dict<any>;
 export type Attributes = Dict<string>;
 
-const symbolTag: unique symbol = Symbol('instance');
-
-export function setTag<T extends object, T2>(obj: T, tag: T2): void {
-    (obj as any)[symbolTag] = tag;
-}
-
-export function isTag<T2>(obj: any, tag: T2): boolean {
-    return typeof obj === 'object' && obj[symbolTag] === tag;
-}
-
-export function getTag<T2>(obj: any): T2 | undefined {
-    if (typeof obj === 'object') {
-        return obj[symbolTag] as T2;
-    } else {
-        return undefined;
-    }
-}
-
-export function undefEmpty<T extends object>(obj: T): T | undefined {
-    for (let value of Object.values(obj)) {
+export function undefEmpty<T>(obj: T): T | undefined {
+    for (let value of Object.values(obj as object)) {
         if (value !== undefined) {
             return obj;
         }

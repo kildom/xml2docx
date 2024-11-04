@@ -26,9 +26,10 @@ import { paragraphContextTags } from './text';
 import { getBorders } from './borders';
 import {
     convertBool, convertColor, convertEnum, convertPositiveUniversalMeasure, convertPositiveUniversalMeasureInt,
-    convertUfloat, convertUint, convertUniversalMeasure, convertUniversalMeasureInt, UnitsPerPt
+    convertUFloat, convertUInt, convertUniversalMeasure, convertUniversalMeasureInt, UnitsPerPt
 } from '../converters';
 import { AlignmentTypeAliases } from '../enums';
+import { chunk } from 'underscore';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
@@ -95,7 +96,7 @@ export function getILevelParagraphStylePropertiesOptions(attributes: Attributes)
         //* Keep next. @@
         keepNext: convertBool(attributes.keepnext),
         //* Outline level if this paragraph should be part of document outline. @@
-        outlineLevel: convertUint(attributes.outline),
+        outlineLevel: convertUInt(attributes.outline),
         contextualSpacing: spacing?.contextualSpacing,
         spacing: undefEmpty({
             ...spacing?.spacing,
@@ -142,7 +143,7 @@ function getLineSpacing(text?: string): docx.ISpacingProperties | undefined {
         //* `distance` *[optional]* - Absolute distance. @@
         distance: (value: string) => convertPositiveUniversalMeasureInt.noErr(value, UnitsPerPt.dxa),
         //* `multiple` *[optional]* - Multiple of one line, fractions allowed. @@
-        multiple: (value: string) => convertUfloat.noErr(value),
+        multiple: (value: string) => convertUFloat.noErr(value),
     }) as { distance: number, multiple: number, exactly: boolean } | undefined;
     /*> Provide exactly one of `distance` or `multiple`.
     */
@@ -187,7 +188,6 @@ function getIndent(indent: string | undefined): docx.IIndentAttributesProperties
 */
 function getSingleTabStop(tab: string): docx.TabStopDefinition | undefined {
 
-
     let result = splitListValues(tab, {
         //* `type` *[optional]* - Type of tab. @enum:TabStopType
         type: (value: string) => [
@@ -222,6 +222,8 @@ export function pTag(ts: TranslatorState, element: Element, captureChildren?: Ca
 
     let [tsInner, attributes, properties] = normalizeElement(ts, element, SpacesProcessing.TRIM);
 
+    addImplicitFont(element.elements);
+
     let heading: HeadingLevelType | undefined = headingTags[element.name];
     let options: docx.IParagraphOptions = {
         ...getIParagraphPropertiesOptions(attributes),
@@ -236,8 +238,35 @@ export function pTag(ts: TranslatorState, element: Element, captureChildren?: Ca
     return [new docx.Paragraph({ ...options, ...properties })];
 }
 
-
 export function addImplicitParagraphs(nodes: Node[], allowedTags: string[]): void {
+    addImplicitTags(nodes, allowedTags, chunk => {
+        return {
+            type: 'element',
+            name: 'p',
+            attributes: {},
+            properties: {},
+            elements: chunk,
+            line: chunk[0].line,
+            column: chunk[0].column,
+        };
+    });
+}
+
+export function addImplicitFont(nodes: Node[]): void {
+    addImplicitTags(nodes, ['font'], chunk => {
+        return {
+            type: 'element',
+            name: 'font',
+            attributes: {},
+            properties: {},
+            elements: chunk,
+            line: chunk[0].line,
+            column: chunk[0].column,
+        };
+    });
+}
+
+function addImplicitTags(nodes: Node[], allowedTags: string[], createTag: (chunk: Node[]) => Element): void {
     let result: Node[] = [];
     let allowed = new Set(allowedTags);
     let chunk: Node[] = [];
@@ -249,17 +278,9 @@ export function addImplicitParagraphs(nodes: Node[], allowedTags: string[]): voi
             chunk.push(node);
         } else {
             if (chunk.length > 0) {
-                let paragraph: Element = {
-                    type: 'element',
-                    name: 'p',
-                    attributes: {},
-                    properties: {},
-                    elements: chunk,
-                    line: chunk[0].line,
-                    column: chunk[0].column,
-                };
+                let newElement = createTag(chunk);
                 chunk = [];
-                result.push(paragraph);
+                result.push(newElement);
             }
             if (node) {
                 result.push(node);
