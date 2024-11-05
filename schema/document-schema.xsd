@@ -1,0 +1,384 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Define a type for hex color codes -->
+  <xs:simpleType name="_HexColorType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="#[0-9a-fA-F]{6}" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="_ShortHexColorType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="#[0-9a-fA-F]{3}" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Define a type for color names -->
+  <xs:simpleType name="_ColorNameType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="aliceblue" />
+      <xs:enumeration value="antiquewhite" />
+      <xs:enumeration value="aqua" />
+      <xs:enumeration value="aquamarine" />
+      <xs:enumeration value="azure" />
+      <xs:enumeration value="beige" />
+      <xs:enumeration value="bisque" />
+      <xs:enumeration value="black" />
+      <xs:enumeration value="blanchedalmond" />
+      <xs:enumeration value="blue" />
+      <xs:enumeration value="blueviolet" />
+      <xs:enumeration value="brown" />
+      <xs:enumeration value="burlywood" />
+      <xs:enumeration value="cadetblue" />
+      <xs:enumeration value="chartreuse" />
+      <xs:enumeration value="chocolate" />
+      <xs:enumeration value="coral" />
+      <xs:enumeration value="cornflowerblue" />
+      <xs:enumeration value="cornsilk" />
+      <xs:enumeration value="crimson" />
+      <xs:enumeration value="cyan" />
+      <xs:enumeration value="darkblue" />
+      <xs:enumeration value="darkcyan" />
+      <xs:enumeration value="darkgoldenrod" />
+      <xs:enumeration value="darkgray" />
+      <xs:enumeration value="darkgreen" />
+      <xs:enumeration value="darkgrey" />
+      <xs:enumeration value="darkkhaki" />
+      <xs:enumeration value="darkmagenta" />
+      <xs:enumeration value="darkolivegreen" />
+      <xs:enumeration value="darkorange" />
+      <xs:enumeration value="darkorchid" />
+      <xs:enumeration value="darkred" />
+      <xs:enumeration value="darksalmon" />
+      <xs:enumeration value="darkseagreen" />
+      <xs:enumeration value="darkslateblue" />
+      <xs:enumeration value="darkslategray" />
+      <xs:enumeration value="darkslategrey" />
+      <xs:enumeration value="darkturquoise" />
+      <xs:enumeration value="darkviolet" />
+      <xs:enumeration value="deeppink" />
+      <xs:enumeration value="deepskyblue" />
+      <xs:enumeration value="dimgray" />
+      <xs:enumeration value="dimgrey" />
+      <xs:enumeration value="dodgerblue" />
+      <xs:enumeration value="firebrick" />
+      <xs:enumeration value="floralwhite" />
+      <xs:enumeration value="forestgreen" />
+      <xs:enumeration value="fuchsia" />
+      <xs:enumeration value="gainsboro" />
+      <xs:enumeration value="ghostwhite" />
+      <xs:enumeration value="gold" />
+      <xs:enumeration value="goldenrod" />
+      <xs:enumeration value="gray" />
+      <xs:enumeration value="green" />
+      <xs:enumeration value="greenyellow" />
+      <xs:enumeration value="grey" />
+      <xs:enumeration value="honeydew" />
+      <xs:enumeration value="hotpink" />
+      <xs:enumeration value="indianred" />
+      <xs:enumeration value="indigo" />
+      <xs:enumeration value="ivory" />
+      <xs:enumeration value="khaki" />
+      <xs:enumeration value="lavender" />
+      <xs:enumeration value="lavenderblush" />
+      <xs:enumeration value="lawngreen" />
+      <xs:enumeration value="lemonchiffon" />
+      <xs:enumeration value="lightblue" />
+      <xs:enumeration value="lightcoral" />
+      <xs:enumeration value="lightcyan" />
+      <xs:enumeration value="lightgoldenrodyellow" />
+      <xs:enumeration value="lightgray" />
+      <xs:enumeration value="lightgreen" />
+      <xs:enumeration value="lightgrey" />
+      <xs:enumeration value="lightpink" />
+      <xs:enumeration value="lightsalmon" />
+      <xs:enumeration value="lightseagreen" />
+      <xs:enumeration value="lightskyblue" />
+      <xs:enumeration value="lightslategray" />
+      <xs:enumeration value="lightslategrey" />
+      <xs:enumeration value="lightsteelblue" />
+      <xs:enumeration value="lightyellow" />
+      <xs:enumeration value="lime" />
+      <xs:enumeration value="limegreen" />
+      <xs:enumeration value="linen" />
+      <xs:enumeration value="magenta" />
+      <xs:enumeration value="maroon" />
+      <xs:enumeration value="mediumaquamarine" />
+      <xs:enumeration value="mediumblue" />
+      <xs:enumeration value="mediumorchid" />
+      <xs:enumeration value="mediumpurple" />
+      <xs:enumeration value="mediumseagreen" />
+      <xs:enumeration value="mediumslateblue" />
+      <xs:enumeration value="mediumspringgreen" />
+      <xs:enumeration value="mediumturquoise" />
+      <xs:enumeration value="mediumvioletred" />
+      <xs:enumeration value="midnightblue" />
+      <xs:enumeration value="mintcream" />
+      <xs:enumeration value="mistyrose" />
+      <xs:enumeration value="moccasin" />
+      <xs:enumeration value="navajowhite" />
+      <xs:enumeration value="navy" />
+      <xs:enumeration value="oldlace" />
+      <xs:enumeration value="olive" />
+      <xs:enumeration value="olivedrab" />
+      <xs:enumeration value="orange" />
+      <xs:enumeration value="orangered" />
+      <xs:enumeration value="orchid" />
+      <xs:enumeration value="palegoldenrod" />
+      <xs:enumeration value="palegreen" />
+      <xs:enumeration value="paleturquoise" />
+      <xs:enumeration value="palevioletred" />
+      <xs:enumeration value="papayawhip" />
+      <xs:enumeration value="peachpuff" />
+      <xs:enumeration value="peru" />
+      <xs:enumeration value="pink" />
+      <xs:enumeration value="plum" />
+      <xs:enumeration value="powderblue" />
+      <xs:enumeration value="purple" />
+      <xs:enumeration value="rebeccapurple" />
+      <xs:enumeration value="red" />
+      <xs:enumeration value="rosybrown" />
+      <xs:enumeration value="royalblue" />
+      <xs:enumeration value="saddlebrown" />
+      <xs:enumeration value="salmon" />
+      <xs:enumeration value="sandybrown" />
+      <xs:enumeration value="seagreen" />
+      <xs:enumeration value="seashell" />
+      <xs:enumeration value="sienna" />
+      <xs:enumeration value="silver" />
+      <xs:enumeration value="skyblue" />
+      <xs:enumeration value="slateblue" />
+      <xs:enumeration value="slategray" />
+      <xs:enumeration value="slategrey" />
+      <xs:enumeration value="snow" />
+      <xs:enumeration value="springgreen" />
+      <xs:enumeration value="steelblue" />
+      <xs:enumeration value="tan" />
+      <xs:enumeration value="teal" />
+      <xs:enumeration value="thistle" />
+      <xs:enumeration value="tomato" />
+      <xs:enumeration value="turquoise" />
+      <xs:enumeration value="violet" />
+      <xs:enumeration value="wheat" />
+      <xs:enumeration value="white" />
+      <xs:enumeration value="whitesmoke" />
+      <xs:enumeration value="yellow" />
+      <xs:enumeration value="yellowgreen" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Combine both types using a union -->
+  <xs:simpleType name="Color">
+    <xs:union memberTypes="_HexColorType _ColorNameType" />
+  </xs:simpleType>
+
+  <xs:simpleType name="UniversalMeasure">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[-+]?\s*\d+(\.\d+)?\s*(mm|cm|in|pt|pi|pc|px)" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="PositiveUniversalMeasure">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\+?\s*\d+(\.\d+)?\s*(mm|cm|in|pt|pi|pc|px)" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:simpleType name="Bool">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="y" />
+      <xs:enumeration value="n" />
+      <xs:enumeration value="1" />
+      <xs:enumeration value="0" />
+      <xs:enumeration value="t" />
+      <xs:enumeration value="f" />
+      <xs:enumeration value="yes" />
+      <xs:enumeration value="no" />
+      <xs:enumeration value="true" />
+      <xs:enumeration value="false" />
+      <xs:enumeration value="on" />
+      <xs:enumeration value="off" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:attributeGroup name="FontAttributes">
+    <xs:attribute name="color" type="Color" />
+    <xs:attribute name="no-proof" type="Bool" />
+    <xs:attribute name="bold" type="Bool" />
+    <xs:attribute name="bold-complex-script" type="Bool" />
+    <xs:attribute name="italics" type="Bool" />
+    <xs:attribute name="italics-complex-script" type="Bool" />
+    <xs:attribute name="size-complex-script" type="Bool" />
+    <xs:attribute name="right-to-left" type="Bool" />
+    <xs:attribute name="small-caps" type="Bool" />
+    <xs:attribute name="all-caps" type="Bool" />
+    <xs:attribute name="strike" type="Bool" />
+    <xs:attribute name="double-strike" type="Bool" />
+    <xs:attribute name="sub" type="Bool" />
+    <xs:attribute name="sub-script" type="Bool" />
+    <xs:attribute name="super" type="Bool" />
+    <xs:attribute name="super-script" type="Bool" />
+    <xs:attribute name="highlight-complex-script" type="Bool" />
+    <xs:attribute name="emboss" type="Bool" />
+    <xs:attribute name="imprint" type="Bool" />
+    <xs:attribute name="snap-to-grid" type="Bool" />
+    <xs:attribute name="vanish" type="Bool" />
+    <xs:attribute name="spec-vanish" type="Bool" />
+    <xs:attribute name="math" type="Bool" />
+    <xs:attribute name="vwnbsp" type="Bool" />
+  </xs:attributeGroup>
+
+  <xs:complexType name="FontTagType" mixed="true">
+    <xs:attributeGroup ref="FontAttributes" />
+  </xs:complexType>
+
+  <xs:group name="ParagraphElements">
+    <xs:choice>
+      <xs:element name="all-caps" type="FontTagType" />
+      <xs:element name="b" type="FontTagType" />
+      <xs:element name="bold" type="FontTagType" />
+      <xs:element name="bold-complex-script" type="FontTagType" />
+      <xs:element name="double-strike" type="FontTagType" />
+      <xs:element name="emboss" type="FontTagType" />
+      <xs:element name="imprint" type="FontTagType" />
+      <xs:element name="i" type="FontTagType" />
+      <xs:element name="italics" type="FontTagType" />
+      <xs:element name="italics-complex-script" type="FontTagType" />
+      <xs:element name="math" type="FontTagType" />
+      <xs:element name="no-proof" type="FontTagType" />
+      <xs:element name="right-to-left" type="FontTagType" />
+      <xs:element name="small-caps" type="FontTagType" />
+      <xs:element name="snap-to-grid" type="FontTagType" />
+      <xs:element name="spec-vanish" type="FontTagType" />
+      <xs:element name="s" type="FontTagType" />
+      <xs:element name="strike" type="FontTagType" />
+      <xs:element name="sub" type="FontTagType" />
+      <xs:element name="sub-script" type="FontTagType" />
+      <xs:element name="sup" type="FontTagType" />
+      <xs:element name="super" type="FontTagType" />
+      <xs:element name="super-script" type="FontTagType" />
+      <xs:element name="u" type="FontTagType" />
+      <xs:element name="underline" type="FontTagType" />
+      <xs:element name="vanish" type="FontTagType" />
+      <xs:element name="span" type="FontTagType" />
+      <xs:element name="font" type="FontTagType" />
+      <xs:element name="avoid-orphans" type="FontTagType" />
+    </xs:choice>
+  </xs:group>
+
+  <xs:element name="p">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:group ref="ParagraphElements" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="table">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tc" />
+        <xs:element ref="tr" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="tc">
+    <xs:annotation>
+      <xs:documentation>
+        Defines table column. The actual table content is in the &lt;tr&gt; tags.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="width" type="PositiveUniversalMeasure" use="optional">
+        <xs:annotation>
+          <xs:documentation> Width of the column. </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="tr">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="td" />
+      </xs:choice>
+      <xs:attribute name="height" type="PositiveUniversalMeasure" use="optional">
+        <xs:annotation>
+          <xs:documentation>
+            &lt;p&gt;Some docs&lt;/p&gt;
+`rule length`&lt;br/&gt;
+&lt;br/&gt;
+Height of the row.&lt;br/&gt;
+* `rule` - `at-least` or `exact`&lt;br/&gt;
+* `length` - **Positive** universal measure.&lt;br/&gt;
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="td">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="p" />
+        <xs:element ref="table" />
+        <xs:group ref="ParagraphElements" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Define the root element -->
+  <xs:element name="document">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="p" />
+        <xs:element ref="table" />
+        <xs:group ref="ParagraphElements" />
+        <!--
+        <xs:element name="p" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string">
+                <xs:attribute name="align" type="xs:string"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="table" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="tc" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="width" type="xs:string" use="optional"/>
+                  <xs:attribute name="td.background" type="xs:string" use="optional"/>
+                  <xs:attribute name="font.color" type="xs:string" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="tr" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="td" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="rowspan" type="xs:integer" use="optional"/>
+                            <xs:attribute name="colspan" type="xs:integer" use="optional"/>
+                            <xs:attribute name="font.color" type="xs:string" use="optional"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="header" type="xs:string" use="optional"/>
+                  <xs:attribute name="height" type="xs:string" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>-->
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

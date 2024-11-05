@@ -37,10 +37,6 @@ Table.
 
 Child elements of the row are `<tr>` (or its associated @api class) or `<tc>`.
 
-All attributes starting with `td-`, `tr-`, `tc-`, `p-` and `font-` prefixes will be passed to
-all cells, rows, columns, paragraphs (as preserved attributes) and paragraphs default
-text format.
-
 @api:classes/Table.
 */
 export function tableTag(ts: TranslatorState, element: Element, captureChildren?: CaptureChildren): docx.Table[] {
