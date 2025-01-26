@@ -1,65 +1,60 @@
-/*!
- * Copyright 2023 Dominik Kilian
- *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
- *    disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
- *    following disclaimer in the documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 
-import { CompiledTemplate, template } from 'underscore';
-import { InterceptedError, os } from './os';
-import { AnyObject } from './common';
+import { template } from 'underscore';
+import { DocTMLError, OptionsProcessed } from './doctml';
+import { dirName } from './common';
 
-const commonUtils = {
-    templateFile: '',
-    dataFile: '',
-    data: ({} as any),
-    templateDir: '',
-    include: function (fileName: string) {
-        let includeFile: string;
-        let templateFile: string;
-        try {
-            includeFile = os.path.resolve(this.templateDir, fileName);
-            templateFile = os.fs.readFileSync(includeFile, 'utf-8') as string;
-        } catch (ex) { throw new InterceptedError(ex, `Error reading "${fileName}" file.`); }
-        try {
-            return fromTemplate(includeFile, templateFile, this.dataFile, this.data);
-        } catch (ex) { throw new InterceptedError(ex, `Error evaluating template from "${fileName}" include file.`); }
+
+class TemplateUtils {
+    public templateDir: string;
+    public inputFile: string;
+    public inputDir: string;
+    public dataFile: string;
+    public dataDir: string;
+    public data: any;
+
+    constructor(
+        public options: OptionsProcessed,
+        public templateFile: string
+    ) {
+        this.templateDir = dirName(this.templateFile);
+        this.inputFile = options.inputFile;
+        this.inputDir = dirName(this.inputFile);
+        this.dataFile = options.dataFile!;
+        this.dataDir = dirName(this.dataFile);
+        this.data = options.data;
     }
-};
 
-export function fromTemplate(templateFile: string, templateText: string, dataFile: string, data: any): string {
+    public include(fileName: string): string {
+        if (this.options.readFile == null) {
+            throw new DocTMLError('Cannot include files, no readFile callback given.');
+        }
+        let template = this.options.readFile(fileName, false) as string;
+        let text = renderTemplate(this.options, template, fileName);
+        return text;
+    }
 
-    let compiled: CompiledTemplate;
+}
+
+export function renderTemplate(options: OptionsProcessed, input: string, inputFile: string): string {
+
+    let compiled: ReturnType<typeof template>;
     try {
-        compiled = template(templateText, {
+        compiled = template(input, {
             evaluate: /<%!([\s\S]+?)%>/g,
             interpolate: /<%=([\s\S]+?)%>/g,
             escape: /<%(?![!=])([\s\S]+?)%>/g
         });
-    } catch (ex) { throw new InterceptedError(ex, `Error parsing template from "${templateFile}".`); }
+    } catch (ex) {
+        throw new DocTMLError(`Error parsing template from "${inputFile}".`, ex);
+    }
 
     try {
-        let utils: AnyObject = { ...commonUtils };
-        utils.templateFile = templateFile;
-        utils.dataFile = dataFile;
-        utils.data = data;
-        utils.templateDir = os.path.dirname(templateFile);
-        return compiled({ utils: utils, ...data, __utils__: utils });
+        let utils = new TemplateUtils(options, inputFile);
+        return compiled({ utils: utils, ...options.data, __utils__: utils });
     } catch (ex) {
-        throw new InterceptedError(ex,
-            `Error evaluating template from "${templateFile}" with data from "${dataFile}".`);
+        throw new DocTMLError(
+            `Error evaluating template from "${inputFile}" with data from "${options.dataFile}".`,
+            ex
+        );
     }
 }

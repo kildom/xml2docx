@@ -29,7 +29,6 @@ import {
     convertUFloat, convertUInt, convertUniversalMeasure, convertUniversalMeasureInt, UnitsPerPt
 } from '../converters';
 import { AlignmentTypeAliases } from '../enums';
-import { chunk } from 'underscore';
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 
@@ -232,8 +231,6 @@ export function pTag(ts: TranslatorState, element: Element, captureChildren?: Ca
     };
 
     captureChildren?.(options.children); // TODO: For docx->doctml context switch (<...:doctml.p> tag)
-
-    /*unused*/ attributes;
 
     return [new docx.Paragraph({ ...options, ...properties })];
 }
