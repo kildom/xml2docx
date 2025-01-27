@@ -9,6 +9,6 @@
     "outDir": "temp/xml2docx-ts-check"
   },
   "files": [
-      "src/xml2docx.ts",
+      "src/cli.ts",
   ]
 }

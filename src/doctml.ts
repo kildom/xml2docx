@@ -35,24 +35,17 @@ export class DocTMLError extends Error {
     }
 }
 
-function processOptions(options: Options): OptionsProcessed {
+function processOptions(options: Options): void {
 
-    // Copy options and preserve "this" of the callbacks.
-    let readFile = options.readFile;
-    let debugFile = options.debugFile;
-    let optionsCopy: Options = {
-        ...options,
-        inputFile: options.inputFile ?? ':input',
-        dataFile: options.dataFile ?? (options.data == null ? undefined : ':data'),
-        docxJsEnabled: !!options.docxJsEnabled,
-        readFile: readFile ? (...args: any[]) => (options.readFile as any)(...args) : undefined,
-        debugFile: debugFile ? (...args: any[]) => (options.debugFile as any)(...args) : undefined,
-    };
+    // Update simple options.
+    options.inputFile = options.inputFile ?? ':input';
+    options.dataFile = options.dataFile ?? (options.data == null ? undefined : ':data');
+    options.docxJsEnabled = !!options.docxJsEnabled;
 
     // Set output file name to default if not specified.
-    if (optionsCopy.outputFile == null) {
-        if (optionsCopy.inputFile == ':input') {
-            optionsCopy.outputFile = ':output';
+    if (options.outputFile == null) {
+        if (options.inputFile === ':input') {
+            options.outputFile = ':output';
         } else {
             let pathParts = options.inputFile!.split(/([/\\])/);
             let name = pathParts.at(-1)!;
@@ -62,45 +55,43 @@ function processOptions(options: Options): OptionsProcessed {
             }
             nameParts[nameParts.length - 1] = 'docx';
             pathParts[pathParts.length - 1] = nameParts.join('.');
-            optionsCopy.outputFile = pathParts.join('');
+            options.outputFile = pathParts.join('');
         }
     }
 
     // Read input if just file name given.
-    if (optionsCopy.input == null) {
-        if (optionsCopy.inputFile == null || optionsCopy.readFile == null) {
+    if (options.input == null) {
+        if (options.inputFile == null || options.readFile == null) {
             throw new DocTMLError('No input given.');
         }
-        optionsCopy.input = optionsCopy.readFile(optionsCopy.inputFile, false) as string;
+        options.input = options.readFile(options.inputFile, false) as string;
     }
 
     // Read data if just data file name given.
-    if (optionsCopy.data == null && optionsCopy.dataFile != null) {
-        if (optionsCopy.readFile == null) {
+    if (options.data == null && options.dataFile != null) {
+        if (options.readFile == null) {
             throw new DocTMLError('Cannot read data file, no readFile callback given.');
         }
-        optionsCopy.data = optionsCopy.readFile(optionsCopy.dataFile, false) as string;
+        options.data = options.readFile(options.dataFile, false) as string;
     }
 
     // Parse JSON5 string if needed.
-    if (typeof optionsCopy.data === 'string') {
+    if (typeof options.data === 'string') {
         try {
-            optionsCopy.data = JSON5.parse(optionsCopy.data);
-        } catch (ex) {
-            throw new DocTMLError('Error parsing input data.', ex);
+            options.data = JSON5.parse(options.data);
+        } catch (err) {
+            throw new DocTMLError('Error parsing input data.', err);
         }
     }
-
-    return optionsCopy as OptionsProcessed;
 }
-
 
 
 export async function generate(options: Options, returnBase64?: false): Promise<Uint8Array>;
 export async function generate(options: Options, returnBase64: true): Promise<string>;
 export async function generate(options: Options, returnBase64?: boolean): Promise<Uint8Array | string> {
 
-    let optionsProcessed = processOptions(options);
+    processOptions(options);
+    let optionsProcessed = options as OptionsProcessed;
 
     // Output debugging data file.
     if (optionsProcessed.data != null && optionsProcessed.debugFile) {
@@ -122,9 +113,6 @@ export async function generate(options: Options, returnBase64?: boolean): Promis
     // Process macros.
     // Macros are not currently implemented, but may be in future.
 
-
-
     returnBase64;
     return optionsProcessed.input;
 }
-

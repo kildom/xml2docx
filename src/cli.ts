@@ -1,5 +1,6 @@
-import { Options } from './doctml';
 
+import * as fs from 'node:fs';
+import { DebugFileType, DocTMLError, generate, Options } from './doctml';
 
 
 const USAGE = `
@@ -46,7 +47,11 @@ Options:
     Dump intermediate files alongside the output after each step of
     processing and show more verbose output in case of errors. This option
     is mainly useful when debugging the template or the tool.
+
+You can use "-" as <input.xml> or <data.json> to read the file from standard
+input. You can also use "-" as [output.docx] to write result to standard output.
 `;
+
 
 function printUsage(failed?: string): void {
     if (failed) {
@@ -57,6 +62,7 @@ function printUsage(failed?: string): void {
         console.log(USAGE);
     }
 }
+
 
 function parseArguments() {
     let options: Options = {};
@@ -95,7 +101,7 @@ function parseArguments() {
             process.exit(0);
         } else if (arg === '--debug') {
             debug = true;
-        } else if (arg.startsWith('-')) {
+        } else if (arg.startsWith('-') && arg.length > 1) {
             throw printUsage(`Unknown option: ${arg}`);
         } else if (argCounter === 0) {
             options.inputFile = arg;
@@ -110,15 +116,80 @@ function parseArguments() {
     return { options, debug };
 }
 
-async function main() {
-    let args = parseArguments();
-    try {
-        //await exec(args);
-    } catch (ex) {
-        //printError(err, args.debug);
-        //process.exit(1);
+
+function addCallbacks(options: Options, debug: boolean) {
+    options.readFile = (file: string, binary: boolean): Uint8Array | string => {
+        return fs.readFileSync(
+            file === '-' ? 0 : file,
+            { encoding: binary ? null : 'utf8' });
+    };
+    if (debug) {
+        options.debugFile = (type: DebugFileType, content: string | Uint8Array) => {
+            let fileName = options.outputFile;
+            if (fileName === '-' || fileName == null) {
+                fileName = 'doctml-output.debug';
+            }
+            if (fileName.match(/\.docx$/i)) {
+                fileName = fileName.substring(0, fileName.length - 5);
+            }
+            switch (type) {
+            case 'data':
+                fileName += '.debug.json';
+                break;
+            case 'rendered':
+                fileName += '.debug.rendered.doctml';
+                break;
+            default:
+                fileName += `.debug.${type}.dat`;
+                break;
+            }
+            fs.writeFileSync(fileName, content);
+        };
     }
-    console.log(args);
 }
+
+
+function printError(err: any, debug: boolean): void {
+    while (err instanceof DocTMLError) {
+        console.error(err.message);
+        err = err.sourceError;
+    }
+    if (err) {
+        if (debug) {
+            console.error(err);
+        } else {
+            console.error(err.message);
+        }
+    }
+}
+
+
+async function main() {
+
+    let args = parseArguments();
+    addCallbacks(args.options, args.debug);
+
+    try {
+
+        if (args.options.inputFile === '-' && !args.options.outputFile) {
+            args.options.outputFile = '-';
+        }
+
+        let output = await generate(args.options);
+
+        fs.writeFileSync(
+            args.options.outputFile === '-'
+                ? process.stdout.fd
+                : (args.options.outputFile ?? 'doctml-output.docx'),
+            output);
+
+    } catch (err) {
+
+        printError(err, args.debug);
+        process.exit(1);
+
+    }
+}
+
 
 main();

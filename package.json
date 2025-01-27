@@ -42,8 +42,10 @@
     "build-web": "node scripts/build-web.js",
     "postbuild-web": "npm run _lic -- web/license.html dist/web-main.json dist/web-monaco.json dist/web-worker.json",
     "check": "npx tsc -p tsconfig.json && npx eslint src",
-    "test": "npx ts-node --swc test/testInputs.ts",
+    "_test__old": "npx ts-node --swc test/testInputs.ts",
     "docs": "npx ts-node --swc scripts/gen-docs.ts && npx ts-node --swc scripts/build-docs.ts",
-    "all": "npm run check && npm run docs && npm run build && npm run test && npm run build-web"
+    "all": "npm run check && npm run docs && npm run build && npm run test && npm run build-web",
+    "test": "npm run test-template",
+    "test-template": "npx tsx test/test-template.ts"
   }
 }

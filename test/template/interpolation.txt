@@ -1,0 +1,9 @@
+<% foo %>
+<% markups %>
+<% quotes %>
+<% amp %>
+-----------------------------------------------------------------
+bar
+&lt;b&gt;foo&lt;/b&gt;
+&quot;foo&quot; &#x27;bar&#x27;
+&amp;amp;

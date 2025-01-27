@@ -1,0 +1,7 @@
+{
+    foo: 'bar',
+    markups: '<b>foo</b>',
+    quotes: '"foo" \'bar\'',
+    amp: '&amp;',
+    digits: ['one', 'two', 'three'],
+}

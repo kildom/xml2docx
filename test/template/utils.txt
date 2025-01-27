@@ -1,0 +1,17 @@
+<%= utils.templateFile %>
+<%= utils.templateDir %>
+<%= utils.inputFile %>
+<%= utils.inputDir %>
+<%= utils.dataFile %>
+<%= utils.dataDir %>
+<%= utils.data.foo %>
+<%= utils === __utils__ ? 'ok' : 'error' %>
+----------------------------------------------------------------
+test/template/utils.txt
+test/template/
+test/template/utils.txt
+test/template/
+test/template/data.json5
+test/template/
+bar
+ok

@@ -44,17 +44,17 @@ export function renderTemplate(options: OptionsProcessed, input: string, inputFi
             interpolate: /<%=([\s\S]+?)%>/g,
             escape: /<%(?![!=])([\s\S]+?)%>/g
         });
-    } catch (ex) {
-        throw new DocTMLError(`Error parsing template from "${inputFile}".`, ex);
+    } catch (err) {
+        throw new DocTMLError(`Error parsing template from "${inputFile}".`, err);
     }
 
     try {
         let utils = new TemplateUtils(options, inputFile);
         return compiled({ utils: utils, ...options.data, __utils__: utils });
-    } catch (ex) {
+    } catch (err) {
         throw new DocTMLError(
             `Error evaluating template from "${inputFile}" with data from "${options.dataFile}".`,
-            ex
+            err
         );
     }
 }
