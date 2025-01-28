@@ -1,6 +1,25 @@
+/*!
+ * Copyright 2025 Dominik Kilian
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *    following disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 import * as fs from 'node:fs';
-import { DebugFileType, DocTMLError, generate, Options } from './doctml';
+import { DebugFileType, DocTMLError, generate, Options, Result } from './doctml';
 
 
 const USAGE = `
@@ -118,14 +137,24 @@ function parseArguments() {
 
 
 function addCallbacks(options: Options, debug: boolean) {
-    options.readFile = (file: string, binary: boolean): Uint8Array | string => {
+
+    options.readFile = (result: Result, file: string, binary: boolean): Uint8Array | string => {
         return fs.readFileSync(
             file === '-' ? 0 : file,
             { encoding: binary ? null : 'utf8' });
     };
+
+    options.writeFile = (result: Result, content: Uint8Array) => {
+        fs.writeFileSync(
+            result.outputFile === '-'
+                ? process.stdout.fd
+                : (result.outputFile ?? 'doctml-output.docx'),
+            content);
+    };
+
     if (debug) {
-        options.debugFile = (type: DebugFileType, content: string | Uint8Array) => {
-            let fileName = options.outputFile;
+        options.debugFile = (result: Result, type: DebugFileType, content: string | Uint8Array) => {
+            let fileName = result.outputFile;
             if (fileName === '-' || fileName == null) {
                 fileName = 'doctml-output.debug';
             }
@@ -133,15 +162,18 @@ function addCallbacks(options: Options, debug: boolean) {
                 fileName = fileName.substring(0, fileName.length - 5);
             }
             switch (type) {
-            case 'data':
-                fileName += '.debug.json';
-                break;
-            case 'rendered':
-                fileName += '.debug.rendered.doctml';
-                break;
-            default:
-                fileName += `.debug.${type}.dat`;
-                break;
+                case 'data':
+                    fileName += '.debug.json';
+                    break;
+                case 'rendered':
+                    fileName += '.debug.rendered.doctml';
+                    break;
+                case 'normalized':
+                    fileName += '.debug.normalized.doctml';
+                    break;
+                default:
+                    fileName += `.debug.${type}.dat`;
+                    break;
             }
             fs.writeFileSync(fileName, content);
         };
@@ -169,25 +201,17 @@ async function main() {
     let args = parseArguments();
     addCallbacks(args.options, args.debug);
 
-    try {
+    if (args.options.inputFile === '-' && !args.options.outputFile) {
+        args.options.outputFile = '-';
+    }
 
-        if (args.options.inputFile === '-' && !args.options.outputFile) {
-            args.options.outputFile = '-';
+    let result = await generate(args.options);
+
+    if (result.errors.length > 0) {
+        for (let err of result.errors) {
+            printError(err, args.debug);
         }
-
-        let output = await generate(args.options);
-
-        fs.writeFileSync(
-            args.options.outputFile === '-'
-                ? process.stdout.fd
-                : (args.options.outputFile ?? 'doctml-output.docx'),
-            output);
-
-    } catch (err) {
-
-        printError(err, args.debug);
         process.exit(1);
-
     }
 }
 

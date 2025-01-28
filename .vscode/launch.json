@@ -7,16 +7,32 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "test-template",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\xml2docx.ts",
-            "args": ["--debug", "temp/a.xml"],
+            "program": "${workspaceFolder}/test/test-template.ts",
             "outFiles": [
-                "${workspaceFolder}/dist/**/*.cjs"
+                "${workspaceFolder}/dist/test/template/**/*.cjs"
             ],
-            "preLaunchTask": "npm: prebuild"
+            "preLaunchTask": "npm: build-test-template"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "cli",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/cli.ts",
+            "args": [
+                "--debug",
+                "test/inputs/Paragraph.xml"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/cli/**/*.cjs"
+            ],
+            "preLaunchTask": "npm: build-cli"
         }
     ]
 }

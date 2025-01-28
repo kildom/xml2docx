@@ -1,5 +1,5 @@
 /*!
- * Copyright 2023 Dominik Kilian
+ * Copyright 2025 Dominik Kilian
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
@@ -19,14 +19,16 @@
  */
 
 import * as sax from 'sax';
-import { InterceptedError } from './os';
-import { AnyObject, Attributes, Dict, error } from './common';
+import { Attributes, deepCopy, Dict } from './common';
+import { Context } from './context';
+
 
 export interface NodeBase {
     type: 'element' | 'text' | 'cdata' | 'instruction';
     line: number;
     column: number;
 }
+
 
 export interface Element extends NodeBase {
     type: 'element';
@@ -36,35 +38,23 @@ export interface Element extends NodeBase {
     elements: Node[];
 }
 
+
 export interface Text extends NodeBase {
     type: 'text';
     text: string;
 }
+
 
 export interface CData extends NodeBase {
     type: 'cdata';
     cdata: string;
 }
 
+
 export type Node = Element | Text | CData;
 
-export class XMLError extends Error { // TODO: Remove this
-    constructor(node: Node | { element: Node } | { node: Node } | undefined, message: string) {
-        if (node) {
-            super(message + ` [at ${(node as any)?.line || (node as any)?.element?.line || (node as any)?.node?.line}]`);
-        } else {
-            super(message);
-        }
-    }
-}
 
-export class InterceptedXMLError extends InterceptedError { // TODO: Remove this
-    public constructor(node: Node, previous: any, message: string) {
-        super(previous, message + ` [at ${node.line}]`);
-    }
-}
-
-export function parse(input: string): Element {
+export function parse(ctx: Context): Element {
 
     let parser = sax.parser(true, {
         trim: false,
@@ -135,37 +125,57 @@ export function parse(input: string): Element {
     };
 
     parser.onerror = (e) => {
-        error(e.message, parser);
+        ctx.error(e.message, parser);
         parser.resume();
     };
 
     parser.onprocessinginstruction = () => {
-        error('Unexpected XML instruction', parser);
+        ctx.error('Unexpected XML instruction.', parser);
     };
 
-    parser.write(input);
+    parser.write(ctx.input);
     parser.close();
 
     if (stack.length !== 1 || stack[0] !== root) {
-        error('Invalid XML parsing result');
+        ctx.error('Invalid XML parsing result.');
     }
 
     return root;
 }
 
-export function stringify(element: Element, singleRoot: boolean) {
-    return ''; // TODO: is it really necessary?
-    // if (singleRoot) {
-    //     let root: Element = {
-    //         type: 'element',
-    //         name: 'ROOT',
-    //         path: '',
-    //         elements: [element],
-    //     };
-    //     return xmlJs.js2xml(root, { compact: false });
-    // } else {
-    //     return xmlJs.js2xml(element, { compact: false });
-    // }
+function xmlEscape(text: string) {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function stringifyInner(result: string[], node: Node) {
+    if (node.type === 'element') {
+        result.push(`<${node.name}`);
+        for (let [key, value] of Object.entries(node.attributes)) {
+            result.push(` ${key}="${xmlEscape(value)}"`);
+        }
+        if (node.elements.length > 0) {
+            result.push('>');
+            for (let sub of node.elements) {
+                stringifyInner(result, sub);
+            }
+            result.push(`</${node.name}>`);
+        } else {
+            result.push('/>');
+        }
+    } else if (node.type === 'text') {
+        result.push(xmlEscape(node.text));
+    } else if (node.type === 'cdata') {
+        result.push(`<![CDATA[${node.cdata}]]>`);
+    }
+}
+
+export function stringify(element: Element) {
+    let result: string[] = [];
+    stringifyInner(result, element);
+    return result.join('');
 }
 
 export enum SpacesProcessing {
@@ -255,10 +265,6 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
 }
 
 
-export function deepCopy(obj: any) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
 export function mergeElements(base: Element, addition: Element): Element {
     base = deepCopy(base);
     for (let [key, value] of Object.entries(addition.attributes || {})) {
@@ -272,44 +278,57 @@ export function mergeElements(base: Element, addition: Element): Element {
     return base;
 }
 
-export function normalizeDocxContext(node: Node) {
+export function normalize(node: Node) {
     if (node.type !== 'element') return;
-    /* TODO: doctml context switch
-    Return children of p element, This element may have attributes and properties just like <p> element.
-        <children:doctml.p>Content</children:doctml.p>
-    Return single element:
-        <children:doctml><p>Content</p></children:doctml>
-    */
-    if (node.name.match(/:doctml(?:\.[A-Z0-9a-z_-]+)?$/)) {
-        for (let sub of node.elements) {
-            normalizeDoctmlContext(sub);
-        }
-    } else {
-        for (let sub of node.elements) {
-            normalizeDocxContext(sub);
+    // Normalize tag and attribute names
+    node.name = node.name.replace(/[_-]/g, '').toLowerCase();
+    let attributes = Object.create(null);
+    for (let [name, value] of Object.entries(node.attributes)) {
+        attributes[name.replace(/[_-]/g, '').toLowerCase()] = value;
+    }
+    node.attributes = attributes;
+    // Concatenate adjacent text nodes
+    let lastText: Text | undefined = undefined;
+    let joined = [];
+    for (let sub of node.elements) {
+        if (sub.type === 'text') {
+            if (lastText) {
+                lastText.text += sub.text;
+            } else {
+                joined.push(sub);
+                lastText = sub;
+            }
+        } else if (sub.type === 'element') {
+            normalize(sub);
+            joined.push(sub);
+            lastText = undefined;
+        } else if (sub.type === 'cdata') {
+            joined.push(sub);
+            lastText = undefined;
         }
     }
-}
-
-export function normalizeDoctmlContext(node: Node) {
-    if (node.type !== 'element') return;
-    if (node.name.startsWith('docx.')) {
-        for (let sub of node.elements) {
-            normalizeDocxContext(sub);
-        }
-    } else if (node.name.endsWith(':property')) {
-        for (let sub of node.elements) {
-            normalizeDocxContext(sub);
-        }
-    } else {
-        node.name = node.name.replace(/[_-]/g, '').toLowerCase();
-        let attributes = Object.create(null);
-        for (let [name, value] of Object.entries(node.attributes)) {
-            attributes[name.replace(/[_-]/g, '').toLowerCase()] = value;
-        }
-        node.attributes = attributes;
-        for (let sub of node.elements) {
-            normalizeDoctmlContext(sub);
+    // Separate leading or trailing space as a single text node with single space character
+    node.elements.splice(0);
+    for (let sub of joined) {
+        if (sub.type === 'text') {
+            let text = sub.text;
+            let trimmedEnd = text.trimEnd();
+            let trimmedBoth = trimmedEnd.trimStart();
+            if (trimmedBoth === '') {
+                sub.text = ' ';
+                node.elements.push(sub);
+            } else {
+                if (trimmedBoth.length < trimmedEnd.length) {
+                    node.elements.push({ ...sub, text: ' ', });
+                }
+                sub.text = trimmedBoth;
+                node.elements.push(sub);
+                if (trimmedEnd.length < text.length) {
+                    node.elements.push({ ...sub, text: ' ', });
+                }
+            }
+        } else {
+            node.elements.push(sub);
         }
     }
 }

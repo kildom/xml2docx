@@ -1,6 +1,7 @@
 
 import * as fs from 'node:fs';
-import { Options, generate } from '../src/doctml';
+import { Options, Result, generate } from '../src/doctml';
+import assert from 'node:assert';
 
 class EndOfTestIsNotAnError extends Error {
     public constructor(
@@ -26,58 +27,56 @@ async function test() {
             input: template,
             inputFile: path,
             dataFile: 'test/template/data.json5',
-            debugFile: (type, content) => {
+            debugFile: (result, type, content) => {
                 if (type === 'rendered') throw new EndOfTestIsNotAnError(content as string);
             },
-            readFile: (file, binary) => {
+            readFile: (result, file, binary) => {
                 return fs.readFileSync(file, binary ? null : 'utf8');
             },
         };
 
-        let errorMessage: string | undefined = undefined;
-        let error: any = undefined;
+        let result = await generate(options);
 
         try {
-            await generate(options);
-            throw new Error('This should not happen.');
-        } catch (err) {
-            if (err instanceof EndOfTestIsNotAnError) {
-                let result = err.result.trim();
-                if (expected === 'ERROR') {
-                    errorMessage = `Expecting exception\nGot result:\n${result}`;
-                } else if (result !== expected) {
-                    for (let pos = 0; pos <= Math.min(result.length, expected.length); pos++) {
-                        if (result[pos] !== expected[pos]) {
-                            let ok = result.substring(0, pos);
+            assert(result.errors.length > 0, 'Expected error, got none.');
+            let ok = result.errors.length === 1 && result.errors[0].sourceError instanceof EndOfTestIsNotAnError;
+
+            if (ok) {
+                let output = (result.errors[0].sourceError as EndOfTestIsNotAnError).result.trim();
+                assert(expected !== 'ERROR', `Expecting exception\nGot output:\n${output}`)
+                if (output !== expected) {
+                    for (let pos = 0; pos <= Math.min(output.length, expected.length); pos++) {
+                        if (output[pos] !== expected[pos]) {
+                            let ok = output.substring(0, pos);
                             let line = ok.split('\n').length;
                             let startOfLine = ok.lastIndexOf('\n') + 1;
                             let column = ok.substring(startOfLine).length + 1;
-                            errorMessage = `Difference at line ${line}, column ${column}\nGot result:\n${result}`;
-                            break;
+                            assert(false, `Difference at line ${line}, column ${column}\nGot output:\n${output}`);
                         }
                     }
-                    if (!errorMessage) {
-                        errorMessage = `Unexpected\nGot result:\n${result}`;
-                    }
+                    assert(false, `Unexpected\nGot output:\n${output}`);
                 }
             } else {
-                if (expected !== 'ERROR') {
-                    errorMessage = 'Expecting output, got exception:';
-                    error = err;
-                }
+                assert(expected === 'ERROR', 'Expecting output, got errors.');
             }
-        }
 
-        if (errorMessage) {
-            failingTests++;
-            console.error(`[FAIL] ${fileName}`);
-            console.error('       ' + errorMessage.trim().replace(/\r?\n/g, '\n       '));
-            if (error) {
-                console.error(error);
-            }
-        } else {
             passingTests++;
             console.log(`[PASS] ${fileName}`);
+
+        } catch (err) {
+
+            failingTests++;
+            console.error(`[FAIL] ${fileName}`);
+            console.error('       ' + err.message.trim().replace(/\r?\n/g, '\n       '));
+            for (let resultError of result.errors) {
+                if (!(resultError.sourceError instanceof EndOfTestIsNotAnError)) {
+                    console.error(resultError);
+                    if (resultError.sourceError) {
+                        console.error(resultError.sourceError);
+                    }
+                }
+            }
+
         }
     }
 

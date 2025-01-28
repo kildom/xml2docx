@@ -1,8 +1,29 @@
+/*!
+ * Copyright 2025 Dominik Kilian
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *    following disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-import JSON5 from 'json5';
 import { renderTemplate } from './template';
+import { DocTMLError, DebugFileType } from './common';
+import { Context } from './context';
+import { normalize, parse, stringify } from './xml';
 
-export type DebugFileType = 'data' | 'rendered'; // If macros implemented add 'expanded'
+export { DocTMLError, DebugFileType }
 
 export interface Options {
     input?: string;
@@ -11,108 +32,62 @@ export interface Options {
     dataFile?: string;
     outputFile?: string;
     docxJsEnabled?: boolean;
-    debugFile?: (type: DebugFileType, content: string | Uint8Array) => void;
-    readFile?: (file: string, binary: boolean) => Uint8Array | string;
+    debugFile?: (result: Result, type: DebugFileType, content: string | Uint8Array) => void;
+    readFile?: (result: Result, file: string, binary: boolean) => Uint8Array | string;
+    writeFile?: (result: Result, content: Uint8Array) => void;
 }
 
-export interface OptionsProcessed {
-    input: string;
+export interface Result {
+    options: Options;
     inputFile: string;
-    data?: any;
-    dataFile?: string;
     outputFile: string;
-    docxJsEnabled: boolean;
-    debugFile?: (type: DebugFileType, content: string | Uint8Array) => void;
-    readFile?: (file: string, binary: boolean) => Uint8Array | string;
+    errors: DocTMLError[];
+    output: Uint8Array;
 }
 
-export class DocTMLError extends Error {
-    constructor(
-        message: string,
-        public sourceError?: any
-    ) {
-        super(message);
-    }
-}
+export async function generate(options: Options): Promise<Result> {
 
-function processOptions(options: Options): void {
+    let ctx: Context = new Context();
 
-    // Update simple options.
-    options.inputFile = options.inputFile ?? ':input';
-    options.dataFile = options.dataFile ?? (options.data == null ? undefined : ':data');
-    options.docxJsEnabled = !!options.docxJsEnabled;
+    try {
 
-    // Set output file name to default if not specified.
-    if (options.outputFile == null) {
-        if (options.inputFile === ':input') {
-            options.outputFile = ':output';
+        ctx.setOptions(options);
+
+        // Output debugging data file.
+        if (ctx.data != null && ctx.options.debugFile) {
+            ctx.debugFile('data', JSON.stringify(ctx.data, null, 4));
+        }
+
+        if (ctx.data != null) {
+            // Render template if data provided.
+            ctx.input = renderTemplate(ctx, ctx.input, ctx.inputFile);
+            // Output debugging rendered file.
+            ctx.debugFile('rendered', ctx.input);
+        }
+
+        let rootNode = parse(ctx);
+
+        // Process macros.
+        // Macros are not currently implemented, but may be in future.
+
+        // Normalize spaces, tag and attribute names in the document.
+        normalize(rootNode);
+        if (ctx.options.debugFile) {
+            ctx.debugFile('normalized', stringify(rootNode));
+        }
+
+        ctx.output = new Uint8Array([...ctx.input].map(x => x.charCodeAt(0)));
+        ctx.writeFile(ctx.output);
+
+    } catch (err) {
+
+        if (err instanceof DocTMLError) {
+            // Ignore DocTMLError errors since they are already in the errors array.
         } else {
-            let pathParts = options.inputFile!.split(/([/\\])/);
-            let name = pathParts.at(-1)!;
-            let nameParts = name.split('.');
-            if (nameParts.length === 1) {
-                nameParts.push('docx');
-            }
-            nameParts[nameParts.length - 1] = 'docx';
-            pathParts[pathParts.length - 1] = nameParts.join('.');
-            options.outputFile = pathParts.join('');
+            throw err;
         }
+
     }
 
-    // Read input if just file name given.
-    if (options.input == null) {
-        if (options.inputFile == null || options.readFile == null) {
-            throw new DocTMLError('No input given.');
-        }
-        options.input = options.readFile(options.inputFile, false) as string;
-    }
-
-    // Read data if just data file name given.
-    if (options.data == null && options.dataFile != null) {
-        if (options.readFile == null) {
-            throw new DocTMLError('Cannot read data file, no readFile callback given.');
-        }
-        options.data = options.readFile(options.dataFile, false) as string;
-    }
-
-    // Parse JSON5 string if needed.
-    if (typeof options.data === 'string') {
-        try {
-            options.data = JSON5.parse(options.data);
-        } catch (err) {
-            throw new DocTMLError('Error parsing input data.', err);
-        }
-    }
-}
-
-
-export async function generate(options: Options, returnBase64?: false): Promise<Uint8Array>;
-export async function generate(options: Options, returnBase64: true): Promise<string>;
-export async function generate(options: Options, returnBase64?: boolean): Promise<Uint8Array | string> {
-
-    processOptions(options);
-    let optionsProcessed = options as OptionsProcessed;
-
-    // Output debugging data file.
-    if (optionsProcessed.data != null && optionsProcessed.debugFile) {
-        optionsProcessed.debugFile('data', JSON.stringify(optionsProcessed.data, null, 4));
-    }
-
-    if (optionsProcessed.data != null) {
-        // Render template if data provided.
-        optionsProcessed.input = renderTemplate(
-            optionsProcessed,
-            optionsProcessed.input,
-            optionsProcessed.inputFile);
-        // Output debugging rendered file.
-        if (optionsProcessed.debugFile) {
-            optionsProcessed.debugFile('rendered', optionsProcessed.input);
-        }
-    }
-
-    // Process macros.
-    // Macros are not currently implemented, but may be in future.
-
-    returnBase64;
-    return optionsProcessed.input;
+    return ctx;
 }

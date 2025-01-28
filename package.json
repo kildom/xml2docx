@@ -1,51 +1,54 @@
 {
+  "name": "doctml",
+  "version": "0.1.0",
+  "description": "Generate DOCX documents using a simple HTML-like syntax with optional templating.",
+  "main": "src/cli.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kildom/doctml.git"
+  },
+  "keywords": [
+    "create",
+    "docx",
+    "word",
+    "office",
+    "document",
+    "template"
+  ],
+  "author": "Dominik Kilian <kontakt@dominik.cc>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/kildom/doctml/issues"
+  },
+  "homepage": "https://kildom.github.io/doctml/",
+  "scripts": {
+    "test": "npm run test-template",
+    "test-template": "npx tsx test/test-template.ts",
+    "build-test": "npm run build-test-template",
+    "build-test-template": "npx esbuild test/test-template.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --outfile=dist/test/template/main.cjs",
+    "build-cli": "npx esbuild src/cli.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --outfile=dist/cli/doctml.cjs",
+    "_old-_lic": "npx license-checker --json --out dist/licenses.json && npx ts-node --swc scripts/gen-licenses.ts dist/licenses.json",
+    "_old-prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/xml2docx.json --outfile=dist/xml2docx.cjs && npm run _lic -- dist/xml2docx-license.txt dist/xml2docx.json && node scripts/postprocess.cjs",
+    "_old-build": "npx pkg -C Brotli -t node18-linux-x64,node18-win-x64,node18-macos-x64 --public -o dist/xml2docx dist/xml2docx.cjs",
+    "_old-build-web": "node scripts/build-web.js",
+    "_old-postbuild-web": "npm run _lic -- web/license.html dist/web-main.json dist/web-monaco.json dist/web-worker.json",
+    "_old-check": "npx tsc -p tsconfig.json && npx eslint src",
+    "_old-_test__old": "npx ts-node --swc test/testInputs.ts",
+    "_old-docs": "npx ts-node --swc scripts/gen-docs.ts && npx ts-node --swc scripts/build-docs.ts",
+    "_old-all": "npm run check && npm run docs && npm run build && npm run test && npm run build-web"
+  },
   "dependencies": {
-    "@blueprintjs/core": "^5.5.1",
-    "@blueprintjs/icons": "^5.2.1",
-    "docx": "^8.2.3",
+    "docx": "^9.1.1",
     "json5": "^2.2.3",
-    "monaco-editor": "^0.44.0",
-    "normalize.css": "^8.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-dropzone": "^14.2.3",
     "sax": "^1.4.1",
-    "underscore": "^1.13.6"
+    "underscore": "^1.13.7"
   },
   "devDependencies": {
-    "@swc/core": "^1.3.102",
-    "@types/node": "^20.8.2",
-    "@types/react": "^18.2.47",
-    "@types/react-dom": "^18.2.18",
-    "@types/react-router": "^5.1.20",
+    "@types/node": "^22.12.0",
     "@types/sax": "^1.2.7",
-    "@types/showdown": "^2.0.6",
     "@types/underscore": "^1.13.0",
-    "@typescript-eslint/eslint-plugin": "^6.18.1",
-    "@typescript-eslint/parser": "^6.18.1",
-    "esbuild": "0.19.4",
-    "eslint": "^8.56.0",
-    "http-server": "^14.1.1",
-    "license-checker": "^25.0.1",
-    "pkg": "^5.8.1",
-    "showdown": "^2.1.0",
-    "showdown-highlight": "^3.1.0",
-    "ts-node": "^10.9.2",
+    "esbuild": "^0.24.2",
     "tsx": "^4.19.2",
-    "typedoc": "^0.25.3",
-    "typescript": "^5.2.2"
-  },
-  "scripts": {
-    "_lic": "npx license-checker --json --out dist/licenses.json && npx ts-node --swc scripts/gen-licenses.ts dist/licenses.json",
-    "prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/xml2docx.json --outfile=dist/xml2docx.cjs && npm run _lic -- dist/xml2docx-license.txt dist/xml2docx.json && node scripts/postprocess.cjs",
-    "build": "npx pkg -C Brotli -t node18-linux-x64,node18-win-x64,node18-macos-x64 --public -o dist/xml2docx dist/xml2docx.cjs",
-    "build-web": "node scripts/build-web.js",
-    "postbuild-web": "npm run _lic -- web/license.html dist/web-main.json dist/web-monaco.json dist/web-worker.json",
-    "check": "npx tsc -p tsconfig.json && npx eslint src",
-    "_test__old": "npx ts-node --swc test/testInputs.ts",
-    "docs": "npx ts-node --swc scripts/gen-docs.ts && npx ts-node --swc scripts/build-docs.ts",
-    "all": "npm run check && npm run docs && npm run build && npm run test && npm run build-web",
-    "test": "npm run test-template",
-    "test-template": "npx tsx test/test-template.ts"
+    "typescript": "^5.7.3"
   }
 }

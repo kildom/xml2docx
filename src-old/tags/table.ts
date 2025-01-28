@@ -210,7 +210,7 @@ function tdTag(ts: TranslatorState, element: Element, captureChildren?: CaptureC
 
     tableData.columns[tableData.columnIndex] = tableData.columns[tableData.columnIndex] ?? { rowSpanRemaining: 0 };
     let tsColumn = ts.setCommon(tableData.columns[tableData.columnIndex]?.common);
-    let [tsInner, attributes, properties] = normalizeElement(tsColumn, element, SpacesProcessing.IGNORE);
+    let [tsInner, attributes, properties] = normalizeElement(tsColumn, element, SpacesProcessing.IGNORE); // TODO: Ignoring all spaces is not correct, if we have implicit paragraph.
 
     addImplicitParagraphs(element.elements, [
         ...Object.keys(headingTags), 'table',
