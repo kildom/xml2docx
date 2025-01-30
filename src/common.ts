@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { Element } from "./xml";
+
 export type Dict<T> = { [key: string]: T };
 export type AnyObject = Dict<any>;
 export type Attributes = Dict<string>;
 
 
-export type DebugFileType = 'data' | 'rendered' | 'normalized'; // If macros implemented add 'expanded'
+export type DebugFileType = 'data' | 'rendered' | 'normalized' | 'processed'; // If macros implemented add 'expanded'
 
 export class DocTMLError extends Error {
     constructor(
@@ -65,4 +67,97 @@ export function dirName(path: string): string {
 
 export function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
+}
+
+export type Mutable<T> = {
+    -readonly [P in keyof T]: T[P];
+};
+
+
+export type FirstConstructorParam<T> = T extends new (arg1: infer P, ...args: any[]) => any ? P : never;
+
+export function removeShallowUndefined(object: AnyObject) {
+    for (let key of [...Object.keys(object)]) {
+        if (object[key] === undefined) {
+            delete object[key];
+        }
+    }
+}
+
+export function selectUndef<T>(a: any, b: T): T | undefined;
+export function selectUndef<T>(a: any, b: any, c: T): T | undefined;
+export function selectUndef<T>(a: any, b: any, c: any, d: T): T | undefined;
+export function selectUndef<T>(...args: (T | undefined)[]): T | undefined {
+    let last: T | undefined = undefined;
+    for (let a of args) {
+        last = a;
+        if (a === undefined) {
+            return a;
+        }
+    }
+    return last;
+}
+
+export type SplitListMatcher = (value: string) => any;
+export type SplitListDefault = () => any;
+
+/** Split a list of values into an object.
+ *
+ * The matchers will convert list items into properties.
+ *
+ * If the matcher is a function, it will be used to convert list item into output property value.
+ * It returns undefined if the value does not match current property.
+ * If there are no matches for this property, the property will not be present in the output object.
+ *
+ * If the matcher is an array of two functions, the second will be used as default value for the property.
+ *
+ * If the matcher is as array of two functions and a string, and there are no matches, the string will be used
+ * as an error message.
+ *
+ * @param value Value to convert
+ * @param matchers Dictionary of matchers
+ * @param split List splitter character
+ * @returns New object
+ */
+export function splitListValues(
+    element: Element, name: string, value: string | undefined,
+    matchers: Dict<SplitListMatcher | [SplitListMatcher, SplitListDefault] | [SplitListMatcher, SplitListDefault, string]>,
+    split?: ',' | ' '
+) {
+    if (value === undefined) return undefined;
+    let arr = value.trim().split(split === ' ' ? /\s+/ : split === ',' ? /\s*[,;]\s*/ : /(?:\s*[,;]\s*|\s+)/);
+    let result: AnyObject = {};
+    outerLoop:
+    for (let item of arr) {
+        for (let [name, matcher] of Object.entries(matchers)) {
+            if (name in result) continue;
+            let matcherFunc = typeof (matcher) === 'function' ? matcher : matcher[0];
+            let m = matcherFunc(item);
+            if (m !== undefined) {
+                result[name] = m;
+                continue outerLoop;
+            }
+        }
+        element.ctx.error(`Invalid list item '${item}' in "${name}" attribute on "${element.name}" tag.`, element);
+    }
+    for (let [name, matcher] of Object.entries(matchers)) {
+        if ((name in result) || typeof (matcher) === 'function') {
+            continue;
+        } else if (typeof (matcher[2]) === 'string') {
+            element.ctx.error(`${matcher[2]} in "${name}" attribute on "${element.name}" tag.`, element);
+            result[name] = matcher[1]();
+        } else if (typeof (matcher[1]) === 'function') {
+            result[name] = matcher[1]();
+        }
+    }
+    return result;
+}
+
+export function undefEmpty<T>(obj: T): T | undefined {
+    for (let value of Object.values(obj as object)) {
+        if (value !== undefined) {
+            return obj;
+        }
+    }
+    return undefined;
 }

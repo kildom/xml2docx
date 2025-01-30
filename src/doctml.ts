@@ -18,10 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+import * as docx from 'docx';
+
 import { renderTemplate } from './template';
 import { DocTMLError, DebugFileType } from './common';
 import { Context } from './context';
 import { normalize, parse, stringify } from './xml';
+import { rootTag } from './tags/root';
+import { TranslatorState } from './translator';
 
 export { DocTMLError, DebugFileType }
 
@@ -76,7 +81,19 @@ export async function generate(options: Options): Promise<Result> {
             ctx.debugFile('normalized', stringify(rootNode));
         }
 
-        ctx.output = new Uint8Array([...ctx.input].map(x => x.charCodeAt(0)));
+        let document = rootTag(new TranslatorState(ctx), rootNode);
+
+        if (ctx.options.debugFile) {
+            ctx.debugFile('processed', stringify(rootNode));
+        }
+
+        if (typeof Buffer !== 'undefined') {
+            ctx.output = await docx.Packer.toBuffer(document);
+        } else {
+            let blob = await docx.Packer.toBlob(document);
+            ctx.output = new Uint8Array(await blob.arrayBuffer());
+        }
+
         ctx.writeFile(ctx.output);
 
     } catch (err) {

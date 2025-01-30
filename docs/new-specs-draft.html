@@ -1,0 +1,106 @@
+<html>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto+Slab:wght@100..900&display=swap');
+
+    body {
+        font-family: "Lato", serif;
+        font-size: 16px;
+    }
+
+    .tag-container {
+        background: #f0f0f0;
+        padding: 0px 15px;
+    }
+
+    .tag {
+        font-family: "Roboto Slab", serif;
+        color: rgb(0, 73, 156);
+        font-weight: bold;
+        font-size: 200%;
+    }
+
+    .tag-description {
+        padding: 7px 0px 7px 50px;
+    }
+
+    .attr {
+        color: rgb(101, 112, 121);
+        padding: 7px 0px 7px 25px;
+    }
+
+    .attr-name {
+        color: rgb(0, 99, 180);
+        font-size: 120%;
+        font-weight: bold;
+    }
+
+    .child {
+        padding: 7px 0px 7px 25px;
+    }
+</style>
+
+<body>
+    <p>
+    <div class="tag-container">
+        <div class="tag">
+            &lt;p
+        </div>
+        <div class="tag-description">
+            <p>
+                Paragraph.
+            </p>
+            <p>
+                The paragraph contains formatted text and images.
+            </p>
+            <p>
+                Any whitespaces at the beginning and end of the paragraph are removed.
+                If you want to keep the whitespaces, enclose the text in a <a href="#font-tag">&lt;font&gt;</a> tag.
+            </p>
+            <p>
+                The paragraph expects <a href="#font-tag">&lt;font&gt;</a> tag as a child.
+                If it contains any other tags, they will be implicitly enclosed in a <a
+                    href="#font-tag">&lt;font&gt;</a> tag.
+            </p>
+        </div>
+        <div class="attr">
+            ⊞ &nbsp;<span class="attr-name">align</span>="alignment"
+        </div>
+        <div class="attr">
+            ⊞ &nbsp;<span class="attr-name">border</span>="top, right, bottom, left"
+        </div>
+        <div class="attr">
+            ⊞ &nbsp;<span class="attr-name">tabs</span>="tab-stop, tab-stop, ..."
+        </div>
+        <div class="tag">
+            &gt;
+        </div>
+        <div class="child" style="line-height: 1.5em;">
+            ⊟ &nbsp;Allowed children: <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>&lt;font/&gt; (implicit)</b><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Allowed children of implicit tag: <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;img/&gt;
+            &lt;b/&gt;
+            &lt;i/&gt;
+            &lt;u/&gt;
+            &lt;s/&gt;
+            &lt;sub/&gt;
+            &lt;sup/&gt;
+            text
+        </div>
+        <div class="tag">
+            &lt;/p&gt;
+        </div>
+    </div>
+    </p>
+    <pre>
+
+* Tag description is always expanded.
+* Attributes and children are collapsed by default.
+* Hovering over attribute type will show a tooltip with the type description.
+* Only most common enum values are shown for attributes, rest is available after clicking "..." button.
+* There should be global "Expand all" and "Collapse all" buttons useful for searching.
+* Attributes should be sorted by importance.
+</pre>
+</body>
+
+</html>

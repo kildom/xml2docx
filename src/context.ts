@@ -22,7 +22,7 @@ import JSON5 from 'json5';
 import * as docx from 'docx';
 
 import { Options, Result } from './doctml';
-import { DebugFileType, DocTMLError } from './common';
+import { DebugFileType, Dict, DocTMLError } from './common';
 
 
 export class Context implements Result {
@@ -37,6 +37,8 @@ export class Context implements Result {
     public data?: any;
     public dataFile?: string;
     public input = '';
+
+    public enumMapCache = new Map<any, Dict<string | number>>();
 
     public setOptions(options: Readonly<Options>) {
 

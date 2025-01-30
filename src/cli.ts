@@ -166,10 +166,9 @@ function addCallbacks(options: Options, debug: boolean) {
                     fileName += '.debug.json';
                     break;
                 case 'rendered':
-                    fileName += '.debug.rendered.doctml';
-                    break;
                 case 'normalized':
-                    fileName += '.debug.normalized.doctml';
+                case 'processed':
+                    fileName += `.debug.${type}.doctml`;
                     break;
                 default:
                     fileName += `.debug.${type}.dat`;

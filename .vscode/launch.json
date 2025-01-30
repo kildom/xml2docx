@@ -27,7 +27,7 @@
             "program": "${workspaceFolder}/src/cli.ts",
             "args": [
                 "--debug",
-                "test/inputs/Paragraph.xml"
+                "tmp.xml"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/cli/**/*.cjs"

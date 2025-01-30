@@ -23,35 +23,15 @@ import { Attributes, deepCopy, Dict } from './common';
 import { Context } from './context';
 
 
-export interface NodeBase {
-    type: 'element' | 'text' | 'cdata' | 'instruction';
+export interface Element {
+    ctx: Context,
+    name: string | '#TEXT' | '#CDATA';
+    attributes: Attributes;
+    elements: Element[];
+    text: string;
     line: number;
     column: number;
 }
-
-
-export interface Element extends NodeBase {
-    type: 'element';
-    name: string;
-    attributes: Attributes;
-    properties: Dict<Element>;
-    elements: Node[];
-}
-
-
-export interface Text extends NodeBase {
-    type: 'text';
-    text: string;
-}
-
-
-export interface CData extends NodeBase {
-    type: 'cdata';
-    cdata: string;
-}
-
-
-export type Node = Element | Text | CData;
 
 
 export function parse(ctx: Context): Element {
@@ -67,13 +47,13 @@ export function parse(ctx: Context): Element {
     } as any);
 
     let root: Element = {
-        type: 'element',
+        ctx,
         name: 'ROOT',
         attributes: {},
-        properties: {},
         elements: [],
         line: 1,
         column: 1,
+        text: '',
     };
 
     let stack = [root];
@@ -89,11 +69,11 @@ export function parse(ctx: Context): Element {
 
     parser.onopentag = (tag: sax.Tag) => {
         let element: Element = {
-            type: 'element',
+            ctx,
             name: tag.name,
             attributes: tag.attributes,
-            properties: {},
             elements: [],
+            text: '',
             ...tagStart,
         };
         stack.at(-1)!.elements.push(element);
@@ -105,21 +85,27 @@ export function parse(ctx: Context): Element {
     };
 
     parser.ontext = (t: string) => {
-        let text: Text = {
-            type: 'text',
+        let text: Element = {
+            ctx,
+            name: '#TEXT',
             text: t,
             line: parser.line,
             column: parser.column,
+            elements: [],
+            attributes: {},
         };
         stack.at(-1)!.elements.push(text);
     };
 
     parser.oncdata = (t: string) => {
-        let cdata: CData = {
-            type: 'cdata',
-            cdata: t,
+        let cdata: Element = {
+            ctx,
+            name: '#CDATA',
+            text: t,
             line: parser.line,
             column: parser.column,
+            elements: [],
+            attributes: {},
         };
         stack.at(-1)!.elements.push(cdata);
     };
@@ -150,8 +136,12 @@ function xmlEscape(text: string) {
         .replace(/>/g, '&gt;');
 }
 
-function stringifyInner(result: string[], node: Node) {
-    if (node.type === 'element') {
+function stringifyInner(result: string[], node: Element) {
+    if (node.name === '#TEXT') {
+        result.push(xmlEscape(node.text));
+    } else if (node.name === '#CDATA') {
+        result.push(`<![CDATA[${node.text}]]>`);
+    } else {
         result.push(`<${node.name}`);
         for (let [key, value] of Object.entries(node.attributes)) {
             result.push(` ${key}="${xmlEscape(value)}"`);
@@ -165,16 +155,14 @@ function stringifyInner(result: string[], node: Node) {
         } else {
             result.push('/>');
         }
-    } else if (node.type === 'text') {
-        result.push(xmlEscape(node.text));
-    } else if (node.type === 'cdata') {
-        result.push(`<![CDATA[${node.cdata}]]>`);
     }
 }
 
 export function stringify(element: Element) {
     let result: string[] = [];
-    stringifyInner(result, element);
+    for (let sub of element.elements) {
+        stringifyInner(result, sub);
+    }
     return result.join('');
 }
 
@@ -196,14 +184,15 @@ function trimEndSpacesAndNewLines(text: string) {
     return text.replace(/[ \r\n]*$/, '');
 }
 
-export function processSpacesInPlace(nodes: Node[] | undefined, textProcessing: SpacesProcessing) {
+/*
+export function processSpacesInPlace(nodes: Element[] | undefined, textProcessing: SpacesProcessing) {
     if (nodes !== undefined) {
         let ret = processSpaces(nodes, textProcessing);
         nodes.splice(0, nodes.length, ...ret);
     }
 }
 
-export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesProcessing) {
+export function processSpaces(nodes: Element[] | undefined, textProcessing: SpacesProcessing) {
 
     if (textProcessing === SpacesProcessing.PRESERVE || !nodes) {
 
@@ -211,13 +200,13 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
 
     } else if (textProcessing === SpacesProcessing.IGNORE) {
 
-        return nodes.filter(node => node.type != 'text' || trimSpacesAndNewLines(node.text) !== '');
+        return nodes.filter(node => node.name !== '#TEXT' || trimSpacesAndNewLines(node.text) !== '');
 
     } else {
 
         let i: number;
-        let input: Node[] = nodes;
-        let result: Node[] = [];
+        let input: Element[] = nodes;
+        let result: Element[] = [];
         for (i = 0; i < input.length; i++) {
             let node = input[i];
             if (node.type === 'text') {
@@ -262,7 +251,7 @@ export function processSpaces(nodes: Node[] | undefined, textProcessing: SpacesP
 
         return result;
     }
-}
+}*/
 
 
 export function mergeElements(base: Element, addition: Element): Element {
@@ -278,8 +267,8 @@ export function mergeElements(base: Element, addition: Element): Element {
     return base;
 }
 
-export function normalize(node: Node) {
-    if (node.type !== 'element') return;
+export function normalize(node: Element) {
+    if (node.name.startsWith('#')) return;
     // Normalize tag and attribute names
     node.name = node.name.replace(/[_-]/g, '').toLowerCase();
     let attributes = Object.create(null);
@@ -288,21 +277,21 @@ export function normalize(node: Node) {
     }
     node.attributes = attributes;
     // Concatenate adjacent text nodes
-    let lastText: Text | undefined = undefined;
+    let lastText: Element | undefined = undefined;
     let joined = [];
     for (let sub of node.elements) {
-        if (sub.type === 'text') {
+        if (sub.name === '#TEXT') {
             if (lastText) {
-                lastText.text += sub.text;
+                lastText.text = lastText.text + sub.text;
             } else {
                 joined.push(sub);
                 lastText = sub;
             }
-        } else if (sub.type === 'element') {
-            normalize(sub);
+        } else if (sub.name === '#CDATA') {
             joined.push(sub);
             lastText = undefined;
-        } else if (sub.type === 'cdata') {
+        } else {
+            normalize(sub);
             joined.push(sub);
             lastText = undefined;
         }
@@ -310,7 +299,7 @@ export function normalize(node: Node) {
     // Separate leading or trailing space as a single text node with single space character
     node.elements.splice(0);
     for (let sub of joined) {
-        if (sub.type === 'text') {
+        if (sub.name === '#TEXT') {
             let text = sub.text;
             let trimmedEnd = text.trimEnd();
             let trimmedBoth = trimmedEnd.trimStart();
