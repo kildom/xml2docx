@@ -9,4 +9,17 @@
         "endregion",
         "Ufloat"
     ],
+    "todo-tree.general.tags": [
+        "TODO",
+        "TC:"
+    ],
+    "todo-tree.highlights.customHighlight": {
+        "TC:": {
+            "foreground": "#c9c9c9",
+            "background": "#005000",
+            "icon": "log",
+            "iconColour": "#808080",
+            "type": "text"
+        }
+    }
 }

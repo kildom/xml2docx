@@ -27,12 +27,12 @@
             "program": "${workspaceFolder}/src/cli.ts",
             "args": [
                 "--debug",
-                "tmp.xml"
+                "temp/tmp.xml"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/cli/**/*.cjs"
             ],
-            "preLaunchTask": "npm: build-cli"
+            "preLaunchTask": "npm: prebuild-cli"
         }
     ]
 }

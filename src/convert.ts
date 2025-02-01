@@ -33,10 +33,13 @@ function converterVariants<T extends (value: string, ...args: any[]) => any>(
     type Tail<T extends any[]> = T extends [any, ...infer Rest] ? Rest : never;
     type RemainingParams<T extends (...args: any) => any> = Tail<Parameters<T>>;
     type _ConverterVariantsHelper<T> = (def?: T) => void;
-    type Func = (element: Element, name: string, ...args: [...RemainingParams<T>, ...Parameters<_ConverterVariantsHelper<ReturnType<T>>>]) => ReturnType<T>;
+    type Func = (element: Element, name: string, ...args:
+        [...RemainingParams<T>, ...Parameters<_ConverterVariantsHelper<ReturnType<T>>>]) => ReturnType<T>;
     type FuncNoErr = (value: string, ...args: RemainingParams<T>) => ReturnType<T>;
     let result: Func & { noErr: FuncNoErr };
-    result = ((element: Element, name: string, ...args: [...RemainingParams<T>, ...Parameters<_ConverterVariantsHelper<ReturnType<T>>>]) => {
+    result = ((element: Element, name: string, ...args:
+        [...RemainingParams<T>, ...Parameters<_ConverterVariantsHelper<ReturnType<T>>>]
+    ) => {
         try {
             let value = element.attributes[name];
             return func(value, ...args);
@@ -70,6 +73,80 @@ export function mandatory(element: Element, name: string): string {
         return '';
     }
     return value;
+}
+
+// #endregion
+
+
+// #region Base-64
+
+const fromBase64Map = (function () {
+    let charMap = {
+        'A': 0, 'B': 1, 'C': 2, 'D': 3,
+        'E': 4, 'F': 5, 'G': 6, 'H': 7,
+        'I': 8, 'J': 9, 'K': 10, 'L': 11,
+        'M': 12, 'N': 13, 'O': 14, 'P': 15,
+        'Q': 16, 'R': 17, 'S': 18, 'T': 19,
+        'U': 20, 'V': 21, 'W': 22, 'X': 23,
+        'Y': 24, 'Z': 25, 'a': 26, 'b': 27,
+        'c': 28, 'd': 29, 'e': 30, 'f': 31,
+        'g': 32, 'h': 33, 'i': 34, 'j': 35,
+        'k': 36, 'l': 37, 'm': 38, 'n': 39,
+        'o': 40, 'p': 41, 'q': 42, 'r': 43,
+        's': 44, 't': 45, 'u': 46, 'v': 47,
+        'w': 48, 'x': 49, 'y': 50, 'z': 51,
+        '0': 52, '1': 53, '2': 54, '3': 55,
+        '4': 56, '5': 57, '6': 58, '7': 59,
+        '8': 60, '9': 61, '+': 62, '/': 63,
+    };
+    let result = new Uint8Array(256);
+    for (let [key, value] of Object.entries(charMap)) {
+        result[key.charCodeAt(0)] = value;
+    }
+    return result;
+})();
+
+
+export function fromBase64(value: string): Uint8Array {
+    if (typeof globalThis.Buffer !== 'undefined' && typeof globalThis.Buffer.from === 'function') {
+        return globalThis.Buffer.from(value, 'base64');
+    } else if (typeof globalThis.atob === 'function') {
+        let binary = globalThis.atob(value);
+        let bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    } else {
+        value = value.replace(/[^A-Za-z0-9+/]/g, '');
+        let bytes = new Uint8Array((value.length * 3) >> 2);
+        let bytesOffset = 0;
+        let valueOffset = 0;
+        while (valueOffset + 4 <= value.length) {
+            let a = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let b = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let c = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let d = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let v = (a << 18) | (b << 12) | (c << 6) | d;
+            bytes[bytesOffset++] = (v >> 16) & 0xFF;
+            bytes[bytesOffset++] = (v >> 8) & 0xFF;
+            bytes[bytesOffset++] = v & 0xFF;
+        }
+        if (valueOffset === value.length - 3) {
+            let a = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let b = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let c = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let v = (a << 12) | (b << 6) | c;
+            bytes[bytesOffset++] = (v >> 10) & 0xFF;
+            bytes[bytesOffset++] = (v >> 2) & 0xFF;
+        } else if (valueOffset === value.length - 2) {
+            let a = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let b = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let v = (a << 6) | b;
+            bytes[bytesOffset++] = (v >> 4) & 0xFF;
+        }
+        return bytes;
+    }
 }
 
 // #endregion

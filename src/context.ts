@@ -18,8 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import JSON5 from 'json5';
 import * as docx from 'docx';
+import JSON5 from 'json5';
 
 import { Options, Result } from './doctml';
 import { DebugFileType, Dict, DocTMLError } from './common';

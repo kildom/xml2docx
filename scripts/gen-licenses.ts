@@ -65,11 +65,11 @@ interface LicenseCheckerEntry {
 }
 
 const predefinedEntries: { [moduleName: string]: LicenseCheckerEntry } = {
-    xml2docx: {
+    'doctml@0.1.0': {
         licenses: 'BSD-3-Clause',
-        repository: 'https://github.com/kildom/xml2docx',
+        repository: 'https://github.com/kildom/doctml',
         publisher: 'Dominik Kilian',
-        url: 'https://kildom.github.io/xml2docx/',
+        url: 'https://kildom.github.io/doctml/',
         path: 'src',
         licenseFile: 'LICENSE',
         realPath: '',
@@ -131,10 +131,10 @@ for (let file of allInputs) {
 
 resolved.sort((a, b) => b.priority - a.priority);
 
-let text = '';
+let textChunks:string[] = [];
 
 for (let info of resolved) {
-    text += '\n===============================================================================\n';
+    let text = '';
     text += `Module:     ${[...info.modules].join(', ')}\n`;
     text += `License:    ${info.licenses}\n`;
     if (info.publisher && info.email)
@@ -147,14 +147,17 @@ for (let info of resolved) {
         text += `Repository: ${info.repository}\n`;
     if (info.url)
         text += `URL:        ${info.url}\n`;
-    text += `License text:\n${info.licenseText}\n`;
+    text += `\n${info.licenseText.trim()}\n`;
+    textChunks.push(text);
 }
 
+let finalText = textChunks.join('\n===============================================================================\n\n');
+
 if (!outputFile.toLocaleLowerCase().endsWith('.txt')) {
-    text = `
+    finalText = `
     <html><body><pre>
     ${
-    text.replace(/&/g, '&amp;')
+    finalText.replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;')
         .replace(/</g, '&lt;')
@@ -163,7 +166,7 @@ if (!outputFile.toLocaleLowerCase().endsWith('.txt')) {
     `;
 }
 
-fs.writeFileSync(outputFile, text);
+fs.writeFileSync(outputFile, finalText);
 
 function assign(info: LicenseCheckerEntry, file: string) {
     if (info.resolved) {

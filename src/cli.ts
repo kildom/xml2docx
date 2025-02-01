@@ -162,17 +162,17 @@ function addCallbacks(options: Options, debug: boolean) {
                 fileName = fileName.substring(0, fileName.length - 5);
             }
             switch (type) {
-                case 'data':
-                    fileName += '.debug.json';
-                    break;
-                case 'rendered':
-                case 'normalized':
-                case 'processed':
-                    fileName += `.debug.${type}.doctml`;
-                    break;
-                default:
-                    fileName += `.debug.${type}.dat`;
-                    break;
+            case 'data':
+                fileName += '.debug.json';
+                break;
+            case 'rendered':
+            case 'normalized':
+            case 'processed':
+                fileName += `.debug.${type}.doctml`;
+                break;
+            default:
+                fileName += `.debug.${type}.dat`;
+                break;
             }
             fs.writeFileSync(fileName, content);
         };

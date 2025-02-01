@@ -18,9 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import * as docx from 'docx';
-
 import { renderTemplate } from './template';
 import { DocTMLError, DebugFileType } from './common';
 import { Context } from './context';
@@ -28,7 +26,7 @@ import { normalize, parse, stringify } from './xml';
 import { rootTag } from './tags/root';
 import { TranslatorState } from './translator';
 
-export { DocTMLError, DebugFileType }
+export { DocTMLError, DebugFileType };
 
 export interface Options {
     input?: string;

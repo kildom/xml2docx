@@ -1,5 +1,5 @@
 /*!
- * Copyright 2023 Dominik Kilian
+ * Copyright 2025 Dominik Kilian
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
@@ -19,11 +19,12 @@
  */
 
 import * as docx from 'docx';
-import { Attributes, Dict } from '../common';
+import { Dict } from '../common';
 import { processChildren, TagFunction, TranslatorState } from '../translator';
 import { Element } from '../xml';
 import { fontTag } from './font';
 import { getIParagraphPropertiesOptions } from '../attrs/p-attrs';
+
 
 type HeadingLevelType = (typeof docx.HeadingLevel)[keyof typeof docx.HeadingLevel];
 

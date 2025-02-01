@@ -19,7 +19,7 @@
  */
 
 import * as sax from 'sax';
-import { Attributes, deepCopy, Dict } from './common';
+import { Attributes, deepCopy } from './common';
 import { Context } from './context';
 
 
@@ -170,18 +170,6 @@ export enum SpacesProcessing {
     PRESERVE,
     IGNORE,
     TRIM,
-}
-
-function trimSpacesAndNewLines(text: string) {
-    return text.replace(/(?:^[ \r\n]*|[ \r\n]*$)/g, '');
-}
-
-function trimStartSpacesAndNewLines(text: string) {
-    return text.replace(/^[ \r\n]*/, '');
-}
-
-function trimEndSpacesAndNewLines(text: string) {
-    return text.replace(/[ \r\n]*$/, '');
 }
 
 /*

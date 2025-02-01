@@ -18,7 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Element } from "./xml";
+import { Element } from './xml';
+
 
 export type Dict<T> = { [key: string]: T };
 export type AnyObject = Dict<any>;
