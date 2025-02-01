@@ -83,6 +83,59 @@ function printUsage(failed?: string): void {
 }
 
 
+function printLicense(): void {
+    if (!fs.existsSync(__dirname + '/license.txt')) {
+        console.error('License information not found.');
+        console.error('Probably you running directly from sources.');
+        process.exit(1);
+    }
+    console.log(fs.readFileSync(__dirname + '/license.txt', 'utf-8'));
+}
+
+
+function printVersion(): void {
+    let loc = fs.existsSync(__dirname + '/version.json') ? '/version.json'
+        : fs.existsSync(__dirname + '/../version.json') ? '/../version.json'
+            : undefined;
+    if (!loc) {
+        console.error('Version information not found.');
+        console.error('Probably you running directly from sources.');
+    } else {
+        let info = JSON.parse(fs.readFileSync(__dirname + loc, 'utf-8')) as {
+            commit: string,
+            time: number,
+            tag: {
+                name: string,
+                commit: string,
+                time: number,
+            },
+            dirty: boolean,
+        };
+        if (info.commit !== info.tag.commit) {
+            console.log(`DocTML version ${info.commit} (${new Date(info.time * 1000).toLocaleString()})`);
+            console.log(`    based on ${info.tag.name} (${new Date(info.tag.time * 1000).toLocaleString()})`);
+        } else {
+            console.log(`DocTML version ${info.tag.name} (${new Date(info.tag.time * 1000).toLocaleString()})`);
+        }
+        if (info.dirty) {
+            console.log('    with local modifications');
+        }
+    }
+
+    if (typeof ((globalThis as any).Deno) == 'object'
+        && typeof ((globalThis as any).Deno.version) == 'object'
+        && typeof ((globalThis as any).Deno.version.deno) == 'string'
+    ) {
+        console.log(`    runtime: Deno ${(globalThis as any).Deno.version.deno} with V8 ${(globalThis as any).Deno.version.v8}`);
+    } else if (typeof (process) == 'object'
+        && typeof (process.versions) == 'object'
+        && typeof (process.versions.node) == 'string'
+    ) {
+        console.log(`    runtime: Node.js ${process.version} with V8 ${process.versions.v8}`);
+    }
+}
+
+
 function parseArguments() {
     let options: Options = {};
     let debug = false;
@@ -111,12 +164,10 @@ function parseArguments() {
             printUsage();
             process.exit(0);
         } else if (arg === '--license') {
-            // TODO: Printing license information
-            //console.log(getLicense());
+            printLicense();
             process.exit(0);
-        } else if (arg === '--version') {
-            // TODO: Printing version information
-            //console.log(getLicense());
+        } else if (arg === '--version' || arg === '-v') {
+            printVersion();
             process.exit(0);
         } else if (arg === '--debug') {
             debug = true;
