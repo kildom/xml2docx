@@ -58,7 +58,7 @@ function loadImage(element: Element, srcAttribute: string, dataAttribute: string
     } else if (dataValue) {
         try {
             data = convert.fromBase64(dataValue);
-        } catch (e) {
+        } catch (_) {
             element.ctx.error(`Invalid BASE-64 encoding in ${dataAttribute} attribute.`, element);
         }
     } else if (errorIfMissing) {
