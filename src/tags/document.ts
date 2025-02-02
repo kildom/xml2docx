@@ -25,6 +25,7 @@ import { headingTags } from './p';
 import { FirstConstructorParam, Mutable } from '../common';
 import { fontStyleTag } from './font-style';
 import { pStyleTag } from './p-style';
+import { tableTag } from './table';
 
 export class ObjectContainer {
     public constructor(
@@ -38,9 +39,10 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
     let list = processChildren(ts, element, {
         tags: {
             ...headingTags,
-            'fontstyle': fontStyleTag,
-            'pstyle': pStyleTag,
-        }, // TODO: Table, Header, footer, styles, and section
+            table: tableTag,
+            fontstyle: fontStyleTag,
+            pstyle: pStyleTag,
+        }, // TODO: Header, footer, and section
         implicitTag: 'p',
         removeSpaces: true,
     });
