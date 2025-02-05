@@ -21,64 +21,136 @@
 import * as fs from 'node:fs';
 import { DebugFileType, DocTMLError, generate, Options, Result } from './doctml';
 
+const linuxASCIIArt = `
+    \x1B[38;2;87;144;246m+▄\x1B[48;2;87;144;246m                \x1B[0m\x1B[38;2;87;144;246m▄\x1B[0m
+    \x1B[38;2;254;254;254m\x1B[48;2;87;144;246m           ▄      \x1B[0m
+    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m     ▂    ▟▘▂     \x1B[0m
+    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m ▂▄▆▀Ó   ▟▘ Ó▀▆▄▂ \x1B[0m
+    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m Ć▀ł▄▂  ▟▘  ▂▄ł▀Ć \x1B[0m
+    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m     Ć ▟▘   Ć     \x1B[0m
+    \x1B[38;2;254;254;254m++\x1B[48;2;7;49;128m      ▝▘          \x1B[0m
+    \x1B[38;2;7;49;128m+▀\x1B[48;2;7;49;128m                \x1B[0m\x1B[38;2;7;49;128m▀\x1B[0m
+    \x1B[38;2;130;130;130m        ▁▁\x1B[0m
+    \x1B[38;2;130;130;130m▕▔╲ ▁ ▁ ▕ ▕╲╱▏▕\x1B[0m
+    \x1B[38;2;130;130;130m▕▁╱▕ ▏▏ ▕ ▕  ▏▕▁▁\x1B[0m
+    \x1B[38;2;130;130;130m    ▔ ▔\x1B[0m
+    `
+    .replace(/Ó/g, '\x1B[48;2;254;254;254m\x1B[38;2;21;101;243m▆\x1B[38;2;254;254;254m\x1B[48;2;21;101;243m')
+    .replace(/Ć/g, '\x1B[48;2;254;254;254m\x1B[38;2;10;74;189m▆\x1B[38;2;254;254;254m\x1B[48;2;10;74;189m')
+    .replace(/ł/g, '\x1B[48;2;254;254;254m\x1B[38;2;10;74;189m▂\x1B[38;2;254;254;254m\x1B[48;2;10;74;189m')
+    ;
+
+const macASCIIArt = `
+    \x1B[38;5;111m▄\x1B[48;5;111m                \x1B[0m\x1B[38;5;111m▄\x1B[0m
+    \x1B[38;5;15m+\x1B[48;5;111m           ▄      \x1B[0m
+    \x1B[38;5;15m++\x1B[48;5;33m     ▂    ▟▘▂     \x1B[0m
+    \x1B[38;5;15m++\x1B[48;5;33m ▂▄▆▀Ó   ▟▘ Ó▀▆▄▂ \x1B[0m
+    \x1B[38;5;15m++\x1B[48;5;26m Ć▀ł▄▂  ▟▘  ▂▄ł▀Ć \x1B[0m
+    \x1B[38;5;15m++\x1B[48;5;26m     Ć ▟▘   Ć     \x1B[0m
+    \x1B[38;5;15m++\x1B[48;5;25m      ▝▘          \x1B[0m
+    \x1B[38;5;25m▀\x1B[48;5;25m                \x1B[0m\x1B[38;5;25m▀\x1B[0m
+    \x1B[38;5;247m        ▁▁\x1B[0m
+    \x1B[38;5;247m▕▔╲ ▁ ▁ ▕ ▕╲╱▏▕\x1B[0m
+    \x1B[38;5;247m▕▁╱▕ ▏▏ ▕ ▕  ▏▕▁▁\x1B[0m
+    \x1B[38;5;247m    ▔ ▔\x1B[0m
+    `
+    .replace(/Ó/g, '\x1B[48;5;15m\x1B[38;5;33m▆\x1B[38;5;15m\x1B[48;5;33m')
+    .replace(/Ć/g, '\x1B[48;5;15m\x1B[38;5;26m▆\x1B[38;5;15m\x1B[48;5;26m')
+    .replace(/ł/g, '\x1B[48;5;15m\x1B[38;5;26m▂\x1B[38;5;15m\x1B[48;5;26m')
+    ;
+
+const winASCIIArt = `
+    \x1B[38;2;87;144;246m+▄\x1B[48;2;87;144;246m               \x1B[0m\x1B[38;2;87;144;246m▄\x1B[0m
+    \x1B[38;2;254;254;254m\x1B[48;2;87;144;246m          ▄      \x1B[0m
+    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m         ▄▀      \x1B[0m
+    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m ▄▄▀▀   ▄▀  ▀▀▄▄ \x1B[0m
+    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m ▀▀▄▄  ▄▀   ▄▄▀▀ \x1B[0m
+    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m      ▄▀         \x1B[0m
+    \x1B[38;2;254;254;254m++\x1B[48;2;7;49;128m      ▀          \x1B[0m
+    \x1B[38;2;7;49;128m+++++▀\x1B[48;2;7;49;128m               \x1B[0m\x1B[38;2;7;49;128m▀\x1B[0m
+    \x1B[38;2;130;130;130m\x1B[0m
+    \x1B[38;2;130;130;130m   D o c T M L\x1B[0m
+    `;
 
 const USAGE = `
-USAGE:
-    doctml [options] <input.xml> [output.docx]
+~USAGE:~                                                   $$
+    ~doctml [options] <input.xml> [output.docx]~           $$
+                                                         $$
+Transform an DocTML file into a docx file.               $$
+                                                         $$
+For detailed DocTML file format, please see the          $$
+documentation at: ~https://kildom.github.io/doctml/~       $$
+                                                         $$
+Options:                                                 $$
+                                                         $$
+~<input.xml>~                                              $$
+    Input DocTML file.                                   $$
 
-Transform an DocTML file into a docx file.
-
-For detailed DocTML file format, please see the documentation at
-https://kildom.github.io/doctml/
-
-Options:
-
-<input.xml>
-    Input DocTML file.
-
-[output.docx]
+~[output.docx]~
     Output document. By default, it is <input> with the ".docx" extension.
 
--d <data.json>
---data <data.json>
+~-d <data.json>~
+~--data <data.json>~
     Interpret the input file as a template and use the <data.json> file for
     template input data.
-    CAUTION! ACTIVATING THIS OPTION WILL PERMIT THE EXECUTION OF ARBITRARY
+    ~~CAUTION!~~ ACTIVATING THIS OPTION WILL PERMIT THE EXECUTION OF ARBITRARY
              CODE FROM THE <input.xml> FILE WITHOUT LIMITATIONS. USE ONLY
              DOCTML FILES FROM A TRUSTED SOURCE.
 
---docx.js
+~--docx.js~
     Enable <docx.js> tags in the input file.
-    CAUTION! ACTIVATING THIS OPTION WILL PERMIT THE EXECUTION OF ARBITRARY
+    ~~CAUTION!~~ ACTIVATING THIS OPTION WILL PERMIT THE EXECUTION OF ARBITRARY
              CODE FROM THE <input.xml> FILE WITHOUT LIMITATIONS. USE ONLY
              DOCTML FILES FROM A TRUSTED SOURCE.
 
---help
+~--help~
     Show this message.
 
---version
+~--version~
     Show version information.
 
---license
+~--license~
     Show license information.
 
---debug
+~--debug~
     Dump intermediate files alongside the output after each step of
     processing and show more verbose output in case of errors. This option
     is mainly useful when debugging the template or the tool.
 
-You can use "-" as <input.xml> or <data.json> to read the file from standard
-input. You can also use "-" as [output.docx] to write result to standard output.
+You can use ~"-"~ as <input.xml> or <data.json> to read the file from standard
+input. You can also use ~"-"~ as [output.docx] to write result to standard output.
 `;
 
 
 function printUsage(failed?: string): void {
+    let text;
+    if (process.stdout.isTTY && !failed) {
+        let highlight = false;
+        let aaText = process.platform.startsWith('win') ? winASCIIArt
+            : process.platform.startsWith('darwin') ? macASCIIArt
+                : linuxASCIIArt;
+        let aaLines = aaText
+            .split('\n')
+            .map(x => x.trim().replace(/\+/g, ''))
+            .filter(x => x.length > 0)
+            ;
+        text = USAGE
+            .replace(/~~/g, () => { highlight = !highlight; return highlight ? '\x1B[33m' : '\x1B[0m'; })
+            .replace(/~/g, () => { highlight = !highlight; return highlight ? '\x1B[38;2;87;144;246m' : '\x1B[0m'; })
+            .replace(/\$\$/g, () => aaLines.shift() ?? '')
+            ;
+    } else {
+        text = USAGE
+            .replace(/~/g, '')
+            .replace(/ *\$\$/g, '')
+            ;
+    }
     if (failed) {
         console.error('\n' + failed);
-        console.log(USAGE);
+        console.log(text);
         process.exit(3);
     } else {
-        console.log(USAGE);
+        console.log(text);
     }
 }
 
@@ -143,7 +215,7 @@ function parseArguments() {
     let args = process.argv.slice(2);
     if (args.length === 0) {
         printUsage();
-        process.exit(0);
+        process.exit(1);
     }
     for (let i = 0; i < args.length; i++) {
         let arg = args[i];
@@ -213,17 +285,17 @@ function addCallbacks(options: Options, debug: boolean) {
                 fileName = fileName.substring(0, fileName.length - 5);
             }
             switch (type) {
-            case 'data':
-                fileName += '.debug.json';
-                break;
-            case 'rendered':
-            case 'normalized':
-            case 'processed':
-                fileName += `.debug.${type}.doctml`;
-                break;
-            default:
-                fileName += `.debug.${type}.dat`;
-                break;
+                case 'data':
+                    fileName += '.debug.json';
+                    break;
+                case 'rendered':
+                case 'normalized':
+                case 'processed':
+                    fileName += `.debug.${type}.doctml`;
+                    break;
+                default:
+                    fileName += `.debug.${type}.dat`;
+                    break;
             }
             fs.writeFileSync(fileName, content);
         };

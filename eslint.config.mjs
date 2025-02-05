@@ -54,7 +54,8 @@ export default [
                     'varsIgnorePattern': '^_',
                     'caughtErrorsIgnorePattern': '^_'
                 }
-            ]
+            ],
+            'no-control-regex': false,
         },
     },
 ];
