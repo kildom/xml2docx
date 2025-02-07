@@ -18,6 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import * as docx from 'docx';
 import { PositiveUniversalMeasure, UniversalMeasure } from 'docx';
 import { Dict } from './common';
 import { Element } from './xml';
@@ -548,6 +549,84 @@ const colorTable: Dict<string> = {
     'whitesmoke': '#F5F5F5',
     'yellow': '#FFFF00',
     'yellowgreen': '#9ACD32',
+};
+
+// #endregion
+
+
+// #region Paper sizes
+
+export const paperSizes: Dict<[docx.PositiveUniversalMeasure, docx.PositiveUniversalMeasure]> = {
+    A0: ['841mm', '1189mm'],
+    A1: ['594mm', '841mm'],
+    A2: ['420mm', '594mm'],
+    A3: ['297mm', '420mm'],
+    A4: ['210mm', '297mm'],
+    A5: ['148mm', '210mm'],
+    A6: ['105mm', '148mm'],
+    A7: ['74mm', '105mm'],
+    A8: ['52mm', '74mm'],
+    A9: ['37mm', '52mm'],
+    A10: ['26mm', '37mm'],
+    B0: ['1000mm', '1414mm'],
+    B1: ['707mm', '1000mm'],
+    B2: ['500mm', '707mm'],
+    B3: ['353mm', '500mm'],
+    B4: ['250mm', '353mm'],
+    B5: ['176mm', '250mm'],
+    B6: ['125mm', '176mm'],
+    B7: ['88mm', '125mm'],
+    B8: ['62mm', '88mm'],
+    B9: ['44mm', '62mm'],
+    B10: ['31mm', '44mm'],
+    C0: ['917mm', '1297mm'],
+    C1: ['648mm', '917mm'],
+    C2: ['458mm', '648mm'],
+    C3: ['324mm', '458mm'],
+    C4: ['229mm', '324mm'],
+    C5: ['162mm', '229mm'],
+    C6: ['114mm', '162mm'],
+    C7: ['81mm', '114mm'],
+    C8: ['57mm', '81mm'],
+    C9: ['40mm', '57mm'],
+    C10: ['28mm', '40mm'],
+    JB0: ['1030mm', '1456mm'],
+    JB1: ['728mm', '1030mm'],
+    JB2: ['515mm', '728mm'],
+    JB3: ['364mm', '515mm'],
+    JB4: ['257mm', '364mm'],
+    JB5: ['182mm', '257mm'],
+    JB6: ['128mm', '182mm'],
+    JB7: ['91mm', '128mm'],
+    JB8: ['64mm', '91mm'],
+    JB9: ['45mm', '64mm'],
+    JB10: ['32mm', '45mm'],
+    DL: ['110mm', '220mm'],
+    DLEnvelope: ['110mm', '220mm'],
+    C6C5: ['114mm', '229mm'],
+    C7C6: ['81mm', '162mm'],
+    Letter: ['8.5in', '11in'],
+    Legal: ['8.5in', '14in'],
+    Tabloid: ['11in', '17in'],
+    Ledger: ['17in', '11in'],
+    JuniorLegal: ['5in', '8in'],
+    HalfLetter: ['5.5in', '8.5in'],
+    GovernmentLetter: ['8in', '10.5in'],
+    GovernmentLegal: ['8.5in', '13in'],
+    LongBond: ['8.5in', '13in'],
+    ANSIA: ['8.5in', '11in'],
+    ANSIB: ['11in', '17in'],
+    ANSIC: ['17in', '22in'],
+    ANSID: ['22in', '34in'],
+    ANSIE: ['34in', '44in'],
+    ArchA: ['9in', '12in'],
+    ArchB: ['12in', '18in'],
+    ArchC: ['18in', '24in'],
+    ArchD: ['24in', '36in'],
+    ArchE: ['36in', '48in'],
+    ArchE1: ['30in', '42in'],
+    ArchE2: ['26in', '38in'],
+    ArchE3: ['27in', '39in'],
 };
 
 // #endregion

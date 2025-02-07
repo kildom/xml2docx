@@ -26,10 +26,12 @@ import { FirstConstructorParam, Mutable } from '../common';
 import { fontStyleTag } from './font-style';
 import { pStyleTag } from './p-style';
 import { tableTag } from './table';
+import { headerFooterTag, sectionTag } from './section';
+import { HeaderFooterPage } from '../enums';
 
 export class ObjectContainer {
     public constructor(
-        public type: 'ISectionOptions' | 'IParagraphStyleOptions' | 'ICharacterStyleOptions',
+        public type: 'ISectionOptions' | 'IParagraphStyleOptions' | 'ICharacterStyleOptions' | 'default' | 'even' | 'first',
         public value: any
     ) { }
 }
@@ -42,14 +44,17 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
             table: tableTag,
             fontstyle: fontStyleTag,
             pstyle: pStyleTag,
-        }, // TODO: Header, footer, and section
+            section: sectionTag,
+            header: headerFooterTag,
+            footer: headerFooterTag,
+        },
         implicitTag: 'p',
         removeSpaces: true,
     });
 
     let attributes = element.attributes;
 
-    let sections: docx.ISectionOptions[] = [];
+    let sections: Mutable<docx.ISectionOptions>[] = [];
     let paragraphStyles: docx.IParagraphStyleOptions[] = [];
     let characterStyles: docx.ICharacterStyleOptions[] = [];
     let children: Mutable<docx.ISectionOptions['children']> = [];
@@ -83,20 +88,57 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
                 paragraphStyles.push(obj.value);
             } else if (obj.type === 'ICharacterStyleOptions') {
                 characterStyles.push(obj.value);
+            } else if ((obj.value instanceof docx.Header) || (obj.value instanceof docx.Footer)) {
+                addHeaderFooterToSection(sections.at(-1)!, obj.value, obj.type as HeaderFooterPage);
             }
         } else {
             if (sections.length === 0) {
                 children = [];
                 sections.push({ children });
             }
-            if ((obj instanceof docx.Header) || (obj instanceof docx.Footer)) {
-                //addHeaderFooterToSection(sections.at(-1) as Mutable<docx.ISectionOptions>, obj);
-            } else {
-                children.push(obj);
-            }
+            children.push(obj);
         }
     }
 
     return new docx.Document(options);
 }
 
+
+function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: docx.Header | docx.Footer,
+    page: HeaderFooterPage
+) {
+    let isFooter = obj instanceof docx.Footer;
+    if (isFooter) {
+        let footers = (section.footers || {}) as Mutable<Exclude<typeof section.footers, undefined>>;
+        section.footers = footers;
+        switch (page) {
+        case HeaderFooterPage.DEFAULT:
+            footers.default = obj;
+            break;
+        case HeaderFooterPage.EVEN:
+            footers.even = obj;
+            break;
+        case HeaderFooterPage.FIRST:
+            section.properties = section.properties || {};
+            (section.properties as Mutable<typeof section.properties>).titlePage = true;
+            footers.first = obj;
+            break;
+        }
+    } else {
+        let headers = (section.headers || {}) as Mutable<Exclude<typeof section.headers, undefined>>;
+        section.headers = headers;
+        switch (page) {
+        case HeaderFooterPage.DEFAULT:
+            headers.default = obj;
+            break;
+        case HeaderFooterPage.EVEN:
+            headers.even = obj;
+            break;
+        case HeaderFooterPage.FIRST:
+            section.properties = section.properties || {};
+            (section.properties as Mutable<typeof section.properties>).titlePage = true;
+            headers.first = obj;
+            break;
+        }
+    }
+}

@@ -55,7 +55,7 @@ export default [
                     'caughtErrorsIgnorePattern': '^_'
                 }
             ],
-            'no-control-regex': false,
+            'no-control-regex': 'off',
         },
     },
 ];

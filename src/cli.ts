@@ -137,13 +137,11 @@ function printUsage(failed?: string): void {
         text = USAGE
             .replace(/~~/g, () => { highlight = !highlight; return highlight ? '\x1B[33m' : '\x1B[0m'; })
             .replace(/~/g, () => { highlight = !highlight; return highlight ? '\x1B[38;2;87;144;246m' : '\x1B[0m'; })
-            .replace(/\$\$/g, () => aaLines.shift() ?? '')
-            ;
+            .replace(/\$\$/g, () => aaLines.shift() ?? '');
     } else {
         text = USAGE
             .replace(/~/g, '')
-            .replace(/ *\$\$/g, '')
-            ;
+            .replace(/ *\$\$/g, '');
     }
     if (failed) {
         console.error('\n' + failed);
@@ -285,17 +283,17 @@ function addCallbacks(options: Options, debug: boolean) {
                 fileName = fileName.substring(0, fileName.length - 5);
             }
             switch (type) {
-                case 'data':
-                    fileName += '.debug.json';
-                    break;
-                case 'rendered':
-                case 'normalized':
-                case 'processed':
-                    fileName += `.debug.${type}.doctml`;
-                    break;
-                default:
-                    fileName += `.debug.${type}.dat`;
-                    break;
+            case 'data':
+                fileName += '.debug.json';
+                break;
+            case 'rendered':
+            case 'normalized':
+            case 'processed':
+                fileName += `.debug.${type}.doctml`;
+                break;
+            default:
+                fileName += `.debug.${type}.dat`;
+                break;
             }
             fs.writeFileSync(fileName, content);
         };
