@@ -266,11 +266,14 @@ function addCallbacks(options: Options, debug: boolean) {
     };
 
     options.writeFile = (result: Result, content: Uint8Array) => {
-        fs.writeFileSync(
-            result.outputFile === '-'
-                ? process.stdout.fd
-                : (result.outputFile ?? 'doctml-output.docx'),
-            content);
+        let nameOrFd: string | number = result.outputFile;
+        if (!nameOrFd || nameOrFd[0] === ':') {
+            nameOrFd = 'doctml-output.docx';
+        }
+        if (nameOrFd === '-') {
+            nameOrFd = process.stdout.fd;
+        }
+        fs.writeFileSync(nameOrFd, content);
     };
 
     if (debug) {

@@ -62,6 +62,8 @@ export class Context implements Result {
                 pathParts[pathParts.length - 1] = nameParts.join('.');
                 this.outputFile = pathParts.join('');
             }
+        } else {
+            this.outputFile = options.outputFile;
         }
 
         // Read input if just file name given.

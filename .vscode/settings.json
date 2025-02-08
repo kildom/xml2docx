@@ -21,5 +21,6 @@
             "iconColour": "#808080",
             "type": "text"
         }
-    }
+    },
+    "typescript.format.indentSwitchCase": false
 }
