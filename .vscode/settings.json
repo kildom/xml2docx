@@ -22,5 +22,6 @@
             "type": "text"
         }
     },
-    "typescript.format.indentSwitchCase": false
+    "typescript.format.indentSwitchCase": false,
+    "files.eol": "\r\n"
 }

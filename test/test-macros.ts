@@ -1,4 +1,7 @@
 
+// TODO: If implemented, test it more like "test-template.ts".
+
+/*
 import * as fs from 'node:fs';
 
 import { resolveAliases } from '../src/aliases';
@@ -39,3 +42,4 @@ let document = parse(input, true, true);
 fs.writeFileSync('pass1.xml', stringify(document, true));
 resolveAliases(document);
 fs.writeFileSync('pass2.xml', stringify(document, true));
+*/

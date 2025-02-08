@@ -1,6 +1,6 @@
 
 import * as fs from 'node:fs';
-import { Options, Result, generate } from '../src/doctml';
+import { Options, generate } from '../src/doctml';
 import assert from 'node:assert';
 
 class EndOfTestIsNotAnError extends Error {
@@ -43,7 +43,7 @@ async function test() {
 
             if (ok) {
                 let output = (result.errors[0].sourceError as EndOfTestIsNotAnError).result.trim();
-                assert(expected !== 'ERROR', `Expecting exception\nGot output:\n${output}`)
+                assert(expected !== 'ERROR', `Expecting exception\nGot output:\n${output}`);
                 if (output !== expected) {
                     for (let pos = 0; pos <= Math.min(output.length, expected.length); pos++) {
                         if (output[pos] !== expected[pos]) {
