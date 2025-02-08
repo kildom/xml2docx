@@ -91,7 +91,23 @@ export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: A
     let margin = getMargin(attributes.margin,
         (value, mode) => filterLengthUint(value, LengthUnits.emu, mode)
     );
+    let type: 'jpg' | 'png' | 'gif' | 'bmp' = 'png';
+    if (attributes.type) {
+        type = fromEnum(attributes.type, { 'jpg': 'jpg', 'png': 'png', 'gif': 'gif', 'bmp': 'bmp' }, { 'jpeg': 'jpg' }, false) as any;
+    } else if (attributes.src) {
+        let name = attributes.src.toLowerCase();
+        if (name.endsWith('.jpg') || name.endsWith('.jpeg')) {
+            type = 'jpg';
+        } else if (name.endsWith('.png')) {
+            type = 'png';
+        } else if (name.endsWith('.gif')) {
+            type = 'gif';
+        } else if (name.endsWith('.bmp')) {
+            type = 'bmp';
+        }
+    }
     let options: docx.IImageOptions = {
+        type,
         //* Image source path. An absolute path or a path relative to main input file.
         data: attributes.src ? tr.filter(':file', attributes.src)
             //* Raw image data in BASE-64 encoding.

@@ -2,7 +2,7 @@
   "dependencies": {
     "@blueprintjs/core": "^5.5.1",
     "@blueprintjs/icons": "^5.2.1",
-    "docx": "^8.2.3",
+    "docx": "^9.1.1",
     "json5": "^2.2.3",
     "monaco-editor": "^0.44.0",
     "normalize.css": "^8.0.1",
