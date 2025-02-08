@@ -93,7 +93,11 @@ export function imgTag(tr: DocxTranslator, attributes: Attributes, properties: A
     );
     let type: 'jpg' | 'png' | 'gif' | 'bmp' = 'png';
     if (attributes.type) {
-        type = fromEnum(attributes.type, { 'jpg': 'jpg', 'png': 'png', 'gif': 'gif', 'bmp': 'bmp' }, { 'jpeg': 'jpg' }, false) as any;
+        type = fromEnum(
+            attributes.type,
+            { 'jpg': 'jpg', 'png': 'png', 'gif': 'gif', 'bmp': 'bmp' },
+            { 'jpeg': 'jpg' },
+            false) as any;
     } else if (attributes.src) {
         let name = attributes.src.toLowerCase();
         if (name.endsWith('.jpg') || name.endsWith('.jpeg')) {

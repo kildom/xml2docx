@@ -119,3 +119,4 @@ export type Mutable<T> = {
     -readonly [P in keyof T]: T[P];
 };
 
+export type FirstConstructorParam<T> = T extends new (arg1: infer P, ...args: any[]) => any ? P : never;

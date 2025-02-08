@@ -18,12 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { FileChild } from 'docx/build/file/file-child';
 import { DocxTranslator } from '../docxTranslator';
 import { SpacesProcessing } from '../xml';
 import * as docx from 'docx';
-import { IPropertiesOptions } from 'docx/build/file/core-properties';
-import { AnyObject, Attributes, Mutable, getTag, isTag, setTag } from '../common';
+import { AnyObject, Attributes, FirstConstructorParam, Mutable, getTag, isTag, setTag } from '../common';
 import { fromEnum } from '../filters';
 import { HeaderFooterPage } from '../enums';
 import { createDummyParagraph } from './paragraph';
@@ -73,8 +71,8 @@ export function documentTag(tr: DocxTranslator, attributes: Attributes, properti
     let sections: docx.ISectionOptions[] = [];
     let paragraphStyles: docx.IParagraphStyleOptions[] = [];
     let characterStyles: docx.ICharacterStyleOptions[] = [];
-    let children: FileChild[] = [];
-    let options: IPropertiesOptions = {
+    let children: Mutable<docx.ISectionOptions['children']> = [];
+    let options: FirstConstructorParam<typeof docx.Document> = {
         sections: sections,
         //* Title in document properties.
         title: attributes.title,
