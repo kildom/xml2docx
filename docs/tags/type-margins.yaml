@@ -1,0 +1,8 @@
+- type-name: margins
+  value: top right bottom left
+  details: |
+    Each margin is a [positive length](#positive-length) value.
+     - **top** - Top margin.
+     - **right** - Right margin. By default, the same as top.
+     - **bottom** - Bottom margin. By default, the same as top.
+     - **left** - Left margin. By default, the same as right.

@@ -1,0 +1,23 @@
+- tag-name: document
+  brief: Root document element.
+  children: [ section, header, footer, p-style, font-style, table, p ]
+  implicit: p
+  attributes:
+    title:
+      type: str
+      brief: Title in document properties.
+    subject:
+      type: str
+      brief: Subject in document properties.
+    creator:
+      type: str
+      brief: Creator name in document properties.
+    keywords:
+      type: str
+      brief: Keywords in document properties.
+    description:
+      type: str
+      brief: Description in document properties.
+    last-modified-by:
+      type: str
+      brief: Last modified by name in document properties.

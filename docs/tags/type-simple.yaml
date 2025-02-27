@@ -1,0 +1,18 @@
+
+- type-name: length
+  value: '[length](#length)'
+
+- type-name: positive-length
+  value: '[positive length](#positive-length)'
+
+- type-name: int
+  value: integer
+
+- type-name: uint
+  value: unsigned integer
+
+- type-name: bool
+  value: '[boolean](#boolean)'
+
+- type-name: str
+  value: 'string'

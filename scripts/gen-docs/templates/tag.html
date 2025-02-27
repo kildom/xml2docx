@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><% tag.name %> tag</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
+
+        body {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+
+        }
+        
+        #content {
+            margin: 0px auto;
+            max-width: 900px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Rosarivo", serif;
+            font-weight: bold;
+        }
+
+        code {
+            font-family: monospace;
+            font-size: 90%;
+            background-color: #f4f4f4;
+            border: 1px solid #e2e2e2;
+            border-radius: 2px;
+            padding: 1px 3px;
+        }
+
+        table.attr-tab {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.attr-tab>tbody>tr:nth-child(4n + 1), table.attr-tab>tbody>tr:nth-child(4n + 2) {
+            background-color: #f4f4f4;
+        }
+
+        table.attr-tab>tbody>tr:last-child>td {
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        td.attr-tab-name {
+            font-weight: bold;
+            border-top: 1px solid #e2e2e2;
+            border-left: 1px solid #e2e2e2;
+            padding: 5px 5px 5px 10px;
+            width: 0;
+            white-space: nowrap;
+        }
+
+        td.attr-tab-name a {
+            text-decoration: none;
+            color: #293787;
+        }
+
+        td.attr-tab-value {
+            border-top: 1px solid #e2e2e2;
+            border-right: 1px solid #e2e2e2;
+            padding: 5px;
+            color: #a4a4a4;
+        }
+
+        td.attr-tab-value a {
+            color: #738ea4;
+        }
+
+        td.attr-tab-brief {
+            border-right: 1px solid #e2e2e2;
+            border-left: 1px solid #e2e2e2;
+            padding: 5px 5px 5px 100px;
+        }
+
+        td.attr-tab-brief a {
+            color: #293787;
+        }
+
+        span.conditional, span.required, span.optional {
+            font-family: "Roboto", sans-serif;
+            display: inline;
+            font-size: 12px;
+            background-color: #f4f4f4;
+            border: 1px solid #e2e2e2;
+            border-radius: 2px;
+            padding: 1px 3px;
+            font-weight: normal;
+            color: #888;
+        }
+
+        span.conditional>span:first-child {
+            display: none;
+        }
+
+        span.conditional:hover>span:first-child {
+            display: inline-block;
+            position: absolute;
+        }
+
+        span.conditional:hover>span:first-child>span {
+            color: black;
+            display: block;
+            position: relative;
+            top: 19px;
+            left: -20px;
+            width: 180px;
+            border: 1px solid #777777;
+            border-radius: 7px;
+            background-color: #f4f4f4;
+            padding: 10px 16px;
+            box-shadow: 2px 2px 5px #0000004d;
+        }
+
+        div.attr-brief, div.attr-details {
+            padding-left: 40px;
+        }
+
+        h3.attr {
+            background-color: #eef4f9;
+            border-bottom: 1px solid #b8cee0;
+            padding: 7px 13px 4px;
+            margin: 35px 0px 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="content">
+
+    <h1>&lt;<% tag.name %>&gt;</h1>
+
+    <div class="brief">
+        <%= markdownWithParagraphs(tag.brief) %>
+    </div>
+
+    <%! if (tag.details) { %>
+        <div class="details">
+            <%= markdownWithParagraphs(tag.details) %>
+        </div>
+    <%! } %>
+
+    <%! if (tag.attributes) { %>
+        <h2>Attributes summary</h2>
+        <table class="attr-tab" cellspacing="0" cellpadding="0">
+            <%! for (attr of tag.attributes) { %>
+                <tr>
+                    <td class="attr-tab-name"><a href="#tag-<% tag.name %>-attr-<% attr.name %>"><% attr.name %></a></td>
+                    <td class="attr-tab-value">= "<%= markdown(attr.value) %>"
+                    <%! if (!attr.required) { %>
+                        <span class="optional">Optional</span>
+                    <%! } else if (attr.required === true) { %>
+                        <span class="required">Required</span>
+                    <%! } else { %>
+                        <span class="conditional"><span><span><%= markdown(attr.required) %></span></span>Conditionally required</span>
+                    <%! } %>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="attr-tab-brief" colspan="2"><%= markdown(attr.brief) %>
+                        <%! if (attr.details) { %>
+                            <a href="#tag-<% tag.name %>-attr-<% attr.name %>">More...</a>
+                        <%! } %>
+                        </td>
+                </tr>
+            <%! } %>
+        </table>
+    <%! } %>
+
+    <h2>Allowed parents</h2>
+
+    TODO: Table with allowed parent elements and its brief description.
+    TODO: It should also contains allowed over implicit elements (separated from the rest).
+
+    <h2>Allowed children</h2>
+
+    TODO: Table with allowed child elements and its brief description.
+    TODO: It should also contains allowed over implicit elements (separated from the rest).
+
+    <%! if (tag.attributes) { %>
+        <h2>Attributes details</h2>
+        <%! for (attr of tag.attributes) { %>
+            <h3 id="tag-<% tag.name %>-attr-<% attr.name %>" class="attr"><% attr.name %> = "<%= markdown(attr.value) %>"
+            <%! if (!attr.required) { %>
+                <span class="optional">Optional</span>
+            <%! } else if (attr.required === true) { %>
+                <span class="required">Required</span>
+            <%! } else { %>
+                <span class="conditional"><span><span><%= markdown(attr.required) %></span></span>Conditionally required</span>
+            <%! } %></h3>
+            <div class="attr-brief">
+                <%= markdownWithParagraphs(attr.brief) %>
+            </div>        
+            <%! if (attr.details) { %>
+                <div class="attr-details">
+                    <%= markdownWithParagraphs(attr.details) %>
+                </div>
+            <%! } %>
+        <%! } %>
+    <%! } %>
+
+    </div>
+</body>
+</html>
