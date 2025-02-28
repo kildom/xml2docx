@@ -173,7 +173,7 @@ showdown.extension('gitHubAlerts', function () {
     let myext5 = {
         type: 'output',
         regex: /@(optional|required)/g,
-        replace: (m0, text) => `<div class="${text}">${text[0].toUpperCase() + text.substring(1)}</div>`,
+        replace: (m0, text) => `<span class="${text}">${text[0].toUpperCase() + text.substring(1)}</span>`,
     };
     let myext6 = {
         type: 'lang',

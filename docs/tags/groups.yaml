@@ -1,0 +1,13 @@
+
+- group-name: -leaf-tags-
+  tags:
+    - TEXT
+    - CDATA
+    - img
+    - br
+    - tab
+    - space
+    - pagenumber
+    - totalpages
+    - pagebreak
+    - vwnbsp

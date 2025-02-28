@@ -1,0 +1,62 @@
+
+- tag-name: b
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Bold text.
+  details: Besides making text bold, it takes the same attributes as `<font>` tag.
+  combine: -formatting-attributes-
+  attributes:
+    - bold:
+      type: bool
+      brief: Bold text.
+      details: In `<b>` tag, this attribute is `true` by default.
+
+- tag-name: i
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Italic text.
+  details: Besides making text italic, it takes the same attributes as `<font>` tag.
+  combine: -formatting-attributes-
+  attributes:
+    - italics:
+      type: bool
+      brief: Italic text.
+      details: In `<i>` tag, this attribute is `true` by default.
+
+- tag-name: u
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Underline text.
+  details: Besides adding underline below text, it takes the same attributes as `<font>` tag.
+  combine: -formatting-attributes-
+  attributes:
+    - underline:
+      value: type color
+      brief: Underline text.
+      details: |
+        In `<u>` tag, this attribute is `single` by default which makes single underline of color the same as the text.
+        See `underline` attribute in [`<img>`](img.html#tag-font-attr-underline) tag for details.
+
+- tag-name: s
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Line through text.
+  details: Besides adding underline below text, it takes the same attributes as `<font>` tag.
+  combine: -formatting-attributes-
+  attributes:
+    - strike:
+      type: bool
+      brief: Strike through text.
+      details: In `<s>` tag, this attribute is `true` by default.
+
+- tag-name: span
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Alias of `<font>`.
+  combine: -formatting-attributes-
+
+- group-name: -formatting-tags-
+  tags:
+    - font
+    - span
+    - b
+    - i
+    - s
+    - u
+    - sub
+    - sup
