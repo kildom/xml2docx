@@ -1,0 +1,22 @@
+- tag-name: header
+  brief: Page header.
+  combine: [ -header-footer- ]
+
+- tag-name: footer
+  brief: Page footer.
+  combine: [ -header-footer- ]
+
+- tag-name: -header-footer-
+  children: [ p ]
+  implicit: p
+  details: |
+    It is associated with the section.
+    If you create a new section, you have to define it again for that section.
+  attributes:
+    page:
+      value: context
+      brief: Where it is applied.
+      details: |
+        - `even` - Show it on even pages only.
+        - `first` - Show it on the first page of the section. It will automatically set `<section title-page=""` attribute.
+        - `default` - Show if none of above is defined.

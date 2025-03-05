@@ -1,11 +1,19 @@
 
+- tag-name: font
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Change text style.
+  details: |
+    This tag is used to change text style.
+    It can be used to change font, size, color, and other text attributes.
+  combine: [ -formatting-attributes- ]
+
 - tag-name: b
   children: [ -formatting-tags-, -leaf-tags- ]
   brief: Bold text.
   details: Besides making text bold, it takes the same attributes as `<font>` tag.
-  combine: -formatting-attributes-
+  combine: [ -formatting-attributes- ]
   attributes:
-    - bold:
+    bold:
       type: bool
       brief: Bold text.
       details: In `<b>` tag, this attribute is `true` by default.
@@ -14,9 +22,9 @@
   children: [ -formatting-tags-, -leaf-tags- ]
   brief: Italic text.
   details: Besides making text italic, it takes the same attributes as `<font>` tag.
-  combine: -formatting-attributes-
+  combine: [ -formatting-attributes- ]
   attributes:
-    - italics:
+    italics:
       type: bool
       brief: Italic text.
       details: In `<i>` tag, this attribute is `true` by default.
@@ -25,22 +33,23 @@
   children: [ -formatting-tags-, -leaf-tags- ]
   brief: Underline text.
   details: Besides adding underline below text, it takes the same attributes as `<font>` tag.
-  combine: -formatting-attributes-
+  combine: [ -formatting-attributes- ]
   attributes:
-    - underline:
+    underline:
       value: type color
       brief: Underline text.
       details: |
         In `<u>` tag, this attribute is `single` by default which makes single underline of color the same as the text.
-        See `underline` attribute in [`<img>`](img.html#tag-font-attr-underline) tag for details.
+
+        See `<font underline=""` attribute for details.
 
 - tag-name: s
   children: [ -formatting-tags-, -leaf-tags- ]
   brief: Line through text.
   details: Besides adding underline below text, it takes the same attributes as `<font>` tag.
-  combine: -formatting-attributes-
+  combine: [ -formatting-attributes- ]
   attributes:
-    - strike:
+    strike:
       type: bool
       brief: Strike through text.
       details: In `<s>` tag, this attribute is `true` by default.
@@ -48,7 +57,7 @@
 - tag-name: span
   children: [ -formatting-tags-, -leaf-tags- ]
   brief: Alias of `<font>`.
-  combine: -formatting-attributes-
+  combine: [ -formatting-attributes- ]
 
 - group-name: -formatting-tags-
   tags:
@@ -60,3 +69,75 @@
     - u
     - sub
     - sup
+
+- tag-name: -formatting-attributes-
+  attributes:
+    bold:
+      type: bool
+      brief: Bold text.
+    italics:
+      type: bool
+      brief: Italic text.
+    underline:
+      value: type [color](attributes.html#color)
+      brief: Underline text.
+      details: |
+        - **type** @optional - The underline type. Default is `single`.
+            @enum UnderlineType
+        - **color** @optional - The underline color. Default is the same as the text color.
+    strike:
+      type: bool
+      brief: Strike through text.
+
+
+- tag-name: sub
+- tag-name: sup
+- tag-name: br
+- tag-name: tab
+- tag-name: space
+- tag-name: page-break
+
+
+- tag-name: vwnbsp
+  brief: Variable width non-breaking space.
+  details: |
+    This tag adds "zero width no-break space" and "normal space" characters which
+    is workaround to achieve "variable width no-break space" in docx.
+    This is useful for justified text where normal non-breaking spaces are not stretched to fill the line.
+
+    This workaround works with a desktop Word application.
+    It will not work in browsers and probably in other applications.
+
+- tag-name: page-number
+  brief: Show page number.
+  details: Allowed only inside `<footer>` or `<header>`.
+
+- tag-name: total-pages
+  brief: Show total number of pages.
+  details: Allowed only inside `<footer>` or `<header>`.
+
+
+- tag-name: CDATA
+  brief: CDATA node containing text.
+  custom-page: |
+    # CDATA
+
+    This is node containing text.
+    You can use it if your text may contain special characters, for example:
+
+    ```
+    <![CDATA[
+      The <br> HTML element produces a line break.
+    ]]>
+    ```
+
+- tag-name: TEXT
+  brief: Text node.
+  custom-page: |
+    # TEXT
+
+    This is simple node containing text, for example:
+
+    ```
+    Hello, World!
+    ```

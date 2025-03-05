@@ -1,4 +1,13 @@
-<!DOCTYPE html>
+<%!
+
+const parentTypes = {
+    children: "Children",
+    indirectChildren: "Children allowed through implicit tag `<$$$>`",
+    parents: "Parents",
+    indirectParents: "Parents allowed through implicit tags",
+};
+
+%><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,8 +20,10 @@
             font-family: "Roboto", sans-serif;
             font-size: 15px;
             line-height: 1.5;
-
+            hyphens: none;
+            word-break: keep-all;
         }
+
         
         #content {
             margin: 0px auto;
@@ -24,13 +35,23 @@
             font-weight: bold;
         }
 
-        code {
+        code:not(.hljs) {
             font-family: monospace;
             font-size: 90%;
             background-color: #f4f4f4;
             border: 1px solid #e2e2e2;
             border-radius: 2px;
             padding: 1px 3px;
+        }
+
+        pre>code.hljs {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f4f4f4;
+            border: 1px solid #e2e2e2;
+            display: block;
+            overflow-x: auto;
+            white-space: pre;
         }
 
         table.attr-tab {
@@ -79,6 +100,50 @@
 
         td.attr-tab-brief a {
             color: #293787;
+        }
+
+        table.rel-tab {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.rel-tab>tbody>tr:nth-child(2n) {
+            background-color: #f4f4f4;
+        }
+
+        table.rel-tab>tbody>tr:last-child>td {
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        table.rel-tab>tbody>tr>td {
+            border: 1px solid #e2e2e2;
+            padding: 5px 5px 5px 10px;
+        }
+
+        td.rel-tab-name a {
+            text-decoration: none;
+            color: #293787;
+        }
+
+        td.rel-tab-brief {
+            border-right: 1px solid #e2e2e2;
+            border-left: 1px solid #e2e2e2;
+            padding: 5px;
+        }
+
+        td.rel-tab-brief a {
+            color: #293787;
+        }
+
+        td.rel-tab-title {
+            font-weight: bold;
+            font-size: 110%;
+            background-color: #e2e2e2;
+            padding-left: 30px;
+        }
+
+        table.rel-tab>tbody>tr>td.rel-tab-title {
+            padding: 7px 5px 5px 30px;
         }
 
         span.conditional, span.required, span.optional {
@@ -133,36 +198,43 @@
 
     <div id="content">
 
+    <%! if (tag.customPage) { %>
+
+        <%= markdownToHtml(tag.customPage) %>
+
+    <%! } else { %>
+
     <h1>&lt;<% tag.name %>&gt;</h1>
 
     <div class="brief">
-        <%= markdownWithParagraphs(tag.brief) %>
+        <%= markdownToHtml(tag.brief) %>
     </div>
 
     <%! if (tag.details) { %>
         <div class="details">
-            <%= markdownWithParagraphs(tag.details) %>
+            <%= markdownToHtml(tag.details) %>
         </div>
     <%! } %>
 
-    <%! if (tag.attributes) { %>
+    <%! if (Object.keys(tag.attributes).length > 0) { %>
         <h2>Attributes summary</h2>
+
         <table class="attr-tab" cellspacing="0" cellpadding="0">
-            <%! for (attr of tag.attributes) { %>
+            <%! for (let attr of Object.values(tag.attributes)) { %>
                 <tr>
                     <td class="attr-tab-name"><a href="#tag-<% tag.name %>-attr-<% attr.name %>"><% attr.name %></a></td>
-                    <td class="attr-tab-value">= "<%= markdown(attr.value) %>"
+                    <td class="attr-tab-value">= "<%= markdownToHtml(attr.value, false) %>"
                     <%! if (!attr.required) { %>
                         <span class="optional">Optional</span>
                     <%! } else if (attr.required === true) { %>
                         <span class="required">Required</span>
                     <%! } else { %>
-                        <span class="conditional"><span><span><%= markdown(attr.required) %></span></span>Conditionally required</span>
+                        <span class="conditional"><span><span><%= markdownToHtml(attr.required, false) %></span></span>Conditionally required</span>
                     <%! } %>
                     </td>
                 </tr>
                 <tr>
-                    <td class="attr-tab-brief" colspan="2"><%= markdown(attr.brief) %>
+                    <td class="attr-tab-brief" colspan="2"><%= markdownToHtml(attr.brief, false) %>
                         <%! if (attr.details) { %>
                             <a href="#tag-<% tag.name %>-attr-<% attr.name %>">More...</a>
                         <%! } %>
@@ -170,35 +242,49 @@
                 </tr>
             <%! } %>
         </table>
+    <%! } else { %>
+        <p>The <code>&lt;<% tag.name %>&gt;</code> tag does not have any attributes.</p>
     <%! } %>
 
-    <h2>Allowed parents</h2>
+    <%! } %>
 
-    TODO: Table with allowed parent elements and its brief description.
-    TODO: It should also contains allowed over implicit elements (separated from the rest).
+    <h2>Related tags</h2>
 
-    <h2>Allowed children</h2>
+    <table class="rel-tab" cellspacing="0" cellpadding="0">
+        <%! for (let [parentTypeName, parentTypeTitle] of Object.entries(parentTypes)) { %>
+            <%! if (tag[parentTypeName].length) { %>
+                <tr>
+                    <td colspan="2" class="rel-tab-title">
+                        <%= markdownToHtml(parentTypeTitle.replace('$$$', tag.implicitChild?.name), false) %>
+                    </td>
+                </tr>
+                <%! for (let parent of tag[parentTypeName]) { %>
+                    <tr>
+                        <td class="rel-tab-name"><a href="<% parent.name %>.html">&lt;<% parent.name %>&gt;</a></td>
+                        <td class="rel-tab-brief"><%= markdownToHtml(parent.brief, false) %></td>
+                    </tr>
+                <%! } %>
+            <%! } %>
+        <%! } %>
+    </table>
 
-    TODO: Table with allowed child elements and its brief description.
-    TODO: It should also contains allowed over implicit elements (separated from the rest).
-
-    <%! if (tag.attributes) { %>
+    <%! if (Object.keys(tag.attributes).length > 0) { %>
         <h2>Attributes details</h2>
-        <%! for (attr of tag.attributes) { %>
-            <h3 id="tag-<% tag.name %>-attr-<% attr.name %>" class="attr"><% attr.name %> = "<%= markdown(attr.value) %>"
+        <%! for (let attr of Object.values(tag.attributes)) { %>
+            <h3 id="tag-<% tag.name %>-attr-<% attr.name %>" class="attr"><% attr.name %> = "<%= markdownToHtml(attr.value, false) %>"
             <%! if (!attr.required) { %>
                 <span class="optional">Optional</span>
             <%! } else if (attr.required === true) { %>
                 <span class="required">Required</span>
             <%! } else { %>
-                <span class="conditional"><span><span><%= markdown(attr.required) %></span></span>Conditionally required</span>
+                <span class="conditional"><span><span><%= markdownToHtml(attr.required, false) %></span></span>Conditionally required</span>
             <%! } %></h3>
             <div class="attr-brief">
-                <%= markdownWithParagraphs(attr.brief) %>
+                <%= markdownToHtml(attr.brief) %>
             </div>        
             <%! if (attr.details) { %>
                 <div class="attr-details">
-                    <%= markdownWithParagraphs(attr.details) %>
+                    <%= markdownToHtml(attr.details) %>
                 </div>
             <%! } %>
         <%! } %>

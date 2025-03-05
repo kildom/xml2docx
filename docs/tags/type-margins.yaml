@@ -6,3 +6,19 @@
      - **right** - Right margin. By default, the same as top.
      - **bottom** - Bottom margin. By default, the same as top.
      - **left** - Left margin. By default, the same as right.
+
+- type-name: border
+  value: top, right, bottom, left
+  details: |
+    Each side of border can be defined separately.
+    - **top** @required - Top border.
+    - **right** @optional - Right border. The same as top by default.
+    - **bottom** @optional - Bottom border. The same as top by default.
+    - **left** @optional - Left border. The same as left by default.
+
+    Each side of border is `color style size space`:
+    - **color** @optional - Border color.
+    - **style** @optional - Border style. Default is `single`.
+        @enum BorderStyle
+    - **size** @optional - Border size in [positive length](#positive-length) units.
+    - **space** @optional - Space between border and content in [positive length](#positive-length) units.

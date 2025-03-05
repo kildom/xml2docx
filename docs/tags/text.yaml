@@ -1,0 +1,8 @@
+- tag-name: br
+  brief: Line break.
+  details: |
+    Be careful when using this tag with `justify` in `<p alignment=""` attribute.
+    The text may be stretched to fill the line making the spaces between words too wide.
+  TC:
+    - Line break
+    - With justify

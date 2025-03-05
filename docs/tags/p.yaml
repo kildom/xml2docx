@@ -1,0 +1,55 @@
+- tag-name: p
+  brief: Paragraph.
+  children: [ font ]
+  implicit: font
+  details: |
+    This tag is used to create a paragraph.
+
+    You can use attributes passing to change text style of this paragraph since direct children are `<font>` tags,
+    for example:
+    ```
+    <p font.color="red">Warning!</p>
+    ```
+    This is shorter version of the following:
+    ```
+    <p><font color="red">Warning!</font></p>
+    ```
+
+    For multiple paragraphs that shares the same style, you should use the `style=""` attribute and `<p-style>` tag.
+  combine: [ -IParagraphPropertiesOptions- ]
+
+- tag-name: -IParagraphPropertiesOptions-
+  attributes:
+    align:
+      value: alignment
+      brief: Text alignment.
+      details: |
+        Possible values are:
+        @enum ParagraphAlignment
+    line-spacing:
+      value: requirement distance
+      brief: Line spacing.
+      details: |
+        - **requirement** @optional - Defines spacing if line height is greater than the specified distance.
+            - `exactly` - The line spacing is exactly the specified distance.
+            - `at-least` - The line spacing is at least the specified distance (default).
+
+        - **distance** @required - The distance between lines can be expressed in two ways:
+            - Absolute value in [positive length](#positive-length) units, e.g. `1.5cm`.
+            - Relative to line height, e.g. `1.25`.
+    indent:
+      value: left right first-line
+      brief: Paragraph indentation.
+      details: |
+        - **left** @required - Left indentation in [positive length](#positive-length) units.
+          Zero by default.
+        - **right** @optional - Right indentation in [positive length](#positive-length) units.
+          Zero by default.
+        - **first-line** @optional - First line indentation in [length](#length) units.
+          This is relative to the left indentation and it can be negative to create a hanging indent.
+          Zero by default.
+
+- enum-name: ParagraphAlignment
+  combine: [ AlignmentType ]
+  values:
+    justify: Alias of `both`.

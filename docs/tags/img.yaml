@@ -4,147 +4,149 @@
     Supported image formats are: `JPEG`, `PNG`, `GIF`, and `BMP`.
 
     The `SVG` is allowed, but some editors does not support it.
-    You can provide a fallback image for those editors.
-    Use `fallback-src` attribute for that.
+    You can provide a fallback image for those editors using `fallback-src=""` attribute.
+
+    By default, image is embedded in text where the tag is placed.
+    You can use `horizontal=""` and `vertical=""` attributes for floating images.
 
   attributes:
 
-      src: 
-        value: path
-        required: true
-        brief: Image source.
-        details: |
-          An absolute path or a path relative to main input file.
+    src: 
+      value: path
+      required: true
+      brief: Image source.
+      details: |
+        An absolute path or a path relative to main input file.
 
-          It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
-        TC:
-          - Relative path
-          - Absolute path
-          - Missing file
+        It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
+      TC:
+        - Relative path
+        - Absolute path
+        - Missing file
 
-      width:
-        type: positive-length
-        brief: Image width.
-        details: |
-          By default, converter will parse the image to calculate the width.
-          If `height` attribute is provided, width will be set to preserve aspect ratio.
-          Otherwise, the image will be embedded using `1px` per one image pixel which is 96 DPI.
-          The source DPI metadata is ignored.
-        TC:
-          - Normal
-          - Missing (vertical image)
-          - Missing (horizontal image)
-          - Both width and height are missing
-      
-      height:
-        type: positive-length
-        brief: Image height.
-        details: |
-          By default, converter will parse the image to calculate the height.
-          If `width` attribute is provided, height will be set to preserve aspect ratio.
-          Otherwise, the image will be embedded using `1px` per one image pixel which is 96 DPI.
-          The source DPI metadata is ignored.
-        TC:
-          - Normal
-          - Missing (vertical image)
-          - Missing (horizontal image)
+    width:
+      type: positive-length
+      brief: Image width.
+      details: |
+        By default, converter will parse the image to calculate the width.
+        If `height` attribute is provided, width will be set to preserve aspect ratio.
+        Otherwise, the image will be embedded using `1px` per one image pixel which is 96 DPI.
+        The source DPI metadata is ignored.
+      TC:
+        - Normal
+        - Missing (vertical image)
+        - Missing (horizontal image)
+        - Both width and height are missing
+    
+    height:
+      type: positive-length
+      brief: Image height.
+      details: |
+        By default, converter will parse the image to calculate the height.
+        If `width` attribute is provided, height will be set to preserve aspect ratio.
+        Otherwise, the image will be embedded using `1px` per one image pixel which is 96 DPI.
+        The source DPI metadata is ignored.
+      TC:
+        - Normal
+        - Missing (vertical image)
+        - Missing (horizontal image)
 
-      horizontal:
-        value: anchor offset
-        required: Required if `vertical` attribute is present.
-        brief: Horizontal position in floating mode.
-        details: |
-          - **anchor** @optional - The horizontal anchor.
-              @enum HorizontalPositionRelativeFrom
-              
-          - **offset** @optional - The horizontal offset.
-              - offset expressed as the [length](#length) value
-              @enum HorizontalPositionAlign
+    horizontal:
+      value: anchor offset
+      required: Required if `vertical` attribute is present.
+      brief: Horizontal position in floating mode.
+      details: |
+        - **anchor** @optional - The horizontal anchor.
+            @enum HorizontalPositionRelativeFrom
+            
+        - **offset** @optional - The horizontal offset.
+            - offset expressed as the [length](#length) value
+            @enum HorizontalPositionAlign
 
-      vertical:
-        value: anchor offset
-        required: Required if `horizontal` attribute is present.
-        brief: Vertical position in floating mode.
-        details: |
-          - **anchor** @optional - The vertical anchor.
-              @enum VerticalPositionRelativeFrom
+    vertical:
+      value: anchor offset
+      required: Required if `horizontal` attribute is present.
+      brief: Vertical position in floating mode.
+      details: |
+        - **anchor** @optional - The vertical anchor.
+            @enum VerticalPositionRelativeFrom
 
-          - **offset** @optional - The vertical offset.
-              - offset expressed as the [length](#length) value
-              @enum VerticalPositionAlign
+        - **offset** @optional - The vertical offset.
+            - offset expressed as the [length](#length) value
+            @enum VerticalPositionAlign
 
-      margin:
-        type: margins
-        brief: Image margins.
+    margin:
+      type: margins
+      brief: Image margins.
 
-      rotation:
-        type: int
-        brief: Clockwise rotation in degrees.
-      
-      flip:
-        value: 'directions'
-        brief: Image flip.
-        details: Combination of `horizontal` (alias `mirror`) and `vertical`. You can also use short forms `h`, `m`, or `v`.
+    rotation:
+      type: int
+      brief: Clockwise rotation in degrees.
+    
+    flip:
+      value: 'directions'
+      brief: Image flip.
+      details: Combination of `horizontal` (alias `mirror`) and `vertical`. You can also use short forms `h`, `m`, or `v`.
 
-      allow-overlap:
-        type: bool
-        brief: Allow image overlapping.
+    allow-overlap:
+      type: bool
+      brief: Allow image overlapping.
 
-      behind-document:
-        type: bool
-        brief: Place the image behind the document text.
+    behind-document:
+      type: bool
+      brief: Place the image behind the document text.
 
-      wrap:
-        value: type side
-        brief: Text wrapping around image.
-        details: |
-          - **type** @optional - The text wrapping type.
-              @enum TextWrappingType
-          - **side** @optional - The side of the image where the text will wrap.
-              @enum TextWrappingSide
+    wrap:
+      value: type side
+      brief: Text wrapping around image.
+      details: |
+        - **type** @optional - The text wrapping type.
+            @enum TextWrappingType
+        - **side** @optional - The side of the image where the text will wrap.
+            @enum TextWrappingSide
 
-      layout-in-cell:
-        type: bool
-        brief: Layout the image in cell.
+    layout-in-cell:
+      type: bool
+      brief: Layout the image in cell.
 
-      lock-anchor:
-        type: bool
-        brief: Lock the image anchor in one place.
+    lock-anchor:
+      type: bool
+      brief: Lock the image anchor in one place.
 
-      z-index:
-        type: int
-        brief: Image z-index that decides which image is on top another.
+    z-index:
+      type: int
+      brief: Image z-index that decides which image is on top another.
 
-      type:
-        value: type
-        brief: Image type.
-        details: |
-          Possible values are:
-          @enum img-type
+    type:
+      value: type
+      brief: Image type.
+      details: |
+        Possible values are:
+        @enum img-type
 
-          The converter will determine the image type from the file content, so this attribute is needed only if automatic detection fails.
+        The converter will determine the image type from the file content, so this attribute is needed only if automatic detection fails.
 
-      fallback-src:
-        value: path
-        brief: Fallback image source path.
-        details: |
-          An absolute path or a path relative to main input file.
+    fallback-src:
+      value: path
+      brief: Fallback image source path.
+      details: |
+        An absolute path or a path relative to main input file.
 
-          It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
+        It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
 
-      fallback-type:
-        value: type
-        brief: Fallback image type.
-        details: |
-          Possible values are:
-          @enum fallback-img-type
+    fallback-type:
+      value: type
+      brief: Fallback image type.
+      details: |
+        Possible values are:
+        @enum fallback-img-type
 
-          The converter will determine the image type from the file content, so this attribute is needed only if automatic detection fails.
+        The converter will determine the image type from the file content, so this attribute is needed only if automatic detection fails.
 
 - enum-name: img-type
   combine: [ fallback-img-type ]
   values:
-    svg: You should provide `fallback-src` attribute for SVG images.
+    svg: You should provide `<img fallback-src=""` attribute for SVG images.
 
 - enum-name: fallback-img-type
   combine: [ RegularImageFileTypes ]

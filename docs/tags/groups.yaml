@@ -7,7 +7,7 @@
     - br
     - tab
     - space
-    - pagenumber
-    - totalpages
-    - pagebreak
+    - page-number
+    - total-pages
+    - page-break
     - vwnbsp
