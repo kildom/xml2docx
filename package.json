@@ -55,6 +55,7 @@
         "@typescript-eslint/parser": "^8.22.0",
         "esbuild": "^0.24.2",
         "eslint": "^9.19.0",
+        "graphviz-wasm": "^3.0.2",
         "license-checker": "^25.0.1",
         "showdown": "^2.1.0",
         "showdown-highlight": "^3.1.0",

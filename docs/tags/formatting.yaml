@@ -59,16 +59,15 @@
   brief: Alias of `<font>`.
   combine: [ -formatting-attributes- ]
 
-- group-name: -formatting-tags-
-  tags:
-    - font
-    - span
-    - b
-    - i
-    - s
-    - u
-    - sub
-    - sup
+- tag-name: sub
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Subscript.
+  combine: [ -formatting-attributes- ]
+
+- tag-name: sup
+  children: [ -formatting-tags-, -leaf-tags- ]
+  brief: Superscript.
+  combine: [ -formatting-attributes- ]
 
 - tag-name: -formatting-attributes-
   attributes:

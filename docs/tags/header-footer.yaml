@@ -7,7 +7,7 @@
   combine: [ -header-footer- ]
 
 - tag-name: -header-footer-
-  children: [ p ]
+  children: [ p, table ]
   implicit: p
   details: |
     It is associated with the section.

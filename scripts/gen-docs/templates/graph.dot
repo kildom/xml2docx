@@ -1,0 +1,73 @@
+digraph "DocTML tags hierarchy" {
+
+    node [fontname="Arial" style=filled fillcolor=white color="#999999"];
+    edge [color="#999999"]
+    fontname="Arial";
+    rankdir="LR";
+
+    subgraph cluster_legend {
+
+        label="Legend";
+        color="#DDDDDD";
+        fontcolor="#BBBBBB";
+
+        subgraph cluster_0 {
+            label="DocTML\nTag";
+            fontcolor=black;
+            color=invis;
+            tag [ color="#999999"]
+        }
+
+        subgraph cluster_1 {
+            label="Graph\nJunction";
+            fontcolor=black;
+            color=invis;
+            bbb [shape="circle" style="filled" color="#777777" fillcolor="#777777" label=" "]
+        }
+
+        subgraph cluster_2 {
+            label="Child";
+            fontcolor=black;
+            color=invis;
+            ccc [shape="point" color=invis]
+            ddd [shape="point" color=invis]
+            ccc -> ddd [color="#999999"]
+        }
+
+        subgraph cluster_3 {
+            label="Implicit Child";
+            fontcolor=black;
+            color=invis;
+            eee [shape="point" color=invis]
+            fff [shape="point" color=invis]
+            eee -> fff [color="#999999:invis:#999999"]
+        }
+
+
+        tag->bbb [ltail=cluster_0 lhead=cluster_1 color=invis]    
+        bbb->ccc [ltail=cluster_1 lhead=cluster_2 color=invis]    
+        ddd->eee [ltail=cluster_2 lhead=cluster_3 color=invis]    
+
+    }
+
+    <%! for (let tag of tags) { %>
+        "<% tag.name %>" [URL="<% tag.name %>.html"]
+        <%! for (child of tag.groupsAndChildren) { %>
+            "<% tag.name %>" -> "<% child.name %>"
+            <%! if (child === tag.implicitChild) { %>
+                [color="#999999:invis:#999999"]
+            <%! } %>
+        <%! } %>
+    <%! } %>
+
+    <%! for (let group of groups) { %>
+        "<% group.name %>" [shape="circle" style="filled" color="#777777" fillcolor="#777777" label=" " ]
+        <%! for (child of group.groupsAndChildren) { %>
+            "<% group.name %>" -> "<% child.name %>" [color="#999999"]
+        <%! } %>
+    <%! } %>
+
+    "p-style-font" [label=font URL="font.html"]
+    "p-style" -> "p-style-font"
+    
+}

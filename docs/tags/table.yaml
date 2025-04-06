@@ -1,0 +1,15 @@
+- tag-name: table
+  brief: Table.
+  children: [ tr, tc ]
+
+- tag-name: tc
+  brief: Table column.
+
+- tag-name: tr
+  brief: Table row.
+  children: [ td ]
+
+- tag-name: td
+  brief: Table cell.
+  children: [ p, table ]
+  implicit: p

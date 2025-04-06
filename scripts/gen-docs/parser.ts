@@ -35,6 +35,7 @@ export interface TagDocs {
     implicitChild?: TagDocs;
     indirectChildren: TagDocs[];
     indirectParents: TagDocs[];
+    groupsAndChildren: (TagDocs | GroupDocs)[];
     brief: string;
     details: string;
     attributes: Record<string, AttributeDocs>;
@@ -44,6 +45,11 @@ export interface TagDocs {
 export interface PageDocs {
     name: string;
     text: string;
+}
+
+export interface GroupDocs {
+    name: string;
+    groupsAndChildren: (TagDocs | GroupDocs)[];
 }
 
 interface EnumYaml {
@@ -97,6 +103,7 @@ type TopLevelYaml = TypeYaml | EnumYaml | TagYaml | GroupYaml | PageYaml;
 const yamlElements: TopLevelYaml[] = [];
 const enums: Record<string, EnumDocs> = {};
 const tags: Record<string, TagDocs> = {};
+const groups: Record<string, GroupDocs> = {};
 
 // #endregion
 
@@ -191,6 +198,7 @@ function getTag(name: string, optional?: boolean): TagDocs | undefined {
         parents: [],
         indirectChildren: [],
         indirectParents: [],
+        groupsAndChildren: [],
         attributes: {},
         brief: '',
         details: '',
@@ -217,6 +225,7 @@ function getTag(name: string, optional?: boolean): TagDocs | undefined {
         implicitChild: tagYaml.implicit ? getTag(tagYaml.implicit) : undefined,
         indirectChildren: [],
         indirectParents: [],
+        groupsAndChildren: tagYaml.children?.map(childName => getTag(childName, true) ?? getGroupDocs(childName)) ?? [],
         attributes,
         brief: tagYaml.brief || '',
         details: tagYaml.details || '',
@@ -226,10 +235,35 @@ function getTag(name: string, optional?: boolean): TagDocs | undefined {
     return tagDocs;
 }
 
+export function getGroups(): GroupDocs[] {
+    return Object.values(groups);
+}
+
+function getGroupDocs(name: string): GroupDocs {
+
+    if (name in groups) return groups[name];
+
+    let groupYaml = yamlElements.find(x => 'group-name' in x && x['group-name'] === name) as GroupYaml | undefined;
+
+    if (!groupYaml) {
+        throw new Error(`Group ${name} not found`);
+    }
+
+    let group: GroupDocs = {
+        name: name,
+        groupsAndChildren: groupYaml.tags?.map(childName => getTag(childName, true) ?? getGroupDocs(childName)) ?? [],
+    };
+
+    groups[name] = group;
+
+    return group;
+}
+
 function combineTagDocs(tagDocs: TagDocs, combined: TagDocs) {
     tagDocs.implicitChild = combined.implicitChild ?? tagDocs.implicitChild;
     tagDocs.customPage = combined.customPage || tagDocs.customPage;
     tagDocs.children.push(...combined.children);
+    tagDocs.groupsAndChildren.push(...combined.groupsAndChildren);
     for (let [attrName, attr] of Object.entries(combined.attributes)) {
         tagDocs.attributes[attrName] = attr;
     }

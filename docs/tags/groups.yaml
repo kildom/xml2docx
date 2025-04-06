@@ -1,8 +1,16 @@
 
+- group-name: -formatting-tags-
+  tags:
+    - font
+    - span
+    - b
+    - i
+    - s
+    - u
+    - sub
+    - sup
 - group-name: -leaf-tags-
   tags:
-    - TEXT
-    - CDATA
     - img
     - br
     - tab
@@ -11,3 +19,5 @@
     - total-pages
     - page-break
     - vwnbsp
+    - TEXT
+    - CDATA

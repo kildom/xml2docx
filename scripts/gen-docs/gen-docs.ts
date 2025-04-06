@@ -1,6 +1,6 @@
 import fs from 'node:fs';
-import util from 'node:util';
-import { getTags, parse } from './parser';
+import graphviz from 'graphviz-wasm';
+import { getGroups, getTags, parse } from './parser';
 import { compileTemplate } from './template';
 import { markdownToHtml } from './markdown';
 
@@ -25,10 +25,18 @@ async function main() {
     let tagTemplate = compileTemplate(tagTemplateText);
 
     for (let tag of getTags()) {
-        let html = tagTemplate({tag, markdownToHtml});
+        let html = tagTemplate({ tag, markdownToHtml });
         //console.log(tag.name, html.length);
         fs.writeFileSync(`dist/docs/${tag.name}.html`, html);
     }
+
+    let dotTemplateText = fs.readFileSync('scripts/gen-docs/templates/graph.dot', 'utf8');
+    let dotTemplate = compileTemplate(dotTemplateText);
+    let dot = dotTemplate({ tags: getTags(), groups: getGroups() });
+    fs.writeFileSync('dist/docs/graph.dot', dot);
+    await graphviz.loadWASM();
+    const svg = graphviz.layout(dot);
+    fs.writeFileSync('dist/docs/graph.svg', svg);
 }
 
 main();
