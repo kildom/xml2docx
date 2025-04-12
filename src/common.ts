@@ -155,12 +155,16 @@ export function splitListValues(
 }
 
 export function undefEmpty<T>(obj: T | undefined): T | undefined {
-    if (obj !== undefined) {
+    if (obj === undefined) {
+        return undefined;
+    } else if (Array.isArray(obj)) {
+        return obj.length ? obj : undefined;
+    } else {
         for (let value of Object.values(obj as object)) {
             if (value !== undefined) {
                 return obj;
             }
         }
+        return undefined;
     }
-    return undefined;
 }

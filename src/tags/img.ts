@@ -20,7 +20,7 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { Dict, dirName, splitListValues, undefEmpty } from '../common';
+import { Dict, splitListValues, undefEmpty } from '../common';
 import { prepareElement, TranslatorState } from '../translator';
 import { Element } from '../xml';
 import { getMargin } from '../attrs/borders-attrs';
@@ -45,25 +45,11 @@ function getFlip(value: string | undefined) {
     };
 }
 
-function loadImage(element: Element, srcAttribute: string, dataAttribute: string, errorIfMissing: boolean, loadInfo: boolean) {
+function loadImage(element: Element, srcAttribute: string, mandatory: boolean, loadInfo: boolean) {
 
-    let srcValue = element.attributes[srcAttribute];
-    let dataValue = element.attributes[dataAttribute];
-    let data = defaultImage;
-
-    if (srcValue) {
-        if (dataValue) {
-            element.ctx.error(`Both ${srcAttribute} and ${dataAttribute} attributes are present in img tag.`, element);
-        }
-        data = element.ctx.readFile(dirName(element.ctx.inputFile) + srcValue, true);
-    } else if (dataValue) {
-        try {
-            data = convert.fromBase64(dataValue);
-        } catch (_) {
-            element.ctx.error(`Invalid BASE-64 encoding in ${dataAttribute} attribute.`, element);
-        }
-    } else if (errorIfMissing) {
-        element.ctx.error(`No ${srcAttribute} or ${dataAttribute} attribute in img tag.`, element);
+    let data = convert.src(element, srcAttribute, mandatory);
+    if (!data || !data.length) {
+        data = defaultImage;
     }
 
     let info: ImageInfo | undefined = undefined;
@@ -145,10 +131,10 @@ export function imgTag(ts: TranslatorState, element: Element): any[] {
 
     //* src: Image source path. An absolute path or a path relative to main input file.
     //* data: Raw image data in BASE-64 encoding.
-    let image = loadImage(element, 'src', 'data', true, !attributes.width || !attributes.height || !attributes.type);
+    let image = loadImage(element, 'src', true, !attributes.width || !attributes.height || !attributes.type);
     //* fallback-src: Fallback image source path.
     //* fallback-data: Raw fallback image data in BASE-64 encoding.
-    let fallback = loadImage(element, 'fallbacksrc', 'fallbackdata', false, !attributes.fallbacktype);
+    let fallback = loadImage(element, 'fallbacksrc', false, !attributes.fallbacktype);
 
     let widthImg = 1;
     let heightImg = 1;

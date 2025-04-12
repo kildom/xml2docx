@@ -1,23 +1,82 @@
 - tag-name: document
   brief: Root document element.
-  children: [ section, header, footer, p-style, font-style, table, p ]
+  children: [ section, header, footer, p-style, font-style, table, p, embedded-font ]
   implicit: p
   attributes:
     title:
       type: str
       brief: Title in document properties.
+      TC: [Exists, Missing]
     subject:
       type: str
       brief: Subject in document properties.
+      TC: [Exists, Missing]
     creator:
       type: str
       brief: Creator name in document properties.
+      TC: [Exists, Missing]
     keywords:
       type: str
       brief: Keywords in document properties.
+      TC: [Exists, Missing]
     description:
       type: str
       brief: Description in document properties.
+      TC: [Exists, Missing]
     last-modified-by:
       type: str
       brief: Last modified by name in document properties.
+      TC: [Exists, Missing]
+    background:
+      type: color
+      brief: Background color of the document.
+      TC: [Exists, Missing]
+    custom-properties:
+      value: name=value, name=value, ...
+      brief: Custom document properties.
+      details: |
+        They are comma-separated name-value pairs.
+        If you want to use a comma in the name or value, you must escape it with a backslash.
+        Use double backslashes to escape a backslash.
+        For example: `Coauthors=John Doe\, Jane Smith` or `Source=C:\\My Files\\source.txt`
+      TC: [None, One, Two, With escapes and multiple equals]
+    revision:
+      type: int
+      brief: Revision number of the document.
+      TC: [Revision]
+
+- tag-name: embedded-font
+  brief: Embeds font file into document file.
+  attributes:
+    name:
+      type: str
+      required: true
+      brief: Name of the font.
+    src: 
+      type: file
+      required: true
+      brief: TTF font file.
+    charset:
+      value: charset
+      brief: Charset of the font.
+      details: |
+        Possible values are:
+        - `ansi` (alias `00`)
+        - `default` (alias `01`)
+        - `symbol` (alias `02`)
+        - `mac` (alias `4D`)
+        - `jis` (alias `80`)
+        - `hangul` (alias `81`)
+        - `johab` (alias `82`)
+        - `gb-2312` (alias `86`)
+        - `chinese-big5` (alias `88`)
+        - `greek` (alias `A1`)
+        - `turkish` (alias `A2`)
+        - `vietnamese` (alias `A3`)
+        - `hebrew` (alias `B1`)
+        - `arabic` (alias `B2`)
+        - `baltic` (alias `BA`)
+        - `russian` (alias `CC`)
+        - `thai` (alias `DE`)
+        - `east-europe` (alias `EE`)
+        - `oem` (alias `FF`)

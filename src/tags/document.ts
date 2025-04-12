@@ -22,16 +22,23 @@ import * as docx from 'docx';
 import { Element } from '../xml';
 import { TranslatorState, processChildren } from '../translator';
 import { headingTags } from './p';
-import { FirstConstructorParam, Mutable } from '../common';
+import { FirstConstructorParam, Mutable, undefEmpty } from '../common';
 import { fontStyleTag } from './font-style';
 import { pStyleTag } from './p-style';
 import { tableTag } from './table';
 import { headerFooterTag, sectionTag } from './section';
 import { HeaderFooterPage } from '../enums';
+import * as convert from '../convert';
 
 export class ObjectContainer {
     public constructor(
-        public type: 'ISectionOptions' | 'IParagraphStyleOptions' | 'ICharacterStyleOptions' | 'default' | 'even' | 'first',
+        public type: 'ISectionOptions'
+            | 'IParagraphStyleOptions'
+            | 'ICharacterStyleOptions'
+            | 'FontOptions'
+            | 'default'
+            | 'even'
+            | 'first',
         public value: any
     ) { }
 }
@@ -47,6 +54,7 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
             section: sectionTag,
             header: headerFooterTag,
             footer: headerFooterTag,
+            embeddedfont: embeddedFontTag,
         },
         implicitTag: 'p',
         removeSpaces: true,
@@ -58,49 +66,73 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
     let paragraphStyles: docx.IParagraphStyleOptions[] = [];
     let characterStyles: docx.ICharacterStyleOptions[] = [];
     let children: Mutable<docx.ISectionOptions['children']> = [];
-    let options: FirstConstructorParam<typeof docx.Document> = {
-        sections: sections,
-        //* Title in document properties.
-        title: attributes.title,
-        //* Subject in document properties.
-        subject: attributes.subject,
-        //* Creator name in document properties.
-        creator: attributes.creator,
-        //* Keywords in document properties.
-        keywords: attributes.keywords,
-        //* Description in document properties.
-        description: attributes.description,
-        //* last-modified-by: Last modified by name in document properties.
-        lastModifiedBy: attributes.lastmodifiedby,
-        // TODO: More properties
-        styles: {
-            paragraphStyles,
-            characterStyles,
-        },
-    };
+    let fonts: Mutable<FirstConstructorParam<typeof docx.Document>['fonts']> = [];
 
     for (let obj of list) {
+
         if (obj instanceof ObjectContainer) {
             if (obj.type === 'ISectionOptions') {
                 sections.push(obj.value);
                 children = obj.value.children;
+                continue;
             } else if (obj.type === 'IParagraphStyleOptions') {
                 paragraphStyles.push(obj.value);
+                continue;
             } else if (obj.type === 'ICharacterStyleOptions') {
                 characterStyles.push(obj.value);
-            } else if ((obj.value instanceof docx.Header) || (obj.value instanceof docx.Footer)) {
+                continue;
+            } else if (obj.type === 'FontOptions') {
+                fonts.push(obj.value);
+                continue;
+            }
+        }
+
+        if (sections.length === 0) {
+            children = [];
+            sections.push({ children });
+        }
+
+        if (obj instanceof ObjectContainer) {
+            if ((obj.value instanceof docx.Header) || (obj.value instanceof docx.Footer)) {
                 addHeaderFooterToSection(sections.at(-1)!, obj.value, obj.type as HeaderFooterPage);
             }
         } else {
-            if (sections.length === 0) {
-                children = [];
-                sections.push({ children });
-            }
             children.push(obj);
         }
     }
 
-    return new docx.Document(options);
+    return new docx.Document({
+        sections: sections,
+        title: attributes.title,
+        subject: attributes.subject,
+        creator: attributes.creator,
+        keywords: attributes.keywords,
+        description: attributes.description,
+        lastModifiedBy: attributes.lastmodifiedby,
+        background: undefEmpty({
+            color: convert.color(element, 'background'),
+        }),
+        customProperties: (!attributes.customproperties
+            ? undefined
+            : attributes.customproperties.split(/(.*?=(?:\\.|.)*?(?:,|$))/)
+                .map(x => x.trim())
+                .filter(x => x)
+                .map(x => x
+                    .split(/(^.*?)=/)
+                    .slice(1)
+                )
+                .filter(x => x.length)
+                .map(x => ({
+                    name: x[0].replace(/\\(.)/g, '$1'),
+                    value: x[1].replace(/\\(.)/g, '$1'),
+                }))),
+        revision: convert.uint(element, 'revision'),
+        styles: {
+            paragraphStyles,
+            characterStyles,
+        },
+        fonts: undefEmpty(fonts),
+    });
 }
 
 
@@ -141,4 +173,15 @@ function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: d
             break;
         }
     }
+}
+
+function embeddedFontTag(ts: TranslatorState, element: Element): ObjectContainer[] {
+    let fonts: Mutable<FirstConstructorParam<typeof docx.Document>['fonts']> = [];
+    let data = convert.src(element, 'src', true);
+    fonts.push({
+        name: convert.mandatory(element, 'name'),
+        characterSet: convert.enumeration(element, 'charset', docx.CharacterSet),
+        data: Buffer.from(data),
+    });
+    return fonts.map(x => ({type: 'FontOptions', value: x}));
 }

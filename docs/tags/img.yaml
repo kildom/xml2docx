@@ -12,17 +12,14 @@
   attributes:
 
     src: 
-      value: path
+      type: file
       required: true
       brief: Image source.
-      details: |
-        An absolute path or a path relative to main input file.
-
-        It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
       TC:
         - Relative path
         - Absolute path
         - Missing file
+        - Data URI
 
     width:
       type: positive-length
@@ -127,12 +124,8 @@
         The converter will determine the image type from the file content, so this attribute is needed only if automatic detection fails.
 
     fallback-src:
-      value: path
+      type: file
       brief: Fallback image source path.
-      details: |
-        An absolute path or a path relative to main input file.
-
-        It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
 
     fallback-type:
       value: type

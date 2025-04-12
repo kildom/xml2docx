@@ -16,3 +16,14 @@
 
 - type-name: str
   value: 'string'
+
+- type-name: color
+  value: '[color](#color)'
+
+- type-name: file
+  value: '[file](#file)'
+  details: |
+    An absolute path or a path relative to main input file.
+
+    It also accepts base64 encoded <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank">data URI</a>.
+

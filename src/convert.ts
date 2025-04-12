@@ -20,7 +20,7 @@
 
 import * as docx from 'docx';
 import { PositiveUniversalMeasure, UniversalMeasure } from 'docx';
-import { Dict } from './common';
+import { Dict, dirName } from './common';
 import { Element } from './xml';
 import { Context } from './context';
 
@@ -109,7 +109,9 @@ const fromBase64Map = (function () {
 
 
 export function fromBase64(value: string): Uint8Array {
-    if (typeof globalThis.Buffer !== 'undefined' && typeof globalThis.Buffer.from === 'function') {
+    if (typeof (Uint8Array as any).fromBase64 !== 'undefined') {
+        return (Uint8Array as any).fromBase64(value);
+    } else if (typeof globalThis.Buffer !== 'undefined' && typeof globalThis.Buffer.from === 'function') {
         return globalThis.Buffer.from(value, 'base64');
     } else if (typeof globalThis.atob === 'function') {
         let binary = globalThis.atob(value);
@@ -377,6 +379,47 @@ enumeration.noErr = function convertEnumNoErr<T extends Dict<string | number>>(
     let enumMap = getEnumMap(element.ctx, enumValue);
     return _convertEnum.noErr(value, enumMap, aliases) as any;
 };
+
+// #endregion
+
+
+// #region File
+
+export function src(element: Element, srcAttribute: string, mandatory: true): Uint8Array;
+export function src(element: Element, srcAttribute: string, mandatory: false): Uint8Array | undefined;
+export function src(element: Element, srcAttribute: string, mandatory: boolean): Uint8Array | undefined;
+export function src(element: Element, srcAttribute: string, mandatory: boolean): Uint8Array | undefined {
+    if (!element.attributes[srcAttribute]) {
+        if (mandatory) {
+            element.ctx.error(`Missing attribute "${srcAttribute}" on "${element.name}" tag.`, element);
+            return new Uint8Array(0);
+        } else {
+            return undefined;
+        }
+    } else if (srcAttribute.trimStart().startsWith('data:')) {
+        return srcURI(element, element.attributes[srcAttribute]);
+    } else {
+        return srcFile(element, element.attributes[srcAttribute]);
+    }
+}
+
+function srcFile(element: Element, path: string): Uint8Array {
+    return element.ctx.readFile(dirName(element.ctx.inputFile) + path, true);
+}
+
+function srcURI(element: Element, dataURI: string): Uint8Array {
+    dataURI = dataURI.trimStart().substring(5);
+    let index = dataURI.indexOf(',');
+    let type = dataURI.substring(0, index).toLowerCase();
+    let data = dataURI.substring(index + 1);
+    let parts = type.split(';');
+    let isBase64 = parts.includes('base64');
+    if (isBase64) {
+        return fromBase64(data);
+    } else {
+        return new TextEncoder().encode(data);
+    }
+}
 
 // #endregion
 
