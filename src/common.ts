@@ -168,3 +168,16 @@ export function undefEmpty<T>(obj: T | undefined): T | undefined {
         return undefined;
     }
 }
+
+export function delUndef<T>(obj: T | undefined): T | undefined {
+    if (obj === undefined) {
+        return undefined;
+    } else {
+        let keys = Object.keys(obj as object);
+        for (let key of keys) {
+            if ((obj as any)[key] === undefined) {
+                delete (obj as any)[key];
+            }
+        }
+    }
+}

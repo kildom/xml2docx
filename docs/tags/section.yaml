@@ -31,4 +31,11 @@
         - `JB0` `JB1` `JB2` `JB3` `JB4` `JB5` `JB6` `JB7` `JB8` `JB9` `JB10`
         - `DL` `DLEnvelope` `C6C5` `C7C6`
 - tag-name: p-style
+  brief: Paragraph style.
+  details: |
+    Creates a paragraph style.
+    
+    You can put empty `<font>` tag inside this tag to set default font for this style.
+    Other option is to use attribute inheritance, for example `<p-style font.color="red">`.
+
 - tag-name: font-style

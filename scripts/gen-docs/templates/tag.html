@@ -248,25 +248,35 @@ const parentTypes = {
 
     <%! } %>
 
-    <h2>Related tags</h2>
+    <%! 
+        let hasRelatedTags = false;
+        for (let [parentTypeName, parentTypeTitle] of Object.entries(parentTypes)) {
+            if (tag[parentTypeName].length) hasRelatedTags = true;
+        }
+    %>
 
-    <table class="rel-tab" cellspacing="0" cellpadding="0">
-        <%! for (let [parentTypeName, parentTypeTitle] of Object.entries(parentTypes)) { %>
-            <%! if (tag[parentTypeName].length) { %>
-                <tr>
-                    <td colspan="2" class="rel-tab-title">
-                        <%= markdownToHtml(parentTypeTitle.replace('$$$', tag.implicitChild?.name), false) %>
-                    </td>
-                </tr>
-                <%! for (let parent of tag[parentTypeName]) { %>
+    <%! if (hasRelatedTags) { %>
+
+        <h2>Related tags</h2>
+
+        <table class="rel-tab" cellspacing="0" cellpadding="0">
+            <%! for (let [parentTypeName, parentTypeTitle] of Object.entries(parentTypes)) { %>
+                <%! if (tag[parentTypeName].length) { %>
                     <tr>
-                        <td class="rel-tab-name"><a href="<% parent.name %>.html">&lt;<% parent.name %>&gt;</a></td>
-                        <td class="rel-tab-brief"><%= markdownToHtml(parent.brief, false) %></td>
+                        <td colspan="2" class="rel-tab-title">
+                            <%= markdownToHtml(parentTypeTitle.replace('$$$', tag.implicitChild?.name), false) %>
+                        </td>
                     </tr>
+                    <%! for (let parent of tag[parentTypeName]) { %>
+                        <tr>
+                            <td class="rel-tab-name"><a href="<% parent.name %>.html">&lt;<% parent.name %>&gt;</a></td>
+                            <td class="rel-tab-brief"><%= markdownToHtml(parent.brief, false) %></td>
+                        </tr>
+                    <%! } %>
                 <%! } %>
             <%! } %>
-        <%! } %>
-    </table>
+        </table>
+    <%! } %>
 
     <%! if (Object.keys(tag.attributes).length > 0) { %>
         <h2>Attributes details</h2>

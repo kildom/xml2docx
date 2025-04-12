@@ -54,9 +54,9 @@ function pTag(ts: TranslatorState, element: Element, heading?: HeadingLevelType)
 
     return [
         new docx.Paragraph({
+            heading,
             ...getIParagraphPropertiesOptions(element),
             children,
-            heading,
         })
     ];
 }

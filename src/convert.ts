@@ -396,7 +396,7 @@ export function src(element: Element, srcAttribute: string, mandatory: boolean):
         } else {
             return undefined;
         }
-    } else if (srcAttribute.trimStart().startsWith('data:')) {
+    } else if (element.attributes[srcAttribute].trimStart().startsWith('data:')) {
         return srcURI(element, element.attributes[srcAttribute]);
     } else {
         return srcFile(element, element.attributes[srcAttribute]);

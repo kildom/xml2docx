@@ -81,3 +81,18 @@ export enum RegularImageFileTypes {
     bmp = 'bmp',
     jpg = 'jpg',
 }
+
+export const HeadingLevelAliases = {
+    '1': docx.HeadingLevel.HEADING_1,
+    '2': docx.HeadingLevel.HEADING_2,
+    '3': docx.HeadingLevel.HEADING_3,
+    '4': docx.HeadingLevel.HEADING_4,
+    '5': docx.HeadingLevel.HEADING_5,
+    '6': docx.HeadingLevel.HEADING_6,
+    'h1': docx.HeadingLevel.HEADING_1,
+    'h2': docx.HeadingLevel.HEADING_2,
+    'h3': docx.HeadingLevel.HEADING_3,
+    'h4': docx.HeadingLevel.HEADING_4,
+    'h5': docx.HeadingLevel.HEADING_5,
+    'h6': docx.HeadingLevel.HEADING_6,
+};

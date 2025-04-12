@@ -1,0 +1,34 @@
+- tag-name: docx.js
+  brief: Raw JavaScript returning [docx.js](https://docx.js.org/) object.
+  custom-page: |
+    # &lt;docx.js&gt;
+
+    Raw JavaScript returning [docx.js](https://docx.js.org/) object.
+
+    > [!CAUTION]
+    > By default, this tag is disabled for security reasons.
+    > Enabling it will allow you to run potentially harmful JavaScript code from a DocTML file.
+    > You can enable this tag using `--docx.js` command line option or `docxJsEnabled` API configuration option.
+    >
+    > ENABLE IT ONLY IF YOU TRUST THE SOURCE FILE.
+
+    This tag may appear in anywhere in the document.
+    All [TEXT](text.html) and [CDATA](cdata.html) nodes will be threated as JavaScript expression that returns `docx.js` object.
+    There will be no object validation, so you must make sure that the object is valid in the context of the parent tag.
+
+    All other tags will be passed to the JavaScript code at place where they appear.
+
+    Prefer [CDATA](cdata.html) tag over the [TEXT](text.html) to avoid escaping issues.
+
+    ```
+    <docx.js>
+    <![CDATA[
+      new docx.Paragraph({
+        children: [
+          ]]><b>The bold text.</b><![CDATA[,
+        ],
+      })
+    ]]>
+    </docx.js>
+    ```
+    <!-- @preview -->

@@ -20,12 +20,62 @@
 
 - tag-name: -IParagraphPropertiesOptions-
   attributes:
-    align:
-      value: alignment
-      brief: Text alignment.
+    border:
+      type: border
+      brief: Paragraph borders.
+    heading:
+      value: level
+      brief: Heading level.
       details: |
-        Possible values are:
-        @enum ParagraphAlignment
+        By default it is deduced from the tag name.
+        Possible values are `title` and numbers from `1` to `6`.
+    bidirectional:
+      type: bool
+      brief: Bidirectional text.
+    page-break:
+      type: bool
+      brief: Page break before paragraph.
+    tabs:
+      value: position type leader, ...
+      brief: Tabulator stops.
+      details: |
+        - **position** @required - Tabulator stop position in [positive length](#positive-length).
+        - **type** @optional - Tabulator stop type. Default is `left`.
+            @enum TabStopType
+        - **leader** @optional - Tabulator stop leader. Default is `none`.
+            @enum LeaderType
+    style:
+      type: str
+      brief: Paragraph style name.
+    background:
+      type: color
+      brief: Paragraph background color.
+    widow-control:
+      type: bool
+      brief: Paragraph widow control.
+    suppress-line-numbers:
+      type: bool
+      brief: Suppress line numbers.
+    word-wrap:
+      type: bool
+      brief: Word wrapping.
+    overflow-punctuation:
+      type: bool
+      brief: Overflow punctuation.
+  combine: [ -IParagraphStylePropertiesOptions- ]
+  
+- tag-name: -IParagraphStylePropertiesOptions-
+  combine: [ -ILevelParagraphStylePropertiesOptions- ]
+
+- tag-name: -ILevelParagraphStylePropertiesOptions-
+  attributes:
+    spacing:
+      value: before after contextual
+      brief: Paragraph spacing.
+      details: |
+        - **before** @optional - Space before paragraph in [positive length](#positive-length) units.
+        - **after** @optional - Space after paragraph in [positive length](#positive-length) units.
+        - **contextual** @optional - Literal `contextual`. If set, use contextual spacing.
     line-spacing:
       value: requirement distance
       brief: Line spacing.
@@ -37,6 +87,15 @@
         - **distance** @required - The distance between lines can be expressed in two ways:
             - Absolute value in [positive length](#positive-length) units, e.g. `1.5cm`.
             - Relative to line height, e.g. `1.25`.
+    align:
+      value: alignment
+      brief: Text alignment.
+      details: |
+        Possible values are:
+        @enum ParagraphAlignment
+    thematic-break:
+      type: bool
+      brief: Thematic break.
     indent:
       value: left right first-line
       brief: Paragraph indentation.
@@ -48,6 +107,18 @@
         - **first-line** @optional - First line indentation in [length](#length) units.
           This is relative to the left indentation and it can be negative to create a hanging indent.
           Zero by default.
+    keep-next:
+      type: bool
+      brief: Keep next.
+    keep-lines:
+      type: bool
+      brief: Keep lines.
+    outline:
+      type: uint
+      brief: Outline level.
+      details: |
+        Possible values are numbers from `1` to `9`.
+        By default, paragraph is not in the document outline.
 
 - enum-name: ParagraphAlignment
   combine: [ AlignmentType ]

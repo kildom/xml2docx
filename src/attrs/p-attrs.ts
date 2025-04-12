@@ -20,28 +20,20 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { splitListValues, undefEmpty } from '../common';
+import { delUndef, splitListValues, undefEmpty } from '../common';
 import { Element } from '../xml';
 import { getBorders } from './borders-attrs';
-import { AlignmentTypeAliases } from '../enums';
+import { AlignmentTypeAliases, HeadingLevelAliases } from '../enums';
 
 
-/*>>> : exactly|at-least distance|multiple
-*/
 function getLineSpacing(element: Element, name: string): docx.ISpacingProperties | undefined {
     let text = element.attributes[name];
-    // TODO: beforeAutoSpacing?: boolean; afterAutoSpacing?: boolean;
     let spacing = splitListValues(element, name, text, {
-        //* `exactly|at-least` *[optional]* - Use exactly or at least the value. `at-least` by default.
         exactly: (value: string) => value.toLowerCase()[0] === 'e' ? true : undefined,
         atLeast: (value: string) => value.toLowerCase()[0] === 'a' ? true : undefined,
-        //* `distance` *[optional]* - Absolute distance. @@
         distance: (value: string) => convert.positiveUniversalMeasureInt.noErr(value, convert.UnitsPerPt.dxa),
-        //* `multiple` *[optional]* - Multiple of one line, fractions allowed. @@
         multiple: (value: string) => convert.ufloat.noErr(value),
     }) as { distance: number, multiple: number, exactly: boolean } | undefined;
-    /*> Provide exactly one of `distance` or `multiple`.
-    */
 
     if (spacing?.distance !== undefined) {
         return {
@@ -58,25 +50,20 @@ function getLineSpacing(element: Element, name: string): docx.ISpacingProperties
     }
 }
 
-/*>>> : before after contextual
-*/
 function getSpacing(element: Element, name: string): docx.ILevelParagraphStylePropertiesOptions | undefined {
     let text = element.attributes[name];
     let spacing = splitListValues(element, name, text, {
-        //* `before` *[optional]* - Space before paragraph. @@
         before: (value: string) => convert.positiveUniversalMeasureInt.noErr(value, convert.UnitsPerPt.dxa),
-        //* `after` *[optional]* - Space after paragraph. @@
         after: (value: string) => convert.positiveUniversalMeasureInt.noErr(value, convert.UnitsPerPt.dxa),
-        //* `contextual` *[optional]* - Use contextual spacing. If set, it is literal `contextual`.
         contextual: (value: string) => value.toLowerCase()[0] === 'c' ? true : undefined,
     }) as { before: number, after: number, contextual: boolean } | undefined;
 
     if (spacing) {
         return {
-            spacing: {
+            spacing: undefEmpty({
                 before: spacing.before,
                 after: spacing.after,
-            },
+            }),
             contextualSpacing: spacing.contextual,
         };
     } else {
@@ -85,17 +72,12 @@ function getSpacing(element: Element, name: string): docx.ILevelParagraphStylePr
 }
 
 
-/*>>> : left right first-line
-*/
 function getIndent(element: Element, name: string): docx.IIndentAttributesProperties | undefined {
 
     let indent = element.attributes[name];
     let result = splitListValues(element, name, indent, {
-        //* `left` *[optional]* - Left indent. Zero by default. @filterPositiveUniversalMeasure
         left: (value: string) => convert.positiveUniversalMeasure.noErr(value),
-        //* `right` *[optional]* - Right indent. Zero by default. @filterPositiveUniversalMeasure
         right: (value: string) => convert.positiveUniversalMeasure.noErr(value),
-        //* `first-line` *[optional]* - First line offset relative to `left`. Zero by default. @filterUniversalMeasure
         firstLine: (value: string) => convert.universalMeasure.noErr(value),
     });
 
@@ -107,58 +89,42 @@ function getIndent(element: Element, name: string): docx.IIndentAttributesProper
     return result;
 }
 
-/*>>> */
 export function getILevelParagraphStylePropertiesOptions(element: Element) {
-    //* Vertical spacing of the paragraph. @@
     let spacing = getSpacing(element, 'spacing');
-    //* Spacing between lines. @@
     let lineSpacing = getLineSpacing(element, 'linespacing');
     let options: docx.ILevelParagraphStylePropertiesOptions = {
-        //* Text alignment. @enum:AlignmentType+AlignmentTypeAliases
         alignment: convert.enumeration(element, 'align', docx.AlignmentType, AlignmentTypeAliases),
-        //* Text indentation. @@
-        indent: getIndent(element, 'indent'),
-        //* Keep text lines. @@
-        keepLines: convert.bool(element, 'keeplines'),
-        //* Keep next. @@
-        keepNext: convert.bool(element, 'keepnext'),
-        //* Outline level if this paragraph should be part of document outline. @@
-        outlineLevel: convert.uint(element, 'outline'),
+        thematicBreak: convert.bool(element, 'thematicbreak'),
         contextualSpacing: spacing?.contextualSpacing,
+        indent: getIndent(element, 'indent'),
         spacing: undefEmpty({
             ...spacing?.spacing,
             ...lineSpacing,
-        })
+        }),
+        keepNext: convert.bool(element, 'keepnext'),
+        keepLines: convert.bool(element, 'keeplines'),
+        outlineLevel: convert.uint(element, 'outline'),
     };
     return options;
 }
 
 
-/*>>>
-@merge:getILevelParagraphStylePropertiesOptions
-*/
 export function getIParagraphStylePropertiesOptions(element: Element) {
     let options: docx.IParagraphStylePropertiesOptions = {
         ...getILevelParagraphStylePropertiesOptions(element),
-        // TODO: numbering
     };
     return options;
 }
 
 
-/*>>> : position type leader, ...
-*/
 function getSingleTabStop(element: Element, tab: string): docx.TabStopDefinition | undefined {
 
     let result = splitListValues(element, 'tabs', tab, {
-        //* `type` *[optional]* - Type of tab. @enum:TabStopType
         type: (value: string) => [
             convert.enumeration.noErr(element, value, docx.TabStopType),
             () => docx.TabStopType.LEFT,
         ],
-        //* `leader` *[optional]* - Type of tab leader. @enum:LeaderType
         leader: (value: string) => convert.enumeration.noErr(element, value, docx.LeaderType),
-        //* `position` *[required]* - Tab position. @@
         position: [
             (value: string) => convert.universalMeasureInt.noErr(value, convert.UnitsPerPt.dxa),
             () => 0,
@@ -169,9 +135,6 @@ function getSingleTabStop(element: Element, tab: string): docx.TabStopDefinition
     return result as docx.TabStopDefinition | undefined;
 }
 
-/*>>>
-@merge:getSingleTabStop
-*/
 function getTabStops(element: Element): docx.TabStopDefinition[] | undefined {
     let tabs = element.attributes.tabs;
     if (tabs === undefined) return undefined;
@@ -181,28 +144,24 @@ function getTabStops(element: Element): docx.TabStopDefinition[] | undefined {
         .sort((a, b) => a!.position - b!.position) as docx.TabStopDefinition[];
 }
 
-/*>>>
-@merge:getIParagraphStylePropertiesOptions
-*/
 export function getIParagraphPropertiesOptions(element: Element) {
     let attributes = element.attributes;
     let options: docx.IParagraphPropertiesOptions = {
         ...getIParagraphStylePropertiesOptions(element),
-        //* Paragraph border. @@
         border: getBorders(element, 'border', attributes.border),
-        //* Force page break before this paragraph. @@
+        heading: convert.enumeration(element, 'heading', docx.HeadingLevel, HeadingLevelAliases),
+        bidirectional: convert.bool(element, 'bidirectional'),
         pageBreakBefore: convert.bool(element, 'pagebreak'),
-        //* Tabulator stops. @@
         tabStops: getTabStops(element),
         style: attributes.style,
-        // TODO: bullet - numbering
         shading: attributes.background === undefined ? undefined : {
             type: docx.ShadingType.SOLID,
             color: convert.color(element, 'background'),
         },
-        // TODO: what is frame?
+        widowControl: convert.bool(element, 'widowcontrol'),
+        suppressLineNumbers: convert.bool(element, 'suppresslinenumbers'),
         wordWrap: convert.bool(element, 'wordwrap'),
-        // TODO: what is scale?
+        overflowPunctuation: convert.bool(element, 'overflowpunctuation'),
     };
-    return options;
+    return delUndef(options);
 }

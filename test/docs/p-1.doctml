@@ -1,0 +1,27 @@
+<document>
+    <%! eval(utils.include('tc.js')) %>
+
+    <%= testCase('p: Simple') %>
+    <p>Simple paragraph.</p>
+
+    <%= testCase('p:align: Left', 'p:align: Right', 'p:align: Center', 'p:align: Justify') %>
+    <p align="left"><b>Left.</b></p>
+    <p align="right"><b>Right.</b></p>
+    <p align="center"><b>Center.</b></p>
+    <p align="justify"><b>Justify.</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut in dolor in dui vestibulum auctor vitae at lectus. Vivamus sit amet dolor non orci iaculis pharetra. Donec efficitur mauris purus, non euismod lectus pretium in. Nunc sed elit et ante posuere ullamcorper ac eu magna. Fusce rutrum in magna non consectetur. Nulla dignissim mollis nibh, ac scelerisque ligula laoreet a. Maecenas quis augue ut urna congue euismod sit amet in purus.</p>
+
+    <%= testCase('p: Left trim', 'p: Right trim') %>
+    <p border="black single 1pt 0cm" font.size="1cm"> Space before trimmed</p>
+    <p border="black single 1pt 0cm" font.size="1cm"> <group> Space before trimmed</group></p>
+    <p border="black single 1pt 0cm" font.size="1cm">Space after trimmed </p>
+    <p border="black single 1pt 0cm" font.size="1cm"><group>Space after trimmed </group> </p>
+    <p border="black single 1pt 0cm" font.size="1cm"> Both trimmed </p>
+    <p border="black single 1pt 0cm" font.size="1cm"> <group> Both trimmed </group> </p>
+    <p border="black single 1pt 0cm" font.size="1cm"><span> Space before preserved</span></p>
+    <p border="black single 1pt 0cm" font.size="1cm"><span> <group> Space before preserved</group></span></p>
+    <p border="black single 1pt 0cm" font.size="1cm"><span>Space after preserved </span></p>
+    <p border="black single 1pt 0cm" font.size="1cm"><span><group>Space after preserved </group> </span></p>
+    <p border="black single 1pt 0cm" font.size="1cm"><span> Both preserved </span></p>
+    <p border="black single 1pt 0cm" font.size="1cm"><span> <group> Both preserved </group> </span></p>
+
+</document>

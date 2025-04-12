@@ -1,0 +1,22 @@
+- tag-name: group
+  brief: Group of tags.
+  custom-page: |
+    # &lt;group&gt;
+
+    This tag may appear in anywhere in the document.
+    It is a virtual tag that does not exists in final document tree, but instead it passes all its children to the parent tag.
+
+    It is used to group tags together and apply the same attributes to all of them using attributes inheritance.
+
+    For example, if you want to align few paragraphs to the center:
+
+    ```
+    <group p.align="center">
+      <p>First paragraph</p>
+      <p>Second paragraph</p>
+      <p>Third paragraph</p>
+    </group>
+    ```
+    <!-- @preview -->
+
+    Consider also using styles (`<p-style>` and `<font-style>`) instead of this tag.
