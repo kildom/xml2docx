@@ -18,33 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as docx from 'docx';
-import * as convert from '../convert';
-import { Mutable } from '../common';
-import { processChildren, TranslatorState } from '../translator';
-import { Element } from '../xml';
-import { getIRunStylePropertiesOptions } from '../attrs/font-attrs';
-import { ObjectContainer } from './document';
+import * as sax from 'sax';
 
-
-export function fontStyleTag(ts: TranslatorState, element: Element): any[] {
-
-    processChildren(ts, element, { tags: {}, removeSpaces: true });
-
-    let opt: Mutable<docx.ICharacterStyleOptions> = {
-        id: convert.mandatory(element, 'id'),
-        basedOn: element.attributes.basedon,
-        name: element.attributes.name,
-        run: getIRunStylePropertiesOptions(element),
-    };
-
-    opt.name = opt.name || opt.id;
-
-    ts.ctx.fontStylesMap.set(opt.id, opt.id);
-    if (!ts.ctx.fontStylesMap.has(opt.name)) {
-        ts.ctx.fontStylesMap.set(opt.name, opt.id);
-    }
-
-    return [new ObjectContainer('ICharacterStyleOptions', opt)];
+export interface Style {
+    type: 'paragraph' | 'character';
+    id: string;
+    name?: string;
 }
 
+export function getDocxStyles(xmlText: string) {
+
+    let parser = sax.parser(false, {
+        normalize: true,
+        lowercase: true,
+    });
+
+    let styles: Style[] = [];
+    let current: Style | undefined = undefined;
+
+    parser.onopentag = (tag: sax.Tag) => {
+        if (tag.name === 'w:style') {
+            let type = tag.attributes['w:type'];
+            let id = tag.attributes['w:styleid'];
+            if (type === 'paragraph' || type === 'character') {
+                current = { type, id };
+                styles.push(current);
+            }
+        } else if (current && tag.name === 'w:name') {
+            current.name = tag.attributes['w:val'];
+        }
+    };
+
+    parser.onclosetag = (tagName: string) => {
+        if (tagName === 'w:style') {
+            current = undefined;
+        }
+    };
+
+    parser.write(xmlText);
+    parser.close();
+
+    return styles;
+}

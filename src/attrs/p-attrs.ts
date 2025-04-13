@@ -20,7 +20,7 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { delUndef, splitListValues, undefEmpty } from '../common';
+import { delUndef, splitListValues, translateStyle, undefEmpty } from '../common';
 import { Element } from '../xml';
 import { getBorders } from './borders-attrs';
 import { AlignmentTypeAliases, HeadingLevelAliases } from '../enums';
@@ -153,7 +153,7 @@ export function getIParagraphPropertiesOptions(element: Element) {
         bidirectional: convert.bool(element, 'bidirectional'),
         pageBreakBefore: convert.bool(element, 'pagebreak'),
         tabStops: getTabStops(element),
-        style: attributes.style,
+        style: translateStyle(element, 'style', element.ctx.paragraphStylesMap),
         shading: attributes.background === undefined ? undefined : {
             type: docx.ShadingType.SOLID,
             color: convert.color(element, 'background'),

@@ -20,57 +20,8 @@
 
 import * as fs from 'node:fs';
 import { DebugFileType, DocTMLError, generate, Options, Result } from './doctml';
-
-const linuxASCIIArt = `
-    \x1B[38;2;87;144;246m+▄\x1B[48;2;87;144;246m                \x1B[0m\x1B[38;2;87;144;246m▄\x1B[0m
-    \x1B[38;2;254;254;254m\x1B[48;2;87;144;246m           ▄      \x1B[0m
-    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m     ▂    ▟▘▂     \x1B[0m
-    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m ▂▄▆▀Ó   ▟▘ Ó▀▆▄▂ \x1B[0m
-    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m Ć▀ł▄▂  ▟▘  ▂▄ł▀Ć \x1B[0m
-    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m     Ć ▟▘   Ć     \x1B[0m
-    \x1B[38;2;254;254;254m++\x1B[48;2;7;49;128m      ▝▘          \x1B[0m
-    \x1B[38;2;7;49;128m+▀\x1B[48;2;7;49;128m                \x1B[0m\x1B[38;2;7;49;128m▀\x1B[0m
-    \x1B[38;2;130;130;130m        ▁▁\x1B[0m
-    \x1B[38;2;130;130;130m▕▔╲ ▁ ▁ ▕ ▕╲╱▏▕\x1B[0m
-    \x1B[38;2;130;130;130m▕▁╱▕ ▏▏ ▕ ▕  ▏▕▁▁\x1B[0m
-    \x1B[38;2;130;130;130m    ▔ ▔\x1B[0m
-    `
-    .replace(/Ó/g, '\x1B[48;2;254;254;254m\x1B[38;2;21;101;243m▆\x1B[38;2;254;254;254m\x1B[48;2;21;101;243m')
-    .replace(/Ć/g, '\x1B[48;2;254;254;254m\x1B[38;2;10;74;189m▆\x1B[38;2;254;254;254m\x1B[48;2;10;74;189m')
-    .replace(/ł/g, '\x1B[48;2;254;254;254m\x1B[38;2;10;74;189m▂\x1B[38;2;254;254;254m\x1B[48;2;10;74;189m')
-    ;
-
-const macASCIIArt = `
-    \x1B[38;5;111m▄\x1B[48;5;111m                \x1B[0m\x1B[38;5;111m▄\x1B[0m
-    \x1B[38;5;15m+\x1B[48;5;111m           ▄      \x1B[0m
-    \x1B[38;5;15m++\x1B[48;5;33m     ▂    ▟▘▂     \x1B[0m
-    \x1B[38;5;15m++\x1B[48;5;33m ▂▄▆▀Ó   ▟▘ Ó▀▆▄▂ \x1B[0m
-    \x1B[38;5;15m++\x1B[48;5;26m Ć▀ł▄▂  ▟▘  ▂▄ł▀Ć \x1B[0m
-    \x1B[38;5;15m++\x1B[48;5;26m     Ć ▟▘   Ć     \x1B[0m
-    \x1B[38;5;15m++\x1B[48;5;25m      ▝▘          \x1B[0m
-    \x1B[38;5;25m▀\x1B[48;5;25m                \x1B[0m\x1B[38;5;25m▀\x1B[0m
-    \x1B[38;5;247m        ▁▁\x1B[0m
-    \x1B[38;5;247m▕▔╲ ▁ ▁ ▕ ▕╲╱▏▕\x1B[0m
-    \x1B[38;5;247m▕▁╱▕ ▏▏ ▕ ▕  ▏▕▁▁\x1B[0m
-    \x1B[38;5;247m    ▔ ▔\x1B[0m
-    `
-    .replace(/Ó/g, '\x1B[48;5;15m\x1B[38;5;33m▆\x1B[38;5;15m\x1B[48;5;33m')
-    .replace(/Ć/g, '\x1B[48;5;15m\x1B[38;5;26m▆\x1B[38;5;15m\x1B[48;5;26m')
-    .replace(/ł/g, '\x1B[48;5;15m\x1B[38;5;26m▂\x1B[38;5;15m\x1B[48;5;26m')
-    ;
-
-const winASCIIArt = `
-    \x1B[38;2;87;144;246m+▄\x1B[48;2;87;144;246m               \x1B[0m\x1B[38;2;87;144;246m▄\x1B[0m
-    \x1B[38;2;254;254;254m\x1B[48;2;87;144;246m          ▄      \x1B[0m
-    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m         ▄▀      \x1B[0m
-    \x1B[38;2;254;254;254m\x1B[48;2;21;101;243m ▄▄▀▀   ▄▀  ▀▀▄▄ \x1B[0m
-    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m ▀▀▄▄  ▄▀   ▄▄▀▀ \x1B[0m
-    \x1B[38;2;254;254;254m+\x1B[48;2;10;74;189m      ▄▀         \x1B[0m
-    \x1B[38;2;254;254;254m++\x1B[48;2;7;49;128m      ▀          \x1B[0m
-    \x1B[38;2;7;49;128m+++++▀\x1B[48;2;7;49;128m               \x1B[0m\x1B[38;2;7;49;128m▀\x1B[0m
-    \x1B[38;2;130;130;130m\x1B[0m
-    \x1B[38;2;130;130;130m   D o c T M L\x1B[0m
-    `;
+import { embedMain } from './cliEmbed';
+import { printUsage } from './cliUsage';
 
 const USAGE = `
 ~USAGE:~                                                   $$
@@ -103,6 +54,12 @@ Options:                                                 $$
              CODE FROM THE <input.xml> FILE WITHOUT LIMITATIONS. USE ONLY
              DOCTML FILES FROM A TRUSTED SOURCE.
 
+~-t <tool>~
+~--tool <tool>~
+    Execute the specified tool. Currently only "embed" is supported.
+    For help on the tool, type:
+        doctml -t embed
+
 ~--help~
     Show this message.
 
@@ -120,37 +77,6 @@ Options:                                                 $$
 You can use ~"-"~ as <input.xml> or <data.json> to read the file from standard
 input. You can also use ~"-"~ as [output.docx] to write result to standard output.
 `;
-
-
-function printUsage(failed?: string): void {
-    let text;
-    if (process.stdout.isTTY && !failed) {
-        let highlight = false;
-        let aaText = process.platform.startsWith('win') ? winASCIIArt
-            : process.platform.startsWith('darwin') ? macASCIIArt
-                : linuxASCIIArt;
-        let aaLines = aaText
-            .split('\n')
-            .map(x => x.trim().replace(/\+/g, ''))
-            .filter(x => x.length > 0)
-            ;
-        text = USAGE
-            .replace(/~~/g, () => { highlight = !highlight; return highlight ? '\x1B[33m' : '\x1B[0m'; })
-            .replace(/~/g, () => { highlight = !highlight; return highlight ? '\x1B[38;2;87;144;246m' : '\x1B[0m'; })
-            .replace(/\$\$/g, () => aaLines.shift() ?? '');
-    } else {
-        text = USAGE
-            .replace(/~/g, '')
-            .replace(/ *\$\$/g, '');
-    }
-    if (failed) {
-        console.error('\n' + failed);
-        console.log(text);
-        process.exit(3);
-    } else {
-        console.log(text);
-    }
-}
 
 
 function printLicense(): void {
@@ -212,7 +138,7 @@ function parseArguments() {
     let argCounter = 0;
     let args = process.argv.slice(2);
     if (args.length === 0) {
-        printUsage();
+        printUsage(USAGE);
         process.exit(1);
     }
     for (let i = 0; i < args.length; i++) {
@@ -221,9 +147,9 @@ function parseArguments() {
 
         if (arg === '-d' || arg === '--data') {
             if (options.dataFile) {
-                printUsage('Only one data file allowed.');
+                printUsage(USAGE, 'Only one data file allowed.');
             } else if (next === undefined) {
-                printUsage('The "--data" option requires a parameter.');
+                printUsage(USAGE, 'The "--data" option requires a parameter.');
             } else {
                 options.dataFile = next;
                 i++;
@@ -231,7 +157,7 @@ function parseArguments() {
         } else if (arg === '--docx.js') {
             options.docxJsEnabled = true;
         } else if (arg === '--help' || arg === '/?' || arg === '-h' || arg === '/h') {
-            printUsage();
+            printUsage(USAGE);
             process.exit(0);
         } else if (arg === '--license') {
             printLicense();
@@ -242,7 +168,7 @@ function parseArguments() {
         } else if (arg === '--debug') {
             debug = true;
         } else if (arg.startsWith('-') && arg.length > 1) {
-            throw printUsage(`Unknown option: ${arg}`);
+            throw printUsage(USAGE, `Unknown option: ${arg}`);
         } else if (argCounter === 0) {
             options.inputFile = arg;
             argCounter++;
@@ -250,7 +176,7 @@ function parseArguments() {
             options.outputFile = arg;
             argCounter++;
         } else {
-            throw printUsage('Too many arguments.');
+            throw printUsage(USAGE, 'Too many arguments.');
         }
     }
     return { options, debug };
@@ -318,8 +244,28 @@ function printError(err: any, debug: boolean): void {
     }
 }
 
+function getToolName(): string {
+    let args = process.argv.slice(2);
+    if (args.length >= 2 && (args[0] === '--tool' || args[0] === '-t')) {
+        return args[1];
+    } else {
+        return 'doctml';
+    }
+}
 
 async function main() {
+
+    let toolName = getToolName();
+    switch (toolName) {
+    case 'embed':
+        embedMain();
+        return;
+    case 'doctml':
+        break;
+    default:
+        printError(new Error('Unknown tool name: ' + toolName), false);
+        return;
+    }
 
     let args = parseArguments();
     addCallbacks(args.options, args.debug);

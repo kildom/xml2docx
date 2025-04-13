@@ -28,6 +28,8 @@ import { pStyleTag } from './p-style';
 import { tableTag } from './table';
 import { headerFooterTag, sectionTag } from './section';
 import { HeaderFooterPage } from '../enums';
+import { unZip } from '../unzip';
+import { getDocxStyles } from '../docxStyles';
 import * as convert from '../convert';
 
 export class ObjectContainer {
@@ -44,6 +46,18 @@ export class ObjectContainer {
 }
 
 export function documentTag(ts: TranslatorState, element: Element): docx.Document {
+
+    let externalStyles = loadExternalStyles(element, convert.src(element, 'styles', false));
+
+    if (externalStyles !== undefined) {
+        for (let style of getDocxStyles(externalStyles)) {
+            let map = (style.type === 'paragraph') ? ts.ctx.paragraphStylesMap : ts.ctx.fontStylesMap;
+            map.set(style.id, style.id);
+            if (style.name && !map.has(style.name)) {
+                map.set(style.name, style.id);
+            }
+        }
+    }
 
     let list = processChildren(ts, element, {
         tags: {
@@ -109,6 +123,7 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
         keywords: attributes.keywords,
         description: attributes.description,
         lastModifiedBy: attributes.lastmodifiedby,
+        externalStyles,
         background: undefEmpty({
             color: convert.color(element, 'background'),
         }),
@@ -183,5 +198,42 @@ function embeddedFontTag(ts: TranslatorState, element: Element): ObjectContainer
         characterSet: convert.enumeration(element, 'charset', docx.CharacterSet),
         data: Buffer.from(data),
     });
-    return fonts.map(x => ({type: 'FontOptions', value: x}));
+    return fonts.map(x => new ObjectContainer('FontOptions', x));
+}
+
+export function loadStylesData(data: Uint8Array) {
+    let stylesFound = false;
+    let entries = unZip(data, fileName => {
+        if (stylesFound) {
+            return null;
+        } else if (fileName === 'word/styles.xml') {
+            stylesFound = true;
+            return true;
+        } else {
+            return false;
+        }
+    });
+    if (entries.length !== 1) {
+        throw new Error('ZIP: Failed to find word/styles.xml in the document');
+    }
+    return entries[0].read();
+}
+
+function loadExternalStyles(element: Element, data: Uint8Array | undefined): string | undefined {
+    if (!data) {
+        return undefined;
+    }
+    let stylesData: Uint8Array;
+    if (data.length > 2 && data[0] === 0x50 && data[1] === 0x4B) {
+        try {
+            stylesData = loadStylesData(data);
+        } catch (err) {
+            let msg = typeof err === 'object' && err !== null && (err as any).message ? (err as any).message : `${err}`;
+            element.ctx.error('Failed to read styles file: ' + msg);
+            return '';
+        }
+    } else {
+        stylesData = data;
+    }
+    return new TextDecoder().decode(stylesData);
 }

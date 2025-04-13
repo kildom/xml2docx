@@ -129,7 +129,7 @@ export function parse(ctx: Context): Element {
     return root;
 }
 
-function xmlEscape(text: string) {
+export function xmlEscape(text: string) {
     return text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')

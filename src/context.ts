@@ -39,6 +39,8 @@ export class Context implements Result {
     public input = '';
 
     public enumMapCache = new Map<any, Dict<string | number>>();
+    public paragraphStylesMap = new Map<string, string>();
+    public fontStylesMap = new Map<string, string>();
 
     public setOptions(options: Readonly<Options>) {
 

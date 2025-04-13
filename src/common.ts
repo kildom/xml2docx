@@ -170,9 +170,7 @@ export function undefEmpty<T>(obj: T | undefined): T | undefined {
 }
 
 export function delUndef<T>(obj: T | undefined): T | undefined {
-    if (obj === undefined) {
-        return undefined;
-    } else {
+    if (obj !== undefined) {
         let keys = Object.keys(obj as object);
         for (let key of keys) {
             if ((obj as any)[key] === undefined) {
@@ -180,4 +178,32 @@ export function delUndef<T>(obj: T | undefined): T | undefined {
             }
         }
     }
+    return obj;
 }
+
+export function translateStyle(element: Element, attributeName: string, stylesMap: Map<string, string>): string | undefined {
+    let style = element.attributes[attributeName];
+    if (!style) {
+        return undefined;
+    }
+    // Direct match
+    if (stylesMap.has(style)) {
+        return stylesMap.get(style)!;
+    }
+    // Lower case match
+    let entries = [...stylesMap.entries()];
+    style = style.toLowerCase();
+    let entry = entries.find(x => x[0].toLowerCase() === style);
+    if (entry) {
+        return entry[1];
+    }
+    // normalize match
+    style = style.replace(/[^a-z0-9_]/g, '');
+    entry = entries.find(x => x[0].toLowerCase().replace(/[^a-z0-9_]/g, '') === style);
+    if (entry) {
+        return entry[1];
+    }
+    // Fallback to original style name
+    return element.attributes[attributeName];
+}
+

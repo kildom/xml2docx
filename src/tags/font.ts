@@ -20,7 +20,7 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { Dict } from '../common';
+import { Dict, translateStyle } from '../common';
 import { convertElement, prepareElement, TagFunction, TextFormat, TranslatorState } from '../translator';
 import { Element } from '../xml';
 import { getIRunStylePropertiesOptions } from '../attrs/font-attrs';
@@ -64,12 +64,10 @@ export function fontTag(ts: TranslatorState, element: Element, formatChange?: Te
 
     let tsInner = prepareElement(ts, element, fontTagOptions);
 
-    let attributes = element.attributes;
-
     let format: TextFormat = {
         ...formatChange,
         ...getIRunStylePropertiesOptions(element),
-        style: attributes.style,
+        style: translateStyle(element, 'style', element.ctx.fontStylesMap),
         avoidOrphans: convert.uint(element, 'avoidorphans'),
         useVarWidthNoBreakSpace: convert.bool(element, 'vwnbsp'),
     };

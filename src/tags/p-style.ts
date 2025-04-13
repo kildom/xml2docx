@@ -68,6 +68,11 @@ export function pStyleTag(ts: TranslatorState, element: Element): any[] {
 
     opt.name = opt.name || opt.id;
 
+    ts.ctx.paragraphStylesMap.set(opt.id, opt.id);
+    if (!ts.ctx.paragraphStylesMap.has(opt.name)) {
+        ts.ctx.paragraphStylesMap.set(opt.name, opt.id);
+    }
+
     return [new ObjectContainer('IParagraphStyleOptions', opt)];
 }
 

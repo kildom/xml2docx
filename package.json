@@ -45,11 +45,13 @@
     "dependencies": {
         "docx": "^9.1.1",
         "json5": "^2.2.3",
+        "pako": "^2.1.0",
         "sax": "^1.4.1",
         "underscore": "^1.13.7"
     },
     "devDependencies": {
         "@types/node": "^22.13.0",
+        "@types/pako": "^2.0.3",
         "@types/sax": "^1.2.7",
         "@types/underscore": "^1.13.0",
         "@typescript-eslint/eslint-plugin": "^8.22.0",
