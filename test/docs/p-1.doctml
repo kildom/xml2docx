@@ -1,5 +1,5 @@
 <document>
-    <%! eval(utils.include('tc.js')) %>
+    <%! eval(utils.include(utils.inputDir + '../include/tc.js')) %>
 
     <%= testCase('p: Simple') %>
     <p>Simple paragraph.</p>

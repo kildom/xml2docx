@@ -3,6 +3,17 @@
   children: [ section, header, footer, p-style, font-style, table, p, embedded-font ]
   implicit: p
   attributes:
+    styles:
+      type: file
+      brief: External styles.
+      details: |
+        Styles will be loaded from the specified docx file.
+        You can create a docx file and define styles there.
+      TC: [Paragraph, Character, Missing]
+    background:
+      type: color
+      brief: Background color of the document.
+      TC: [Orange]
     title:
       type: str
       brief: Title in document properties.
@@ -27,10 +38,6 @@
       type: str
       brief: Last modified by name in document properties.
       TC: [Exists, Missing]
-    background:
-      type: color
-      brief: Background color of the document.
-      TC: [Exists, Missing]
     custom-properties:
       value: name=value, name=value, ...
       brief: Custom document properties.
@@ -44,39 +51,3 @@
       type: int
       brief: Revision number of the document.
       TC: [Revision]
-
-- tag-name: embedded-font
-  brief: Embeds font file into document file.
-  attributes:
-    name:
-      type: str
-      required: true
-      brief: Name of the font.
-    src: 
-      type: file
-      required: true
-      brief: TTF font file.
-    charset:
-      value: charset
-      brief: Charset of the font.
-      details: |
-        Possible values are:
-        - `ansi` (alias `00`)
-        - `default` (alias `01`)
-        - `symbol` (alias `02`)
-        - `mac` (alias `4D`)
-        - `jis` (alias `80`)
-        - `hangul` (alias `81`)
-        - `johab` (alias `82`)
-        - `gb-2312` (alias `86`)
-        - `chinese-big5` (alias `88`)
-        - `greek` (alias `A1`)
-        - `turkish` (alias `A2`)
-        - `vietnamese` (alias `A3`)
-        - `hebrew` (alias `B1`)
-        - `arabic` (alias `B2`)
-        - `baltic` (alias `BA`)
-        - `russian` (alias `CC`)
-        - `thai` (alias `DE`)
-        - `east-europe` (alias `EE`)
-        - `oem` (alias `FF`)

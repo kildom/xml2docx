@@ -36,7 +36,7 @@ export class ZipEntry {
             return this.data;
         }
         try {
-            let zlib = eval('require("node:zlib")');
+            let zlib = new Function('return require("node:zlib")')();
             let buffer = zlib.inflateRawSync(this.data) as Buffer;
             return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
         } catch (_e) {

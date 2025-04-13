@@ -56,7 +56,7 @@ function testCase(...list) {
     return `
         <section/>
             <p>
-                <img src="${dataToImage(list)}" width="64pt" height="64pt" horizontal="page 0cm" vertical="page 0cm"
+                <img src="${dataToImage(list)}" width="32pt" height="32pt" horizontal="page 0cm" vertical="page 0cm"
                 /><font color="blue" size="12pt" face="Arial" bold="y">${list.map(x => `${x}<br/>`).join('')}</font>
             </p>
         <section/>

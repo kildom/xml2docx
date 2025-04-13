@@ -3,11 +3,11 @@ import child_process from 'node:child_process';
 
 
 const targets:{[key:string]:[string, string, string[]]} = {
-    'x86_64-win': [ 'x86_64-pc-windows-msvc', '.exe', ['--icon', '../../scripts/icon.ico']],
-    'x86_64-macos': [ 'x86_64-apple-darwin', '', []],
-    'aarch64-macos': [ 'aarch64-apple-darwin', '', []],
-    'x86_64-linux': [ 'x86_64-unknown-linux-gnu', '', []],
-    'aarch64-linux': [ 'aarch64-unknown-linux-gnu', '', []],
+    'x64-win': [ 'x86_64-pc-windows-msvc', '.exe', ['--icon', '../../scripts/icon.ico']],
+    'x64-macos': [ 'x86_64-apple-darwin', '', []],
+    'arm64-macos': [ 'aarch64-apple-darwin', '', []],
+    'x64-linux': [ 'x86_64-unknown-linux-gnu', '', []],
+    'arm64-linux': [ 'aarch64-unknown-linux-gnu', '', []],
 };
 
 

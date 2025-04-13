@@ -1,0 +1,39 @@
+
+- tag-name: embedded-font
+  brief: Embeds font file into document file.
+  attributes:
+    name:
+      type: str
+      required: true
+      brief: Name of the font.
+      TC: [Normal, With spaces, With special characters]
+    src: 
+      type: file
+      required: true
+      brief: TTF font file.
+      TC: [Normal, Data URI, Missing]
+    charset:
+      value: charset
+      brief: Charset of the font.
+      details: |
+        Possible values are:
+        - `ansi` (alias `00`)
+        - `default` (alias `01`)
+        - `symbol` (alias `02`)
+        - `mac` (alias `4D`)
+        - `jis` (alias `80`)
+        - `hangul` (alias `81`)
+        - `johab` (alias `82`)
+        - `gb-2312` (alias `86`)
+        - `chinese-big5` (alias `88`)
+        - `greek` (alias `A1`)
+        - `turkish` (alias `A2`)
+        - `vietnamese` (alias `A3`)
+        - `hebrew` (alias `B1`)
+        - `arabic` (alias `B2`)
+        - `baltic` (alias `BA`)
+        - `russian` (alias `CC`)
+        - `thai` (alias `DE`)
+        - `east-europe` (alias `EE`)
+        - `oem` (alias `FF`)
+      TC: [Exists, Missing]

@@ -44,7 +44,7 @@ class TemplateUtils {
     }
 
     public include(fileName: string): string {
-        let template = this.ctx.readFile(this.inputDir + fileName, false) as string;
+        let template = this.ctx.readFile(fileName, false) as string;
         let text = renderTemplate(this.ctx, template, fileName);
         return text;
     }
