@@ -33,6 +33,10 @@ async function main() {
 
 async function docx2pdf(docxFiles: string[]) {
     for (let docxFile of docxFiles) {
+        // TODO: Maybe avoid using Python:
+        // https://github.com/AlJohri/docx2pdf/blob/master/docx2pdf/__init__.py
+        // const ActiveXObject = require('winax').ActiveXObject;
+        // const word = new ActiveXObject('Word.Application');
         console.log(`Converting ${docxFile} to PDF`);
         let pdfFile = docxFile.replace(/\.docx$/, '.pdf');
         let res = child_process.spawnSync('docx2pdf', [docxFile, pdfFile], { stdio: 'inherit' });
@@ -53,11 +57,12 @@ async function pdf2png(docxFiles: string[]) {
         let doc = mupdf.Document.openDocument(buffer, 'application/pdf');
         let pages = doc.countPages();
         for (let i = 0; i < pages; i++) {
-            console.log(`    page ${i + 1} / ${pages}.`);
+            process.stdout.write(`\r    page ${i + 1} / ${pages}.`);
             let page = doc.loadPage(i);
             let pixmap = page.toPixmap(mupdf.Matrix.scale(2, 2), mupdf.ColorSpace.DeviceRGB);
             fs.writeFileSync(pngFilePatten.replace('$', (i + 1).toString()), pixmap.asPNG());
         }
+        console.log(`\r    ${pages} pages converted.`);
     }
 }
 
