@@ -33,10 +33,7 @@ async function main() {
 
 async function docx2pdf(docxFiles: string[]) {
     for (let docxFile of docxFiles) {
-        // TODO: Maybe avoid using Python:
-        // https://github.com/AlJohri/docx2pdf/blob/master/docx2pdf/__init__.py
-        // const ActiveXObject = require('winax').ActiveXObject;
-        // const word = new ActiveXObject('Word.Application');
+        // TODO: Use scripts/docx2pdf.ps1 instead
         console.log(`Converting ${docxFile} to PDF`);
         let pdfFile = docxFile.replace(/\.docx$/, '.pdf');
         let res = child_process.spawnSync('docx2pdf', [docxFile, pdfFile], { stdio: 'inherit' });
