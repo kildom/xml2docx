@@ -33,10 +33,15 @@ async function main() {
 
 async function docx2pdf(docxFiles: string[]) {
     for (let docxFile of docxFiles) {
-        // TODO: Use scripts/docx2pdf.ps1 instead
         console.log(`Converting ${docxFile} to PDF`);
         let pdfFile = docxFile.replace(/\.docx$/, '.pdf');
-        let res = child_process.spawnSync('docx2pdf', [docxFile, pdfFile], { stdio: 'inherit' });
+        let res = child_process.spawnSync('powershell.exe', [
+            '-ExecutionPolicy',
+            'Bypass',
+            '-File',
+            'scripts\\docx2pdf.ps1',
+            docxFile,
+            pdfFile], { stdio: 'inherit' });
         if (res.error) {
             throw res.error;
         } else if (res.status) {
