@@ -3,7 +3,7 @@ import child_process from 'node:child_process';
 import * as mupdf from 'mupdf';
 import fs from 'node:fs';
 import { Runner } from './runner';
-import { CliRunner } from './runner-cli';
+import { CliRunner } from './runner-cli.mts';
 import path from 'node:path';
 
 async function doctml2docx() {
