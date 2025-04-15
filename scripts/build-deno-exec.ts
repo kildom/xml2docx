@@ -1,10 +1,6 @@
 import fs from 'fs';
 import child_process from 'node:child_process';
 
-// TODO: Use deno as npm package:
-// https://www.npmjs.com/package/deno
-// npm i --save-dev deno
-// npx deno compile ...
 
 const targets:{[key:string]:[string, string, string[]]} = {
     'x64-win': [ 'x86_64-pc-windows-msvc', '.exe', ['--icon', '../../scripts/icon.ico']],
@@ -25,8 +21,9 @@ fs.copyFileSync('dist/version.json', 'dist/deno-compile/version.json');
 function compile(dir: string, target: string, suffix: string, args: string[]): void {
 
     let res = child_process.spawnSync(
-        'deno',
+        'npx',
         [
+            'deno',
             'compile',
             '--allow-read', '--allow-write', '--allow-env',
             ...args,
@@ -39,6 +36,7 @@ function compile(dir: string, target: string, suffix: string, args: string[]): v
         {
             cwd: 'dist/deno-compile',
             stdio: 'inherit',
+            shell: true,
         }
     );
 
