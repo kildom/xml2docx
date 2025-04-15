@@ -1,6 +1,10 @@
 import fs from 'fs';
 import child_process from 'node:child_process';
 
+// TODO: Use deno as npm package:
+// https://www.npmjs.com/package/deno
+// npm i --save-dev deno
+// npx deno compile ...
 
 const targets:{[key:string]:[string, string, string[]]} = {
     'x64-win': [ 'x86_64-pc-windows-msvc', '.exe', ['--icon', '../../scripts/icon.ico']],
