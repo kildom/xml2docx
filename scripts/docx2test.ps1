@@ -16,11 +16,14 @@ if (-not $outputPath) {
     $outputPath = [System.IO.Path]::GetFullPath($outputPath)
 }
 
+$outputHtmlPath = [System.IO.Path]::ChangeExtension($outputPath, ".html")
+
 $word = New-Object -ComObject Word.Application
 
 try {
     $doc = $word.Documents.Open($inputPath)
     $doc.SaveAs($outputPath, 17)
+    $doc.SaveAs($outputHtmlPath, 10)
     $doc.Close()
     Write-Host "Successfully converted to: $outputPath"
 }
