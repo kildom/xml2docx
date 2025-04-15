@@ -39,7 +39,7 @@ async function docx2pdf(docxFiles: string[]) {
             '-ExecutionPolicy',
             'Bypass',
             '-File',
-            'scripts\\docx2pdf.ps1',
+            'scripts\\docx2test.ps1',
             docxFile,
             pdfFile], { stdio: 'inherit' });
         if (res.error) {
