@@ -1,16 +1,29 @@
 <document>
     <%! eval(utils.include(utils.inputDir + '../include/tc.js')) %>
 
-    <%= testCase('p: Simple') %>
-    <p>Simple paragraph.</p>
+    <%!// TODO: Remove "TC" from docs and assume, that every documented tag and attribute must be tested by at least one test case. %>
+    <%!// Single block of code may test multiple test cases. %>
 
-    <%= testCase('p:align: Left', 'p:align: Right', 'p:align: Center', 'p:align: Justify') %>
+    <!--
+    p: Check if simple `<p>` tag generates correct paragraph.
+    -->
+
+    <p>Lorem ipsum,</p>
+    <p>dolor sit amet.</p>
+
+    <!--
+    p.align: Check a few variants of paragraph alignment.
+    -->
+
     <p align="left"><b>Left.</b></p>
     <p align="right"><b>Right.</b></p>
     <p align="center"><b>Center.</b></p>
     <p align="justify"><b>Justify.</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut in dolor in dui vestibulum auctor vitae at lectus. Vivamus sit amet dolor non orci iaculis pharetra. Donec efficitur mauris purus, non euismod lectus pretium in. Nunc sed elit et ante posuere ullamcorper ac eu magna. Fusce rutrum in magna non consectetur. Nulla dignissim mollis nibh, ac scelerisque ligula laoreet a. Maecenas quis augue ut urna congue euismod sit amet in purus.</p>
 
-    <%= testCase('p: Left trim', 'p: Right trim') %>
+    <!--
+    p: Check if leading and trailing whitespaces are trimmed correctly inside `<p>` tag.
+    -->
+
     <p border="black single 1pt 0cm" font.size="1cm"> Space before trimmed</p>
     <p border="black single 1pt 0cm" font.size="1cm"> <group> Space before trimmed</group></p>
     <p border="black single 1pt 0cm" font.size="1cm">Space after trimmed </p>
@@ -23,5 +36,42 @@
     <p border="black single 1pt 0cm" font.size="1cm"><span><group>Space after preserved </group> </span></p>
     <p border="black single 1pt 0cm" font.size="1cm"><span> Both preserved </span></p>
     <p border="black single 1pt 0cm" font.size="1cm"><span> <group> Both preserved </group> </span></p>
+
+    <!--
+    p: Check if it correctly inherits attributes from parent.
+    -->
+
+    <group p.align="right" font.bold="1">
+        <p>This is right aligned.</p>
+        <p>This too.</p>
+    </group>
+
+    <!--
+    p: AAAAAAAAAs.
+    -->
+
+    <p>Pierwsza strona</p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p>Druga strona</p>
+
+    <!--
+    p: Check if children inherits its attributes.
+    -->
+
+    <p font.face="Arial" b.face="Courier New">Arial <b>Bold Courier New</b>. <font face="Times New Roman">Times New Roman</font></p>
+
+    <!-- TODO
+    p: Table is not allowed inside `<p>`.
+    ERROR: The <table> tag not expected here.
+    - - >
+
+    <p><table><tr><td></td></tr></table></p> -->
+
+    <!--
+    END
+    -->
 
 </document>
