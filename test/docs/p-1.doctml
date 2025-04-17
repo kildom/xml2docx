@@ -1,5 +1,4 @@
 <document>
-    <%! eval(utils.include(utils.inputDir + '../include/tc.js')) %>
 
     <%!// TODO: Remove "TC" from docs and assume, that every documented tag and attribute must be tested by at least one test case. %>
     <%!// Single block of code may test multiple test cases. %>
@@ -24,18 +23,18 @@
     p: Check if leading and trailing whitespaces are trimmed correctly inside `<p>` tag.
     -->
 
-    <p border="black single 1pt 0cm" font.size="1cm"> Space before trimmed</p>
-    <p border="black single 1pt 0cm" font.size="1cm"> <group> Space before trimmed</group></p>
-    <p border="black single 1pt 0cm" font.size="1cm">Space after trimmed </p>
-    <p border="black single 1pt 0cm" font.size="1cm"><group>Space after trimmed </group> </p>
-    <p border="black single 1pt 0cm" font.size="1cm"> Both trimmed </p>
-    <p border="black single 1pt 0cm" font.size="1cm"> <group> Both trimmed </group> </p>
-    <p border="black single 1pt 0cm" font.size="1cm"><span> Space before preserved</span></p>
-    <p border="black single 1pt 0cm" font.size="1cm"><span> <group> Space before preserved</group></span></p>
-    <p border="black single 1pt 0cm" font.size="1cm"><span>Space after preserved </span></p>
-    <p border="black single 1pt 0cm" font.size="1cm"><span><group>Space after preserved </group> </span></p>
-    <p border="black single 1pt 0cm" font.size="1cm"><span> Both preserved </span></p>
-    <p border="black single 1pt 0cm" font.size="1cm"><span> <group> Both preserved </group> </span></p>
+    <p border="black single 1pt 0cm"> Space before trimmed</p>
+    <p border="black single 1pt 0cm"> <group> Space before trimmed</group></p>
+    <p border="black single 1pt 0cm">Space after trimmed </p>
+    <p border="black single 1pt 0cm"><group>Space after trimmed </group> </p>
+    <p border="black single 1pt 0cm"> Both trimmed </p>
+    <p border="black single 1pt 0cm"> <group> Both trimmed </group> </p>
+    <p border="black single 1pt 0cm"><span> Space before preserved</span></p>
+    <p border="black single 1pt 0cm"><span> <group> Space before preserved</group></span></p>
+    <p border="black single 1pt 0cm"><span>Space after preserved </span></p>
+    <p border="black single 1pt 0cm"><span><group>Space after preserved </group> </span></p>
+    <p border="black single 1pt 0cm"><span> Both preserved </span></p>
+    <p border="black single 1pt 0cm"><span> <group> Both preserved </group> </span></p>
 
     <!--
     p: Check if it correctly inherits attributes from parent.
@@ -56,12 +55,16 @@
     <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
     <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
     <p>Druga strona</p>
+    <section size="A5" margin="5mm" border="blue 1mm" />
+    <p>Trzecia strona</p>
+    <section size="A6" margin="5mm" />
+    <p>Czwarta strona</p>
 
     <!--
     p: Check if children inherits its attributes.
     -->
 
-    <p font.face="Arial" b.face="Courier New">Arial <b>Bold Courier New</b>. <font face="Times New Roman">Times New Roman</font></p>
+    <p font.face="Arial" b.face="Courier New">Arial, <b>Bold Courier New<font face="Times New Roman">aaaaa</font></b>, <font face="Times New Roman">Times New Roman.</font></p>
 
     <!-- TODO
     p: Table is not allowed inside `<p>`.
