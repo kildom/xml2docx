@@ -1,6 +1,6 @@
 
 import * as fs from 'node:fs';
-import { Options, generate } from '../src/doctml';
+import { Options, generate } from '../../src/doctml';
 import assert from 'node:assert';
 
 class EndOfTestIsNotAnError extends Error {
@@ -14,10 +14,10 @@ class EndOfTestIsNotAnError extends Error {
 async function test() {
     let passingTests = 0;
     let failingTests = 0;
-    for (let fileName of fs.readdirSync('test/template')) {
+    for (let fileName of fs.readdirSync('test/template/data')) {
         if (!fileName.endsWith('.txt')) continue;
 
-        let path = `test/template/${fileName}`;
+        let path = `test/template/data/${fileName}`;
         let text = fs.readFileSync(path, 'utf8');
         let [template, expected] = text.split(/----------------------------+/);
         template = template.trim();
@@ -26,7 +26,7 @@ async function test() {
         let options: Options = {
             input: template,
             inputFile: path,
-            dataFile: 'test/template/data.json5',
+            dataFile: 'test/template/data/data.json5',
             debugFile: (result, type, content) => {
                 if (type === 'rendered') throw new EndOfTestIsNotAnError(content as string);
             },

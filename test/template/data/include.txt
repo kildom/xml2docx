@@ -1,0 +1,9 @@
+<%= utils.include(utils.inputDir + 'helper/include.inc') %>
+----------------------------------------------------------------
+test/template/data/helper/include.inc
+test/template/data/helper/
+test/template/data/include.txt
+test/template/data/
+test/template/data/data.json5
+test/template/data/
+bar

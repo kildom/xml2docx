@@ -7,11 +7,11 @@
 <%= utils.data.foo %>
 <%= utils === __utils__ ? 'ok' : 'error' %>
 ----------------------------------------------------------------
-test/template/utils.txt
-test/template/
-test/template/utils.txt
-test/template/
-test/template/data.json5
-test/template/
+test/template/data/utils.txt
+test/template/data/
+test/template/data/utils.txt
+test/template/data/
+test/template/data/data.json5
+test/template/data/
 bar
 ok

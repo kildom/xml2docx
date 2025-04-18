@@ -13,8 +13,8 @@ export interface Group {
 export function createGroups(): Group[] {
     let groups: Group[] = [];
 
-    for (let file of fs.readdirSync('test/docs', { recursive: true, encoding: 'utf-8' })) {
-        let inputFile = `test/docs/${file}`;
+    for (let file of fs.readdirSync('test/docs/data', { recursive: true, encoding: 'utf-8' })) {
+        let inputFile = `test/docs/data/${file}`;
         let stem = file.replace(/\.doctml$/, '');
         let content = fs.readFileSync(inputFile, 'utf-8');
         let parts = content.split(/<!--\s*\n(.*?)\n\s*-->/gs);

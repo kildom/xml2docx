@@ -19,7 +19,7 @@ async function doctml2docx(groups: Group[], runnerName: string) {
         let to = `${CUR}/${runnerName}/${group.stem}.docx`;
         mkdirFor(to);
         console.log(`Converting ${from} -> .docx`);
-        await runner.run(from, 'test/include/data.json', to, {});
+        await runner.run(from, 'test/docs/include/data.json', to, {});
     }
     runner.stop();
 }
