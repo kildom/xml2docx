@@ -20,3 +20,15 @@
   allows you to customize the output using a JSON input data.
 
 <a href="https://github.com/kildom/xml2docx/actions/workflows/build.yml"><img src="https://github.com/kildom/xml2docx/actions/workflows/build.yml/badge.svg" alt="Build for Cortex-M4" align="right"/></a>
+
+<br clear="both"/>
+
+<img src="docs/img/hello-world-preview.png" alt="Preview" align="right"/>
+
+```xml
+<document>
+  <p>
+    Hello <b>World</b>!!!
+  </p>
+</document>
+```
