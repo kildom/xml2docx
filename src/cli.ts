@@ -187,7 +187,7 @@ function addCallbacks(options: Options, debug: boolean) {
 
     options.readFile = (result: Result, file: string, binary: boolean): Uint8Array | string => {
         return fs.readFileSync(
-            file === '-' ? 0 : file,
+            file === '-' ? process.stdin.fd : file,
             { encoding: binary ? null : 'utf8' });
     };
 

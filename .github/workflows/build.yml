@@ -46,7 +46,7 @@ jobs:
       if: "${{ github.event.inputs.full_test == 'yes' }}"
       shell: cmd
       run: |
-        choco install officeproplus2013
+        choco install -y officeproplus2013
         pip install docx2pdf
         cd test\outputs
         cd

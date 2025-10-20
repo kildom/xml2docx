@@ -1,4 +1,8 @@
 
+
+
+
+/*
 const bmpHeader = new Uint8Array([
     0x42, 0x4D, 0x36, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x04,
     0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x40, 0x00,
@@ -62,3 +66,21 @@ function testCase(...list) {
         <section/>
         `;
 }
+*/
+
+
+(function(utils) {
+
+    const LoremIpsum = eval(utils.include("../../../../node_modules/lorem-ipsum-nn/dist/browser/lorem-ipsum.min.js") + ';\nLoremIpsum');
+
+    return {
+        loremIpsum(count, seed, language) {
+            seed = seed ?? 0;
+            language = language ?? 'la';
+            let ipsum = new LoremIpsum({ seed, language, version: 0 });
+            let prefix = language === 'la' ? 'Lorem impsum, ' : '';
+            ipsum.setContext(prefix);
+            return prefix + ipsum.generate(count - prefix.length);
+        }
+    }
+})

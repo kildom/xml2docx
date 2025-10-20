@@ -1,3 +1,4 @@
+<%! tools = eval(utils.include("../../../docs/include/tools.js"))(utils); %>
 <document>
 
     <%!// TODO: Remove "TC" from docs and assume, that every documented tag and attribute must be tested by at least one test case. %>
@@ -17,7 +18,7 @@
     <p align="left"><b>Left.</b></p>
     <p align="right"><b>Right.</b></p>
     <p align="center"><b>Center.</b></p>
-    <p align="justify"><b>Justify.</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut in dolor in dui vestibulum auctor vitae at lectus. Vivamus sit amet dolor non orci iaculis pharetra. Donec efficitur mauris purus, non euismod lectus pretium in. Nunc sed elit et ante posuere ullamcorper ac eu magna. Fusce rutrum in magna non consectetur. Nulla dignissim mollis nibh, ac scelerisque ligula laoreet a. Maecenas quis augue ut urna congue euismod sit amet in purus.</p>
+    <p align="justify"><b>Justify.</b> <% tools.loremIpsum(500, 1) %></p>
 
     <!--
     p: Check if leading and trailing whitespaces are trimmed correctly inside `<p>` tag.
@@ -72,6 +73,14 @@
     - - >
 
     <p><table><tr><td></td></tr></table></p> -->
+
+    <!--
+    p: Check if simple `<p>` accepts unicode chars.
+    -->
+
+    <p align="justify"><b>PL</b> <% tools.loremIpsum(200, 1, 'pl') %></p>
+    <p align="justify"><b>EL</b> <% tools.loremIpsum(200, 1, 'el') %></p>
+    <p align="justify"><b>UK</b> <% tools.loremIpsum(200, 1, 'uk') %></p>
 
     <!--
     END

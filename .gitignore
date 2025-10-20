@@ -6,3 +6,5 @@
 /temp/
 /docs/index.html
 .venv
+/uploads/
+/test/docs/include/lorem-ipsum.min.js

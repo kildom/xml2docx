@@ -6,6 +6,7 @@ import { CliRunner } from './runner-cli.mts';
 import { pdf2png } from './pdf2png.mts';
 import { createGroups, Group } from './groups.mts';
 import { CUR, mkdirFor } from './common.mts';
+import { convertDocxFiles } from './docx2pdf.mts';
 
 
 const MAX_GROUPS_AT_ONCE = 50;
@@ -28,29 +29,9 @@ async function docx2pdf(groups: Group[], runnerName: string) {
     let groupsPerCommand = MAX_GROUPS_AT_ONCE;
     for (let i = 0; i < groups.length; i += groupsPerCommand) {
         let list = groups.slice(i, i + groupsPerCommand);
-        console.log(list.map(x => `Converting ${CUR}/${runnerName}/${x.stem}.docx -> .pdf and .html`).join('\n'));
-        let res = child_process.spawnSync('powershell.exe',
-            [
-                '-ExecutionPolicy',
-                'Bypass',
-                '-File',
-                'scripts\\docx-convert.ps1',
-                ...list.map(x => `${CUR}/${runnerName}/${x.stem}.docx`)
-            ], { stdio: 'inherit' });
-        if (res.error) {
-            throw res.error;
-        } else if (res.status) {
-            throw new Error(`Process exit code ${res.status}`);
-        }
-        for (let group of list) {
-            mkdirFor(`${CUR}/rendered/${group.stem}.pdf`);
-            fs.renameSync(
-                `${CUR}/${runnerName}/${group.stem}.pdf`,
-                `${CUR}/rendered/${group.stem}.pdf`);
-            fs.renameSync(
-                `${CUR}/${runnerName}/${group.stem}.html`,
-                `${CUR}/rendered/${group.stem}.html`);
-        }
+        await convertDocxFiles(Object.fromEntries(
+            list.map(x => [`${CUR}/${runnerName}/${x.stem}.docx`, `${CUR}/rendered/${x.stem}.pdf`])
+        ));
     }
 }
 
