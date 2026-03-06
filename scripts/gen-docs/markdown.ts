@@ -85,17 +85,17 @@ function registerPlugins() {
         };
         let tagLink = {
             type: 'lang',
-            regex: /(`<([a-z._-]+)>`)/gi,
+            regex: /(`<([a-z0-9._-]+)>`)/gi,
             replace: '[$1]($2.html)',
         };
         let attrLink = {
             type: 'lang',
-            regex: /`([a-z._-]+)="(…|\.\.\.)?"`/gi,
+            regex: /`([a-z0-9._-]+)="(…|\.\.\.)?"`/gi,
             replace: '[`$1="…"`](#attr-$1)',
         };
         let tagAttrLink = {
             type: 'lang',
-            regex: /`<([a-z._-]+) ([a-z._-]+)="(…|\.\.\.)?"`/gi,
+            regex: /`<([a-z0-9._-]+) ([a-z0-9._-]+)="(…|\.\.\.)?">?`/gi,
             replace: '[`<$1 $2="…"`]($1.html#tag-$2)',
         };
         return [ext1, ext2, ext3, tagLink, attrLink, tagAttrLink];

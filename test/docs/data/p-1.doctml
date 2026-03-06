@@ -1,6 +1,8 @@
 <%! tools = eval(utils.include("../../../docs/include/tools.js"))(utils); %>
 <document>
 
+    <section size="A4" margin="5mm"/>
+
     <%!// TODO: Remove "TC" from docs and assume, that every documented tag and attribute must be tested by at least one test case. %>
     <%!// Single block of code may test multiple test cases. %>
 
@@ -12,6 +14,33 @@
     <p>dolor sit amet.</p>
 
     <!--
+    p.page-break: Check page break before paragraph.
+    -->
+
+    <p>First page.</p>
+    <p page-break="1">Second page.</p>
+    <p>Still second.</p>
+    <p page-break="1">Now, it is third.</p>
+
+    <!--
+    p.heading: Check all heading levels.
+    -->
+    <p heading="title">Title</p>
+    <title>Title</title>
+    <p heading="1">Level 1</p>
+    <h1>Level 1</h1>
+    <p heading="2">Level 2</p>
+    <h2>Level 2</h2>
+    <p heading="3">Level 3</p>
+    <h3>Level 3</h3>
+    <p heading="4">Level 4</p>
+    <h4>Level 4</h4>
+    <p heading="5">Level 5</p>
+    <h5>Level 5</h5>
+    <p heading="6">Level 6</p>
+    <h6>Level 6</h6>
+
+    <!--
     p.align: Check a few variants of paragraph alignment.
     -->
 
@@ -19,6 +48,90 @@
     <p align="right"><b>Right.</b></p>
     <p align="center"><b>Center.</b></p>
     <p align="justify"><b>Justify.</b> <% tools.loremIpsum(500, 1) %></p>
+
+    <!--
+    p.indent: Check all variants of left and right paragraph indentation.
+    -->
+
+    <group p.align="justify">
+    <p>Default indentation. <% tools.loremIpsum(300, 46336933) %></p><p></p>
+    <p indent="1cm">1 cm on the left. <% tools.loremIpsum(300, 543937523) %></p><p></p>
+    <p indent="0 1cm">1 cm on the right. <% tools.loremIpsum(300, 4536345) %></p><p></p>
+    <p indent="2cm 2cm">2 cm on both. <% tools.loremIpsum(300, 97664566) %></p><p></p>
+    </group>
+
+    <!--
+    p.indent: Check first line indentation.
+    -->
+
+    <group p.align="justify">
+    <p indent="0 0 1cm">1 cm on starting line. <% tools.loremIpsum(300, 17634534) %></p><p></p>
+    <p indent="0 0 -5mm">5 mm first line hanging. <% tools.loremIpsum(300, 426423689) %></p><p></p>
+    <p indent="1cm 0 1cm">1 cm relative first line indentation with 1 cm left margin. <% tools.loremIpsum(300, 7642344546) %></p><p></p>
+    <p indent="1cm 2cm -1cm">1 cm left margin except first line, 2 cm right. <% tools.loremIpsum(300, 225564234) %></p><p></p>
+    </group>
+
+    <!--
+    p.keep-lines: Enabled.
+    -->
+
+    <p><img src="../../../docs/include/images/white.png" width="10mm" height="267mm"/></p>
+    <p><b>First page.</b></p>
+    <p keep-lines="true"><b>This paragraph should be on the second page.</b> <% tools.loremIpsum(700, 47215454) %></p>
+
+    <!--
+    p.keep-lines: Disabled.
+    -->
+
+    <p><img src="../../../docs/include/images/white.png" width="10mm" height="267mm"/></p>
+    <p><b>First page.</b></p>
+    <p keep-lines="false"><b>This paragraph should be broken into two pages.</b> <% tools.loremIpsum(700, 758645345) %></p>
+
+    <!--
+    p.keep-lines: Default.
+    -->
+
+    <p><img src="../../../docs/include/images/white.png" width="10mm" height="267mm"/></p>
+    <p><b>First page.</b></p>
+    <p keep-lines="false"><b>This paragraph should be broken into two pages.</b> <% tools.loremIpsum(700, 4563875456) %></p>
+
+    <!--
+    p.keep-next: Enabled.
+    -->
+
+    <p><img src="../../../docs/include/images/white.png" width="10mm" height="267mm"/></p>
+    <p keep-next="true"><b>This paragraph should be in the second page.</b></p>
+    <p keep-lines="true"><% tools.loremIpsum(700, 95345648) %></p>
+
+    <!--
+    p.keep-next: Disabled.
+    -->
+
+    <p><img src="../../../docs/include/images/white.png" width="10mm" height="267mm"/></p>
+    <p keep-next="false"><b>This paragraph should be in the first page.</b></p>
+    <p keep-lines="true"><% tools.loremIpsum(700, 3537204) %></p>
+
+    <!--
+    p.keep-next: Default.
+    -->
+
+    <p><img src="../../../docs/include/images/white.png" width="10mm" height="267mm"/></p>
+    <p><b>This paragraph should be in the first page.</b></p>
+    <p keep-lines="true"><% tools.loremIpsum(700, 5755464) %></p>
+
+    <!--
+    p.outline: Check all outline levels.
+    -->
+    <p>The test results are not visible on a rendering. Open file in an editor to see the results.</p>
+    <p outline="1">Outline 1</p>
+    <p outline="2">Outline 2</p>
+    <p outline="3">Outline 3</p>
+    <p outline="4">Outline 4</p>
+    <p outline="5">Outline 5</p>
+    <p outline="6">Outline 6</p>
+    <p outline="7">Outline 7</p>
+    <p outline="8">Outline 8</p>
+    <p outline="9">Outline 9</p>
 
     <!--
     p: Check if leading and trailing whitespaces are trimmed correctly inside `<p>` tag.
@@ -39,33 +152,22 @@
 
     <!--
     p: Check if it correctly inherits attributes from parent.
+    font: Check if it correctly inherits attributes from grandparent.
     -->
 
     <group p.align="right" font.bold="1">
-        <p>This is right aligned.</p>
+        <p>This is right aligned and bold.</p>
         <p>This too.</p>
     </group>
-
-    <!--
-    p: AAAAAAAAAs.
-    -->
-
-    <p>Pierwsza strona</p>
-    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
-    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
-    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
-    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
-    <p>Druga strona</p>
-    <section size="A5" margin="5mm" border="blue 1mm" />
-    <p>Trzecia strona</p>
-    <section size="A6" margin="5mm" />
-    <p>Czwarta strona</p>
 
     <!--
     p: Check if children inherits its attributes.
     -->
 
-    <p font.face="Arial" b.face="Courier New">Arial, <b>Bold Courier New<font face="Times New Roman">aaaaa</font></b>, <font face="Times New Roman">Times New Roman.</font></p>
+    <p font.face="Arial" b.face="Courier New">
+        Arial, <b>Bold Courier New<font face="Times New Roman">, Bold Times New Roman</font></b>,
+        <font face="Times New Roman">Regular Times New Roman.</font>
+    </p>
 
     <!-- TODO
     p: Table is not allowed inside `<p>`.

@@ -1,0 +1,167 @@
+
+- tag-name: -IParagraphPropertiesOptions-
+  combine: [ -IParagraphStylePropertiesOptions- ]
+  attributes:
+    page-break:
+      type: bool
+      brief: Page break before paragraph.
+      docx-js: "pageBreakBefore?: boolean"
+    heading:
+      value: level
+      brief: Heading level.
+      details: |
+        By default, it is deduced from the tag name.
+        Possible values are `title` and numbers from `1` to `6`.
+    style:
+      type: str
+      brief: Paragraph style name.
+      details: Defined by the `<p-style>` tag.
+      docx-js: "style?: string"
+    tabs:
+      value: position type leader, ...
+      brief: Tabulator stops.
+      details: |
+        - **position** @required - Tabulator stop position in [positive length](#positive-length).
+        - **type** @optional - Tabulator stop type. Default is `left`.
+            @enum TabStopType
+        - **leader** @optional - Tabulator stop leader. Default is `none`.
+            @enum LeaderType
+      docx-js: "tabStops?: readonly TabStopDefinition[]"
+    widow-control:
+      type: bool
+      brief: Paragraph widow control.
+      docx-js: "widowControl?: boolean"
+    word-wrap:
+      type: bool
+      brief: Word wrapping.
+      docx-js: "wordWrap?: boolean"
+    # Experimental attributes
+    auto-space-east-asian-text:
+      experimental: true
+      type: bool
+      docx-js: "autoSpaceEastAsianText?: boolean"
+    bidirectional:
+      experimental: true
+      type: bool
+      docx-js: "bidirectional?: boolean"
+    bullet-level:
+      experimental: true
+      type: int
+      docx-js: "bullet?: { level: number }"
+    overflow-punctuation:
+      experimental: true
+      type: bool
+      docx-js: "overflowPunctuation?: boolean"
+    scale:
+      experimental: true
+      type: float
+      docx-js: "scale?: number"
+    suppress-line-numbers:
+      experimental: true
+      type: bool
+      docx-js: "suppressLineNumbers?: boolean"
+  docs-js: https://docx.js.org/api/types/IParagraphPropertiesOptions.html
+  unused-docx-js-properties:
+    - frame?: IFrameOptions
+    - run?: IRunOptions
+
+
+- tag-name: -IParagraphStylePropertiesOptions-
+  combine: [ -ILevelParagraphStylePropertiesOptions- ]
+  attributes:
+    border:
+      type: border
+      brief: Paragraph borders.
+      docx-js: "border?: IBordersOptions"
+    background:
+      type: color
+      brief: Paragraph background color.
+      docx-js: "shading?: IShadingAttributesProperties"
+  unused-docx-js-properties:
+    - numbering?: ...
+
+
+- tag-name: -ILevelParagraphStylePropertiesOptions-
+  attributes:
+    align:
+      value: alignment
+      brief: Text alignment.
+      details: |
+        Possible values are:
+        @enum ParagraphAlignment
+      docx-js: "alignment?: typeof AlignmentType[keyof typeof AlignmentType]"
+    indent:
+      value: left right first-line
+      brief: Paragraph indentation.
+      details: |
+        - **left** @required - Left indentation in [positive length](#positive-length) units.
+          Zero by default.
+        - **right** @optional - Right indentation in [positive length](#positive-length) units.
+          Zero by default.
+        - **first-line** @optional - First line indentation in [length](#length) units.
+          This is relative to the left indentation and it can be negative to create a hanging indent.
+          Zero by default.
+      docx-js: "indent?: IIndentAttributesProperties"
+      unused-docx-js:
+        - start?: number | UniversalMeasure
+        - end?: number | UniversalMeasure
+    keep-lines:
+      type: bool
+      brief: Keep all lines on a single page if possible.
+      docx-js: "keepLines?: boolean"
+    keep-next:
+      type: bool
+      brief: Keep next paragraph on the same page if possible.
+      docx-js: "keepNext?: boolean"
+    outline:
+      type: uint
+      brief: Outline level.
+      details: |
+        Possible values are numbers from `1` to `9`.
+        By default, paragraph is not in the document outline.
+      docx-js: "outlineLevel?: number"
+    spacing:
+      value: before after
+      brief: Paragraph spacing.
+      details: |
+        - **before** @optional - Space before paragraph in [positive length](#positive-length) units.
+        - **after** @optional - Space after paragraph in [positive length](#positive-length) units.
+      unused-docx-js:
+        - afterAutoSpacing?: boolean;
+        - beforeAutoSpacing?: boolean;
+      docx-js: "spacing?: ISpacingProperties"
+    line-spacing:
+      value: requirement distance
+      brief: Line spacing.
+      details: |
+        - **requirement** @optional - Defines spacing if line height is greater than the specified distance.
+            - `exactly` - The line spacing is exactly the specified distance.
+            - `at-least` - The line spacing is at least the specified distance (default).
+
+        - **distance** @required - The distance between lines can be expressed in two ways:
+            - Absolute value in [positive length](#positive-length) units, e.g. `1.5cm`.
+            - Relative to line height, e.g. `1.25`.
+      examples:
+        - title: line-spacing="1.75"
+          code: <p line-spacing="1.75"><b>This paragraph has 1.75 space between lines which is 100% of line and 75% for empty space in between.</b> <% tools.loremIpsum(500, 270477934) %></p>
+        - title: line-spacing="exactly 4mm"
+          code: <p line-spacing="exactly 4mm"><b>Each line in this paragraph is exactly 4mm apart.</b> <% tools.loremIpsum(500, 539351054) %></p>
+      docx-js: "spacing?: ISpacingProperties"
+    # Experimental attributes
+    contextual-spacing:
+      experimental: true
+      type: bool
+      docx-js: "contextualSpacing?: boolean"
+    thematic-break:
+      experimental: true
+      type: bool
+      docx-js: "thematicBreak?: boolean"
+  unused-docx-js-properties:
+    - leftTabStop?: number
+    - rightTabStop?: number
+
+
+- enum-name: ParagraphAlignment
+  combine: [ AlignmentType ]
+  values:
+    justify: Alias of `both`.

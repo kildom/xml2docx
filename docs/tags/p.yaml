@@ -3,7 +3,8 @@
   children: [ font ]
   implicit: font
   details: |
-    This tag is used to create a paragraph.
+    The heading tags `<title>`, `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, and `<h6>` are aliases of
+    `<p>` tag with the `heading=""` attribute set to the corresponding heading level.
 
     You can use attributes passing to change text style of this paragraph since direct children are `<font>` tags,
     for example:
@@ -15,112 +16,59 @@
     <p><font color="red">Warning!</font></p>
     ```
 
-    For multiple paragraphs that shares the same style, you should use the `style=""` attribute and `<p-style>` tag.
+    For multiple paragraphs that share the same style, you should use the `style=""` attribute and `<p-style>` tag.
   combine: [ -IParagraphPropertiesOptions- ]
+  examples:
+    - title: Simple
+      code: <p>Hello, world!</p>
+    - title: Alignment
+      code: <p align="justify">This is a justified paragraph. <% tools.loremIpsum(500, 952727959) %></p>
+    - title: Font color
+      code: <p font.color="red">Warning!</p>
+  docx-js: https://docx.js.org/api/types/IParagraphOptions.html
+  unused-docx-js-properties:
+    - children?: readonly ParagraphChild[]
+    - text?: string
 
-- tag-name: -IParagraphPropertiesOptions-
-  attributes:
-    border:
-      type: border
-      brief: Paragraph borders.
-    heading:
-      value: level
-      brief: Heading level.
-      details: |
-        By default it is deduced from the tag name.
-        Possible values are `title` and numbers from `1` to `6`.
-    bidirectional:
-      type: bool
-      brief: Bidirectional text.
-    page-break:
-      type: bool
-      brief: Page break before paragraph.
-    tabs:
-      value: position type leader, ...
-      brief: Tabulator stops.
-      details: |
-        - **position** @required - Tabulator stop position in [positive length](#positive-length).
-        - **type** @optional - Tabulator stop type. Default is `left`.
-            @enum TabStopType
-        - **leader** @optional - Tabulator stop leader. Default is `none`.
-            @enum LeaderType
-    style:
-      type: str
-      brief: Paragraph style name.
-    background:
-      type: color
-      brief: Paragraph background color.
-    widow-control:
-      type: bool
-      brief: Paragraph widow control.
-    suppress-line-numbers:
-      type: bool
-      brief: Suppress line numbers.
-    word-wrap:
-      type: bool
-      brief: Word wrapping.
-    overflow-punctuation:
-      type: bool
-      brief: Overflow punctuation.
-  combine: [ -IParagraphStylePropertiesOptions- ]
-  
-- tag-name: -IParagraphStylePropertiesOptions-
-  combine: [ -ILevelParagraphStylePropertiesOptions- ]
 
-- tag-name: -ILevelParagraphStylePropertiesOptions-
-  attributes:
-    spacing:
-      value: before after contextual
-      brief: Paragraph spacing.
-      details: |
-        - **before** @optional - Space before paragraph in [positive length](#positive-length) units.
-        - **after** @optional - Space after paragraph in [positive length](#positive-length) units.
-        - **contextual** @optional - Literal `contextual`. If set, use contextual spacing.
-    line-spacing:
-      value: requirement distance
-      brief: Line spacing.
-      details: |
-        - **requirement** @optional - Defines spacing if line height is greater than the specified distance.
-            - `exactly` - The line spacing is exactly the specified distance.
-            - `at-least` - The line spacing is at least the specified distance (default).
+- tag-name: h1
+  alias-of: p
+  brief: Heading level 1 paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="1"` attribute.
 
-        - **distance** @required - The distance between lines can be expressed in two ways:
-            - Absolute value in [positive length](#positive-length) units, e.g. `1.5cm`.
-            - Relative to line height, e.g. `1.25`.
-    align:
-      value: alignment
-      brief: Text alignment.
-      details: |
-        Possible values are:
-        @enum ParagraphAlignment
-    thematic-break:
-      type: bool
-      brief: Thematic break.
-    indent:
-      value: left right first-line
-      brief: Paragraph indentation.
-      details: |
-        - **left** @required - Left indentation in [positive length](#positive-length) units.
-          Zero by default.
-        - **right** @optional - Right indentation in [positive length](#positive-length) units.
-          Zero by default.
-        - **first-line** @optional - First line indentation in [length](#length) units.
-          This is relative to the left indentation and it can be negative to create a hanging indent.
-          Zero by default.
-    keep-next:
-      type: bool
-      brief: Keep next.
-    keep-lines:
-      type: bool
-      brief: Keep lines.
-    outline:
-      type: uint
-      brief: Outline level.
-      details: |
-        Possible values are numbers from `1` to `9`.
-        By default, paragraph is not in the document outline.
+- tag-name: h2
+  alias-of: p
+  brief: Heading level 2 paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="2"` attribute.
 
-- enum-name: ParagraphAlignment
-  combine: [ AlignmentType ]
-  values:
-    justify: Alias of `both`.
+- tag-name: h3
+  alias-of: p
+  brief: Heading level 3 paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="3"` attribute.
+
+- tag-name: h4
+  alias-of: p
+  brief: Heading level 4 paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="4"` attribute.
+
+- tag-name: h5
+  alias-of: p
+  brief: Heading level 5 paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="5"` attribute.
+
+- tag-name: h6
+  alias-of: p
+  brief: Heading level 6 paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="6"` attribute.
+
+- tag-name: title
+  alias-of: p
+  brief: Title paragraph.
+  details: |
+    This is an alias of the `<p>` tag with the `heading="title"` attribute.

@@ -8,6 +8,9 @@
 - type-name: int
   value: integer
 
+- type-name: float
+  value: number
+
 - type-name: uint
   value: unsigned integer
 

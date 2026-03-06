@@ -25,6 +25,7 @@ function compile(dir: string, target: string, suffix: string, args: string[]): v
         [
             'deno',
             'compile',
+            '--no-check',
             '--allow-read', '--allow-write', '--allow-env',
             ...args,
             '--node-modules-dir=auto',

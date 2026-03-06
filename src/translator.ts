@@ -69,7 +69,9 @@ export class TranslatorState {
     public applyCommonAttributes(element: Element): TranslatorState {
         if (!this.common[element.name]) return this;
         for (let [attributeName, value] of Object.entries(this.common[element.name])) {
-            element.attributes[attributeName] = value;
+            if (!(attributeName in element.attributes)) {
+                element.attributes[attributeName] = value;
+            }
         }
         let copy = this.copy();
         delete copy.common[element.name];

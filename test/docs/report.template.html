@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
+
+        body {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            hyphens: none;
+            word-break: keep-all;
+        }
+
+        .rendered-image {
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Test Report</h1>
+
+    <%! function showTestCases(item) { %>
+        <ul>
+            <%! for (let group of item.groups) { %>
+                <li>
+                    <%! for (let caseInfo of group.cases) { %>
+                        <b><% caseInfo.name %></b>: <% caseInfo.desc %><br/>
+                    <%! } %>
+                    <a href="rendered/<% group.stem %>.pdf" target="_blank">
+                    <img src="rendered/<% group.stem %>.png" class="rendered-image">
+                    <br/>[PDF]</a>
+                    <a href="rendered/<% group.stem %>.html" target="_blank">[HTML]</a>
+                    <a href="<% runner %>/<% group.stem %>.docx" target="_blank">[DOCX]</a>
+                </li>
+            <%! } %>
+        </ul>
+    <%! } %>
+
+    <%! for (let tag of tags) { %>
+        <h2><% tag.name %></h2>
+        <%! showTestCases(tag); %>
+        <%! for (let [name, attribute] of Object.entries(tag.attributes)) { %>
+            <h3><% tag.name %>.<% attribute.name %></h3>
+            <%! showTestCases(attribute); %>
+        <%! } %>
+    <%! } %>
+
+</body>
+</html>

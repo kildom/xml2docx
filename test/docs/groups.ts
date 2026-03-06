@@ -1,11 +1,12 @@
 
 import fs from 'node:fs';
-import { CUR, mkdirFor } from './common.mts';
+import { CUR, mkdirFor } from './common';
 
 export interface Group {
     inputFile: string;
     stem: string;
     cases: { name: string; desc: string; }[];
+    expectedErrors: string[];
     errors: string[];
 };
 
@@ -40,7 +41,8 @@ export function createGroups(): Group[] {
                 inputFile,
                 stem: outputStem,
                 cases,
-                errors,
+                expectedErrors: errors,
+                errors: [],
             });
         }
     }

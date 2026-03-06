@@ -23,16 +23,11 @@ async function main() {
 
     let tagTemplateText = fs.readFileSync('scripts/gen-docs/templates/tag.html', 'utf8');
     let tagTemplate = compileTemplate(tagTemplateText);
-    let testCases: string[] = [];
 
     for (let tag of getTags()) {
         let html = tagTemplate({ tag, markdownToHtml });
         //console.log(tag.name, html.length);
         fs.writeFileSync(`dist/docs/${tag.name}.html`, html);
-        testCases.push(...(tag.testCases.map(tc => `${tag.name}: ${tc}`)));
-        for (let attr of Object.values(tag.attributes)) {
-            testCases.push(...(attr.testCases.map(tc => `${tag.name}.${attr.name}: ${tc}`)));
-        }
     }
 
     let dotTemplateText = fs.readFileSync('scripts/gen-docs/templates/graph.dot', 'utf8');
@@ -42,8 +37,6 @@ async function main() {
     await graphviz.loadWASM();
     const svg = graphviz.layout(dot);
     fs.writeFileSync('dist/docs/graph.svg', svg);
-
-    fs.writeFileSync('dist/test-cases.json', JSON.stringify(testCases, null, 2));
 }
 
 main();

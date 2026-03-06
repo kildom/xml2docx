@@ -1,15 +1,23 @@
 
 import child_process from 'node:child_process';
 import fs from 'node:fs';
-import { Runner } from './runner.mts';
-import { CliRunner } from './runner-cli.mts';
-import { pdf2png } from './pdf2png.mts';
-import { createGroups, Group } from './groups.mts';
-import { CUR, mkdirFor } from './common.mts';
-import { convertDocxFiles } from './docx2pdf.mts';
+import { Runner } from './runner.ts';
+import { CliRunner } from './runner-cli.ts';
+import { pdf2png } from './pdf2png.ts';
+import { createGroups, Group } from './groups.ts';
+import { CUR, mkdirFor } from './common.ts';
+import { convertDocxFiles } from './docx2pdf.ts';
+import * as parser from '../../scripts/gen-docs/parser.ts';
+import * as template from '../../scripts/gen-docs/template.ts';
 
 
 const MAX_GROUPS_AT_ONCE = 50;
+
+let errors: string[] = [];
+
+function addError(error: string) {
+    errors.push(error);
+}
 
 
 async function doctml2docx(groups: Group[], runnerName: string) {
@@ -35,7 +43,19 @@ async function docx2pdf(groups: Group[], runnerName: string) {
     }
 }
 
+interface AttributeTest extends parser.AttributeDocs {
+    groups: Group[];
+}
+
+interface TagTest extends parser.TagDocs {
+    groups: Group[];
+    attributes: Record<string, AttributeTest>;
+}
+
 async function main() {
+
+    parser.parse();
+
     /*
     Outputs structure:
     - test/outputs
@@ -81,9 +101,51 @@ async function main() {
     /* todo */
 
     // 5. Convert docx to pdf, html, png (use output from just one runner).
-    let validGroups = groups.filter(g => g.errors.length === 0);
+    let validGroups = groups.filter(g => g.expectedErrors.length === 0);
     await docx2pdf(validGroups, 'cli');
     await pdf2png(validGroups);
+
+
+    let tags = parser.getTags() as TagTest[];
+    let byName: Record<string, TagTest | AttributeTest> = {};
+    let unassignedTag: TagTest = {
+        attributes: {},
+        brief: '',
+        name: '__UNASSIGNED__',
+        children: [],
+        customPage: '',
+        details: '',
+        groupsAndChildren: [],
+        indirectChildren: [],
+        indirectParents: [],
+        parents: [],
+        groups: [],
+    };
+
+    tags.push(unassignedTag);
+
+    for (let tag of tags) {
+        byName[tag.name] = tag;
+        tag.groups = [];
+        for (let attribute of Object.values(tag.attributes)) {
+            byName[`${tag.name}.${attribute.name}`] = attribute;
+            attribute.groups = [];
+        }
+    }
+
+    for (let group of groups) {
+        for (let caseInfo of group.cases) {
+            if (caseInfo.name in byName) {
+                byName[caseInfo.name].groups.push(group);
+            } else {
+                unassignedTag.groups.push(group);
+            }
+        }
+    }
+
+    let reportTemplate = template.compileTemplate(fs.readFileSync('test/docs/report.template.html', 'utf8'));
+    let html = reportTemplate({ tags: parser.getTags(), runner: 'cli' });
+    fs.writeFileSync('test/outputs/cur/results.html', html);
 
     // 6. Save results to "Results.html" report: List of test cases and expandable diff preview.
     // 7. If reference results available, compare them and generate "Compare.html" report.

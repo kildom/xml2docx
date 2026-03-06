@@ -1,4 +1,5 @@
 import { pipeline } from 'node:stream/promises';
+import { fileURLToPath } from 'url';
 import * as http from 'node:http';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -100,15 +101,15 @@ const server = http.createServer(async (req, res) => {
         } else if (req.url?.startsWith('/delete?')) {
 
             for (let file of listFromUrl(req.url)) {
-                try {
-                    fs.unlinkSync(file);
-                } catch (_ex) { }
-                try {
-                    fs.unlinkSync(file.replace('.docx', '.pdf'));
-                } catch (_ex) { }
-                try {
-                    fs.unlinkSync(file.replace('.docx', '.html'));
-                } catch (_ex) { }
+                let match = new RegExp(`^${file.replace('.docx', '')}([^a-zA-Z0-9]|$).*`);
+                for (let file of fs.readdirSync('uploads')) {
+                    file = `uploads/${file}`;
+                    if (match.test(file)) {
+                        try {
+                            fs.rmSync(file, { recursive: true, force: true });
+                        } catch (_ex) { }
+                    }
+                }
             }
             sendSuccess(res);
 
@@ -193,11 +194,29 @@ async function getConvertScript(): Promise<string> {
 }
 
 
+function getScriptDir(): string {
+    let url = import.meta.url;
+    if (url) {
+        let filename = fileURLToPath(url);
+        return path.dirname(filename);
+    } else {
+        return __dirname;
+    }
+}
+
+
 async function main() {
+    process.chdir(getScriptDir());
+    if (!DEBUGGING) {
+        for (let file of fs.readdirSync('uploads')) {
+            try { fs.rmSync(`uploads/${file}`, { recursive: true, force: true }); } catch (_ex) { }
+        }
+    }
     convertScriptPath = await getConvertScript();
     console.log(`Using convert script: ${convertScriptPath}`);
     server.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}/`);
+        console.log('\x1b[31mWARNING! This server IS NOT SECURE - do not expose it to the public network.\x1b[0m');
     });
 }
 

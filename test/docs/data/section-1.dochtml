@@ -1,0 +1,23 @@
+<%! tools = eval(utils.include("../../../docs/include/tools.js"))(utils); %>
+<document>
+
+    <!--
+    section: Check if section tag defines a section.
+    -->
+
+    <p>Pierwsza strona</p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+    <p>Druga strona</p>
+    <section size="A5" margin="5mm" border="blue 1mm" />
+    <p>Trzecia strona</p>
+    <section size="A6" margin="5mm" />
+    <p>Czwarta strona</p>
+
+    <!--
+    END
+    -->
+
+</document>

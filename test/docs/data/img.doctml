@@ -1,0 +1,14 @@
+<%! tools = eval(utils.include("../../../docs/include/tools.js"))(utils); %>
+<document>
+
+    <!--
+    img: Check if img works.
+    -->
+
+    <p><img src="../../../docs/include/images/mountains.png" width="5cm"/></p>
+
+    <!--
+    END
+    -->
+
+</document>
