@@ -1,4 +1,4 @@
-<%! tools = eval(utils.include("../../docs/include/tools.js"))(utils); %>
+<%! tools = eval(utils.include("include/tools.js"))(utils); %>
 <document>
 
     <!--

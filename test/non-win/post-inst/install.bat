@@ -6,6 +6,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-ExecutionPolicy Bypa
 PATH=%PATH%;C:\ProgramData\chocolatey\bin
 choco install -y officeproplus2013
 choco install -y nodejs --version="24.11.0"
+choco install -y git
 netsh advfirewall firewall add rule name="Allow NodeJS Server" dir=in action=allow program="%ProgramFiles%\nodejs\node.exe" enable=yes
 REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /V ConvertServer /T REG_SZ /F /D "%ProgramFiles%\nodejs\node.exe C:\Converter\convert-server.js"
 shutdown /r /t 1

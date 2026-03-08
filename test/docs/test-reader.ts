@@ -1,7 +1,7 @@
 
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
-import { doctmlFileName, isDirectExecution, mkdirFor } from './common';
+import { doctmlFileName, isDirectExecution, isTestSuite, mkdirFor, outputRootDir } from './common';
 
 
 export interface Test {
@@ -17,11 +17,11 @@ export interface Test {
 export function readTests(): Test[] {
     let tests: Test[] = [];
 
-    for (let file of fs.readdirSync('test/docs/data', { recursive: true, encoding: 'utf-8' })) {
-        if (!file.endsWith('.doctml')) {
+    for (let file of fs.readdirSync(outputRootDir(), { recursive: true, encoding: 'utf-8' })) {
+        if (!isTestSuite(file)) {
             continue;
         }
-        let inputFile = `test/docs/data/${file}`;
+        let inputFile = `${outputRootDir()}/${file}`;
         let nameStem = file.replace(/\.doctml$/, '');
         let dataFile = inputFile.replace(/\.doctml$/, '.json');
         let data: string = '{}';
@@ -64,7 +64,7 @@ function createTest(inputFile: string, nameStem: string, header: string, footer:
     let id = `${nameStem}.${hash}`;
     let doctmlFile = doctmlFileName(id);
     mkdirFor(doctmlFile);
-    fs.writeFileSync(doctmlFile, `<%!/*\n    ${inputFile}\n\n    ${coverageText.replace(/\n/g, '\n    ')}\n\n*/%>${header}${body}${footer}`);
+    fs.writeFileSync(doctmlFile, header + body + footer);
     let dataFile = doctmlFile.replace('.doctml', '.json');
     fs.writeFileSync(dataFile, data);
     let result: Test = {

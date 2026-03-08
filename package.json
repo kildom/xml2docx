@@ -25,6 +25,7 @@
     "scripts": {
         "test": "npm run test-template && npm run test-docs",
         "test-docs": "npx tsx test/docs/test-docs.ts",
+        "test-docs-diff": "npx tsx test/docs/test-docs-diff.ts",
         "test-template": "npx tsx test/template/test-template.ts",
         "prebuild-cli": "npx esbuild src/cli.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/cli/doctml.json --outfile=dist/cli/doctml.cjs && npm run _lic -- dist/cli/license.txt dist/cli/doctml.json && npx tsx scripts/get-version.ts",
         "build-cli": "npx tsx scripts/build-deno-exec.ts",

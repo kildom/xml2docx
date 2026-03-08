@@ -1,4 +1,4 @@
-<%! tools = eval(utils.include("../../docs/include/tools.js"))(utils); %>
+<%! tools = eval(utils.include("include/tools.js"))(utils); %>
 <document>
 
     <section size="A4" margin="5mm"/>
@@ -75,7 +75,7 @@
     p.keep-lines: Enabled.
     -->
 
-    <p><img src="../../docs/include/images/gray.png" width="10mm" height="267mm"/></p>
+    <p><img src="include/images/gray.png" width="10mm" height="267mm"/></p>
     <p><b>First page.</b></p>
     <p keep-lines="true"><b>This paragraph should be on the second page.</b> <% tools.loremIpsum(700, 47215454) %></p>
 
@@ -83,7 +83,7 @@
     p.keep-lines: Disabled.
     -->
 
-    <p><img src="../../docs/include/images/gray.png" width="10mm" height="267mm"/></p>
+    <p><img src="include/images/gray.png" width="10mm" height="267mm"/></p>
     <p><b>First page.</b></p>
     <p keep-lines="false"><b>This paragraph should be broken into two pages.</b> <% tools.loremIpsum(700, 758645345) %></p>
 
@@ -91,7 +91,7 @@
     p.keep-lines: Default.
     -->
 
-    <p><img src="../../docs/include/images/gray.png" width="10mm" height="267mm"/></p>
+    <p><img src="include/images/gray.png" width="10mm" height="267mm"/></p>
     <p><b>First page.</b></p>
     <p keep-lines="false"><b>This paragraph should be broken into two pages.</b> <% tools.loremIpsum(700, 4563875456) %></p>
 
@@ -99,7 +99,7 @@
     p.keep-next: Enabled.
     -->
 
-    <p><img src="../../docs/include/images/gray.png" width="10mm" height="267mm"/></p>
+    <p><img src="include/images/gray.png" width="10mm" height="267mm"/></p>
     <p keep-next="true"><b>This paragraph should be in the second page.</b></p>
     <p keep-lines="true"><% tools.loremIpsum(700, 95345648) %></p>
 
@@ -107,7 +107,7 @@
     p.keep-next: Disabled.
     -->
 
-    <p><img src="../../docs/include/images/gray.png" width="10mm" height="267mm"/></p>
+    <p><img src="include/images/gray.png" width="10mm" height="267mm"/></p>
     <p keep-next="false"><b>This paragraph should be in the first page.</b></p>
     <p keep-lines="true"><% tools.loremIpsum(700, 3537204) %></p>
 
@@ -115,7 +115,7 @@
     p.keep-next: Default.
     -->
 
-    <p><img src="../../docs/include/images/gray.png" width="10mm" height="267mm"/></p>
+    <p><img src="include/images/gray.png" width="10mm" height="267mm"/></p>
     <p><b>This paragraph should be in the first page.</b></p>
     <p keep-lines="true"><% tools.loremIpsum(700, 5755464) %></p>
 

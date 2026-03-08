@@ -3,12 +3,13 @@ import fs from 'node:fs';
 import { Runner } from './runner.ts';
 import { CliRunner } from './runner-cli.ts';
 import { readTests } from './test-reader';
-import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest } from './common.ts';
+import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputDirName } from './common.ts';
 import { convertDocxFiles } from './docx2pdf.ts';
 import { pdf2png } from './pdf2png.ts';
 import { NodeRunner } from './runner-api.ts';
 import { generateReport } from './report.ts';
 import { compareDocxFiles } from './docx-compare.ts';
+import path from 'node:path';
 
 const MAX_TESTS_IN_GROUP = 20;
 
@@ -17,9 +18,23 @@ const runners = [
     NodeRunner,
 ];
 
-async function prepareTests() {
+async function prepareTests(outputDirName: string, inputPath: string) {
     console.log('Preparing tests...');
+    // Set output directory
+    setOutputDirName(outputDirName);
+    // Clear output directory
     fs.rmSync(outputRootDir(), { force: true, recursive: true });
+    // Clear old reports
+    let outputParent = path.dirname(outputRootDir());
+    for (let file of fs.readdirSync(outputParent, { encoding: 'utf-8' })) {
+        if (file.startsWith(outputDirName + '-')) {
+            fs.rmSync(path.join(outputParent, file), { force: true, recursive: true });
+        }
+    }
+    // Copy source test files to output directory
+    fs.mkdirSync(outputRootDir(), { recursive: true });
+    fs.cpSync(inputPath, outputRootDir(), { recursive: true });
+    // Read and prepare test cases
     readTests();
 }
 
@@ -227,7 +242,7 @@ async function main() {
      *   correctly and cannot be run at all.
      */
 
-    await prepareTests();
+    await prepareTests(process.argv[2] ?? 'cur', process.argv[3] ?? 'test/docs/data');
 
     /* STAGE 2:
      * For each runner:

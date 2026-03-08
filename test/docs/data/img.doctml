@@ -1,29 +1,29 @@
-<%! tools = eval(utils.include("../../docs/include/tools.js"))(utils); %>
+<%! tools = eval(utils.include("include/tools.js"))(utils); %>
 <document>
 
     <!--
     img: Check if img works.
     -->
 
-    <img src="../../docs/include/images/mountains.png" width="5cm"/>
+    <img src="include/images/mountains.png" width="5cm"/>
 
     <!--
     img.src: Check different image formats (except SVG).
     -->
 
     PNG:
-        <img src="../../docs/include/images/mountains.png" width="5cm"/>
-        <img src="../../docs/include/images/tree.png" height="3cm"/>
+        <img src="include/images/mountains.png" width="5cm"/>
+        <img src="include/images/tree.png" height="3cm"/>
         <br/>
     JPEG:
-        <img src="../../docs/include/images/mountains.jpg" width="5cm"/>
-        <img src="../../docs/include/images/tree.jpg" height="3cm"/>
+        <img src="include/images/mountains.jpg" width="5cm"/>
+        <img src="include/images/tree.jpg" height="3cm"/>
         <br/>
     GIF:
-        <img src="../../docs/include/images/mountains.gif" width="5cm"/>
+        <img src="include/images/mountains.gif" width="5cm"/>
         <br/>
     BMP:
-        <img src="../../docs/include/images/mountains.bmp" width="5cm"/>
+        <img src="include/images/mountains.bmp" width="5cm"/>
         <br/>
 
     <!--
@@ -31,13 +31,13 @@
     -->
 
     <p>
-        <img src="../../docs/include/images/mountains-transparent.png" width="5cm"/>
-        <img src="../../docs/include/images/tree-transparent.png" height="3cm"/>
+        <img src="include/images/mountains-transparent.png" width="5cm"/>
+        <img src="include/images/tree-transparent.png" height="3cm"/>
     </p>
 
     <p background="red">
-        <img src="../../docs/include/images/mountains-transparent.png" width="5cm"/>
-        <img src="../../docs/include/images/tree-transparent.png" height="3cm"/>
+        <img src="include/images/mountains-transparent.png" width="5cm"/>
+        <img src="include/images/tree-transparent.png" height="3cm"/>
     </p>
 
     <!--

@@ -3,8 +3,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Test } from './test-reader';
 
-const CUR = 'test/outputs/cur';
-const REF = 'test/outputs/ref';
+let CUR = 'test/outputs/cur';
 
 declare global {
     const __RUN_SELF_TEST__: boolean | undefined;
@@ -29,6 +28,10 @@ export function mkdirFor(file: string) {
 
 function idFromParam(testOrId: any): string {
     return (typeof testOrId === 'string') ? testOrId : testOrId.id;
+}
+
+export function setOutputDirName(name: string) {
+    CUR = `test/outputs/${name}`;
 }
 
 export function outputRootDir(): string {
@@ -157,10 +160,18 @@ export function debugFilesContent(testOrId: any): { [type: string]: string } {
     return result;
 }
 
+export function isTestCase(name: string): boolean {
+    return /\.[a-z0-9]{16}(?:-[a-z0-9]+)?\.doctml$/.test(name);
+}
+
+export function isTestSuite(name: string): boolean {
+    return name.endsWith('.doctml') && !/\.[a-z0-9]{16}(?:-[a-z0-9]+)?\./.test(name);
+}
+
 export function listTests(): string[] {
     let result: string[] = [];
     for (let file of fs.readdirSync(CUR, { encoding: 'utf-8' })) {
-        if (!file.endsWith('.doctml') || file.indexOf('.debug.') !== -1) {
+        if (!isTestCase(file)) {
             continue;
         }
         result.push(file.replace('.doctml', ''));
@@ -171,7 +182,7 @@ export function listTests(): string[] {
 export function listTestsGrouped(): { [key: string]: string[] } {
     let result: { [key: string]: string[] } = {};
     for (let file of fs.readdirSync(CUR, { encoding: 'utf-8' })) {
-        if (!file.endsWith('.doctml') || file.indexOf('.debug.') !== -1) {
+        if (!isTestCase(file)) {
             continue;
         }
         let id = file.replace('.doctml', '');
@@ -188,5 +199,5 @@ export function listTestsGrouped(): { [key: string]: string[] } {
 }
 
 export function reportFileNameNoExt() {
-    return `${CUR}/../cur`;
+    return CUR;
 }
