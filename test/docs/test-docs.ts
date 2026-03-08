@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { Runner } from './runner.ts';
 import { CliRunner } from './runner-cli.ts';
 import { readTests } from './test-reader';
-import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputDirName } from './common.ts';
+import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, getArgs, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputPath } from './common.ts';
 import { convertDocxFiles } from './docx2pdf.ts';
 import { pdf2png } from './pdf2png.ts';
 import { NodeRunner } from './runner-api.ts';
@@ -18,16 +18,16 @@ const runners = [
     NodeRunner,
 ];
 
-async function prepareTests(outputDirName: string, inputPath: string) {
+async function prepareTests(outputPath: string, inputPath: string, filterFiles: string[]) {
     console.log('Preparing tests...');
     // Set output directory
-    setOutputDirName(outputDirName);
+    setOutputPath(outputPath);
     // Clear output directory
     fs.rmSync(outputRootDir(), { force: true, recursive: true });
     // Clear old reports
     let outputParent = path.dirname(outputRootDir());
     for (let file of fs.readdirSync(outputParent, { encoding: 'utf-8' })) {
-        if (file.startsWith(outputDirName + '-')) {
+        if (file.startsWith(path.basename(outputPath) + '-')) {
             fs.rmSync(path.join(outputParent, file), { force: true, recursive: true });
         }
     }
@@ -35,7 +35,7 @@ async function prepareTests(outputDirName: string, inputPath: string) {
     fs.mkdirSync(outputRootDir(), { recursive: true });
     fs.cpSync(inputPath, outputRootDir(), { recursive: true });
     // Read and prepare test cases
-    readTests();
+    readTests(filterFiles);
 }
 
 async function runRunnerForTest(runner: Runner, outputId: string, inputId: string, sendFiles: boolean) {
@@ -163,10 +163,13 @@ async function compareResults(inputId: string, outputId: string): Promise<boolea
     return await compareDocxFiles(docxFileName(inputId), docxFileName(outputId));
 }
 
-async function runDocTML() {
+async function runDocTML(filterRunners: string[]) {
     let doneRunners: string[] = [];
     for (let RunnerClass of runners) {
         let runner = new RunnerClass();
+        if (filterRunners.length > 0 && !filterRunners.includes(runner.name)) {
+            continue;
+        }
         await runRunner(runner, doneRunners);
         doneRunners.push(runner.name);
     }
@@ -234,6 +237,8 @@ async function renderTests() {
 
 async function main() {
 
+    let { args, files: filterFiles, runners: filterRunners } = getArgs();
+
     /* STAGE 1:
      * - Read input DocTML files
      * - Divide into test cases
@@ -242,7 +247,7 @@ async function main() {
      *   correctly and cannot be run at all.
      */
 
-    await prepareTests(process.argv[2] ?? 'cur', process.argv[3] ?? 'test/docs/data');
+    await prepareTests(args[0] ?? 'test/outputs/cur', args[1] ?? 'test/docs/data', filterFiles);
 
     /* STAGE 2:
      * For each runner:
@@ -252,7 +257,7 @@ async function main() {
      * - If DOCX file was not generated, add error message to test case.
      */
 
-    await runDocTML();
+    await runDocTML(filterRunners);
 
     /* STAGE 3:
      * For each test case:
@@ -270,41 +275,6 @@ async function main() {
      */
 
     await generateReport();
-
-    /* Remaining stages are executed if testing against previous results. */
-
-    /* STAGE 5:
-     * - For those two works, use test cases from before division by runners:
-     *   - Group test cases from different versions by id.
-     *   - Match test cases where id has changed but input is the same and put them in the same group.
-     * - If some group has test cases divided by runners, clone test cases in all versions of this
-     *   group and create group for each runner.
-     */
-
-    /* STAGE 6:
-     * For each group:
-     * - If at least one test case is failing, entire group is failing - no more processing needed.
-     * - Compare generated PNG and HTML files and categorize group.
-     * All possible categories:
-     *   error in any => ERROR: tests are failing - check why
-     *   OO == NO == NN => SILENT: test passed
-     *   OO != NO == NN => ERROR: compatibility broken
-     *   OO == NO != NN => WARNING: test modified - check if modification as expected
-     *   NN == OO != NO => ERROR: compatibility broken and test modified
-     *   NN != OO != NO => ERROR: compatibility broken and test modified
-     *   test removed => ERROR: test removed - check why
-     *   test added => WARNING: test added - check if results as expected
-     * Where:
-     *   OO - old code, old tests
-     *   NO - new code, old tests
-     *   NN - new code, new tests
-     */
-
-    /* STAGE 7:
-     * - Write a HTML report with all groups
-     * - Write a HTML report with failing groups
-     * - Write a summary of the results in Markdown format to be used in PR comments
-     */
 
 }
 

@@ -14,11 +14,14 @@ export interface Test {
 };
 
 
-export function readTests(): Test[] {
+export function readTests(filterFiles: string[]): Test[] {
     let tests: Test[] = [];
 
     for (let file of fs.readdirSync(outputRootDir(), { recursive: true, encoding: 'utf-8' })) {
         if (!isTestSuite(file)) {
+            continue;
+        }
+        if (filterFiles.length > 0 && !filterFiles.includes(file)) {
             continue;
         }
         let inputFile = `${outputRootDir()}/${file}`;

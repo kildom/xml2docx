@@ -30,8 +30,8 @@ function idFromParam(testOrId: any): string {
     return (typeof testOrId === 'string') ? testOrId : testOrId.id;
 }
 
-export function setOutputDirName(name: string) {
-    CUR = `test/outputs/${name}`;
+export function setOutputPath(path: string) {
+    CUR = path;
 }
 
 export function outputRootDir(): string {
@@ -200,4 +200,34 @@ export function listTestsGrouped(): { [key: string]: string[] } {
 
 export function reportFileNameNoExt() {
     return CUR;
+}
+
+export function getArgs(): { args: string[]; files: string[]; runners: string[] } {
+    let args: string[] = [];
+    let files: string[] = [];
+    let runners: string[] = [];
+    for (let i = 2; i < process.argv.length; i++) {
+        if (process.argv[i] === '-f' || process.argv[i] === '--file') {
+            files.push(process.argv[i + 1]);
+            i++;
+        } else if (process.argv[i].startsWith('-f')) {
+            files.push(process.argv[i].substring(2));
+        } else if (process.argv[i].startsWith('-f=')) {
+            files.push(process.argv[i].substring(3));
+        } else if (process.argv[i].startsWith('--file=')) {
+            files.push(process.argv[i].substring(7));
+        } else if (process.argv[i] === '-r' || process.argv[i] === '--runner') {
+            runners.push(process.argv[i + 1]);
+            i++;
+        } else if (process.argv[i].startsWith('-r')) {
+            runners.push(process.argv[i].substring(2));
+        } else if (process.argv[i].startsWith('-r=')) {
+            runners.push(process.argv[i].substring(3));
+        } else if (process.argv[i].startsWith('--runner=')) {
+            runners.push(process.argv[i].substring(9));
+        } else {
+            args.push(process.argv[i]);
+        }
+    }
+    return { args, files, runners };
 }
