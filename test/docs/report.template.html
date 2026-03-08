@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
 
@@ -20,37 +21,180 @@
             margin-bottom: 20px;
         }
 
+        .content-file {
+            margin-left: 30px;
+        }
+
+        .panel-test {            
+            background-color: #ccc;
+            padding: 6px 12px;
+            margin: 15px 0;
+            border-radius: 9px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            color: #5e5e5e;
+        }
+
+        .panel-test.success {
+            background-color: #eff3f8;
+            border: 1px solid #dedede;
+        }
+
+        .panel-test.failure {
+            background-color: #f6cbcb;
+            border: 1px solid #cfa8a8;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 80%;
+            font-weight: normal;
+            color: #7e7e7e;
+            float: right;
+        }
+
+        .failure h3 {
+            color: #670a0a;
+        }
+
+        .content-test {
+        }
+
+        .coverage-item a {
+            text-decoration: none;
+            color: #007acc;
+        }
+
+        pre.code {
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            font-size: 80%;
+        }
+        
+        .tabs {
+            text-align: right;
+        }
+
+
+        .tabs button {
+            background-color: #ffffff;
+            color: #007acc;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .tabs button.active {
+            background-color: #007acc;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .expected-error {
+            color: #0d6d00;
+            font-weight: bold;
+            background: #ffffff;
+            padding: 1px 4px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px #00000065;
+        }
+
+        pre.error {
+            background-color: #f6cbcb;
+            border: 1px solid #cfa8a8;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 80%;
+            background: white;
+        }
+
     </style>
 </head>
 <body>
 
+    <script>
+        /**
+         * Toggle the visibility of a tab content.
+         * @param {HTMLButtonElement} button - The button that was clicked to toggle the tab.
+         * @param {string} tabId - The ID of the tab content to toggle.
+         */
+        function toggleTab(button, tabId) {
+            var tabContent = document.getElementById(tabId);
+            if (tabContent.style.display !== 'block') {
+                tabContent.style.display = 'block';
+                button.className = 'active';
+            } else {
+                tabContent.style.display = 'none';
+                button.className = '';
+            }
+        }
+    </script>
+
     <h1>Test Report</h1>
 
-    <%! function showTestCases(item) { %>
-        <ul>
-            <%! for (let group of item.groups) { %>
-                <li>
-                    <%! for (let caseInfo of group.cases) { %>
-                        <b><% caseInfo.name %></b>: <% caseInfo.desc %><br/>
+    <%!/*
+        export interface Test {
+            inputFile: string;
+            id: string;
+            coverage: { name: string; desc: string; }[];
+            expectedErrors: string[];
+            doctmlFile: string;
+            dataFile: string;
+            docxFile(runnerName: string): string;
+            pdfFile: string;
+            htmlFile: string;
+            pngFile: string;
+            error: { [key: string]: string };
+            success: { [key: string]: boolean };
+        };
+    */%>
+
+    <div>
+
+    <%!
+    let lastInput = null;
+    for (let { test, success, panels } of reportTests) {
+        if (success && errorOnly) continue;
+        if (lastInput !== test.inputFile) {
+            lastInput = test.inputFile;
+            let inputName = test.inputFile.replace('test/docs/data/', '');
+            %></div><h2 id="<% inputName %>"><% inputName %></h2><div id="content-file-<% inputName %>" class="content-file"><%!
+        }
+        %>
+        <div class="panel-test <% success ? 'success' : 'failure' %>">
+            <h3 id="<% test.id %>"><% test.id %></h3>
+            <div id="content-test-<% test.id %>" class="content-test">
+                <%! for (let { name, desc } of test.coverage) { %>
+                    <div class="coverage-item"><a href="#<% name %>"><% name %></a>: <% desc %></div>
+                <%! } %>
+                <div class="tabs">
+                    <%! for (let panel of panels) { %>
+                        <%! if (panel.html) { %>
+                            <button onclick="toggleTab(this, 'tab-<% test.id %>-<% panel.title %>')" <%= panel.unfold ? 'class="active"' : '' %>><% panel.title %></button>
+                        <%! } else if (panel.url) { %>
+                            <a href="<% panel.url %>" target="_blank"><button>⇩&nbsp;<% panel.title %></button></a>
+                        <%! } %>
                     <%! } %>
-                    <a href="rendered/<% group.stem %>.pdf" target="_blank">
-                    <img src="rendered/<% group.stem %>.png" class="rendered-image">
-                    <br/>[PDF]</a>
-                    <a href="rendered/<% group.stem %>.html" target="_blank">[HTML]</a>
-                    <a href="<% runner %>/<% group.stem %>.docx" target="_blank">[DOCX]</a>
-                </li>
-            <%! } %>
-        </ul>
-    <%! } %>
+                </div>
+                <%! for (let panel of panels) { %>
+                    <%! if (panel.html) { %>
+                        <div id="tab-<% test.id %>-<% panel.title %>" class="tab-content" <%= panel.unfold ? 'style="display: block;"' : '' %>>
+                            <%= panel.html %>
+                        </div>
+                    <%! } %>
+                <%! } %>
+            </div>
+        </div>
+    <%!
+    }
+    %>
 
-    <%! for (let tag of tags) { %>
-        <h2><% tag.name %></h2>
-        <%! showTestCases(tag); %>
-        <%! for (let [name, attribute] of Object.entries(tag.attributes)) { %>
-            <h3><% tag.name %>.<% attribute.name %></h3>
-            <%! showTestCases(attribute); %>
-        <%! } %>
-    <%! } %>
-
+    </div>
 </body>
 </html>

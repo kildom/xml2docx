@@ -52,6 +52,7 @@ Options:                                                  $$
 You can use ~"-"~ as <inputN> to read the file from standard input.
 You can also use ~"-"~ as <output.doctml> to write result to standard output.
 `;
+// TODO: "-" as output does not work.
 
 
 function parseArguments() {

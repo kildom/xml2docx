@@ -208,9 +208,7 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
     for (let ext of ['.pdf', '.html']) {
         for (let outputFile of Object.values(files)) {
             outputFile = path.join(path.dirname(outputFile), path.basename(outputFile, path.extname(outputFile)) + ext);
-            if (fs.existsSync(outputFile)) {
-                fs.unlinkSync(outputFile);
-            }
+            fs.rmSync(outputFile, { force: true });
         }
     }
     if (process.env.DOCX_CONVERT_SERVER) {

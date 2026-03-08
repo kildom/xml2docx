@@ -73,6 +73,7 @@ Options:                                                 $$
     Dump intermediate files alongside the output after each step of
     processing and show more verbose output in case of errors. This option
     is mainly useful when debugging the template or the tool.
+    The output file will be generated if possible, even when an error occurs.
 
 You can use ~"-"~ as <input.xml> or <data.json> to read the file from standard
 input. You can also use ~"-"~ as [output.docx] to write result to standard output.
@@ -134,7 +135,7 @@ function printVersion(): void {
 
 function parseArguments() {
     let options: Options = {};
-    let debug = false;
+    let debug = false; // TODO: If error occurs in debug mode file is generated if possible, in normal mode no file is generated and only error message is printed.
     let argCounter = 0;
     let args = process.argv.slice(2);
     if (args.length === 0) {
