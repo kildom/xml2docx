@@ -3,7 +3,7 @@ import { compileTemplate } from '../../scripts/gen-docs/template.ts';
 import hljs from 'highlight.js';
 import { Test } from './test-reader';
 import path from 'node:path';
-import { debugFilesContent, doctmlFileContent, docxFileName, errorFileContent, htmlFileContent, htmlFileName, infoFileContent, listTests, pdfFileName, pngFileName, reportFileNameNoExt } from './common.ts';
+import { debugFilesContent, doctmlFileContent, docxFileName, errorFileContent, htmlFileContent, htmlFileName, infoFileContent, listTests, pdfFileName, pngFileName, processErrors, reportFileNameNoExt } from './common.ts';
 
 interface ReportPanel {
     title: string;
@@ -44,34 +44,6 @@ function compareTests(a: ReportTest, b: ReportTest): number {
     return 0;
 }
 
-function escapeRegExp(string: string): string {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function escapeHtml(string: string): string {
-    return string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function processErrors(id: string): { success: boolean, errorHtml: string } {
-    let test = infoFileContent(id);
-    let expectedErrors = test.expectedErrors;
-    let currentErrors = errorFileContent(id).trim().split('\n').filter(line => line.trim());
-    let unexpectedErrors = [...currentErrors];
-    for (let expectedError of expectedErrors) {
-        let pattern = new RegExp('(' + escapeRegExp(expectedError) + ')');
-        for (let i = 0; i < currentErrors.length; i++) {
-            if (pattern.test(currentErrors[i])) {
-                unexpectedErrors[i] = '';
-                currentErrors[i] = currentErrors[i].replace(pattern, '#####mark_begin#####$1#####mark_end#####');
-            }
-        }
-    }
-    let success = (unexpectedErrors.join('').trim().length === 0);
-    let errorHtml = escapeHtml(currentErrors.join('\n'))
-        .replace(/#####mark_begin#####/g, '<span class="expected-error">')
-        .replace(/#####mark_end#####/g, '</span>');
-    return { success, errorHtml };
-}
 
 export async function generateReport() {
     let ids = listTests();

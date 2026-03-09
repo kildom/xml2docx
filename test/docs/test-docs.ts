@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { Runner } from './runner.ts';
 import { CliRunner } from './runner-cli.ts';
 import { readTests } from './test-reader';
-import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, getArgs, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputPath } from './common.ts';
+import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, getArgs, htmlFileContent, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputPath } from './common.ts';
 import { convertDocxFiles } from './docx2pdf.ts';
 import { pdf2png } from './pdf2png.ts';
 import { NodeRunner } from './runner-api.ts';
@@ -15,7 +15,7 @@ const MAX_TESTS_IN_GROUP = 20;
 
 const runners = [
     CliRunner,
-    NodeRunner,
+    //NodeRunner,
 ];
 
 async function prepareTests(outputPath: string, inputPath: string, filterFiles: string[]) {
@@ -222,6 +222,13 @@ async function renderTests() {
         try {
             if (!fs.existsSync(htmlFileName(testId))) {
                 appendError(testId, 'HTML file is missing\n');
+            } else {
+                let htmlContent = fs.readFileSync(htmlFileName(testId), 'latin1');
+                htmlContent = htmlContent
+                    .replace(/"[0-9a-z_-]+_files\//gi, '"./')
+                    .replace(/^.*<body[^>]*>\s*/s, '')
+                    .replace(/\s*<\/body>.*$/s, '');
+                fs.writeFileSync(htmlFileName(testId), htmlContent, 'utf-8');
             }
             if (fs.existsSync(pdfFile)) {
                 console.log(`Converting ${pdfFile} to PNG...`);

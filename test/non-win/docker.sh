@@ -10,7 +10,7 @@ docker run -it --rm --name windows \
     -p 8006:8006 -p 8083:8083 \
     --device=/dev/kvm --device=/dev/net/tun --cap-add NET_ADMIN \
     -v "${PWD:-.}/storage:/storage" \
-    -v "$(realpath ../../dist):/shared" \
+    -v "$(realpath ../..):/shared" \
     -v "${PWD:-.}/post-inst:/oem" \
     --stop-timeout 120 \
     dockurr/windows

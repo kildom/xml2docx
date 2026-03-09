@@ -3,8 +3,8 @@
 
     <section size="A4" margin="5mm"/>
 
-    <%!// TODO: Remove "TC" from docs and assume, that every documented tag and attribute must be tested by at least one test case. %>
-    <%!// Single block of code may test multiple test cases. %>
+    <%!/* TODO: Remove "TC" from docs and assume, that every documented tag and attribute must be tested by at least one test case. */%>
+    <%!/* Single block of code may test multiple test cases. */%>
 
     <!--
     p: Check if simple `<p>` tag generates correct paragraph.
@@ -182,9 +182,9 @@
     p: Check if simple `<p>` accepts unicode chars.
     -->
 
-    <p align="justify"><b>PL</b> <% tools.loremIpsum(200, 1, 'pl') %></p>
-    <p align="justify"><b>EL</b> <% tools.loremIpsum(200, 1, 'el') %></p>
-    <p align="justify"><b>UK</b> <% tools.loremIpsum(200, 1, 'uk') %></p>
+    <p align="justify"><% tools.loremIpsum(200, 1, 'pl') %></p>
+    <p align="justify"><% tools.loremIpsum(200, 1, 'el') %></p>
+    <p align="justify"><% tools.loremIpsum(200, 1, 'uk') %></p>
 
     <!--
     END
