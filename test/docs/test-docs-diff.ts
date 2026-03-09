@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import { execSync, spawnSync } from 'node:child_process';
 import { cloneTest, dataFileContent, diffHtmlFileName, diffPngFileName, doctmlFileContent, getArgs, htmlFileContent, htmlFileName, infoFileContent, listTestsGrouped, mkdirFor, pngFileName, removeTest } from './common';
-import { generateDiffReport } from './diff-report';
+import { generateDiffReport } from './report';
 
 const buildCommands = [
     'npm run build-cli',

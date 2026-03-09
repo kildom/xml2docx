@@ -26,7 +26,7 @@ async function main() {
 
     for (let tag of getTags()) {
         let html = tagTemplate({ tag, markdownToHtml });
-        //console.log(tag.name, html.length);
+        fs.mkdirSync(`dist/docs`, { recursive: true });
         fs.writeFileSync(`dist/docs/${tag.name}.html`, html);
     }
 

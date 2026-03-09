@@ -1,5 +1,5 @@
 
-import * as showdown from 'showdown';
+import showdown from 'showdown';
 import showdownHighlight from 'showdown-highlight';
 
 import { getEnum } from './parser';

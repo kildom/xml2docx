@@ -25,13 +25,11 @@
             margin-left: 30px;
         }
 
-        .panel-test {            
-            background-color: #ccc;
+        .panel-test {
             padding: 6px 12px;
             margin: 15px 0;
             border-radius: 9px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid #ddd;
             color: #5e5e5e;
         }
 
@@ -45,6 +43,21 @@
             border: 1px solid #cfa8a8;
         }
 
+        .panel-bundle {
+            background-color: white;
+            padding: 6px 12px;
+            margin: 15px 0;
+            border-radius: 9px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            color: #5e5e5e;
+        }
+
+        .panel-bundle.failure {
+            border: 2px solid #c27c7c;
+            padding: 4px 10px;
+        }
+
         h3 {
             margin: 0;
             font-size: 80%;
@@ -54,6 +67,16 @@
         }
 
         .failure h3 {
+            color: #670a0a;
+        }
+
+        h4 {
+            margin: 0px 0px 5px;
+            font-size: 90%;
+            color: #4a4a4a;
+        }
+
+        .failure h4 {
             color: #670a0a;
         }
 
@@ -114,6 +137,84 @@
             background: white;
         }
 
+        .bundle-severity {
+            font-size: 130%;
+            font-weight: bold;
+            padding: 10px 8px 6px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .bundle-severity.error {
+            color: #670a0a;
+        }
+
+        .bundle-severity.warning {
+            color: #7e670e;
+        }
+
+        .bundle-severity.notice {
+            color: #0e5b7e;
+        }
+
+        .img-diff-container {
+            background-color: black;
+            padding: 20px;
+        }
+
+        .img-diff-switcher {
+            display: inline-block;
+            font-size: 130%;
+            padding: 4px;
+            background: #EEE;
+            border: 1px solid #a9a9a9;
+            width: 80px;
+            cursor: default;
+            text-align: center;
+            color: black;
+        }
+
+        .img-diff-flex {
+            flex-direction: row;
+            display: flex;
+            gap: 0px;
+        }
+
+        .img-diff-diff {
+            position: relative;
+            width: 1px;
+            overflow: visible;
+            z-index: 1;
+        }
+
+        .img-diff-diff>img {
+            position: relative;
+        }
+
+        .img-diff-img {
+            position: relative;
+            width: 1px;
+            overflow: visible;
+            z-index: 2;
+        }
+
+        .img-diff-img>img {
+            position: relative;
+            visibility: hidden;
+        }
+        
+        li.coverage-none {
+            color: #d19200;
+        }
+
+        li.coverage-success {
+            color: #959595;
+        }
+
+        li.coverage-failure {
+            color: #ff0000;
+        }
+        
     </style>
 </head>
 <body>
@@ -134,11 +235,22 @@
                 button.className = '';
             }
         }
+        
+        function showImage(id) {
+            let img = document.getElementById(id);
+            img.style.visibility = 'visible';
+        }
+        function hideImage(id) {
+            let img = document.getElementById(id);
+            img.style.visibility = 'hidden';
+        }
     </script>
 
     <h1>Test Report</h1>
 
-    <%!/*
+    <%!
+    
+    /*
         export interface Test {
             inputFile: string;
             id: string;
@@ -153,30 +265,34 @@
             error: { [key: string]: string };
             success: { [key: string]: boolean };
         };
-    */%>
-
-    <div>
-
-    <%!
+    */
+    
     let lastInput = null;
-    for (let { test, success, panels } of reportTests) {
-        if (success && errorOnly) continue;
-        if (lastInput !== test.inputFile) {
+
+    function showReportTest(reportTest, prefix, skipFileHeader, forceShow) {
+        let { title, test, success, panels } = reportTest;
+        prefix = prefix ?? '';
+        
+        if (success && errorOnly && !forceShow) return;
+
+        if (!skipFileHeader && lastInput !== test.inputFile) {
             lastInput = test.inputFile;
             let inputName = test.inputFile.replace('test/docs/data/', '');
-            %></div><h2 id="<% inputName %>"><% inputName %></h2><div id="content-file-<% inputName %>" class="content-file"><%!
+            %></div><h2 id="<% prefix + inputName %>"><% inputName %></h2><div id="content-file-<% prefix + inputName %>" class="content-file"><%!
         }
+
         %>
         <div class="panel-test <% success ? 'success' : 'failure' %>">
-            <h3 id="<% test.id %>"><% test.id %></h3>
-            <div id="content-test-<% test.id %>" class="content-test">
+            <h3 id="<% prefix + test.id %>"><% test.id %></h3>
+            <div id="content-test-<% prefix + test.id %>" class="content-test">
+                <%! if (title) { %><h4><% title %></h4><%! } %>
                 <%! for (let { name, desc } of test.coverage) { %>
                     <div class="coverage-item"><a href="#<% name %>"><% name %></a>: <% desc %></div>
                 <%! } %>
                 <div class="tabs">
                     <%! for (let panel of panels) { %>
                         <%! if (panel.html) { %>
-                            <button onclick="toggleTab(this, 'tab-<% test.id %>-<% panel.title %>')" <%= panel.unfold ? 'class="active"' : '' %>><% panel.title %></button>
+                            <button onclick="toggleTab(this, 'tab-<% prefix + test.id %>-<% panel.title %>')" <%= panel.unfold ? 'class="active"' : '' %>><% panel.title %></button>
                         <%! } else if (panel.url) { %>
                             <a href="<% panel.url %>" target="_blank"><button>⇩&nbsp;<% panel.title %></button></a>
                         <%! } %>
@@ -184,16 +300,120 @@
                 </div>
                 <%! for (let panel of panels) { %>
                     <%! if (panel.html) { %>
-                        <div id="tab-<% test.id %>-<% panel.title %>" class="tab-content" <%= panel.unfold ? 'style="display: block;"' : '' %>>
+                        <div id="tab-<% prefix + test.id %>-<% panel.title %>" class="tab-content" <%= panel.unfold ? 'style="display: block;"' : '' %>>
                             <%= panel.html %>
                         </div>
                     <%! } %>
                 <%! } %>
             </div>
         </div>
+        <%!
+    }
+
+        /*
+        
+interface ReportBundle {
+    inputFile: string;
+    severity: 'ERROR' | 'WARNING' | 'NOTICE' | '';
+    message: string;
+    bundle: TestBundle;
+    old?: ReportTest;
+    mix?: ReportTest;
+    cur?: ReportTest;
+    success: boolean;
+};
+    */
+
+    function showReportBundle(bundle, prefix) {
+
+        if (bundle.success && errorOnly) return;
+
+        let panels = bundle.panels;
+
+        if (lastInput !== bundle.inputFile) {
+            lastInput = bundle.inputFile;
+            let inputName = bundle.inputFile;
+            %></div><h2 id="<% inputName %>"><% inputName %></h2><div id="content-file-<% inputName %>" class="content-file"><%!
+        }
+        %>
+        <div class="panel-bundle <% bundle.success ? 'success' : 'failure' %>">
+            <%! if (bundle.severity) { %>
+                <div class="bundle-severity <%= bundle.severity.toLowerCase() %>"><%= bundle.severity %>: <%= bundle.message %></div>
+            <%! } %>
+            <div class="tabs">
+                <%! for (let panel of panels) { %>
+                    <%! if (panel.html) { %>
+                        <button onclick="toggleTab(this, 'tab-<% prefix %>-<% panel.title %>')" <%= panel.unfold ? 'class="active"' : '' %>><% panel.title %></button>
+                    <%! } else if (panel.url) { %>
+                        <a href="<% panel.url %>" target="_blank"><button>⇩&nbsp;<% panel.title %></button></a>
+                    <%! } %>
+                <%! } %>
+            </div>
+            <%! for (let panel of panels) { %>
+                <%! if (panel.html) { %>
+                    <div id="tab-<% prefix %>-<% panel.title %>" class="tab-content" <%= panel.unfold ? 'style="display: block;"' : '' %>>
+                        <%= panel.html %>
+                    </div>
+                <%! } %>
+            <%! } %>
+            <%! if (bundle.old) { showReportTest(bundle.old, 'old-', true, true) } %>
+            <%! if (bundle.mix) { showReportTest(bundle.mix, 'mix-', true, true) } %>
+            <%! if (bundle.cur) { showReportTest(bundle.cur, 'cur-', true, true) } %>
+        </div>
+        <%!
+    }
+
+    %>
+
+    <div>
+
     <%!
+    lastInput = null;
+    for (let reportTest of reportTests) {
+        showReportTest(reportTest);
     }
     %>
+    </div>
+    <div>
+    <%!
+    lastInput = null;
+    let index = 0;
+    for (let reportBundle of reportBundles) {
+        showReportBundle(reportBundle, `bundle-${index}-`);
+        index++;
+    }
+
+    function coverageItem(item, forceShow) {
+        if (item.success + item.failure === 0) {
+            %><li class="coverage-none"><% item.name %>: <span class="coverage-none">Not covered</span><%!
+        } else if (item.failure === 0) {
+            if (!errorOnly || forceShow) {
+                %><li class="coverage-success"><% item.name %>: <span class="coverage-success">Success: <% item.success %></span><%!
+            }
+        } else if (item.success === 0) {
+            %><li class="coverage-failure"><% item.name %>: <span class="coverage-failure">Failure: <% item.failure %></span><%!
+        } else {
+            %><li class="coverage-failure"><% item.name %>: <span class="coverage-success">Success: <% item.success %></span> <span class="coverage-failure">Failure: <% item.failure %></span><%!
+        }
+    }
+
+    %>
+
+    <h1>Tags Coverage</h1>
+
+    <ul>
+        <%! for (let tag of reportTags) {
+            coverageItem(tag, tag.attributes.some(attr => attr.failure > 0 || attr.success == 0));
+            %>
+                <ul>
+                <%! for (let attribute of tag.attributes) {
+                    coverageItem(attribute, false);
+                    %></li>
+                <%! } %>
+                </ul>
+            </li>
+        <%! } %>
+    </ul>
 
     </div>
 </body>
