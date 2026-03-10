@@ -77,6 +77,8 @@ export type Mutable<T> = {
 
 export type FirstConstructorParam<T> = T extends new (arg1: infer P, ...args: any[]) => any ? P : never;
 
+export type ArrayItem<T extends (readonly unknown[] | undefined)> = T extends readonly (infer U)[] ? U : never;
+
 export function removeShallowUndefined(object: AnyObject) {
     for (let key of [...Object.keys(object)]) {
         if (object[key] === undefined) {

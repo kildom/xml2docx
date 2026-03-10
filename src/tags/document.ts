@@ -22,7 +22,7 @@ import * as docx from 'docx';
 import { Element } from '../xml';
 import { TranslatorState, processChildren } from '../translator';
 import { headingTags } from './p';
-import { FirstConstructorParam, Mutable, undefEmpty } from '../common';
+import { ArrayItem, FirstConstructorParam, Mutable, undefEmpty } from '../common';
 import { fontStyleTag } from './font-style';
 import { pStyleTag } from './p-style';
 import { tableTag } from './table';
@@ -207,14 +207,22 @@ function addHeaderFooterToSection(section: Mutable<docx.ISectionOptions>, obj: d
 }
 
 function embeddedFontTag(ts: TranslatorState, element: Element): ObjectContainer[] {
-    let fonts: Mutable<FirstConstructorParam<typeof docx.Document>['fonts']> = [];
+    let font: Mutable<ArrayItem<FirstConstructorParam<typeof docx.Document>['fonts']>>;
     let data = convert.src(element, 'src', true);
-    fonts.push({
+    font = {
         name: convert.mandatory(element, 'name'),
         characterSet: convert.enumeration(element, 'charset', docx.CharacterSet),
         data: Buffer.from(data),
-    });
-    return fonts.map(x => new ObjectContainer('FontOptions', x));
+    };
+    if (!/^[a-z0-9_-]+$/i.test(font.name)) {
+        element.ctx.error(`Font name "${font.name}" contains invalid characters. Only letters, digits, underscores and hyphens are allowed.`, element);
+        font.name = font.name.replace(/[^a-z0-9_-]/gi, '_');
+    }
+    if (font.data.length < 5 || new TextDecoder().decode(font.data.subarray(0, 5)) !== '\x00\x01\x00\x00\x00') {
+        element.ctx.error(`Invalid font file format. Only TTF fonts allowed.`, element);
+        return [];
+    }
+    return [new ObjectContainer('FontOptions', font)];
 }
 
 export function loadStylesData(data: Uint8Array) {

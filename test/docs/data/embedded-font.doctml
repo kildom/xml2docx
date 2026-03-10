@@ -1,0 +1,49 @@
+<document>
+    <section size="A4" margin="5mm"/>
+
+    <!--
+    embedded-font: Use external font file.
+    embedded-font.name: Use valid name.
+    embedded-font.src: Use TTF file.
+    embedded-font.charset: Use ANSI charset.
+    -->
+
+    <embedded-font name="Printed_Circuit_Board" src="include/fonts/PrintedCircuitBoard.ttf" charset="ansi"/>
+    <font size="2cm" face="Printed_Circuit_Board">Printed <b>Circuit</b> <i>Board</i></font>
+
+    <!--
+    embedded-font.charset: Skip charset.
+    -->
+
+    <embedded-font name="Printed_Circuit_Board_Italic" src="include/fonts/PrintedCircuitBoardItalic.ttf"/>
+    <font size="2cm" face="Printed_Circuit_Board_Italic">Printed Circuit Board Italic</font>
+
+    <!--
+    embedded-font.name: Use invalid name.
+    ERROR: Font name "Printed Circuit Board" contains invalid characters.
+    -->
+
+    <embedded-font name="Printed Circuit Board" src="include/fonts/PrintedCircuitBoard.ttf"/>
+    <font size="2cm" face="Printed Circuit Board">Printed Circuit Board</font>
+
+    <!--
+    embedded-font.src: Use invalid font file format.
+    ERROR: Invalid font file format. Only TTF fonts allowed.
+    -->
+
+    <embedded-font name="Printed_Circuit_Board" src="include/fonts/PrintedCircuitBoard.otf"/>
+    <font size="2cm" face="Printed_Circuit_Board">Printed Circuit Board</font>
+
+    <!--
+    embedded-font.src: Missing file.
+    ERROR: Error reading
+    -->
+
+    <embedded-font name="missing" src="missing.ttf"/>
+    <font size="2cm" face="missing">missing font file</font>
+
+    <!--
+    END
+    -->
+
+</document>

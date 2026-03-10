@@ -6,12 +6,15 @@
       type: str
       required: true
       brief: Name of the font.
-      TC: [Normal, With spaces, With special characters]
+      details: |
+        You can use ASCII letters, digits, underscores (`_`) and hyphens (`-`) in the name.
+        Spaces and other special characters are not allowed.
     src: 
       type: file
       required: true
       brief: TTF font file.
-      TC: [Normal, Data URI, Missing]
+      details: |
+        The file must be in TTF format. OTF and other font formats are not supported.
     charset:
       value: charset
       brief: Charset of the font.
@@ -36,4 +39,3 @@
         - `thai` (alias `DE`)
         - `east-europe` (alias `EE`)
         - `oem` (alias `FF`)
-      TC: [Exists, Missing]

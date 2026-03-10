@@ -15,9 +15,9 @@ import { TsxRunner } from './runner-tsx.ts';
 const MAX_TESTS_IN_GROUP = 20;
 
 const runners = [
+    ApiRunner,
     CliRunner,
     TsxRunner,
-    ApiRunner,
     //NodeRunner,
 ];
 
@@ -113,13 +113,13 @@ async function runRunner(runner: Runner, doneRunners: string[]) {
             await runRunnerForTest(runner, outputId, inputId, sendFiles);
             if (!first && ids.length === 1) {
                 // Compare with previous output only if there is something to compare with and there were no differences before.
-                let matching = await compareResults(inputId, outputId);
-                if (matching) {
+                let difference = await compareResults(inputId, outputId);
+                if (!difference) {
                     // If the results match previous output, we can remove new output.
                     removeTest(outputId);
                 } else {
                     // Differences detected, we need to clone all test files for all previous runners.
-                    let errorText = `Difference detected between runner ${runner.name} and previous runners (${doneRunners.join(', ')}).`;
+                    let errorText = `Difference detected in ${difference} between runner ${runner.name} and previous runners (${doneRunners.join(', ')}).`;
                     appendError(inputId, errorText);
                     appendError(outputId, errorText);
                     console.log(`Detected difference for ${baseId}`);
@@ -156,19 +156,19 @@ async function runRunner(runner: Runner, doneRunners: string[]) {
     }
 }
 
-async function compareResults(inputId: string, outputId: string): Promise<boolean> {
+async function compareResults(inputId: string, outputId: string): Promise<string | undefined> {
     let inputFiles = debugFilesContent(inputId);
     inputFiles['error'] = errorFileContent(inputId);
     let outputFiles = debugFilesContent(outputId);
     outputFiles['error'] = errorFileContent(outputId);
     for (let type in inputFiles) {
         if (inputFiles[type].trim() !== (outputFiles[type] ?? '').trim()) {
-            return false;
+            return type;
         }
     }
     for (let type in outputFiles) {
         if (outputFiles[type].trim() !== (inputFiles[type] ?? '').trim()) {
-            return false;
+            return type;
         }
     }
     return await compareDocxFiles(docxFileName(inputId), docxFileName(outputId));

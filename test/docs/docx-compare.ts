@@ -1,39 +1,54 @@
 import * as fs from 'fs';
 import { unZip } from "../../src/unzip";
 import { isDirectExecution } from './common';
+import { createHash } from 'node:crypto';
 
 async function extractContent(fileName: string) {
     let entries = await unZip(fs.readFileSync(fileName), name => !name.endsWith('/'));
-    let res: { [name: string]: string | Uint8Array } = {};
+    let res: { [name: string]: string } = {};
     for (let entry of entries) {
         if (entry.fileName.endsWith('.xml') || entry.fileName.endsWith('.rels')) {
             let text = new TextDecoder().decode(entry.read());
             text = text.replace(/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z/g, '--DATE--');
+            if (entry.fileName.endsWith('/fontTable.xml')) {
+                text = text.replace(/\{[a-f0-9-]{36}\}/gi, '{00000000-0000-0000-0000-000000000000}');
+            }
             res[entry.fileName] = text;
         } else {
-            res[entry.fileName] = entry.read();
+            let content = entry.read();
+            if (entry.fileName.includes('font') || entry.fileName.includes('ttf')) {
+                content = content.subarray(32);
+            }
+            res[entry.fileName] = createHash('SHA256')
+                .update(content)
+                .digest('base64');
         }
     }
     let keys = Object.keys(res).sort();
-    let sortedRes: { [name: string]: string | Uint8Array } = {};
+    let sortedRes: { [name: string]: string } = {};
     for (let key of keys) {
         sortedRes[key] = res[key];
     }
     return sortedRes;
 }
 
-export async function compareDocxFiles(file1: string, file2: string): Promise<boolean> {
+export async function compareDocxFiles(file1: string, file2: string): Promise<string | undefined> {
 
     let exists1 = fs.existsSync(file1);
     let exists2 = fs.existsSync(file2);
-    if (!exists1 && exists2) return false;
-    if (exists1 && !exists2) return false;
-    if (!exists1 && !exists2) return true;
+    if (!exists1 && exists2) return 'missing';
+    if (exists1 && !exists2) return 'missing';
+    if (!exists1 && !exists2) return undefined;
     let zip1 = await extractContent(file1);
     let zip2 = await extractContent(file2);
+    for (let name in zip1) {
+        if (zip1[name] !== zip2[name]) {
+            return `docx:${name}`;
+        }
+    }
     let json1 = JSON.stringify(zip1);
     let json2 = JSON.stringify(zip2);
-    return json1 === json2;
+    return json1 === json2 ? undefined : 'docx';
 }
 
 

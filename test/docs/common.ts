@@ -269,18 +269,23 @@ export function processErrors(id: string, root?: string): { success: boolean, er
 
     let test = infoFileContent(id, root);
     let expectedErrors = test.expectedErrors;
+    let remainingErrors = new Set(expectedErrors);
     let currentErrors = errorFileContent(id, root).trim().split('\n').filter(line => line.trim());
     let unexpectedErrors = [...currentErrors];
     for (let expectedError of expectedErrors) {
         let pattern = new RegExp('(' + escapeRegExp(expectedError) + ')');
         for (let i = 0; i < currentErrors.length; i++) {
             if (pattern.test(currentErrors[i])) {
+                remainingErrors.delete(expectedError);
                 unexpectedErrors[i] = '';
                 currentErrors[i] = currentErrors[i].replace(pattern, '#####mark_begin#####$1#####mark_end#####');
             }
         }
     }
-    let success = (unexpectedErrors.join('').trim().length === 0);
+    let success = (unexpectedErrors.join('').trim().length === 0 && remainingErrors.size === 0);
+    for (let remaining of remainingErrors) {
+        currentErrors.push(`Expected error not found: ${remaining}`);
+    }
     let errorHtml = escapeHtml(currentErrors.join('\n'))
         .replace(/#####mark_begin#####/g, '<span class="expected-error">')
         .replace(/#####mark_end#####/g, '</span>');
