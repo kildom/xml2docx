@@ -29,6 +29,31 @@ import { TranslatorState } from './translator';
 
 export { DocTMLError, DebugFileType };
 
+// TODO: Simpler interface
+
+type DebugOutputType = DebugFileType;
+
+export interface Options_new {
+    input?: string;
+    inputFile?: string;
+    data?: any;
+    dataFile?: string;
+    //remove outputFile?: string; - output file name was used only to determine output file name, but it is not used any more.
+    docxJsEnabled?: boolean;
+    throwError?: boolean; // If true, the first error will be thrown instead of accumulated in the errors array.
+    readFile?: (result: Result, file: string, binary: boolean) => Uint8Array | string; // "binary" is just a hint - if user return something different, it will be converted.
+    debugOutput?: (result: Result, type: DebugOutputType, content: string) => void;
+    //remove writeFile - output is always returned in Result
+}
+
+export interface Result_new { // Result should not be the same object as Context!
+    options: Options;
+    //inputFile: string; - input and output file names should be handled by the caller
+    //outputFile: string;
+    errors: DocTMLError[];
+    output: Uint8Array;
+}
+
 export interface Options {
     input?: string;
     inputFile?: string;
