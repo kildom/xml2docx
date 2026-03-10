@@ -1,0 +1,87 @@
+<!--
+document: Use implicit tag.
+document.title: Set "title" value.
+document.subject: Set "subject" value.
+document.creator: Set "creator" value.
+document.keywords: Set "keywords" value.
+document.description: Set "description" value.
+document.last-modified-by: Set "last-modified-by" value.
+document.custom-properties: Set "custom-properties" value.
+document.revision: Set "revision" value.
+-->
+
+<document
+    title="Test Document"
+    subject="Test Subject"
+    creator="Test Creator"
+    keywords="Test Keywords"
+    description="Test Description"
+    last-modified-by="Test Last Editor"
+    custom-properties="Test Property 1=Test Value 1, Test Property 2=Test Value 2"
+    revision="99"
+>
+    The document has following metadata set. Verify it in editor.
+    <table width="12cm">
+        <tr><td>title</td><td>Test Document</td></tr>
+        <tr><td>subject</td><td>Test Subject</td></tr>
+        <tr><td>creator</td><td>Test Creator</td></tr>
+        <tr><td>keywords</td><td>Test Keywords</td></tr>
+        <tr><td>description</td><td>Test Description</td></tr>
+        <tr><td>last-modified-by</td><td>Test Last Editor</td></tr>
+        <tr><td>custom-properties</td><td>Test Property 1=Test Value 1<br/>Test Property 2=Test Value 2</td></tr>
+        <tr><td>revision</td><td>99</td></tr>
+    </table>
+</document>
+
+<!--
+document.custom-properties: Escape characters.
+-->
+
+<document custom-properties="Special characters=\ \\ \\\, \\\\ \\, Coauthors=John Smith\, Jane Smith, Source1=C:\\My Files\\source.txt, Source2=C:\My Files\source.txt">
+    The document defines following custom properties:
+    <table width="12cm">
+        <tr><td>Special characters</td><td>\ \ \, \\ \</td></tr>
+        <tr><td>Coauthors</td><td>John Smith, Jane Smith</td></tr>
+        <tr><td>Source1</td><td>C:\My Files\source.txt</td></tr>
+        <tr><td>Source2</td><td>C:\My Files\source.txt</td></tr>
+    </table>
+</document>
+
+<!--
+document.custom-properties: Repeating keys.
+ERROR: Duplicate custom property name "Key"
+-->
+
+<document custom-properties="Key=Value1, Key=Value2"></document>
+
+<!--
+document.background: Set pages color.
+-->
+
+<document background="yellow">Yellow pages.</document>
+
+<!--
+document.styles: Use external file.
+-->
+
+<document styles="include/styles/styles.docx">
+    <title>Title - green.</title>
+    <h1>Heading 1 - red, right align.</h1>
+    <h2>Heading 2 - red.</h2>
+    <h3>Heading 3 - red.</h3>
+    <h4>Heading 4 - red.</h4>
+    <h5>Heading 5 - red.</h5>
+    <h6>Heading 6 - red.</h6>
+    <p>Normal paragraph - blue.</p>
+    <p style="Test Style 1">Test Style 1 - orange, centered.</p>
+    <p>
+        Font styles:
+        <font style="Emphasis">Emphasis - italics;</font>
+        <font style="Intense Reference">Intense Reference - blue, small caps;</font>
+        <font style="Test Style 2">Test Style 2 - Times, bold, green.</font>
+    </p>
+</document>
+
+<!--
+END
+-->

@@ -200,7 +200,7 @@ function addImplicitTags(element: Element, options: ProcessOptions) {
 
     for (let chunk of chunks) {
         if (Array.isArray(chunk)) {
-            let filtered = chunk.filter(sub => sub.text !== ' ');
+            let filtered = options.removeSpaces ? chunk.filter(sub => sub.text !== ' ') : chunk;
             if (filtered.length === 0) {
                 // If array has nothing but spaces, then skip it.
             } else if (filtered.length === 1 && filtered[0].name === 'group') {

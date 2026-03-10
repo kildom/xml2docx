@@ -27,7 +27,8 @@
             "program": "${workspaceFolder}/src/cli.ts",
             "args": [
                 "--debug",
-                "temp/tmp.xml"
+                "test/docs/data/text.doctml",
+                "a.docx"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/cli/**/*.cjs"

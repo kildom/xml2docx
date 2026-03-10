@@ -115,6 +115,35 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
         }
     }
 
+    let customProperties = (!attributes.customproperties
+        ? undefined
+        : attributes.customproperties.split(/(.*?=(?:\\.|.)*?)(?:,|$)/)
+            .map(x => x.trim())
+            .filter(x => x)
+            .map(x => x
+                .split(/(^.*?)=/)
+                .slice(1)
+            )
+            .filter(x => x.length)
+            .map(x => ({
+                name: x[0].replace(/\\([,\\])/g, '$1'),
+                value: x[1].replace(/\\([,\\])/g, '$1'),
+            })));
+
+    if (customProperties) {
+        let customPropertiesSet = new Set<string>();
+        for (let i = 0; i < customProperties.length; i++) {
+            let prop = customProperties[i];
+            if (customPropertiesSet.has(prop.name)) {
+                element.ctx.error(`Duplicate custom property name "${prop.name}"`, element);
+                customProperties.splice(i, 1);
+                i--;
+            } else {
+                customPropertiesSet.add(prop.name);
+            }
+        }
+    }
+
     return new docx.Document({
         sections: sections,
         title: attributes.title,
@@ -127,20 +156,7 @@ export function documentTag(ts: TranslatorState, element: Element): docx.Documen
         background: undefEmpty({
             color: convert.color(element, 'background'),
         }),
-        customProperties: (!attributes.customproperties
-            ? undefined
-            : attributes.customproperties.split(/(.*?=(?:\\.|.)*?(?:,|$))/)
-                .map(x => x.trim())
-                .filter(x => x)
-                .map(x => x
-                    .split(/(^.*?)=/)
-                    .slice(1)
-                )
-                .filter(x => x.length)
-                .map(x => ({
-                    name: x[0].replace(/\\(.)/g, '$1'),
-                    value: x[1].replace(/\\(.)/g, '$1'),
-                }))),
+        customProperties,
         revision: convert.uint(element, 'revision'),
         styles: {
             paragraphStyles,

@@ -20,7 +20,8 @@
 
 import * as docx from 'docx';
 import { renderTemplate } from './template';
-import { DocTMLError, DebugFileType } from './common';
+import { DocTMLError } from './common';
+import type { DebugFileType } from './common';
 import { Context } from './context';
 import { normalize, parse, stringify } from './xml';
 import { rootTag } from './tags/root';
