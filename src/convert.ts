@@ -108,7 +108,7 @@ const fromBase64Map = (function () {
 })();
 
 
-export function fromBase64(value: string): Uint8Array {
+export function fromBase64(value: string): Uint8Array<ArrayBuffer> {
     if (typeof (Uint8Array as any).fromBase64 !== 'undefined') {
         return (Uint8Array as any).fromBase64(value);
     } else if (typeof globalThis.Buffer !== 'undefined' && typeof globalThis.Buffer.from === 'function') {
@@ -385,10 +385,10 @@ enumeration.noErr = function convertEnumNoErr<T extends Dict<string | number>>(
 
 // #region File
 
-export function src(element: Element, srcAttribute: string, mandatory: true): Uint8Array;
-export function src(element: Element, srcAttribute: string, mandatory: false): Uint8Array | undefined;
-export function src(element: Element, srcAttribute: string, mandatory: boolean): Uint8Array | undefined;
-export function src(element: Element, srcAttribute: string, mandatory: boolean): Uint8Array | undefined {
+export function src(element: Element, srcAttribute: string, mandatory: true): Uint8Array<ArrayBuffer>;
+export function src(element: Element, srcAttribute: string, mandatory: false): Uint8Array<ArrayBuffer> | undefined;
+export function src(element: Element, srcAttribute: string, mandatory: boolean): Uint8Array<ArrayBuffer> | undefined;
+export function src(element: Element, srcAttribute: string, mandatory: boolean): Uint8Array<ArrayBuffer> | undefined {
     if (!element.attributes[srcAttribute]) {
         if (mandatory) {
             element.ctx.error(`Missing attribute "${srcAttribute}" on "${element.name}" tag.`, element);
@@ -403,11 +403,11 @@ export function src(element: Element, srcAttribute: string, mandatory: boolean):
     }
 }
 
-function srcFile(element: Element, path: string): Uint8Array {
-    return element.ctx.readFile(dirName(element.ctx.inputFile) + path, true);
+function srcFile(element: Element, path: string): Uint8Array<ArrayBuffer> {
+    return element.ctx.readFile(dirName(element.ctx.inputFile) + path, true) as Uint8Array<ArrayBuffer>;
 }
 
-function srcURI(element: Element, dataURI: string): Uint8Array {
+function srcURI(element: Element, dataURI: string): Uint8Array<ArrayBuffer> {
     dataURI = dataURI.trimStart().substring(5);
     let index = dataURI.indexOf(',');
     let type = dataURI.substring(0, index).toLowerCase();

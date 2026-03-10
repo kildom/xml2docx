@@ -6,7 +6,7 @@ import { readTests } from './test-reader';
 import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, getArgs, htmlFileContent, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputPath } from './common.ts';
 import { convertDocxFiles } from './docx2pdf.ts';
 import { pdf2png } from './pdf2png.ts';
-import { NodeRunner } from './runner-api.ts';
+import { ApiRunner } from './runner-api.ts';
 import { generateReport } from './report.ts';
 import { compareDocxFiles } from './docx-compare.ts';
 import path from 'node:path';
@@ -17,6 +17,7 @@ const MAX_TESTS_IN_GROUP = 20;
 const runners = [
     CliRunner,
     TsxRunner,
+    ApiRunner,
     //NodeRunner,
 ];
 
@@ -140,6 +141,14 @@ async function runRunner(runner: Runner, doneRunners: string[]) {
                     removeTest(inputId);
                 }
             }
+            let errorArray: string[] = [];
+            if (fs.existsSync(errorFileName(outputId))) {
+                errorArray = errorFileContent(outputId)
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line);
+            }
+            fs.writeFileSync(errorFileName(outputId), errorArray.join('\n') + '\n', 'utf-8');
         }
 
     } finally {
@@ -153,12 +162,12 @@ async function compareResults(inputId: string, outputId: string): Promise<boolea
     let outputFiles = debugFilesContent(outputId);
     outputFiles['error'] = errorFileContent(outputId);
     for (let type in inputFiles) {
-        if (inputFiles[type] !== (outputFiles[type] ?? '')) {
+        if (inputFiles[type].trim() !== (outputFiles[type] ?? '').trim()) {
             return false;
         }
     }
     for (let type in outputFiles) {
-        if (outputFiles[type] !== (inputFiles[type] ?? '')) {
+        if (outputFiles[type].trim() !== (inputFiles[type] ?? '').trim()) {
             return false;
         }
     }

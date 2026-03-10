@@ -25,7 +25,7 @@ import { Element } from '../xml';
 import * as convert from '../convert';
 import { getBorders, getMargin } from '../attrs/borders-attrs';
 import { headingTags } from './p';
-import { TextDirectionAliases, VerticalAlignAliases } from '../enums';
+import { TextDirectionAliases, VerticalAlignTableAliases } from '../enums';
 
 function filterAttribute(element: Element, name: string, value: string): [Element, string] {
     return [ // TODO: This function is strage. The convert functions should be able to handle it.
@@ -253,8 +253,8 @@ function tdTag(ts: TranslatorState, element: Element): any[] {
         }),
         //* Text direction. @enum:TextDirection+TextDirectionAliases
         textDirection: convert.enumeration(element, 'dir', docx.TextDirection, TextDirectionAliases),
-        //* Vertical alignment. @enum:VerticalAlign+VerticalAlignAliases
-        verticalAlign: convert.enumeration(element, 'valign', docx.VerticalAlign, VerticalAlignAliases),
+        //* Vertical alignment. @enum:VerticalAlign+VerticalAlignTableAliases
+        verticalAlign: convert.enumeration(element, 'valign', docx.VerticalAlignTable, VerticalAlignTableAliases),
         shading: selectUndef(attributes.background, {
             type: docx.ShadingType.SOLID,
             //* Background color. @@

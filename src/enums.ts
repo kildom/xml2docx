@@ -20,7 +20,7 @@
 
 import * as docx from 'docx';
 
-export const VerticalAlignAliases = {
+export const VerticalAlignTableAliases = {
     middle: docx.VerticalAlign.CENTER,
 };
 

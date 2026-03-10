@@ -51,12 +51,14 @@ export function sectionTag(ts: TranslatorState, element: Element): ObjectContain
     if (attributes.width || attributes.height) {
         if (attributes.size) {
             ts.ctx.error('Section size attribute is ignored when width or height is set.', element);
+        } else if (!attributes.width || !attributes.height) {
+            ts.ctx.error('Both width and height must be set when specifying section size.', element);
         }
         paperSize = {
             //* Page width. @@
-            width: convert.positiveUniversalMeasure(element, 'width'),
+            width: convert.positiveUniversalMeasure(element, 'width', '10cm')!,
             //* Page height. @@
-            height: convert.positiveUniversalMeasure(element, 'height'),
+            height: convert.positiveUniversalMeasure(element, 'height', '10cm')!,
             //* Page orientation. @enum:PageOrientation
             orientation: convert.enumeration(element, 'orientation', docx.PageOrientation),
         };

@@ -31,7 +31,7 @@ export class Context implements Result {
     public inputFile = ':undefined';
     public outputFile = ':undefined';
     public errors: DocTMLError[] = [];
-    public output = new Uint8Array();
+    public output: Uint8Array = new Uint8Array();
 
     public document?: docx.Document;
     public data?: any;

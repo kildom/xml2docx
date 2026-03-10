@@ -1,36 +1,15 @@
-
-import * as child_process from 'node:child_process';
+import fs from 'node:fs';
+import { generate } from '../../dist/esm/doctml.js';
 
 import { Runner } from './runner';
-import path, { dirname } from 'node:path';
-import * as fs from 'node:fs';
+import path from 'node:path';
 
 
-function getPlatform(): string {
-    switch (process.platform.toLowerCase()) {
-    case 'win32':
-        return `${process.arch}-win`;
-    case 'darwin':
-        return `${process.arch}-macos`;
-    default:
-        return `${process.arch}-linux`;
-    }
-}
+export class ApiRunner implements Runner {
 
-function getSuffix(): string {
-    return (process.platform.toLowerCase() === 'win32') ? '.exe' : '';
-}
-
-export class NodeRunner implements Runner {
-
-    private args: string[] = [];
-
-    public name = 'node';
+    public name = 'api';
 
     public constructor() {
-        this.args = [
-            path.join('dist', 'deno-compile', getPlatform(), `doctml${getSuffix()}`),
-        ];
     }
 
     public async start(): Promise<boolean> {
@@ -44,38 +23,39 @@ export class NodeRunner implements Runner {
     public async run(input: string,
         data: string | undefined,
         output: string
-    ): Promise< { [key: string]: Uint8Array } & { error?: string }> {
+    ): Promise<{ [key: string]: Uint8Array } & { error?: string }> {
 
-        // if (Math.random() < 0.1) {
-        //     return { error: 'Simulated random failure for testing retry logic.' } as any;
-        // }
+        let result = await generate({
+            inputFile: input,
+            dataFile: data,
+            outputFile: output,
 
-        let cnt = fs.readFileSync(input, 'utf-8');
-        if (Math.random() < 0.15) {
-            let i = Math.floor(Math.random() * cnt.length);
-            cnt = cnt.substring(0, i) + String.fromCharCode('a'.charCodeAt(0) + Math.floor(Math.random() * 26)) + cnt.substring(i);
-        }
-        fs.writeFileSync(`${input}.tmp`, cnt);
+            debugFile(result, type, content) {
+                const suffixes = {
+                    data: '.debug.json',
+                    rendered: '.debug.rendered.doctml',
+                    normalized: '.debug.normalized.doctml',
+                    processed: '.debug.processed.doctml',
+                };
+                fs.writeFileSync(path.join(path.dirname(output), path.basename(output, path.extname(output)) + suffixes[type]), content);
+            },
 
-        let args = [...this.args];
-        if (data) {
-            args.push('-d', data);
-        }
-        args.push('--debug');
-        args.push(`${input}.tmp`);
-        args.push(output);
+            readFile(result, file, binary) {
+                if (binary) {
+                    return fs.readFileSync(file);
+                } else {
+                    return fs.readFileSync(file, 'utf-8');
+                }
+            },
 
-        let res = child_process.spawnSync(args[0], args.slice(1), { stdio: ['ignore', 'inherit', 'pipe'], encoding: 'utf-8' });
-        fs.rmSync(`${input}.tmp`, { force: true });
-        if (res.error) {
-            return { error: `${res.error}` } as any;
-        } else if (res.stderr.trim().length > 0) {
-            return { error: res.stderr } as any;
-        } else if (res.status) {
-            return { error: `Process exit code ${res.status}` } as any;
-        }
+            writeFile(result, content) {
+                fs.writeFileSync(output, content);
+            },
+        });
 
-        return {};
+        let error = result.errors.map(e => e.message).join('\n').trim();
+
+        return { error: error } as any;
     }
 }
 
