@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as sax from 'sax';
+import sax from 'sax';
 
 export interface Style {
     type: 'paragraph' | 'character';

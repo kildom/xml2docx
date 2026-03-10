@@ -10,11 +10,13 @@ import { NodeRunner } from './runner-api.ts';
 import { generateReport } from './report.ts';
 import { compareDocxFiles } from './docx-compare.ts';
 import path from 'node:path';
+import { TsxRunner } from './runner-tsx.ts';
 
 const MAX_TESTS_IN_GROUP = 20;
 
 const runners = [
     CliRunner,
+    TsxRunner,
     //NodeRunner,
 ];
 
