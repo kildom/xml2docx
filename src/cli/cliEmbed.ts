@@ -118,7 +118,7 @@ function embedMainInner() {
 
     let args = parseArguments();
     for (let file of args.inputFiles) {
-        let data = fs.readFileSync(file === '-' ? 0 : file) as Uint8Array;
+        let data = fs.readFileSync(file === '-' ? 0 : file) as Uint8Array<ArrayBuffer>;
         let view = new DataView(data.buffer, data.byteOffset, data.byteLength);
         if (view.getUint16(0) == 0x504B) { // PK (docx document)
             embedStyles(data, true);
@@ -230,7 +230,7 @@ function embedFont(name: string, data: Uint8Array) {
     });
 }
 
-function embedImage(file: string, data: Uint8Array, mime: string) {
+function embedImage(file: string, data: Uint8Array<ArrayBuffer>, mime: string) {
     let info = getImageInfo(data);
     images.push({
         name: file,

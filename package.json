@@ -32,7 +32,7 @@
         "build-api": "npx tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
         "build-docs": "npx tsx scripts/gen-docs/gen-docs.ts",
         "_lic": "npx license-checker --json --out dist/licenses.json && npx tsx scripts/gen-licenses.ts dist/licenses.json",
-        "check": "npx tsc -p tsconfig.json && npx eslint src test",
+        "check": "npx tsc -p tsconfig.check.json && npx eslint src test",
         "_old-_lic": "npx license-checker --json --out dist/licenses.json && npx ts-node --swc scripts/gen-licenses.ts dist/licenses.json",
         "_old-prebuild": "npx esbuild src/xml2docx.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/xml2docx.json --outfile=dist/xml2docx.cjs && npm run _lic -- dist/xml2docx-license.txt dist/xml2docx.json && node scripts/postprocess.cjs",
         "_old-build": "npx pkg -C Brotli -t node18-linux-x64,node18-win-x64,node18-macos-x64 --public -o dist/xml2docx dist/xml2docx.cjs",
