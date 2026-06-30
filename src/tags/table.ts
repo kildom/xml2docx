@@ -19,9 +19,9 @@
  */
 
 import * as docx from 'docx';
-import { Dict, selectUndef, splitListValues, undefEmpty } from '../common';
+import { Dict, selectUndef, splitListValues, undefEmpty } from '../utils/common';
 import { convertElement, prepareElement, processChildren, ProcessOptions, TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import * as convert from '../convert';
 import { getBorders, getMargin } from '../attrs/borders-attrs';
 import { headingTags } from './p';

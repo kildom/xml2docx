@@ -22,7 +22,7 @@ import * as docx from 'docx';
 import JSON5 from 'json5';
 
 import { Options, Result } from './doctml';
-import { DebugFileType, Dict, DocTMLError } from './common';
+import { DebugFileType, Dict, DocTMLError } from './utils/common';
 
 
 export class Context implements Result {

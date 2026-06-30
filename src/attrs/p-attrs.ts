@@ -20,8 +20,8 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { delUndef, splitListValues, translateStyle, undefEmpty } from '../common';
-import { Element } from '../xml';
+import { delUndef, splitListValues, translateStyle, undefEmpty } from '../utils/common';
+import { Element } from '../utils/xml';
 import { getBorders } from './borders-attrs';
 import { AlignmentTypeAliases, HeadingLevelAliases } from '../enums';
 

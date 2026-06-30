@@ -15,6 +15,13 @@ const compat = new FlatCompat({
 });
 
 export default [
+    {
+        ignores: [
+            "**/*.min.js",
+            "test/outputs/**",
+            "test/non-win/post-inst/convert-server.js",
+        ],
+    },
     ...compat.extends('eslint:recommended', 'plugin:@typescript-eslint/recommended'),
     {
         plugins: {
@@ -41,6 +48,7 @@ export default [
                 130,
                 {
                     'ignoreRegExpLiterals': true,
+                    'ignoreTrailingComments': true,
                 }
             ],
             'no-trailing-spaces': 'error',

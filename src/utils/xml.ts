@@ -20,7 +20,7 @@
 
 import sax from 'sax';
 import { Attributes, deepCopy } from './common';
-import { Context } from './context';
+import { Context } from '../context';
 
 
 export interface Element {

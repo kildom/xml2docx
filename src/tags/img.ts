@@ -20,11 +20,11 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { Dict, splitListValues, undefEmpty } from '../common';
+import { Dict, splitListValues, undefEmpty } from '../utils/common';
 import { prepareElement, TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import { getMargin } from '../attrs/borders-attrs';
-import { getImageInfo, ImageInfo } from '../img-info';
+import { getImageInfo, ImageInfo } from '../utils/img-info';
 import { ImageFileTypes, RegularImageFileTypes } from '../enums';
 
 

@@ -24,7 +24,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/cli.ts",
+            "program": "${workspaceFolder}/src/cli/cliDocTML.ts",
             "args": [
                 "--debug",
                 "test/docs/data/text.doctml",

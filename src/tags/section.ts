@@ -19,9 +19,9 @@
  */
 
 import * as docx from 'docx';
-import { Mutable, undefEmpty } from '../common';
+import { Mutable, undefEmpty } from '../utils/common';
 import { processChildren, TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import * as convert from '../convert';
 import { getBorders, getMargin } from '../attrs/borders-attrs';
 import { headingTags } from './p';

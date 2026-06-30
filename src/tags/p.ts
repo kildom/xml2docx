@@ -19,9 +19,9 @@
  */
 
 import * as docx from 'docx';
-import { Dict } from '../common';
+import { Dict } from '../utils/common';
 import { processChildren, TagFunction, TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import { fontTag } from './font';
 import { getIParagraphPropertiesOptions } from '../attrs/p-attrs';
 

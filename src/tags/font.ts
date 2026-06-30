@@ -20,9 +20,9 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { Dict, translateStyle } from '../common';
+import { Dict, translateStyle } from '../utils/common';
 import { convertElement, prepareElement, TagFunction, TextFormat, TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import { getIRunStylePropertiesOptions } from '../attrs/font-attrs';
 import { brTag, pagebreakTag, pagenumberTag, spaceTag, tabTag, textTag, totalpagesTag, vwnbspTag } from './text-leaf';
 import { imgTag } from './img';

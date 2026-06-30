@@ -20,10 +20,10 @@
 
 import * as docx from 'docx';
 import { renderTemplate } from './template';
-import { DocTMLError } from './common';
-import type { DebugFileType } from './common';
+import { DocTMLError } from './utils/common';
+import type { DebugFileType } from './utils/common';
 import { Context } from './context';
-import { normalize, parse, stringify } from './xml';
+import { normalize, parse, stringify } from './utils/xml';
 import { rootTag } from './tags/root';
 import { TranslatorState } from './translator';
 

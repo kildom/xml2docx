@@ -19,7 +19,7 @@
  */
 
 import * as fs from 'node:fs';
-import { DebugFileType, DocTMLError, generate, Options, Result } from './doctml';
+import { DebugFileType, DocTMLError, generate, Options, Result } from '../doctml';
 import { embedMain } from './cliEmbed';
 import { printUsage } from './cliUsage';
 

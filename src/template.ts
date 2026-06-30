@@ -19,7 +19,7 @@
  */
 
 import { template } from 'underscore';
-import { dirName } from './common';
+import { dirName } from './utils/common';
 import { Context } from './context';
 
 

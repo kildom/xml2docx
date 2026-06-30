@@ -19,16 +19,16 @@
  */
 
 import * as docx from 'docx';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import { TranslatorState, processChildren } from '../translator';
 import { headingTags } from './p';
-import { ArrayItem, FirstConstructorParam, Mutable, undefEmpty } from '../common';
+import { ArrayItem, FirstConstructorParam, Mutable, undefEmpty } from '../utils/common';
 import { fontStyleTag } from './font-style';
 import { pStyleTag } from './p-style';
 import { tableTag } from './table';
 import { headerFooterTag, sectionTag } from './section';
 import { HeaderFooterPage } from '../enums';
-import { unZip } from '../unzip';
+import { unZip } from '../utils/unzip';
 import { getDocxStyles } from '../docxStyles';
 import * as convert from '../convert';
 
@@ -215,11 +215,12 @@ function embeddedFontTag(ts: TranslatorState, element: Element): ObjectContainer
         data: Buffer.from(data),
     };
     if (!/^[a-z0-9_-]+$/i.test(font.name)) {
-        element.ctx.error(`Font name "${font.name}" contains invalid characters. Only letters, digits, underscores and hyphens are allowed.`, element);
+        element.ctx.error(`Font name "${font.name}" contains invalid characters. `
+            + 'Only letters, digits, underscores and hyphens are allowed.', element);
         font.name = font.name.replace(/[^a-z0-9_-]/gi, '_');
     }
     if (font.data.length < 5 || new TextDecoder().decode(font.data.subarray(0, 5)) !== '\x00\x01\x00\x00\x00') {
-        element.ctx.error(`Invalid font file format. Only TTF fonts allowed.`, element);
+        element.ctx.error('Invalid font file format. Only TTF fonts allowed.', element);
         return [];
     }
     return [new ObjectContainer('FontOptions', font)];

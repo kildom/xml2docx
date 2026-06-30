@@ -20,9 +20,9 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { Mutable } from '../common';
+import { Mutable } from '../utils/common';
 import { processChildren, TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import { getIRunStylePropertiesOptions } from '../attrs/font-attrs';
 import { ObjectContainer } from './document';
 

@@ -20,8 +20,8 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { splitListValues } from '../common';
-import { Element } from '../xml';
+import { splitListValues } from '../utils/common';
+import { Element } from '../utils/xml';
 
 // #region SingleBorder
 

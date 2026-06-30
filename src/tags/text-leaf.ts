@@ -20,7 +20,7 @@
 
 import * as docx from 'docx';
 import { TranslatorState } from '../translator';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 
 
 const avoidOrphansVarRegExp: RegExp[] = [];

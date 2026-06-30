@@ -200,7 +200,7 @@ function compareTests(aId: string, aRoot: string, bId: string, bRoot: string): b
     }
 
     console.log(`    HTML: ${diffHtml ? 'different' : 'same'}, PNG: ${theSame ? 'same' : 'different'}`);
-    
+
     return theSame && !diffHtml;
 }
 

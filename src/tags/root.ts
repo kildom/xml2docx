@@ -19,7 +19,7 @@
  */
 
 import * as docx from 'docx';
-import { Element } from '../xml';
+import { Element } from '../utils/xml';
 import { TranslatorState } from '../translator';
 import { documentTag } from './document';
 

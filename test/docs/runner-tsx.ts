@@ -14,7 +14,7 @@ export class TsxRunner implements Runner {
         this.args = [
             'npx',
             'tsx',
-            'src/cli.ts',
+            'src/cli/cliDocTML.ts',
         ];
     }
 

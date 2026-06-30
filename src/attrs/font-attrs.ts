@@ -20,8 +20,8 @@
 
 import * as docx from 'docx';
 import * as convert from '../convert';
-import { removeShallowUndefined, selectUndef, splitListValues } from '../common';
-import { Element } from '../xml';
+import { removeShallowUndefined, selectUndef, splitListValues } from '../utils/common';
+import { Element } from '../utils/xml';
 import { getSingleBorder } from './borders-attrs';
 
 // #region IRunStylePropertiesOptions

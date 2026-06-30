@@ -71,7 +71,7 @@ function testCase(...list) {
 
 (function(utils) {
 
-    const LoremIpsum = eval(utils.include("include/lorem-ipsum.min.js") + ';\nLoremIpsum');
+    const LoremIpsum = eval(utils.include('include/lorem-ipsum.min.js') + ';\nLoremIpsum');
 
     return {
         loremIpsum(count, seed, language) {
@@ -82,5 +82,5 @@ function testCase(...list) {
             ipsum.setContext(prefix);
             return prefix + ipsum.generate(count - prefix.length);
         }
-    }
+    };
 })

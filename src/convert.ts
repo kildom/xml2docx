@@ -20,8 +20,8 @@
 
 import * as docx from 'docx';
 import { PositiveUniversalMeasure, UniversalMeasure } from 'docx';
-import { Dict, dirName } from './common';
-import { Element } from './xml';
+import { Dict, dirName } from './utils/common';
+import { Element } from './utils/xml';
 import { Context } from './context';
 
 // #region Common
@@ -129,24 +129,24 @@ export function fromBase64(value: string): Uint8Array<ArrayBuffer> {
             let a = fromBase64Map[value.charCodeAt(valueOffset++)];
             let b = fromBase64Map[value.charCodeAt(valueOffset++)];
             let c = fromBase64Map[value.charCodeAt(valueOffset++)];
-            let d = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let d = fromBase64Map[value.charCodeAt(valueOffset)];
             let v = (a << 18) | (b << 12) | (c << 6) | d;
             bytes[bytesOffset++] = (v >> 16) & 0xFF;
             bytes[bytesOffset++] = (v >> 8) & 0xFF;
-            bytes[bytesOffset++] = v & 0xFF;
+            bytes[bytesOffset] = v & 0xFF;
         }
         if (valueOffset === value.length - 3) {
             let a = fromBase64Map[value.charCodeAt(valueOffset++)];
             let b = fromBase64Map[value.charCodeAt(valueOffset++)];
-            let c = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let c = fromBase64Map[value.charCodeAt(valueOffset)];
             let v = (a << 12) | (b << 6) | c;
             bytes[bytesOffset++] = (v >> 10) & 0xFF;
-            bytes[bytesOffset++] = (v >> 2) & 0xFF;
+            bytes[bytesOffset] = (v >> 2) & 0xFF;
         } else if (valueOffset === value.length - 2) {
             let a = fromBase64Map[value.charCodeAt(valueOffset++)];
-            let b = fromBase64Map[value.charCodeAt(valueOffset++)];
+            let b = fromBase64Map[value.charCodeAt(valueOffset)];
             let v = (a << 6) | b;
-            bytes[bytesOffset++] = (v >> 4) & 0xFF;
+            bytes[bytesOffset] = (v >> 4) & 0xFF;
         }
         return bytes;
     }

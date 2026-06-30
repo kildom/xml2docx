@@ -20,8 +20,8 @@
 
 import * as docx from 'docx';
 import { Context } from './context';
-import { Element } from './xml';
-import { Attributes, Dict } from './common';
+import { Element } from './utils/xml';
+import { Attributes, Dict } from './utils/common';
 
 const stripAroundTags = new Set([
     'br',

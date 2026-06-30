@@ -1,0 +1,16 @@
+{
+    "entryPoints": ["src"],
+    "entryPointStrategy": "expand",
+    "out": "dist/internal-docs",
+
+    "excludePrivate": false,
+    "excludeProtected": false,
+    "excludeInternal": false,
+    "excludeNotDocumented": false,
+
+    "sourceLinkTemplate": "file:///home/dok/my/xml2docx/{path}",
+
+    "sort": [
+        "source-order"
+    ]
+}

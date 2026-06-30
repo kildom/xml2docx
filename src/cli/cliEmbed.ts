@@ -20,10 +20,10 @@
 
 import * as fs from 'node:fs';
 import { printUsage } from './cliUsage';
-import { loadStylesData } from './tags/document';
-import { getDocxStyles } from './docxStyles';
-import { xmlEscape } from './xml';
-import { getImageInfo } from './img-info';
+import { loadStylesData } from '../tags/document';
+import { getDocxStyles } from '../docxStyles';
+import { xmlEscape } from '../utils/xml';
+import { getImageInfo } from '../utils/img-info';
 
 
 const USAGE = `
