@@ -237,7 +237,7 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
         let list = Object.create(null);
         console.log(`Preparing files for run ${run}`);
         for (let file = 0; file < 10; file++) {
-            fs.copyFileSync(`test/docs/include/styles/styles.docx`, `test/outputs/_tmp/docx2pdf_test/in/${run}${file}.docx`);
+            fs.copyFileSync(`test/docs/data/include/styles/styles.docx`, `test/outputs/_tmp/docx2pdf_test/in/${run}${file}.docx`);
             list[`test/outputs/_tmp/docx2pdf_test/in/${run}${file}.docx`] = `test/outputs/_tmp/docx2pdf_test/out/${run}${file}.pdf`;
             try { fs.unlinkSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.pdf`); } catch (_) { }
             try { fs.unlinkSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.html`); } catch (_) { }

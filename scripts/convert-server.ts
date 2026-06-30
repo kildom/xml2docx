@@ -86,9 +86,6 @@ const server = http.createServer(async (req, res) => {
 
         } else if (req.url === '/upload' && req.method === 'POST') {
 
-            try {
-                fs.mkdirSync('uploads');
-            } catch (_ex) { }
             fileId++;
             let fileName = `uploads/${prefix}${fileId}.docx`;
             await pipeline(
@@ -207,6 +204,9 @@ function getScriptDir(): string {
 
 async function main() {
     process.chdir(getScriptDir());
+    try {
+        fs.mkdirSync('uploads');
+    } catch (_ex) { }
     if (!DEBUGGING) {
         for (let file of fs.readdirSync('uploads')) {
             try { fs.rmSync(`uploads/${file}`, { recursive: true, force: true }); } catch (_ex) { }

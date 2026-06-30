@@ -27,6 +27,18 @@
         <br/>
 
     <!--
+    img.src: Check SVG image format.
+    -->
+
+    SVG, solid, no fallback:
+        <img src="include/images/mountains.svg" width="5cm"/>
+        <br/>
+
+    SVG, transparent, no fallback:
+        <img src="include/images/mountains-transparent.svg" width="5cm"/>
+        <br/>
+
+    <!--
     img.src: Check PNG transparency.
     -->
 

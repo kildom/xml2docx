@@ -255,6 +255,10 @@ async function renderTests() {
 
 async function main() {
 
+    try {
+        fs.mkdirSync('test/outputs', { recursive: true });
+    } catch (_ex) { }
+
     let { args, files: filterFiles, runners: filterRunners } = getArgs();
 
     /* STAGE 1:
