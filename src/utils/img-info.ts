@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as sax from 'sax';
+import sax from 'sax';
 import { Attributes, Dict } from './common';
 
 const gifSignature = 0x47494638;
@@ -235,6 +235,7 @@ export function getImageInfo(image: BufferSource): ImageInfo | undefined {
 
     } catch (_) {
         // All errors should be treated as unsupported format
+        // TODO: Some debug mode should log the error anyway
     }
 
     return undefined;

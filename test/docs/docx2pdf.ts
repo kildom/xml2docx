@@ -218,7 +218,7 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
             console.error(`
                 Local conversion is only supported on Windows with Office installed.
                 If you have a conversion server available, please set DOCX_CONVERT_SERVER environment
-                variable to its address (e.g. localhost:8083). You can start the server with node.js using the
+                variable to its address (e.g. DOCX_CONVERT_SERVER=localhost:8083). You can start the server with node.js using the
                 "dist/dev/convert-server.js" script. Build it first with a "npm run dev-build-convert-server" command.
                 This server IS NOT SECURE, so do not expose it to the public network.
             `.replace(/\s+/g, ' ').trim().replace(/(.{1,79})(?: |$)/g, '$1\n').trim());

@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { unZip } from '../../src/unzip';
+import { unZip } from '../../src/utils/unzip';
 import { isDirectExecution } from './common';
 import { createHash } from 'node:crypto';
 

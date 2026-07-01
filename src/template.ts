@@ -44,8 +44,8 @@ class TemplateUtils {
     }
 
     public include(fileName: string): string {
-        let template = this.ctx.readFile(dirName(this.inputFile) + fileName, false);
-        let text = renderTemplate(this.ctx, template, fileName);
+        let template = this.ctx.readFile(dirName(this.inputFile) + fileName, false); // TODO: Consider better handling of relative paths
+        let text = renderTemplate(this.ctx, template, dirName(this.inputFile) + fileName);
         return text;
     }
 

@@ -1,4 +1,4 @@
-<%= utils.include(utils.inputDir + 'helper/include.inc') %>
+<%= utils.include('helper/include.inc') %>
 ----------------------------------------------------------------
 test/template/data/helper/include.inc
 test/template/data/helper/

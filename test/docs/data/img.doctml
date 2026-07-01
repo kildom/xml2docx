@@ -38,6 +38,14 @@
         <img src="include/images/mountains-transparent.svg" width="5cm"/>
         <br/>
 
+    SVG, solid, red fallback:
+        <img src="include/images/mountains.svg" fallback-src="include/images/red.png" width="5cm"/>
+        <br/>
+
+    SVG, transparent, red fallback:
+        <img src="include/images/mountains-transparent.svg" fallback-src="include/images/red.png" width="5cm"/>
+        <br/>
+
     <!--
     img.src: Check PNG transparency.
     -->

@@ -67,7 +67,7 @@ async function test() {
 
             failingTests++;
             console.error(`[FAIL] ${fileName}`);
-            console.error('       ' + err.message.trim().replace(/\r?\n/g, '\n       '));
+            console.error('       ' + (err as any).message?.trim().replace(/\r?\n/g, '\n       '));
             for (let resultError of result.errors) {
                 if (!(resultError.sourceError instanceof EndOfTestIsNotAnError)) {
                     console.error(resultError);
