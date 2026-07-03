@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { Test } from './test-reader';
+import { TestMetadata } from './test-reader';
 
 let CUR = 'test/outputs/cur';
 
@@ -161,7 +161,7 @@ export function dataFileContent(testOrId: any, root?: string): string {
     return fs.readFileSync(dataFileName(testOrId, root), 'utf-8');
 }
 
-export function infoFileContent(testOrId: any, root?: string): Test {
+export function infoFileContent(testOrId: any, root?: string): TestMetadata {
     return JSON.parse(fs.readFileSync(infoFileName(testOrId, root), 'utf-8'));
 }
 
@@ -227,7 +227,13 @@ export function reportFileNameNoExt(root?: string) {
     return getRoot(root);
 }
 
-export function getArgs(): { args: string[]; files: string[]; runners: string[] } {
+/** Parse command line arguments and return an object containing the parsed arguments, files, and runners.
+ * 
+ * @param minArgs - Minimum number of arguments required.
+ * @param maxArgs - Maximum number of arguments allowed.
+ * @returns An object containing the parsed arguments, files, and runners.
+ */
+export function getArgs(minArgs: number, maxArgs: number, usage: string): { args: string[]; files: string[]; runners: string[] } {
     let args: string[] = [];
     let files: string[] = [];
     let runners: string[] = [];
@@ -250,9 +256,16 @@ export function getArgs(): { args: string[]; files: string[]; runners: string[] 
             runners.push(process.argv[i].substring(3));
         } else if (process.argv[i].startsWith('--runner=')) {
             runners.push(process.argv[i].substring(9));
+        } else if (process.argv[i].match(/^([/-]+(h(elp)?|\?))$/)) {
+            console.log(usage);
+            process.exit(0);
         } else {
             args.push(process.argv[i]);
         }
+    }
+    if (args.length < minArgs || args.length > maxArgs) {
+        console.error(usage);
+        throw new Error(`Expected between ${minArgs} and ${maxArgs} arguments, but got ${args.length}`);
     }
     return { args, files, runners };
 }

@@ -2,13 +2,25 @@
 - group-name: -formatting-tags-
   tags:
     - font
-    - span
     - b
     - i
     - s
     - u
     - sub
     - sup
+    - span
+
+- group-name: font-aliases
+  brief: Font aliases
+  tags:
+    - b
+    - i
+    - s
+    - u
+    - sub
+    - sup
+    - span
+
 - group-name: -leaf-tags-
   tags:
     - img
@@ -21,3 +33,37 @@
     - vwnbsp
     - TEXT
     - CDATA
+
+- group-name: text-elements
+  brief: Text elements
+  tags:
+    - br
+    - tab
+    - space
+    - page-number
+    - total-pages
+    - page-break
+    - vwnbsp
+
+# TODO: Displaying group in the diagram:
+#
+# digraph G {
+#   node [shape=rect, fontname="Arial"];
+#   "text-elements" [margin="0.007" label=<
+#     <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2">
+#       <TR>
+#         <TD COLSPAN="1" BGCOLOR="#2E86C1" ALIGN="CENTER">
+#           <FONT COLOR="white"><B>Text elements</B></FONT>
+#         </TD>
+#       </TR>
+#       <TR><TD HREF="br.html" TOOLTIP="Line break element" BGCOLOR="#FFFFFF">br</TD></TR>
+#       <TR><TD HREF="tab.html" TOOLTIP="Tab character element" BGCOLOR="#EEEEEE">tab</TD></TR>
+#       <TR><TD HREF="space.html" TOOLTIP="Space character element" BGCOLOR="#FFFFFF">space</TD></TR>
+#       <TR><TD HREF="page-number.html" TOOLTIP="Current page number variable" BGCOLOR="#EEEEEE">page-number</TD></TR>
+#       <TR><TD HREF="total-pages.html" TOOLTIP="Total number of pages variable" BGCOLOR="#FFFFFF">total-pages</TD></TR>
+#       <TR><TD HREF="page-break.html" TOOLTIP="Explicit page break marker" BGCOLOR="#EEEEEE">page-break</TD></TR>
+#       <TR><TD HREF="vwnbsp.html" TOOLTIP="Variable-width non-breaking space" BGCOLOR="#FFFFFF">vwnbsp</TD></TR>
+#     </TABLE>
+#   >];
+#   "text-elements" -> a
+# }

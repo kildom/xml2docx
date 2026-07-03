@@ -1,5 +1,5 @@
 
-# DocTML (Document Text Mark-up Language) <img src="docs/icon.svg" width="128" align="right"/>
+# DocTML (Document Text Mark-up Language) <img src="docs/img/icon.svg" width="128" align="right"/>
 
 〚 [Web demo](http://kildom.github.io/xml2docx/) 〛&nbsp;
 〚 [Documentation](http://kildom.github.io/xml2docx/docs.html) 〛&nbsp;

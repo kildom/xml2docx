@@ -12,7 +12,8 @@ const buildCommands = [
 
 async function runTestDocs() {
 
-    let { args, files, runners } = getArgs();
+    let usage = 'Usage: npm run test-docs-diff -- [revision] [-r <runner> ...] [-f <file> ...] [--help]';
+    let { args, files, runners } = getArgs(0, 1, usage);
 
     // Pass filters to test-docs command
     let filesArg = '';
@@ -90,6 +91,7 @@ async function main() {
      * - If at least one test case is failing, entire bundle is failing - no more processing needed.
      * - Compare generated PNG and HTML files and categorize bundle.
      * All possible categories:
+     *   error just in NO => ERROR: compatibility broken
      *   error in any => ERROR: tests are failing - check why
      *   OO == NO == NN => SILENT: test passed
      *   OO != NO == NN => ERROR: compatibility broken

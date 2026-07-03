@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { doctmlFileName, isDirectExecution, isTestSuite, mkdirFor, outputRootDir } from './common';
 
 
-export interface Test {
+export interface TestMetadata {
     id: string;
     inputFile: string;
     index: number;
@@ -14,8 +14,14 @@ export interface Test {
 };
 
 
-export function readTests(filterFiles: string[]): Test[] {
-    let tests: Test[] = [];
+/** Parse DocTML test files from the input copied to output directory and write separate test files.
+ * 
+ * For each test case, the result contains a doctml file, an info.json file with TestMetadata, and a data.json file.
+ * 
+ * @param filterFiles An array of file names that should be included (empty for all files).
+ */
+export function parseDocTMLTests(filterFiles: string[]) {
+    let tests: TestMetadata[] = [];
 
     for (let file of fs.readdirSync(outputRootDir(), { recursive: true, encoding: 'utf-8' })) {
         if (!isTestSuite(file)) {
@@ -56,11 +62,9 @@ export function readTests(filterFiles: string[]): Test[] {
         }
         ids.add(test.id);
     }
-
-    return tests;
 }
 
-function createTest(inputFile: string, nameStem: string, header: string, footer: string, coverageText: string, body: string, data: string, index: number): Test {
+function createTest(inputFile: string, nameStem: string, header: string, footer: string, coverageText: string, body: string, data: string, index: number): TestMetadata {
     coverageText = coverageText.trim().replace(/(^[\t ]+|[\t ]+$)/gm, '').trim();
     let { coverage, expectedErrors } = parseTestCoverage(coverageText);
     let hash = hashOfCoverage(coverage);
@@ -70,7 +74,7 @@ function createTest(inputFile: string, nameStem: string, header: string, footer:
     fs.writeFileSync(doctmlFile, header + body + footer);
     let dataFile = doctmlFile.replace('.doctml', '.json');
     fs.writeFileSync(dataFile, data);
-    let result: Test = {
+    let result: TestMetadata = {
         id,
         inputFile,
         index,
@@ -134,24 +138,3 @@ function parseTestCoverage(coverageText: string) {
     }
     return { coverage, expectedErrors };
 }
-
-
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
-    let tests = readTests();
-    if (tests.length === 0) {
-        throw new Error('No tests found');
-    }
-    console.log('Number of tests:', tests.length);
-    for (let test of tests) {
-        if (test.coverage.length === 0) {
-            throw new Error(`Test has no coverage: ${test.id}`);
-        }
-        let file = `${CUR}/doctml/${test.id}.doctml`;
-        if (!fs.readFileSync(file, 'utf-8').trim().startsWith('<')) {
-            throw new Error(`Test input file is not a valid doctml: ${file}`);
-        }
-        JSON.parse(fs.readFileSync(file.replace(/\.doctml$/, '.json'), 'utf-8'));
-        console.log(`Test: ${test.id} from ${file}`);
-    }
-    console.log('Self test PASSED');
-})();

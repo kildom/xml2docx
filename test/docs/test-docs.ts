@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import { Runner } from './runner.ts';
 import { CliRunner } from './runner-cli.ts';
-import { readTests } from './test-reader';
+import { parseDocTMLTests } from './test-reader';
 import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, getArgs, htmlFileContent, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputPath } from './common.ts';
 import { convertDocxFiles } from './docx2pdf.ts';
 import { pdf2png } from './pdf2png.ts';
@@ -16,11 +16,22 @@ const MAX_TESTS_IN_GROUP = 20;
 
 const runners = [
     ApiRunner,
-    CliRunner,
-    TsxRunner,
+    //CliRunner,
+    //TsxRunner,
     //NodeRunner,
 ];
 
+
+/** Prepare tests by reading input DocTML files, dividing them into test cases, and saving them
+ * to the output directory.
+ *
+ * Once the tests are prepared, they are in the output directory together with their metadata.
+ * They are ready to be run.
+ *
+ * @param outputPath The path to the output directory where test results will be saved.
+ * @param inputPath The path to the input directory containing test DocTML files.
+ * @param filterFiles An array of file names that should be included (empty for all files).
+ */
 async function prepareTests(outputPath: string, inputPath: string, filterFiles: string[]) {
     console.log('Preparing tests...');
     // Set output directory
@@ -38,7 +49,7 @@ async function prepareTests(outputPath: string, inputPath: string, filterFiles: 
     fs.mkdirSync(outputRootDir(), { recursive: true });
     fs.cpSync(inputPath, outputRootDir(), { recursive: true });
     // Read and prepare test cases
-    readTests(filterFiles);
+    parseDocTMLTests(filterFiles);
 }
 
 async function runRunnerForTest(runner: Runner, outputId: string, inputId: string, sendFiles: boolean) {
@@ -259,7 +270,8 @@ async function main() {
         fs.mkdirSync('test/outputs', { recursive: true });
     } catch (_ex) { }
 
-    let { args, files: filterFiles, runners: filterRunners } = getArgs();
+    let usage = 'Usage: npm run test-docs -- [outputPath] [inputPath] [-r <runner> ...] [-f <file> ...] [--help]';
+    let { args, files: filterFiles, runners: filterRunners } = getArgs(0, 2, usage);
 
     /* STAGE 1:
      * - Read input DocTML files
@@ -269,7 +281,7 @@ async function main() {
      *   correctly and cannot be run at all.
      */
 
-    await prepareTests(args[0] ?? 'test/outputs/cur', args[1] ?? 'test/docs/data', filterFiles);
+    await prepareTests(args[0] ?? 'test/outputs/docs', args[1] ?? 'test/docs/data', filterFiles);
 
     /* STAGE 2:
      * For each runner:
@@ -280,6 +292,8 @@ async function main() {
      */
 
     await runDocTML(filterRunners);
+
+    return;
 
     /* STAGE 3:
      * For each test case:

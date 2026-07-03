@@ -9,48 +9,40 @@
 
 - tag-name: b
   alias-of: font
+  alias-text: '`<font bold="true"`'
   brief: Bold text.
-  details: |
-    This is an alias of the `<font>` tag with the `bold="true"` attribute.
 
 - tag-name: i
   alias-of: font
+  alias-text: '`<font italics="true"`'
   brief: Italic text.
-  details: |
-    This is an alias of the `<font>` tag with the `italics="true"` attribute.
 
 - tag-name: u
   alias-of: font
+  alias-text: '`<font underline="single"`'
   brief: Underline text.
-  details: |
-    This is an alias of the `<font>` tag with the `underline="single"` attribute.
 
 - tag-name: s
   alias-of: font
+  alias-text: '`<font strike="true"`'
   brief: Line through text.
-  details: |
-    This is an alias of the `<font>` tag with the `strike="true"` attribute.
 
 - tag-name: span
   alias-of: font
-  brief: Change text style.
+  alias-text: '`<font>`'
+  brief: Text span.
   details: |
-    This is an alias of the `<font>` tag.
-
-- tag-name: span
-  children: [ -formatting-tags-, -leaf-tags- ]
-  brief: Alias of `<font>`.
-  combine: [ -formatting-attributes- ]
+    You can use it for enclosing some text.
 
 - tag-name: sub
-  children: [ -formatting-tags-, -leaf-tags- ]
+  alias-of: font
+  alias-text: '`<font subscript="true"`'
   brief: Subscript.
-  combine: [ -formatting-attributes- ]
 
 - tag-name: sup
-  children: [ -formatting-tags-, -leaf-tags- ]
+  alias-of: font
+  alias-text: '`<font superscript="true"`'
   brief: Superscript.
-  combine: [ -formatting-attributes- ]
 
 - tag-name: -formatting-attributes-
   attributes:

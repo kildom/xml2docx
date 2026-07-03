@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { compileTemplate } from '../../scripts/gen-docs/template.ts';
 import hljs from 'highlight.js';
-import { Test } from './test-reader.ts';
+import { TestMetadata } from './test-reader.ts';
 import path from 'node:path';
 import { debugFilesContent, diffHtmlFileContent, diffHtmlFileName, diffPngFileName, doctmlFileContent, docxFileName, htmlFileContent, htmlFileName, infoFileContent, listTests, pdfFileName, pngFileName, processErrors, reportFileNameNoExt } from './common.ts';
 import { TestBundle } from './test-docs-diff.ts';
@@ -16,7 +16,7 @@ interface ReportPanel {
 
 interface ReportTest {
     title?: string;
-    test: Test;
+    test: TestMetadata;
     success: boolean;
     panels: ReportPanel[];
 };
