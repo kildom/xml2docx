@@ -1,6 +1,7 @@
 
 - tag-name: -IParagraphPropertiesOptions-
   combine: [ -IParagraphStylePropertiesOptions- ]
+  docx-js: docx.IParagraphPropertiesOptions
   attributes:
     page-break:
       type: bool
@@ -60,10 +61,9 @@
       experimental: true
       type: bool
       docx-js: "suppressLineNumbers?: boolean"
-  docs-js: https://docx.js.org/api/types/IParagraphPropertiesOptions.html
-  unused-docx-js-properties:
-    - frame?: IFrameOptions
-    - run?: IRunOptions
+  unused-docx-js:
+    - frame
+    - run
 
 
 - tag-name: -IParagraphStylePropertiesOptions-
@@ -77,8 +77,8 @@
       type: color
       brief: Paragraph background color.
       docx-js: "shading?: IShadingAttributesProperties"
-  unused-docx-js-properties:
-    - numbering?: ...
+  unused-docx-js:
+    - numbering
 
 
 - tag-name: -ILevelParagraphStylePropertiesOptions-
@@ -102,9 +102,6 @@
           This is relative to the left indentation and it can be negative to create a hanging indent.
           Zero by default.
       docx-js: "indent?: IIndentAttributesProperties"
-      unused-docx-js:
-        - start?: number | UniversalMeasure
-        - end?: number | UniversalMeasure
     keep-lines:
       type: bool
       brief: Keep all lines on a single page if possible.
@@ -126,9 +123,6 @@
       details: |
         - **before** @optional - Space before paragraph in [positive length](#positive-length) units.
         - **after** @optional - Space after paragraph in [positive length](#positive-length) units.
-      unused-docx-js:
-        - afterAutoSpacing?: boolean;
-        - beforeAutoSpacing?: boolean;
       docx-js: "spacing?: ISpacingProperties"
     line-spacing:
       value: requirement distance
@@ -156,12 +150,12 @@
       experimental: true
       type: bool
       docx-js: "thematicBreak?: boolean"
-  unused-docx-js-properties:
-    - leftTabStop?: number
-    - rightTabStop?: number
+  unused-docx-js:
+    - leftTabStop
+    - rightTabStop
 
 
 - enum-name: ParagraphAlignment
-  combine: [ AlignmentType ]
+  combine: [ docx.AlignmentType ]
   values:
     justify: Alias of `both`.

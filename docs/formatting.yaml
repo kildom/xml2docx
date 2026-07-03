@@ -64,14 +64,6 @@
       brief: Strike through text.
 
 
-- tag-name: sub
-- tag-name: sup
-- tag-name: br
-- tag-name: tab
-- tag-name: space
-- tag-name: page-break
-
-
 - tag-name: vwnbsp
   brief: Variable width non-breaking space.
   details: |

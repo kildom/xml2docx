@@ -26,9 +26,9 @@
     - title: Font color
       code: <p font.color="red">Warning!</p>
   docx-js: https://docx.js.org/api/types/IParagraphOptions.html
-  unused-docx-js-properties:
-    - children?: readonly ParagraphChild[]
-    - text?: string
+  unused-docx-js:
+    - children
+    - text
 
 
 - tag-name: h1

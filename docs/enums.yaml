@@ -1,0 +1,11 @@
+
+# Enumerations imported from docx module.
+
+- enum-name: docx.AlignmentType
+
+
+# Enumerations imported from local enums file.
+
+- enum-name: enums.RegularImageFileTypes
+
+

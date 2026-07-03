@@ -15,11 +15,6 @@
       type: file
       required: true
       brief: Image source.
-      TC:
-        - Relative path
-        - Absolute path
-        - Missing file
-        - Data URI
 
     width:
       type: positive-length
@@ -29,12 +24,6 @@
         If `height` attribute is provided, width will be set to preserve aspect ratio.
         Otherwise, the image will be embedded using `1px` per one image pixel which is 96 DPI.
         The source DPI metadata is ignored.
-      TC:
-        - Normal
-        - Missing (vertical image)
-        - Missing (horizontal image)
-        - Both width and height are missing
-    
     height:
       type: positive-length
       brief: Image height.
@@ -43,10 +32,6 @@
         If `width` attribute is provided, height will be set to preserve aspect ratio.
         Otherwise, the image will be embedded using `1px` per one image pixel which is 96 DPI.
         The source DPI metadata is ignored.
-      TC:
-        - Normal
-        - Missing (vertical image)
-        - Missing (horizontal image)
 
     horizontal:
       value: anchor offset
@@ -142,6 +127,6 @@
     svg: You should provide `<img fallback-src=""` attribute for SVG images.
 
 - enum-name: fallback-img-type
-  combine: [ RegularImageFileTypes ]
+  combine: [ enums.RegularImageFileTypes ]
   values:
     jpeg: Alias of `jpg`.

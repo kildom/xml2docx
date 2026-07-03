@@ -1,0 +1,21 @@
+- tag-name: br
+  brief: Line break.
+  details: |
+    Be careful when using this tag with `justify` in `<p alignment=""` attribute.
+    The text may be stretched to fill the line making the spaces between words too wide.
+
+- tag-name: tab
+  brief: Tab character element.
+  details: |
+    The `<tab>` tag represents a tab character in the text.
+
+- tag-name: space
+  brief: Space character element.
+  details: |
+    The `<space>` tag represents a space character in the text.
+    It can be used where XML syntax trim spaces to force a space character in such places.
+
+- tag-name: page-break
+  brief: Explicit page break marker.
+  details: |
+    The `<page-break>` tag represents an explicit page break in the text.

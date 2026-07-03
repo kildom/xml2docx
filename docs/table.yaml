@@ -11,5 +11,5 @@
 
 - tag-name: td
   brief: Table cell.
-  children: [ p, table ]
+  children: [ p, p-aliases, table ]
   implicit: p

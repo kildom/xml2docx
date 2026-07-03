@@ -6,7 +6,7 @@ import * as customEnums from '../../src/enums';
 
 // #region Constants
 
-const DOCS_DIR = 'docs/tags';
+const DOCS_DIR = 'docs';
 
 // #endregion
 

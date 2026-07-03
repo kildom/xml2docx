@@ -4,7 +4,7 @@
     The `document` element is the root of the source file and represents the entire
     generated document.
 
-  children: [ section, header, footer, p-style, font-style, group-style, table, p, embedded-font ]
+  children: [ section, header, footer, p-style, font-style, group-style, table, p, embedded-font, p-aliases ]
   implicit: p
 
   attributes:

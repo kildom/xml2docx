@@ -37,6 +37,8 @@
 - group-name: text-elements
   brief: Text elements
   tags:
+    - TEXT
+    - CDATA
     - br
     - tab
     - space
@@ -44,6 +46,17 @@
     - total-pages
     - page-break
     - vwnbsp
+
+- group-name: p-aliases
+  brief: Paragraph aliases
+  tags:
+    - h1
+    - h2
+    - h3
+    - h4
+    - h5
+    - h6
+    - title
 
 # TODO: Displaying group in the diagram:
 #
