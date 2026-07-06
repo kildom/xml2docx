@@ -16,7 +16,8 @@ modifications. It only adds "location" property to all top-level items.
 const DOCS_DIR = 'docs';
 
 const ExampleSchema = z.object({
-    'title': z.string(),
+    'brief': z.string(),
+    'details': z.string().optional(),
     'code': z.string(),
 }).strict();
 

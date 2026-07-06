@@ -1,7 +1,6 @@
 digraph "DocTML tags hierarchy" {
 
     node [fontname="Arial" style=filled fillcolor="#0f2231" color="#2d5177" fontcolor="#d9dce0" fontbold=true];
-    edge [color="#a2a2a2"]
     fontname="Arial";
     rankdir="LR";
 
@@ -10,10 +9,10 @@ digraph "DocTML tags hierarchy" {
     <%! } %>
 
     <%! for (let group of groups) { %>
-        "<% group.id %>" [shape=rect margin="0.007" label=<
+        "<% group.id %>" [shape=rect margin="0.007" tooltip="Group: <% group.name %>" label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2">
             <TR>
-              <TD COLSPAN="1" BGCOLOR="#193659" ALIGN="CENTER"><FONT COLOR="white">&nbsp;&nbsp;<B><% group.name %></B>&nbsp;&nbsp;</FONT></TD>
+              <TD COLSPAN="1" BGCOLOR="#193659" ALIGN="CENTER" TOOLTIP="Group: <% group.name %>"><FONT COLOR="white">&nbsp;&nbsp;<B><% group.name %></B>&nbsp;&nbsp;</FONT></TD>
             </TR>
             <%! for (let i = 0; i < group.items.length; i++) {
                 let item = group.items[i]; %>

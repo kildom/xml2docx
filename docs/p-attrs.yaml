@@ -136,10 +136,21 @@
             - Absolute value in [positive length](#positive-length) units, e.g. `1.5cm`.
             - Relative to line height, e.g. `1.25`.
       examples:
-        - title: line-spacing="1.75"
-          code: <p line-spacing="1.75"><b>This paragraph has 1.75 space between lines which is 100% of line and 75% for empty space in between.</b> <% tools.loremIpsum(500, 270477934) %></p>
-        - title: line-spacing="exactly 4mm"
-          code: <p line-spacing="exactly 4mm"><b>Each line in this paragraph is exactly 4mm apart.</b> <% tools.loremIpsum(500, 539351054) %></p>
+        - brief: line-spacing="1.75"
+          details: |
+            This paragraph has 1.75 space between lines which is 100% of line and 75%
+            for empty space in between.
+          code: |
+            <p line-spacing="1.75">
+              <# lorem({ length: 400, seed: 3281, wordWrap: 77, lineBreak: '\n  ' }) #>
+            </p>
+        - brief: line-spacing="exactly 4mm"
+          details: |
+            This paragraph has exactly 4mm space between lines.
+          code: |
+            <p line-spacing="exactly 4mm">
+              <# lorem({ length: 400, seed: 1054, wordWrap: 77, lineBreak: '\n  ' }) #>
+            </p>
       docx-js: "spacing?: ISpacingProperties"
     # Experimental attributes
     contextual-spacing:

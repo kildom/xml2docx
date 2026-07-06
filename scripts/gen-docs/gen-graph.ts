@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { execSync } from "node:child_process";
 import { isDirectExecution } from "../utils";
 import { Docs, DocsTag } from "./parse-docs";
 import { compileTemplate } from "./template";
@@ -47,7 +48,7 @@ function getChildren(tag: DocsTag): [DocsTag[], DocsTag | undefined] {
     return [children, implicit];
 }
 
-function generateGraph(docs: Docs, outputFile: string): void {
+export function generateGraph(docs: Docs, outputLight: string, outputDark: string): void {
     let nodes: GraphNode[] = [];
     let groups: GraphGroup[] = [];
     let edges: Record<string, GraphEdge> = {};
@@ -98,15 +99,32 @@ function generateGraph(docs: Docs, outputFile: string): void {
         edges: Object.values(edges),
     };
     
-    let template = compileTemplate(fs.readFileSync('scripts/gen-docs/templates/graph-light.dot', 'utf-8'));
+    let tempDirPath = 'temp/docs-graph';
+    let templateDirPath = 'scripts/gen-docs/templates';
+    fs.mkdirSync(tempDirPath, { recursive: true });
+    dotFromTemplate(`${templateDirPath}/graph-light.dot`, templateData, `${tempDirPath}/graph-light.dot`);
+    svgFromDot(`${tempDirPath}/graph-light.dot`, outputLight);
+    dotFromTemplate(`${templateDirPath}/graph-dark.dot`, templateData, `${tempDirPath}/graph-dark.dot`);
+    svgFromDot(`${tempDirPath}/graph-dark.dot`, outputDark);
+}
 
-    let dotContent = template(templateData);
+function dotFromTemplate(templatePath: string, data: any, outputPath: string): void {
+    let templateContent = fs.readFileSync(templatePath, 'utf-8');
+    let template = compileTemplate(templateContent);
+    let dotContent = template(data);
+    fs.writeFileSync(outputPath, dotContent, 'utf-8');
+}
 
-    fs.writeFileSync(outputFile + '.dot', dotContent, 'utf-8');
+function svgFromDot(dotPath: string, outputPath: string): void {
+    let dot = 'dot';
+    if (process.env.GRAPHVIZ_DOT_PATH) {
+        dot = process.env.GRAPHVIZ_DOT_PATH;
+    }
+    execSync(`"${dot}" -Tsvg "${dotPath}" -o "${outputPath}"`);
 }
 
 (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
     let pd = await import('./parse-docs');
     let docs = pd.parseDocs();
-    generateGraph(docs, 'test/outputs/graph.svg');
+    generateGraph(docs, 'temp/docs-graph/graph-light.svg', 'temp/docs-graph/graph-dark.svg');
 })();

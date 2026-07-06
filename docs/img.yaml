@@ -39,11 +39,13 @@
       brief: Horizontal position in floating mode.
       details: |
         - **anchor** @optional - The horizontal anchor.
-            @enum HorizontalPositionRelativeFrom
+          <# enumerator('docx.HorizontalPositionRelativeFrom', {
+            indent: 2,
+            collapse: '`character`, `page`, `left-margin`, and more...',
+          }) #>
             
-        - **offset** @optional - The horizontal offset.
-            - offset expressed as the [length](#length) value
-            @enum HorizontalPositionAlign
+        - **offset** @optional - The horizontal offset expressed as the [length](#length) value
+          or one of the following values: <# enumerator('docx.HorizontalPositionAlign', { oneLine: true }) #>
 
     vertical:
       value: anchor offset
@@ -51,11 +53,13 @@
       brief: Vertical position in floating mode.
       details: |
         - **anchor** @optional - The vertical anchor.
-            @enum VerticalPositionRelativeFrom
+          <# enumerator('docx.VerticalPositionRelativeFrom', {
+            indent: 2,
+            collapse: '`line`, `page`, `paragraph`, `top-margin`, and more...'
+          }) #>
 
-        - **offset** @optional - The vertical offset.
-            - offset expressed as the [length](#length) value
-            @enum VerticalPositionAlign
+        - **offset** @optional - The vertical offset expressed as the [length](#length) value
+          or one of the following values: <# enumerator('docx.VerticalPositionAlign', { oneLine: true }) #>
 
     margin:
       type: margins

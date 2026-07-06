@@ -57,7 +57,13 @@
       brief: Underline text.
       details: |
         - **type** @optional - The underline type. Default is `single`.
-            @enum UnderlineType
+          The `type` accepts [boolean](#boolean) values to enable or disable the `single` underline type
+          or one of the following values:
+
+          <# enumerator('docx.UnderlineType', {
+            indent: 2,
+            collapse: '`single`, `none`, `double`, `dotted`, `dash`, `wave`, and more...',
+          }) #>
         - **color** @optional - The underline color. Default is the same as the text color.
     strike:
       type: bool
@@ -68,7 +74,7 @@
   brief: Variable width non-breaking space.
   details: |
     This tag adds "zero width no-break space" and "normal space" characters which
-    is workaround to achieve "variable width no-break space" in docx.
+    is a workaround to achieve "variable width no-break space" in docx.
     This is useful for justified text where normal non-breaking spaces are not stretched to fill the line.
 
     This workaround works with a desktop Word application.

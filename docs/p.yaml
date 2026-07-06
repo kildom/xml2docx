@@ -19,11 +19,11 @@
     For multiple paragraphs that share the same style, you should use the `style=""` attribute and `<p-style>` tag.
   combine: [ -IParagraphPropertiesOptions- ]
   examples:
-    - title: Simple
+    - brief: Simple
       code: <p>Hello, world!</p>
-    - title: Alignment
-      code: <p align="justify">This is a justified paragraph. <% tools.loremIpsum(500, 952727959) %></p>
-    - title: Font color
+    - brief: Alignment
+      code: <p align="justify">This is a justified paragraph. <# lorem(500, 952727959) #></p>
+    - brief: Font color
       code: <p font.color="red">Warning!</p>
   docx-js: https://docx.js.org/api/types/IParagraphOptions.html
   unused-docx-js:

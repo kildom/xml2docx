@@ -4,7 +4,7 @@ import * as yaml from 'yaml';
 import { z } from 'zod';
 import * as docx from 'docx';
 import * as customEnums from '../../src/enums';
-import { isDirectExecution } from '../utils';
+import { cloneWithRefs, isDirectExecution } from '../utils';
 import { parseDocsInput, YamlAttribute, YamlDocs, YamlEnum, YamlExample, YamlGroup, YamlTag } from './parse-yaml';
 
 /*
@@ -16,7 +16,8 @@ that is fully validated, reference-resolved, and ready for generating documentat
 
 export interface DocsExample {
     type: 'example';
-    title: string;                 ///< Example title
+    brief: string;                 ///< Example title
+    details: string;               ///< Example details
     code: string;                  ///< Example code
 }
 
@@ -109,7 +110,8 @@ export function parseDocs(): Docs {
         for (let example of examples) {
             result.push({
                 type: 'example',
-                title: example.title,
+                brief: example.brief,
+                details: example.details || '',
                 code: example.code,
             });
         }
@@ -372,116 +374,3 @@ export function parseDocs(): Docs {
     let docs = parseDocs();
     console.log(util.inspect(cloneWithRefs(docs), { depth: null, colors: false, compact: false }));
 })();
-
-interface RefInfo {
-    level: number;
-    refs: number;
-    id: number;
-    placed: boolean;
-}
-
-export function cloneWithRefs<T>(root: T): T {
-    const info = new Map<object, RefInfo>();
-
-    // ---------------------------------------------------------------------
-    // Pass 1 - collect metadata.
-    // ---------------------------------------------------------------------
-
-    function collect(value: unknown, level: number): void {
-        if (value === null || typeof value !== "object")
-            return;
-
-        const existing = info.get(value);
-
-        if (existing) {
-            existing.refs++;
-            if (level < existing.level)
-                existing.level = level;
-            return; // Already traversed this object.
-        }
-
-        info.set(value, {
-            level,
-            refs: 1,
-            id: 0,
-            placed: false,
-        });
-
-        if (Array.isArray(value)) {
-            for (const item of value)
-                collect(item, level + 1);
-        } else {
-            for (const item of Object.values(value))
-                collect(item, level + 1);
-        }
-    }
-
-    collect(root, 0);
-
-    // Remove objects referenced only once and assign ids.
-
-    let nextId = 1;
-
-    for (const [obj, entry] of info) {
-        if (entry.refs === 1) {
-            info.delete(obj);
-        } else {
-            entry.id = nextId++;
-        }
-    }
-
-    // ---------------------------------------------------------------------
-    // Pass 2 - clone.
-    // ---------------------------------------------------------------------
-
-    function clone(value: unknown, level: number): unknown {
-        if (value === null || typeof value !== "object")
-            return value;
-
-        const entry = info.get(value);
-
-        if (!entry) {
-            if (Array.isArray(value))
-                return value.map(item => clone(item, level + 1));
-
-            const out: Record<string, unknown> = {};
-
-            for (const [key, item] of Object.entries(value))
-                out[key] = clone(item, level + 1);
-
-            return out;
-        }
-
-        if (!entry.placed && entry.level === level) {
-            entry.placed = true;
-
-            let out: unknown[] | Record<string, unknown>;
-
-            if (Array.isArray(value)) {
-                out = value.map(item => clone(item, level + 1));
-            } else {
-                out = {};
-
-                for (const [key, item] of Object.entries(value))
-                    out[key] = clone(item, level + 1);
-            }
-
-            out = { "###REF###": `<OBJ:${entry.id}>`, ...out };
-
-            return out;
-        }
-
-        let ref = `<REF:${entry.id}>`;
-
-        if (typeof (value as any).type === 'string' && (value as any).type.length < 80) {
-            ref += ' ' + (value as any).type;
-        }
-        if (typeof (value as any).name === 'string' && (value as any).name.length < 80) {
-            ref += ' ' + (value as any).name;
-        }
-
-        return ref;
-    }
-
-    return clone(root, 0) as T;
-}
