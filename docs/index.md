@@ -1,4 +1,4 @@
-# DocTML
+# About DocTML
 
 The `DocTML` is a command line tool and a web tool that creates a Word Document (with the .docx extension) from a simple XML file.
 

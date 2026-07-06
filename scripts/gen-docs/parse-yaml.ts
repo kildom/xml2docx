@@ -75,6 +75,23 @@ const EnumSchema = z.object({
     'values': z.record(z.string(), z.union([z.string(), z.null()])).optional(),
 }).strict();
 
+type TocItemsSchemaType = (string | boolean | Record<string, TocItemsSchemaType | string | boolean>)[];
+
+const TocItemsSchema: z.ZodType<TocItemsSchemaType> = z.lazy(() =>
+    z.array(
+        z.union([
+            z.string(),
+            z.record(z.string(), z.union([z.string(), z.boolean(), TocItemsSchema])),
+        ])
+    ));
+
+
+const TocSchema = z.object({
+    'toc-name': z.string(),
+    'location': z.string(),
+    'items': TocItemsSchema,
+}).strict();
+
 export type YamlAttribute = z.infer<typeof AttributeSchema>;
 export type YamlType = z.infer<typeof TypeSchema>;
 export type YamlTag = z.infer<typeof TagSchema>;
@@ -82,8 +99,9 @@ export type YamlGroup = z.infer<typeof GroupSchema>;
 export type YamlPage = z.infer<typeof PageSchema>;
 export type YamlEnum = z.infer<typeof EnumSchema>;
 export type YamlExample = z.infer<typeof ExampleSchema>;
+export type YamlToc = z.infer<typeof TocSchema>;
 
-export type YamlTopLevelItem = YamlTag | YamlGroup | YamlPage | YamlType | YamlEnum;
+export type YamlTopLevelItem = YamlTag | YamlGroup | YamlPage | YamlType | YamlEnum | YamlToc;
 
 export interface YamlDocs {
     tags: Record<string, YamlTag>;
@@ -91,6 +109,7 @@ export interface YamlDocs {
     pages: Record<string, YamlPage>;
     types: Record<string, YamlType>;
     enums: Record<string, YamlEnum>;
+    tocs: Record<string, YamlToc>;
 };
 
 export function parseDocsInput(): YamlDocs {
@@ -100,6 +119,7 @@ export function parseDocsInput(): YamlDocs {
         pages: {},
         types: {},
         enums: {},
+        tocs: {},
     };
     for (let file of fs.readdirSync(DOCS_DIR)) {
         let fullPath = path.join(DOCS_DIR, file);
@@ -138,8 +158,14 @@ export function parseDocsInput(): YamlDocs {
                     schema = EnumSchema;
                     container = result.enums;
                     name = item['enum-name'];
+                } else if (item['toc-name']) {
+                    schema = TocSchema;
+                    container = result.tocs;
+                    name = item['toc-name'];
+                    console.log(JSON.stringify(item, null, 2)); // TODO: Remove this debug log
+                    //process.exit(1);
                 } else {
-                    console.error(`Error parsing ${file}: each item must have one of the following keys: 'tag-name', 'group-name', 'page-name', 'type-name', 'enum-name'. Found keys: ${Object.keys(item).join(', ')}`);
+                    console.error(`Error parsing ${file}: each item must have one of the following keys: 'tag-name', 'group-name', 'page-name', 'type-name', 'enum-name', 'toc-name'. Found keys: ${Object.keys(item).join(', ')}`);
                     process.exit(1);
                 }
                 item.location = `${file}:${name}`;

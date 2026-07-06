@@ -75,10 +75,27 @@ export interface DocsPage {
 
 export interface DocsEnum {
     type: 'enum';
-    yaml: YamlEnum;                ///< The original YAML enum object
-    name: string;                  ///< Enum name
-    location: string;              ///< Location: file and top-level item name
-    values: Record<string, string>;///< Enum values and their descriptions
+    yaml: YamlEnum;                 ///< The original YAML enum object
+    name: string;                   ///< Enum name
+    location: string;               ///< Location: file and top-level item name
+    values: Record<string, string>; ///< Enum values and their descriptions
+};
+
+export interface DocsTocItem {
+    type: 'tag' | 'page' | 'none';
+    title: string;                    ///< TOC item title
+    link: DocsTag | DocsPage | null;  ///< The tag or page that this TOC item links to (if any)
+    section: string;                  ///< Section name in the page (empty if none)    
+    children: DocsTocItem[];          ///< Nested TOC items (if any)
+    collapse: boolean;                ///< If true, this TOC item is collapsed by default
+    expandOn: (DocsPage | DocsTag)[]; ///< If specified, this TOC item will expand for any of the listed objects
+};
+
+export interface DocsToc {
+    type: 'toc';
+    name: string;          ///< TOC name
+    location: string;      ///< Location: file and top-level item name
+    items: DocsTocItem[];  ///< TOC items
 };
 
 export interface Docs {
@@ -86,6 +103,7 @@ export interface Docs {
     pages: Record<string, DocsPage>;
     groups: Record<string, DocsGroup>;
     enums: Record<string, DocsEnum>;
+    tocs?: Record<string, DocsToc>;
 };
 
 

@@ -1,0 +1,147 @@
+
+# Table of contents for main documentation.
+- toc-name: main
+  items:
+    - About DocTML: about.md
+    - Tutorial: tutorial.md
+    - Language Reference:
+      - Introduction: intro.md
+      - Tags Graph: graph.md
+      - Attributes:
+        - _link: attributes.md
+        - Boolean: attributes.md#boolean
+        - Universal measurement: attributes.md#universal-measurement
+        - Color: attributes.md#color
+      - Document Structure:
+        - _link: document-structure.md
+        - <document>
+        - <section>
+        - Page Header and Footer:
+          - _link: header-footer.md
+          - <header>
+          - <footer>
+          - <total-pages/>
+          - <page-number/>
+        - <group>
+        - <group-style>
+      - Paragraphs:
+        - _link: paragraphs.md
+        - <p>
+        - <p-style>
+        - <tab/>
+        - <br/>
+      - Headings:
+        - _link: headings.md
+        - _collapse: true
+        - _expandOn: [headings.md, <title>, <h1>, <h2>, <h3>, <h4>, <h5>, <h6>]
+        - <title>
+        - <h1>
+        - <h2>
+        - <h3>
+        - <h4>
+        - <h5>
+        - <h6>
+      - Text Formatting:
+        - _link: formatting.md
+        - <font>
+        - <font-style>
+        - Formatting Shortcuts:
+          - _link: formatting.md#formatting-shortcuts
+          - _collapse: true
+          - _expandOn: [formatting.md, <b>, <i>, <u>, <s>, <sub>, <sup>, <vwnbsp>, <span>]
+          - <b>
+          - <i>
+          - <u>
+          - <s>
+          - <sub>
+          - <sup>
+          - <vwnbsp>
+          - <span>
+      - Images:
+        - _link: images.md
+        - <img>
+      - Tables:
+        - _link: tables.md
+        - <table>
+        - <tr>
+        - <td>
+        - <tc>
+      - Index:
+        - All Tags: tags-index.md
+        - All Attributes: attributes-index.md
+    - Templates:
+      - _link: templates.md
+      - <% … %> - Output: templates.md#output
+      - <%! … %> - Execute: templates.md#execute
+      - <%= … %> - Raw Output: templates.md#raw-output
+    - Macros: macros.md
+    - Docx.js: docx-js.md
+
+
+
+# Table of contents for documentation intended for AI agents.
+- toc-name: agents
+  items:
+    - About DocTML: about.md
+    - Agents Instructions: agents.md
+    - Tutorial: tutorial.md
+    - DocTML Language Syntax Introduction: intro.md
+    - Tags Graph: graph.md
+    - Attributes:
+      - _link: attributes.md
+      - Boolean: attributes.md#boolean
+      - Universal measurement: attributes.md#universal-measurement
+      - Color: attributes.md#color
+    - Document Structure:
+      - _link: document-structure.md
+      - <document>
+      - <section>
+      - <group>
+      - <group-style>
+    - Page Header and Footer:
+      - _link: header-footer.md
+      - <header>
+      - <footer>
+      - <total-pages/>
+      - <page-number/>
+    - Paragraphs:
+      - _link: paragraphs.md
+      - <p>
+      - <p-style>
+      - <tab/>
+      - <br/>
+    - Headings:
+      - _link: headings.md
+      - <title>
+      - <h1>
+      - <h2>
+      - <h3>
+      - <h4>
+      - <h5>
+      - <h6>
+    - Text Formatting:
+      - _link: formatting.md
+      - <font>
+      - <font-style>
+      - <b>
+      - <i>
+      - <u>
+      - <s>
+      - <sub>
+      - <sup>
+      - <vwnbsp>
+      - <span>
+    - Images:
+      - _link: images.md
+      - <img>
+    - Tables:
+      - _link: tables.md
+      - <table>
+      - <tr>
+      - <td>
+      - <tc>
+    - All Tags: tags-index.md
+    - All Attributes: attributes-index.md
+    - Templates: templates.md
+    - Macros: macros.md
+    - Docx.js: docx-js.md
