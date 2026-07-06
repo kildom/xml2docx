@@ -79,7 +79,7 @@
 
 
 
-# Table of contents for documentation intended for AI agents.
+# Table of contents for documentation intended for AI agents (flat list).
 - toc-name: agents
   items:
     - About DocTML: about.md
@@ -87,59 +87,48 @@
     - Tutorial: tutorial.md
     - DocTML Language Syntax Introduction: intro.md
     - Tags Graph: graph.md
-    - Attributes:
-      - _link: attributes.md
-      - Boolean: attributes.md#boolean
-      - Universal measurement: attributes.md#universal-measurement
-      - Color: attributes.md#color
-    - Document Structure:
-      - _link: document-structure.md
-      - <document>
-      - <section>
-      - <group>
-      - <group-style>
-    - Page Header and Footer:
-      - _link: header-footer.md
-      - <header>
-      - <footer>
-      - <total-pages/>
-      - <page-number/>
-    - Paragraphs:
-      - _link: paragraphs.md
-      - <p>
-      - <p-style>
-      - <tab/>
-      - <br/>
-    - Headings:
-      - _link: headings.md
-      - <title>
-      - <h1>
-      - <h2>
-      - <h3>
-      - <h4>
-      - <h5>
-      - <h6>
-    - Text Formatting:
-      - _link: formatting.md
-      - <font>
-      - <font-style>
-      - <b>
-      - <i>
-      - <u>
-      - <s>
-      - <sub>
-      - <sup>
-      - <vwnbsp>
-      - <span>
-    - Images:
-      - _link: images.md
-      - <img>
-    - Tables:
-      - _link: tables.md
-      - <table>
-      - <tr>
-      - <td>
-      - <tc>
+    - Attributes: attributes.md
+    - Document Structure: document-structure.md
+    - <document>
+    - <section>
+    - <group>
+    - <group-style>
+    - Page Header and Footer: header-footer.md
+    - <header>
+    - <footer>
+    - <total-pages/>
+    - <page-number/>
+    - Paragraphs: paragraphs.md
+    - <p>
+    - <p-style>
+    - <tab/>
+    - <br/>
+    - Headings: headings.md
+    - <title>
+    - <h1>
+    - <h2>
+    - <h3>
+    - <h4>
+    - <h5>
+    - <h6>
+    - Text Formatting: formatting.md
+    - <font>
+    - <font-style>
+    - <b>
+    - <i>
+    - <u>
+    - <s>
+    - <sub>
+    - <sup>
+    - <vwnbsp>
+    - <span>
+    - Images: images.md
+    - <img>
+    - Tables: tables.md
+    - <table>
+    - <tr>
+    - <td>
+    - <tc>
     - All Tags: tags-index.md
     - All Attributes: attributes-index.md
     - Templates: templates.md

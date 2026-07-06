@@ -75,7 +75,7 @@ const EnumSchema = z.object({
     'values': z.record(z.string(), z.union([z.string(), z.null()])).optional(),
 }).strict();
 
-type TocItemsSchemaType = (string | boolean | Record<string, TocItemsSchemaType | string | boolean>)[];
+export type TocItemsSchemaType = (string | boolean | Record<string, TocItemsSchemaType | string | boolean>)[];
 
 const TocItemsSchema: z.ZodType<TocItemsSchemaType> = z.lazy(() =>
     z.array(
@@ -162,8 +162,6 @@ export function parseDocsInput(): YamlDocs {
                     schema = TocSchema;
                     container = result.tocs;
                     name = item['toc-name'];
-                    console.log(JSON.stringify(item, null, 2)); // TODO: Remove this debug log
-                    //process.exit(1);
                 } else {
                     console.error(`Error parsing ${file}: each item must have one of the following keys: 'tag-name', 'group-name', 'page-name', 'type-name', 'enum-name', 'toc-name'. Found keys: ${Object.keys(item).join(', ')}`);
                     process.exit(1);

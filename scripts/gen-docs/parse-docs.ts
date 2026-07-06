@@ -5,7 +5,7 @@ import { z } from 'zod';
 import * as docx from 'docx';
 import * as customEnums from '../../src/enums';
 import { cloneWithRefs, isDirectExecution } from '../utils';
-import { parseDocsInput, YamlAttribute, YamlDocs, YamlEnum, YamlExample, YamlGroup, YamlTag } from './parse-yaml';
+import { parseDocsInput, YamlAttribute, YamlDocs, YamlEnum, YamlExample, YamlGroup, YamlTag, YamlToc, TocItemsSchemaType } from './parse-yaml';
 
 /*
 
@@ -103,7 +103,7 @@ export interface Docs {
     pages: Record<string, DocsPage>;
     groups: Record<string, DocsGroup>;
     enums: Record<string, DocsEnum>;
-    tocs?: Record<string, DocsToc>;
+    tocs: Record<string, DocsToc>;
 };
 
 
@@ -116,6 +116,7 @@ export function parseDocs(): Docs {
         pages: {},
         groups: {},
         enums: {},
+        tocs: {},
     };
 
     function parseExamples(examples?: YamlExample[]): DocsExample[] {
@@ -378,10 +379,118 @@ export function parseDocs(): Docs {
         }
     }
 
+    function parseTocLink(link: string, title?: string): DocsTocItem {
+        link = link.trim();
+        let m: RegExpMatchArray | null;
+        if ((m = link.match(/^(<([a-z0-9._-]+)\/?>)$/i))) {
+            let tagName = m[2];
+            if (!result.tags[tagName]) {
+                throw new Error(`Tag "${tagName}" referenced from TOC not found in the parsed tags.`);
+            }
+            return {
+                type: 'tag',
+                title: m[1],
+                link: result.tags[tagName],
+                section: '',
+                children: [],
+                collapse: false,
+                expandOn: [],
+            };
+        } else if ((m = link.match(/^([a-z0-9._-]+?).md(?:#(.+))?$/i))) {
+            let pageName = m[1];
+            let section = m[2] || '';
+            let page = result.pages[pageName];
+            if (!page) {
+                throw new Error(`Page "${pageName}" referenced from TOC not found in the parsed pages.`);
+            }
+            return {
+                type: 'page',
+                title: title || pageName,
+                link: page,
+                children: [],
+                section: section,
+                collapse: false,
+                expandOn: [],
+            };
+        } else {
+            throw new Error(`Invalid TOC link "${link}". Must be a tag name in angle brackets (e.g., <tag>) or a page name with optional section (e.g., page.md#section).`);
+        }
+    }
+
+    function getTocYamlProperty(item: string | boolean | Record<string, string | boolean | TocItemsSchemaType>) {
+        if (typeof item === 'object' &&
+            Object.keys(item).length === 1 &&
+            Object.keys(item)[0].startsWith('_')
+        ) {
+            return [Object.keys(item)[0].substring(1), Object.values(item)[0]];
+        } else {
+            return null;
+        }
+    }
+
+    function parseTocItems(items: TocItemsSchemaType): [DocsTocItem[], Record<string, any>] {
+        let result: DocsTocItem[] = [];
+        let properties = Object.fromEntries(items
+            .map(item => getTocYamlProperty(item))
+            .filter(item => item) as any[]);
+        for (let item of items.filter(item => !getTocYamlProperty(item))) {
+            if (typeof item === 'boolean') {
+                throw new Error(`Invalid TOC item: boolean values are not allowed here. Found: ${item}`);
+            } else if (typeof item === 'string') {
+                result.push(parseTocLink(item, undefined));
+            } else if (Object.keys(item).length === 1 && typeof Object.values(item)[0] === 'string') {
+                result.push(parseTocLink(Object.values(item)[0] as any, Object.keys(item)[0]));
+            } else if (Object.keys(item).length === 1 && Array.isArray(Object.values(item)[0])) {
+                let [items, childProperties] = parseTocItems(Object.values(item)[0] as any);
+                let docsItem: DocsTocItem;
+                if (childProperties.link) {
+                    docsItem = parseTocLink(childProperties.link, Object.keys(item)[0]);
+                } else {
+                    docsItem = {
+                        type: 'none',
+                        title: Object.keys(item)[0],
+                        link: null,
+                        section: '',
+                        children: [],
+                        collapse: false,
+                        expandOn: [],
+                    };
+                }
+                docsItem.children = items;
+                docsItem.collapse = !!childProperties.collapse;
+                docsItem.expandOn = (childProperties.expandOn || []).map((link: string) => {
+                    let tocItem = parseTocLink(link);
+                    if (tocItem.type === 'tag' || tocItem.type === 'page') {
+                        return tocItem.link!;
+                    } else {
+                        throw new Error(`Invalid TOC item in "expandOn": ${link}. Must be a tag or page.`);
+                    }
+                });
+                result.push(docsItem);
+            } else {
+                throw new Error(`Invalid TOC item: ${JSON.stringify(item)}. Must be a string, an object with a single key-value pair, or an object with a single key and an array of child items.`);
+            }
+        }
+        return [result, properties];
+    }
+
+    function parseTocs() {
+        for (let toc of Object.values(yaml.tocs)) {
+            let tocObj: DocsToc = {
+                type: 'toc',
+                location: toc.location,
+                name: toc['toc-name'],
+                items: parseTocItems(toc.items)[0],
+            };
+            result.tocs[tocObj.name] = tocObj;
+        }
+    }
+
     parseTags();
     parsePages();
     parseGroups();
     parseEnums();
+    parseTocs();
 
     return result;
 }
