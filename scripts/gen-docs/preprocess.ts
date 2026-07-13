@@ -60,6 +60,7 @@ class TemplateData {
     public renderedEnums: Record<string, DocsEnum> = {};
     public autoRefRegex: Record<string, RegExp> = {};
     public lorem = lorem;
+    public data: Record<string, any> = {};
 
     constructor(
         public ctx: PreprocessContext
@@ -141,6 +142,8 @@ export interface PreprocessOptions {
     substituteLink?: (ctx: PreprocessContext, link: string, text: string) => string | undefined;
     referenceTag?: (ctx: PreprocessContext, tag: DocsTag) => string;
     referenceAttribute?: (ctx: PreprocessContext, tag: DocsTag, attribute: DocsAttribute, value?: string) => string;
+    templateData?: (ctx: PreprocessContext, tag?: DocsTag, attribute?: DocsAttribute, page?: DocsPage,
+        enumObj?: DocsEnum) => Record<string, any>;
     userData?: any;
 };
 
@@ -161,6 +164,10 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
         options.referenceAttribute = defaultReferenceAttribute;
     }
 
+    if (!options.templateData) {
+        options.templateData = defaultTemplateData;
+    }
+
     let ctx: PreprocessContext = {
         options,
         userData: options.userData,
@@ -172,6 +179,7 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
     // Preprocess tags and attributes
     for (let tag of Object.values(docs.tags).filter(t => !t.hidden)) {
         templateData.ctx.tag = tag;
+        templateData.data = templateData.ctx.options.templateData!(templateData.ctx, tag);
         tag.brief = preprocessMarkdown(templateData, tag.brief);
         tag.details = preprocessMarkdown(templateData, tag.details);
         if (tag.aliasOf) {
@@ -180,6 +188,7 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
         preprocessExamples(templateData, tag.examples);
         for (let attribute of Object.values(tag.attributes)) {
             templateData.ctx.attribute = attribute;
+            templateData.data = templateData.ctx.options.templateData!(templateData.ctx, tag, attribute);
             attribute.brief = preprocessMarkdown(templateData, attribute.brief);
             attribute.details = preprocessMarkdown(templateData, attribute.details);
             attribute.validation = preprocessMarkdown(templateData, attribute.validation);
@@ -192,6 +201,7 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
     // Preprocess pages
     for (let page of Object.values(docs.pages)) {
         templateData.ctx.page = page;
+        templateData.data = templateData.ctx.options.templateData!(templateData.ctx, undefined, undefined, page);
         page.text = preprocessMarkdown(templateData, page.text);
         delete templateData.ctx.page;
     }
@@ -203,6 +213,8 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
 
 function preprocessEnum(templateData: TemplateData, enumObj: DocsEnum): void {
     for (let [name, value] of Object.entries(enumObj.values)) {
+        templateData.data = templateData.ctx.options.templateData!(templateData.ctx, undefined, undefined, undefined,
+            enumObj);
         enumObj.values[name] = preprocessMarkdown(templateData, value);
     }
 }
@@ -338,7 +350,7 @@ function renderTemplate(templateData: TemplateData, input: string): string {
     let compiled: ReturnType<typeof template>;
     compiled = template(input, {
         evaluate: /<#!([\s\S]+?)#>/g,
-        interpolate: /<#=?([\s\S]+?)#>/g,
+        interpolate: /<#(?:=|[^!])([\s\S]+?)#>/g,
     });
     return compiled(templateData);
 }
@@ -349,6 +361,10 @@ function defaultSubstituteLink(ctx: PreprocessContext, link: string): string | u
 
 function defaultReferenceTag(ctx: PreprocessContext, tag: DocsTag): string {
     return `[\`&lt;${tag.name}&gt;\`](${tag.name}.md)`;
+}
+
+function defaultTemplateData(): Record<string, any> {
+    return { };
 }
 
 function defaultReferenceAttribute(ctx: PreprocessContext, tag: DocsTag, attribute: DocsAttribute,

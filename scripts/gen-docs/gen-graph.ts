@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import { execSync } from "node:child_process";
 import { isDirectExecution } from "../utils";
 import { Docs, DocsTag } from "./parse-docs";
@@ -48,7 +49,9 @@ function getChildren(tag: DocsTag): [DocsTag[], DocsTag | undefined] {
     return [children, implicit];
 }
 
-export function generateGraph(docs: Docs, outputLight: string, outputDark: string): void {
+export function generateGraph(docs: Docs, outputLight: string, outputDark: string,
+    linkCallback: (tag: DocsTag) => string): void {
+
     let nodes: GraphNode[] = [];
     let groups: GraphGroup[] = [];
     let edges: Record<string, GraphEdge> = {};
@@ -62,7 +65,7 @@ export function generateGraph(docs: Docs, outputLight: string, outputDark: strin
             items: docsGroup.tags.map(tag => ({
                 name: tag.name,
                 brief: tag.brief || tag.name,
-                link: `${tag.name}.html`,
+                link: linkCallback(tag),
             })),
         };
         groups.push(group);
@@ -82,7 +85,7 @@ export function generateGraph(docs: Docs, outputLight: string, outputDark: strin
             id: docsTag.name,
             name: docsTag.name,
             brief: docsTag.brief || docsTag.name,
-            link: `${docsTag.name}.html`,
+            link: linkCallback(docsTag),
         };
         nodes.push(node);
         let [children, implicit] = getChildren(docsTag);
@@ -98,10 +101,12 @@ export function generateGraph(docs: Docs, outputLight: string, outputDark: strin
         groups,
         edges: Object.values(edges),
     };
-    
+
     let tempDirPath = 'temp/docs-graph';
     let templateDirPath = 'scripts/gen-docs/templates';
     fs.mkdirSync(tempDirPath, { recursive: true });
+    fs.mkdirSync(path.dirname(outputLight), { recursive: true });
+    fs.mkdirSync(path.dirname(outputDark), { recursive: true });
     dotFromTemplate(`${templateDirPath}/graph-light.dot`, templateData, `${tempDirPath}/graph-light.dot`);
     svgFromDot(`${tempDirPath}/graph-light.dot`, outputLight);
     dotFromTemplate(`${templateDirPath}/graph-dark.dot`, templateData, `${tempDirPath}/graph-dark.dot`);
@@ -126,5 +131,5 @@ function svgFromDot(dotPath: string, outputPath: string): void {
 (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
     let pd = await import('./parse-docs');
     let docs = pd.parseDocs();
-    generateGraph(docs, 'temp/docs-graph/graph-light.svg', 'temp/docs-graph/graph-dark.svg');
+    generateGraph(docs, 'temp/docs-graph/graph-light.svg', 'temp/docs-graph/graph-dark.svg', tag => `${tag.name}.html`);
 })();

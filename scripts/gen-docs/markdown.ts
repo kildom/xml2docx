@@ -2,9 +2,6 @@
 import showdown from 'showdown';
 import showdownHighlight from 'showdown-highlight';
 
-import { getEnum } from './parser';
-
-
 let pluginsRegistered = false;
 
 export function markdownToHtml(markdown: string, withParagraphs: boolean = true): string {
@@ -78,42 +75,7 @@ function registerPlugins() {
             regex: /@(optional|required)/g,
             replace: (m0, text) => `<span class="${text}">${text[0].toUpperCase() + text.substring(1)}</span>`,
         };
-        let ext3 = {
-            type: 'lang',
-            regex: /^(\s*)@enum\s*([a-zA-Z0-9_-]+)/gm,
-            replace: (m0, prefix, text) => generateEnumMarkdown(text, prefix),
-        };
-        let tagLink = {
-            type: 'lang',
-            regex: /(`<([a-z0-9._-]+)>`)/gi,
-            replace: '[$1]($2.html)',
-        };
-        let attrLink = {
-            type: 'lang',
-            regex: /`([a-z0-9._-]+)="(…|\.\.\.)?"`/gi,
-            replace: '[`$1="…"`](#attr-$1)',
-        };
-        let tagAttrLink = {
-            type: 'lang',
-            regex: /`<([a-z0-9._-]+) ([a-z0-9._-]+)="(…|\.\.\.)?">?`/gi,
-            replace: '[`<$1 $2="…"`]($1.html#tag-$2)',
-        };
-        return [ext1, ext2, ext3, tagLink, attrLink, tagAttrLink];
+        return [ext1, ext2];
     });
 
-
-}
-
-
-function generateEnumMarkdown(enumName: any, prefix: any) {
-    let info = getEnum(enumName);
-    let result = '';
-    for (let [name, text] of Object.entries(info.values)) {
-        if (text) {
-            result += `${prefix}- \`${name}\` - ${text}\n`;
-        } else {
-            result += `${prefix}- \`${name}\`\n`;
-        }
-    }
-    return result.trimEnd();
 }

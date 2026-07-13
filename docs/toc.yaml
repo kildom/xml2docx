@@ -2,7 +2,7 @@
 # Table of contents for main documentation.
 - toc-name: main
   items:
-    - About DocTML: about.md
+    - About DocTML: index.md
     - Tutorial: tutorial.md
     - Language Reference:
       - Introduction: intro.md
@@ -10,7 +10,7 @@
       - Attributes:
         - _link: attributes.md
         - Boolean: attributes.md#boolean
-        - Universal measurement: attributes.md#universal-measurement
+        - Length: attributes.md#length
         - Color: attributes.md#color
       - Document Structure:
         - _link: document-structure.md
@@ -69,7 +69,7 @@
       - Index:
         - All Tags: tags-index.md
         - All Attributes: attributes-index.md
-    - Templates:
+    - Templating:
       - _link: templates.md
       - <% … %> - Output: templates.md#output
       - <%! … %> - Execute: templates.md#execute
@@ -82,7 +82,7 @@
 # Table of contents for documentation intended for AI agents (flat list).
 - toc-name: agents
   items:
-    - About DocTML: about.md
+    - About DocTML: index.md
     - Agents Instructions: agents.md
     - Tutorial: tutorial.md
     - DocTML Language Syntax Introduction: intro.md
