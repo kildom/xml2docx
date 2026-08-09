@@ -92,6 +92,15 @@ Color is represented as:
     * They are case insensitive, so `red`, `Red`, and `RED` are all equivalent.
     * You can add minus sign `-` or underscore `_` to separate words in color names, for example `light-blue`, `Light_Blue`, and `lightblue` are all equivalent.
 
+Example of using color attribute in DocTML:
+
+```xml { prefix: '<document>', suffix: '</document>' }
+<p font.color="#FF0000">This text is using 6-digit hex color</p>
+<p font.color="#F00">This text is using 3-digit hex color</p>
+<p font.color="red">This text is using CSS color name</p>
+```
+
+
 <#! if (!data.agents) { #>
 
 <style>

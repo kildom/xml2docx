@@ -14,292 +14,377 @@ const parentTypes = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><% tag.name %> tag</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+
+pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
+    background-color: #F2F2F2;
+    margin: 0px;
+    white-space: pre;
+    border-radius: 0.6em;
+    font-size: 90%;
+    font-family: "IBM Plex Mono", monospace;
+}
+
+div.doctml-preview-group {
+    background-color: #F2F2F2;
+    border-radius: 0.6em;
+    overflow: hidden;
+    border: 1px solid #E2E2E2;
+}
+
+div.doctml-preview-group pre {
+    margin: 0em;
+}
+
+div.doctml-preview-group pre code.hljs {
+    border-bottom-left-radius: 0em;
+    border-bottom-right-radius: 0em;
+}
+
+div.doctml-preview-group img {
+    display: block;
+    width: 100%;
+    background-color: white;
+}
+
+.hljs {
+    color: #24292e;
+    background: #ffffff
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+    color: #d33343
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+    color: #683bbd
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id {
+    color: #006cc5
+}
+
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string {
+    color: #002d61
+}
+
+.hljs-built_in,
+.hljs-symbol {
+    color: #a35623
+}
+
+.hljs-comment,
+.hljs-code,
+.hljs-formula {
+    color: #5d6a79
+}
+
+.hljs-name,
+.hljs-quote,
+.hljs-selector-tag,
+.hljs-selector-pseudo {
+    color: #22863a
+}
+
+.hljs-subst {
+    color: #2b3238
+}
+
+.hljs-section {
+    color: #004fc5;
+    font-weight: bold
+}
+
+.hljs-bullet {
+    color: #73530f
+}
+
+.hljs-emphasis {
+    color: #24282e;
+    font-style: italic
+}
+
+.hljs-strong {
+    color: #262b31;
+    font-weight: bold
+}
+
+.hljs-addition {
+    color: #1d7431;
+    background-color: #f0fff4
+}
+
+.hljs-deletion {
+    color: #bd0d18;
+    background-color: #ffeef0
+}
 
         body {
-            font-family: "Roboto", sans-serif;
-            font-size: 15px;
-            line-height: 1.5;
+            font-family: "Source Sans 3", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
             hyphens: none;
             word-break: keep-all;
         }
 
-        
-        #content {
-            margin: 0px auto;
-            max-width: 900px;
+        p {
+            margin: 0.3em 0em;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: "Rosarivo", serif;
+        xxdiv.tag-container {
+            background-color: #f8f8f8;
+            border: 1px solid #e2e2e2;
+            border-radius: 0.3em;
+            padding: 1em 1.5em;
+            margin: 2em 0em;
+        }
+
+        h1.tag-name {
             font-weight: bold;
-        }
-
-        code:not(.hljs) {
-            font-family: monospace;
-            font-size: 90%;
-            background-color: #f4f4f4;
-            border: 1px solid #e2e2e2;
-            border-radius: 2px;
-            padding: 1px 3px;
-        }
-
-        pre>code.hljs {
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #f4f4f4;
-            border: 1px solid #e2e2e2;
-            display: block;
-            overflow-x: auto;
-            white-space: pre;
-        }
-
-        table.attr-tab {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table.attr-tab>tbody>tr:nth-child(4n + 1), table.attr-tab>tbody>tr:nth-child(4n + 2) {
-            background-color: #f4f4f4;
-        }
-
-        table.attr-tab>tbody>tr:last-child>td {
-            border-bottom: 1px solid #e2e2e2;
-        }
-
-        td.attr-tab-name {
-            font-weight: bold;
-            border-top: 1px solid #e2e2e2;
-            border-left: 1px solid #e2e2e2;
-            padding: 5px 5px 5px 10px;
-            width: 0;
-            white-space: nowrap;
-        }
-
-        td.attr-tab-name a {
-            text-decoration: none;
+            font-size: 200%;
             color: #293787;
+            margin: 0em 0em 1em;
         }
 
-        td.attr-tab-value {
-            border-top: 1px solid #e2e2e2;
-            border-right: 1px solid #e2e2e2;
-            padding: 5px;
-            color: #a4a4a4;
-        }
-
-        td.attr-tab-value a {
-            color: #738ea4;
-        }
-
-        td.attr-tab-brief {
-            border-right: 1px solid #e2e2e2;
-            border-left: 1px solid #e2e2e2;
-            padding: 5px 5px 5px 100px;
-        }
-
-        td.attr-tab-brief a {
-            color: #293787;
-        }
-
-        table.rel-tab {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table.rel-tab>tbody>tr:nth-child(2n) {
-            background-color: #f4f4f4;
-        }
-
-        table.rel-tab>tbody>tr:last-child>td {
-            border-bottom: 1px solid #e2e2e2;
-        }
-
-        table.rel-tab>tbody>tr>td {
-            border: 1px solid #e2e2e2;
-            padding: 5px 5px 5px 10px;
-        }
-
-        td.rel-tab-name a {
-            text-decoration: none;
-            color: #293787;
-        }
-
-        td.rel-tab-brief {
-            border-right: 1px solid #e2e2e2;
-            border-left: 1px solid #e2e2e2;
-            padding: 5px;
-        }
-
-        td.rel-tab-brief a {
-            color: #293787;
-        }
-
-        td.rel-tab-title {
-            font-weight: bold;
-            font-size: 110%;
-            background-color: #e2e2e2;
-            padding-left: 30px;
-        }
-
-        table.rel-tab>tbody>tr>td.rel-tab-title {
-            padding: 7px 5px 5px 30px;
-        }
-
-        span.conditional, span.required, span.optional {
-            font-family: "Roboto", sans-serif;
-            display: inline;
-            font-size: 12px;
-            background-color: #f4f4f4;
-            border: 1px solid #e2e2e2;
-            border-radius: 2px;
-            padding: 1px 3px;
+        div.attr-expand-marker {
+            display: inline-block;
             font-weight: normal;
-            color: #888;
+            margin-right: 0.5em;
+            font-size: 90%;
         }
 
-        span.conditional>span:first-child {
+        div.attr-container.collapsed div.attr-expand-marker::before {
+            content: "⊞";
+        }
+
+        div.attr-container.expanded div.attr-expand-marker::before {
+            content: "⊟";
+        }
+
+        div.attr-container.non-expandable div.attr-expand-marker::before {
+            content: "⊡";
+        }
+
+        div.attr-expand-btn {
+            display: inline-block;
+            padding-right: 0.5em;
+        }
+
+        div.attr-container.collapsed
+        div.attr-expand-btn,
+        div.attr-container.expanded
+        div.attr-expand-btn {
+            cursor: pointer;
+        }
+
+        span.attr-name {
+            font-weight: bold;
+            color: #3a5d86;
+        }
+
+        span.attr-quotes {
+            color: #888;
+            font-size: 80%;
+        }
+
+        span.attr-value {
+            color: #5b5b5b;
+            font-size: 80%;
+            font-weight: normal;
+        }
+
+        div.attr-container.non-expandable
+        div.attr-details,
+        div.attr-container.collapsed
+        div.attr-details,
+        div.attr-container.non-expandable
+        div.attr-examples,
+        div.attr-container.collapsed
+        div.attr-examples {
             display: none;
         }
 
-        span.conditional:hover>span:first-child {
+        div.attr-container.non-expandable
+        div.attr-brief,
+        div.attr-container.collapsed
+        div.attr-brief {
+            color: #868686;
+            font-size: 90%;
+        }
+
+        div.attr-container.expanded
+        div.attr-brief {
+            margin-top: 0.5em;
+        }
+
+        h2.attr-header {
+            margin: 0.7em 0em 0em;
+            font-weight: normal;
+            font-size: 120%;
+        }
+
+        div.tag-attributes,
+        div.tag-details,
+        div.tag-brief {
+            margin-left: 2em;
+        }
+
+        div.attr-brief,
+        div.attr-details,
+        div.attr-examples {
+            margin-left: 4em;
+        }
+
+        span.attr-value a {
+            color: #5b5b5b;
+            text-decoration: underline;
+        }
+
+        span.required,
+        span.optional,
+        span.experimental {
+            background-color: #f8eded;
+            border: 1px solid #ead9d9;
+            color: #938f8f;
+            border-radius: 0.4em;
+            padding: 0.3em 0.4em 0.2em;
+            font-weight: normal;
+            margin: 0.2em 0.4em;
+            font-size: 80%;
             display: inline-block;
-            position: absolute;
+            line-height: 1;
+            vertical-align: 20%;
         }
 
-        span.conditional:hover>span:first-child>span {
-            color: black;
-            display: block;
-            position: relative;
-            top: 19px;
-            left: -20px;
-            width: 180px;
-            border: 1px solid #777777;
-            border-radius: 7px;
-            background-color: #f4f4f4;
-            padding: 10px 16px;
-            box-shadow: 2px 2px 5px #0000004d;
+        span.required {
+            background-color: #f8eded;
+            border: 1px solid #ead9d9;
+            color: #938f8f;
         }
 
-        div.attr-brief, div.attr-details {
-            padding-left: 40px;
+        span.optional {
+            background-color: #f4f3f3;
+            border: 1px solid #eeeeee;
+            color: #938f8f;
         }
 
-        h3.attr {
-            background-color: #eef4f9;
-            border-bottom: 1px solid #b8cee0;
-            padding: 7px 13px 4px;
-            margin: 35px 0px 15px;
+        span.experimental {
+            background-color: #edf8ef;
+            border: 1px solid #dbead9;
+            color: #938f8f;
+        }
+
+        h2.attr-header span.required,
+        h2.attr-header span.optional,
+        h2.attr-header span.experimental {
+            font-size: 65%;
         }
 
     </style>
 </head>
 <body>
 
-    <div id="content">
+    <div class="tag-container">
 
-    <%! if (tag.customPage) { %>
+    <h1 class="tag-name">&lt;<% tag.name %></h1>
 
-        <%= markdownToHtml(tag.customPage) %>
+    <!-- TODO: tag.customPage -->
 
-    <%! } else { %>
-
-    <h1>&lt;<% tag.name %>&gt;</h1>
-
-    <div class="brief">
-        <%= markdownToHtml(tag.brief) %>
+    <div class="tag-brief">
+        <%= markdown(tag.brief) %>
     </div>
 
-    <%! if (tag.details) { %>
-        <div class="details">
-            <%= markdownToHtml(tag.details) %>
-        </div>
-    <%! } %>
+    <div class="tag-details">
+        <%= markdown(tag.details) %>
+    </div>
 
-    <%! if (Object.keys(tag.attributes).length > 0) { %>
-        <h2>Attributes summary</h2>
-
-        <table class="attr-tab" cellspacing="0" cellpadding="0">
-            <%! for (let attr of Object.values(tag.attributes)) { %>
-                <tr>
-                    <td class="attr-tab-name"><a href="#tag-<% tag.name %>-attr-<% attr.name %>"><% attr.name %></a></td>
-                    <td class="attr-tab-value">= "<%= markdownToHtml(attr.value, false) %>"
-                    <%! if (!attr.required) { %>
-                        <span class="optional">Optional</span>
-                    <%! } else if (attr.required === true) { %>
-                        <span class="required">Required</span>
-                    <%! } else { %>
-                        <span class="conditional"><span><span><%= markdownToHtml(attr.required, false) %></span></span>Conditionally required</span>
-                    <%! } %>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="attr-tab-brief" colspan="2"><%= markdownToHtml(attr.brief, false) %>
-                        <%! if (attr.details) { %>
-                            <a href="#tag-<% tag.name %>-attr-<% attr.name %>">More...</a>
-                        <%! } %>
-                        </td>
-                </tr>
-            <%! } %>
-        </table>
-    <%! } else { %>
-        <p>The <code>&lt;<% tag.name %>&gt;</code> tag does not have any attributes.</p>
-    <%! } %>
-
-    <%! } %>
-
-    <%! 
-        let hasRelatedTags = false;
-        for (let [parentTypeName, parentTypeTitle] of Object.entries(parentTypes)) {
-            if (tag[parentTypeName].length) hasRelatedTags = true;
-        }
-    %>
-
-    <%! if (hasRelatedTags) { %>
-
-        <h2>Related tags</h2>
-
-        <table class="rel-tab" cellspacing="0" cellpadding="0">
-            <%! for (let [parentTypeName, parentTypeTitle] of Object.entries(parentTypes)) { %>
-                <%! if (tag[parentTypeName].length) { %>
-                    <tr>
-                        <td colspan="2" class="rel-tab-title">
-                            <%= markdownToHtml(parentTypeTitle.replace('$$$', tag.implicitChild?.name), false) %>
-                        </td>
-                    </tr>
-                    <%! for (let parent of tag[parentTypeName]) { %>
-                        <tr>
-                            <td class="rel-tab-name"><a href="<% parent.name %>.html">&lt;<% parent.name %>&gt;</a></td>
-                            <td class="rel-tab-brief"><%= markdownToHtml(parent.brief, false) %></td>
-                        </tr>
-                    <%! } %>
-                <%! } %>
-            <%! } %>
-        </table>
-    <%! } %>
-
-    <%! if (Object.keys(tag.attributes).length > 0) { %>
-        <h2>Attributes details</h2>
+    <div class="tag-attributes">
         <%! for (let attr of Object.values(tag.attributes)) { %>
-            <h3 id="tag-<% tag.name %>-attr-<% attr.name %>" class="attr"><% attr.name %> = "<%= markdownToHtml(attr.value, false) %>"
-            <%! if (!attr.required) { %>
-                <span class="optional">Optional</span>
-            <%! } else if (attr.required === true) { %>
-                <span class="required">Required</span>
-            <%! } else { %>
-                <span class="conditional"><span><span><%= markdownToHtml(attr.required, false) %></span></span>Conditionally required</span>
-            <%! } %></h3>
-            <div class="attr-brief">
-                <%= markdownToHtml(attr.brief) %>
-            </div>        
-            <%! if (attr.details) { %>
-                <div class="attr-details">
-                    <%= markdownToHtml(attr.details) %>
+            <div class="attr-container <% attr.details ? 'collapsed' : 'non-expandable' %>" id="attr-<% attr.name %>--container">
+                <h2 class="attr-header" id="attr-<% attr.name %>">
+                    <div class="attr-expand-btn" onclick="toggleCollapse('attr-<% attr.name %>--container')"><div class="attr-expand-marker"></div><span
+                     class="attr-name"><% attr.name %></span></div><span
+                     class="attr-quotes">="</span><span
+                     class="attr-value"><%= markdown(attr.value, false) %></span><span
+                     class="attr-quotes">"</span><%! if (attr.required) { %><span
+                     class="required">Required</span><%! } %><%! if (attr.experimental) { %><span
+                     class="experimental">Experimental</span><%! } %>
+                </h2>
+                
+                <div class="attr-brief">
+                    <%= markdown(attr.brief, false) || "&nbsp;" %>
                 </div>
-            <%! } %>
+                <%! if (attr.details) { %>
+                <div class="attr-details">
+                    <%= markdown(attr.details) %>
+                </div>
+                <%! } %>
+                <%! if (attr.examples.length) { %>
+                <div class="attr-examples">
+                    <%! for (let example of attr.examples) { %>
+                        <div class="attr-example">
+                            <div class="attr-example-title"><%= markdown(example.brief, false) %></div>
+                            <%! if (example.details) { %>
+                            <div class="attr-example-details">
+                                <%= markdown(example.details) %>
+                            </div>
+                            <%! } %>
+                            <div class="attr-example-code">
+                                <%= markdown('```xml\n' + example.code + '\n```\n') %>
+                            </div>
+                        </div>
+                    <%! } %>
+                </div>
+                <%! } %>
+            </div>
         <%! } %>
-    <%! } %>
+    </div>
+
+    <h1 class="tag-end">&gt;</h1>
 
     </div>
+
+<script>
+
+    function toggleCollapse(containerId) {
+        const container = document.getElementById(containerId);
+        if (container.classList.contains('non-expandable')) {
+            // Do nothing
+        } else if (container.classList.contains('collapsed')) {
+            container.classList.remove('collapsed');
+            container.classList.add('expanded');
+        } else {
+            container.classList.remove('expanded');
+            container.classList.add('collapsed');
+        }
+    }
+
+    // TODO: Feature that monitors address fragment, expands and highlights the linked attribute.
+
+</script>
+
 </body>
 </html>

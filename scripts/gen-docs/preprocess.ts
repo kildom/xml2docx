@@ -240,6 +240,7 @@ const autoRefRegex = qre.global.legacy`
     {
         "<"
         1: ("tag" or "names") // Converted to "tag|names" and will be replace with full list of tag names
+        repeat whitespace, optional '/', repeat whitespace
         ">"
     } or {
         2: ("attr" or "names") // Converted to "attr|names" and will be replace with list of attributes of the current tag
@@ -252,10 +253,11 @@ const autoRefRegex = qre.global.legacy`
         '="'
         optional ("…" or "..." or 5: repeat not ["\`])
         '"'
+        repeat whitespace, optional '/', repeat whitespace
         optional '>'
     }
     "\`"
-`; // https://kildom.github.io/qre-web-demo/#2lVXbSsNAEPU5X7EsQltQobeX2Bb8BfEtDSRqaitVIU2qoA9+jR/ml3jOTHZTS2NqHkJyZmfnzJmZ3bREinm2uHh63Jzsl4/Vs5dBoDPDpdfZAsOfvWkxqxK6qgVsTjtPrHy8y1ugiSJ8+qHp2iJ9sGxw+5xCZdvj1OJw2CItTGLxYrjiQ43Q7t68rtasOevFkwH/xdIsoDBEAjMMHRyMONRRZxpVR8nDAxJIiyJvYcAlrRRcdC5e3ZYopXBZZuauzHEKFuTlQ3emtuN/fCt37ffnl5LBeMnHMHSdyd6LIGncq3epNtnLa1fkUSWy8GpXWpYdnytsdb7/T258THK/NunMqozrBkt8V8odhHZMghtkgk4OzTyZIKvZPAmuwNNh5Dy18D6AkttBA9kfNPCAp4VBibio8qNhGkxVrCZH0m6wkcwf5hZKchuJP8RT7fJsU64pnojo793dQT+DsOd4AmwUal2iKDrtx3EcaBAHDQht03WZYcYVGhJyDEKBRn6VeBIaE5IYSU+Zufta+e2Bu+xg+gE=
+`; // https://kildom.github.io/qre-web-demo/#2pVbbTsJAEPW5X7HZmBQSlHB7qUDiLxjfSpNWLYJBTUqLJvrg1/hhfonnzHa3BArFyANpz8x2zpyzs21SoMUsnV8+P63Pdu2je/rK88zMMPUmnWP403djZmmhdc3j5tSzWMvFh/wLNDYIf71AtXSePGpucP2SQGXd5tTicNigLUxi/qqY8WmC0O5BvS1X9Jx+8WTAfb5QcygMkcAMQ4cFSha4SqW3lcId5baP3/U7+wkV4akhbKbQwX1yT/I8ayDPlEb2ljiTl3cFKEgbi1TdFxkO0JwtudL+RPvuxrXR0j9f34YMJlMuBoHti9s2hBtRu3pK+ZCdvrb9GZb+CK9mkyTt9F4Rq/r9e3OjU5r7p/dV3rQUq9rWsZsFefNhCGLvFiJgfgI1i8cQZDrbg7rErtG2BSnBROOJNShbrQ1QjNoAXzWMsCoRW1ZuTJkDobLWoYW2lZoYyRwJN1CS9+Kx9SZBiXDQ3EiepetiRc1Fe/eRsH0qdeDHBX4eHhUYO8MwPO9FUeSZMhbqE9okqyLFgWSgASHLIRBo6LJkJaERIakRtw0z+3Fh+O2A2+wQ+gU=
 
 function createAutoRefRegex(docs: Docs, currentTag: DocsTag | undefined): RegExp {
 

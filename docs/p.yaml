@@ -8,11 +8,11 @@
 
     You can use attributes passing to change text style of this paragraph since direct children are `<font>` tags,
     for example:
-    ```
+    ```xml
     <p font.color="red">Warning!</p>
     ```
     This is shorter version of the following:
-    ```
+    ```xml
     <p><font color="red">Warning!</font></p>
     ```
 

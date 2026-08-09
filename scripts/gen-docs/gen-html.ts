@@ -6,6 +6,7 @@ import { Docs, parseDocs } from "./parse-docs";
 import { preprocessDocs } from "./preprocess";
 import { markdownToHtml } from "./markdown";
 import { compileTemplate } from "./template";
+import { asyncRetryLoop } from "./async-jobs";
 
 /*
 
@@ -29,6 +30,7 @@ To be done later (all three files should be downloaded in parallel to speed up l
 
 const outputDir = 'dist/html';
 const pageTemplatePath = 'scripts/gen-docs/templates/page.html';
+const tagTemplatePath = 'scripts/gen-docs/templates/tag.html';
 
 function escapeHtml<T>(text: T): T {
     if (!text) return text;
@@ -63,17 +65,17 @@ async function main() {
         referenceTag(ctx, tag) {
             let endingSlash = (tag.children && tag.children.length > 0) ? "/" : "";
             if (tag.name.toUpperCase() === tag.name) {
-                return `<a href="${tag.name}.html" class="tag-link"><code>${tag.name}${endingSlash}</code></a>`;
+                return `<a href="${tag.name}.html" class="tag-link">\`${tag.name}${endingSlash}\`</a>`;
             }
-            return `<a href="${tag.name}.html" class="tag-link"><code>&lt;${tag.name}${endingSlash}&gt;</code></a>`;
+            return `<a href="${tag.name}.html" class="tag-link">\`<${tag.name}${endingSlash}>\`</a>`;
         },
         referenceAttribute(ctx, tag, attribute, value) {
             if (ctx.tag === tag) {
-                return `<a href="#attr-${attribute.name}" class="attr-link"><code>` +
-                    `${attribute.name}="${escapeHtml(value) || '…'}"</code></a>`;
+                return `<a href="#attr-${attribute.name}" class="attr-link">\`` +
+                    `${attribute.name}="${escapeHtml(value) || '…'}"\`</a>`;
             } else {
-                return `<a href="${tag.name}.html#attr-${attribute.name}" class="attr-link"><code>` +
-                    `&lt;${tag.name}&nbsp;${attribute.name}="${escapeHtml(value) || '…'}"</code></a>`;
+                return `<a href="${tag.name}.html#attr-${attribute.name}" class="attr-link">\`` +
+                    `<${tag.name}&nbsp;${attribute.name}="${escapeHtml(value) || '…'}"\`</a>`;
             }
         },
         templateData(ctx, tag, attribute, page, enumObj) {
@@ -88,6 +90,9 @@ async function main() {
 
     console.log("Generating pages...");
     await generatePages(docs);
+
+    console.log("Generating tags...");
+    await generateTags(docs);
 }
 
 const headerExtractRegex = qre.global`
@@ -107,22 +112,39 @@ const headerExtractRegex = qre.global`
 `; // https://kildom.github.io/qre-web-demo/#2bVTLroIwEL1rvqLpCpIrCgsXinVlont3TRMhNkEDmEBNfMR/dx5YjNqwoPM48zidKV1drcHPtquLw8hxfez+PnlEGuU8CHh4MI63h11gL8zti9EAH6nMSkk/zbkubDsTOhlNDUk8i3e64nljYGiJ1/Y0IRFSMeqDg/Q3d3CVnYkqv12BDOa0uZJqiCGzcZ8SHloqGSenBhsPv4Ny+3ppzUGJuyArU3HYL2R3qq1UW5hnAR/mxT2BCKkCq8TrvDxRBMmIre3OFUIS9LDgvjsbzcnltcE0TCA7m7gDisIw/xdFJBZK0G7eNC7MdWIiGHwvKFAQ6YlZxjo1H4g/Qz4B
 
 async function generatePages(docs: Docs) {
+    let template = compileTemplate(fs.readFileSync(pageTemplatePath, 'utf-8'));
     for (let page of Object.values(docs.pages)) {
         console.log(`    generating page: ${page.name}.html`);
         let fileName = `${outputDir}/${page.name}.html`;
-        let html = markdownToHtml(page.text, true);
+        let html!: string;
+        await asyncRetryLoop(() => {
+            html = markdownToHtml(page.text, true);
+        });
         let titleMatches = html.matchAll(headerExtractRegex);
         let title = [...titleMatches].sort((a, b) => parseInt(a[1]) - parseInt(b[1]))[0]?.[2] || page.name;
         title = stripHtmlTags(title);
         console.log('        ', title);
         fs.mkdirSync(path.dirname(fileName), { recursive: true });
         fs.writeFileSync(fileName, html, 'utf-8');
-        let templateContent = fs.readFileSync(pageTemplatePath, 'utf-8');
-        let template = compileTemplate(templateContent);
-        let htmlContent = template({ page, html, title });
+        let htmlContent!: string;
+        await asyncRetryLoop(() => {
+            htmlContent = template({ page, html, title });
+        });
         fs.writeFileSync(fileName, htmlContent, 'utf-8');
     }
 }
 
+async function generateTags(docs: Docs) {
+    let template = compileTemplate(fs.readFileSync(tagTemplatePath, 'utf-8'));
+    for (let tag of Object.values(docs.tags).filter(t => !t.hidden)) {
+        console.log(`    generating tag: ${tag.name}.html`);
+        let fileName = `${outputDir}/${tag.name}.html`;
+        let htmlContent!: string;
+        await asyncRetryLoop(() => {
+            htmlContent = template({ tag, markdown: markdownToHtml });
+        });
+        fs.writeFileSync(fileName, htmlContent, 'utf-8');
+    }
+}
 
 main();

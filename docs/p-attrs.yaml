@@ -90,6 +90,21 @@
         Possible values are:
         @enum ParagraphAlignment
       docx-js: "alignment?: typeof AlignmentType[keyof typeof AlignmentType]"
+      examples:
+        - brief: align="right"
+          details: |
+            This paragraph is right-aligned.
+          code: |
+            <p align="right">
+              <# lorem({ length: 400, seed: 2412, wordWrap: 77, lineBreak: '\n  ' }) #>
+            </p>
+        - brief: align="justify"
+          details: |
+            This paragraph is justified.
+          code: |
+            <p align="justify">
+              <# lorem({ length: 400, seed: 1234, wordWrap: 77, lineBreak: '\n  ' }) #>
+            </p>
     indent:
       value: left right first-line
       brief: Paragraph indentation.
@@ -144,11 +159,11 @@
             <p line-spacing="1.75">
               <# lorem({ length: 400, seed: 3281, wordWrap: 77, lineBreak: '\n  ' }) #>
             </p>
-        - brief: line-spacing="exactly 4mm"
+        - brief: line-spacing="exactly 3mm"
           details: |
-            This paragraph has exactly 4mm space between lines.
+            This paragraph has exactly 3mm space between lines.
           code: |
-            <p line-spacing="exactly 4mm">
+            <p line-spacing="exactly 3mm">
               <# lorem({ length: 400, seed: 1054, wordWrap: 77, lineBreak: '\n  ' }) #>
             </p>
       docx-js: "spacing?: ISpacingProperties"
