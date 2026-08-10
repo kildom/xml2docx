@@ -36,6 +36,7 @@ export function markdownToHtml(markdown: string, withParagraphs: boolean = true)
                 auto_detection: true,
             }),
             'gitHubAlerts',
+            'gitHubDarkLightImages',
             'docs',
             'doctmlCode',
         ],
@@ -81,6 +82,46 @@ function registerPlugins() {
             replace: '</div></div>'
         };
         return [ext1, ext2, ext3];
+    });
+
+    showdown.extension('gitHubDarkLightImages', function () {
+        let ext1 = {
+            type: 'output',
+            regex: qre.global.legacy`
+                1: {
+                    '<img'
+                    at-least-1 whitespace
+                    lazy-repeat [^>]
+                }
+                optional {
+                    2: ('class="', repeat [^>"])
+                    3: ('"', lazy-repeat [^>])
+                }
+                4: {
+                    'src="'
+                    lazy-repeat [^>"]
+                }
+                (5: '#gh-dark-mode-only"') or (6: '#gh-light-mode-only"')
+                7: lazy-repeat [^>]
+                optional {
+                    8: ('class="', lazy-repeat [^>"])
+                    9: ('"', lazy-repeat [^>])
+                }
+                10: '>'
+                `, // https://kildom.github.io/qre-web-demo/#2pZVNb8IwDIZ3zq+IskNaabCx77Ulpx23GzfUiaqqwraWVg2axBD/HTs0hTZBIJGjY1v28zoOcPiFzqCiAngPf9RVX0OUkIWE7B4OWLWOjXpGMNJ/h6OAri0jHh59F5I7rw5k2HNxeubJ/wqoa/GmXyK2nDaWpR0dd1n3AfV4CutLjRm/MYMBuVnsOwMeMABd+7XY7nYxj0fpqDqFAs5pmp3TtfcUUH4t5wOtM0o8KBf5inEfF4z33NzmuJ4711aml+A09ROMX7uMrX7coN8uAT26gw4FJ7N2gHFHwAjPSFQJHEXaFKTKIoMFvZCMag1knVQ7bEP1Jx0IaZIvx+y9TCefH3SSSMUE0QkPwjVXE9+HbCcwtZTLeVYzEd1WF6cUbevmE5zCEkcI+2+1zvzYDztOYArJFg==
+            replace: (m0: string, p1, cls2, p3, src4, dark5, light6, p7, cls8, p9, p10) => {
+                let className = light6 ? 'only-light-mode' : 'only-dark-mode';
+                if (cls2) {
+                    cls2 += ' ' + className;
+                } else if (cls8) {
+                    cls8 += ' ' + className;
+                } else {
+                    src4 = `class="${className}" ${src4}`;
+                }
+                return `${p1}${cls2 || ''}${p3 || ''}${src4}"${p7}${cls8 || ''}${p9 || ''}${p10}`;
+            }
+        };
+        return [ext1];
     });
 
     showdown.extension('docs', function () {

@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
-import { isDirectExecution } from "../utils";
+import { isDirectExecution, runCli } from "../utils";
 import { Docs, DocsTag } from "./parse-docs";
 import { compileTemplate } from "./template";
 
@@ -125,7 +124,7 @@ function svgFromDot(dotPath: string, outputPath: string): void {
     if (process.env.GRAPHVIZ_DOT_PATH) {
         dot = process.env.GRAPHVIZ_DOT_PATH;
     }
-    execSync(`"${dot}" -Tsvg "${dotPath}" -o "${outputPath}"`);
+    runCli(dot, ['-Tsvg', dotPath, '-o', outputPath]);
 }
 
 (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {

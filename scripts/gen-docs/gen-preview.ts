@@ -2,16 +2,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
-
+import { runCli } from '../utils';
 import * as mupdf from 'mupdf';
 
 import { convertDocxFiles } from '../../test/docs/docx2pdf.ts';
 
+let firstRun = true;
 
 const tempPath = 'temp/preview';
 const outPath = 'dist/html/preview';
-const imgPath = 'docs/img';
+const includePath = 'test/docs/data/include';
 const cliPath = 'dist/deno-compile/x64-linux/doctml'; // TODO: Depends on the platform, should be configurable
 
 interface PreviewArgs {
@@ -23,21 +23,16 @@ interface PreviewArgs {
 };
 
 
-function runCli(cmd: string, args: string[]): void {
-    const result = spawnSync(cmd, args, {
-        cwd: ".",
-        stdio: "inherit",
-        shell: false,
-    });
-
-    if (result.error) {
-        throw result.error;
-    }
-
-    if (result.status !== 0) {
-        throw new Error(
-            `Process exited with status ${result.status ?? "unknown"}`
-        );
+function copyResources() {
+    // Copy entire directory from `test/docs/data/include` to tempPath recursively, but the directory structure
+    // should be flattened (i.e., all files should be copied directly into tempPath, without subdirectories).
+    const files = fs.readdirSync(includePath, { recursive: true, encoding: 'utf-8', withFileTypes: true });
+    for (const file of files) {
+        if (file.isFile()) {
+            const srcPath = path.join(file.parentPath, file.name);
+            const destPath = path.join(tempPath, path.basename(file.name));
+            fs.copyFileSync(srcPath, destPath);
+        }
     }
 }
 
@@ -46,8 +41,10 @@ export async function generatePreview(code: string, name: string, args: PreviewA
     fs.mkdirSync(tempPath, { recursive: true });
     fs.mkdirSync(outPath, { recursive: true });
 
-    // Copy entire directory from `docs/img` to tempPath
-    fs.cpSync(imgPath, tempPath, { recursive: true });
+    if (firstRun) {
+        copyResources();
+        firstRun = false;
+    }
 
     if (args.prefix) {
         code = args.prefix + code;

@@ -1,6 +1,7 @@
 digraph "DocTML tags hierarchy" {
 
-    node [fontname="Arial" style=filled fillcolor="#e6f3fc" color="#2e5d98" fontcolor="#01275b" fontbold=true];
+    graph [bgcolor="transparent" target="_parent"];
+    node [fontname="Arial" style=filled fillcolor="#e6f3fc" color="#2e5d98" fontcolor="#01275b" fontbold=true target="_parent"];
     fontname="Arial";
     rankdir="LR";
 

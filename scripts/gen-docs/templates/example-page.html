@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocTML — Table element</title>
+<style>
+  :root {
+    --toolbar-h: 32px;
+    --sidebar-w: 230px;
+    --toc-w: 190px;
+    --content-max: 790px;
+    --page-bg: #ffffff;
+    --surface: #f7f8fa;
+    --surface-2: #f1f3f6;
+    --code-bg: #f5f7fa;
+    --border: #e3e7ed;
+    --border-strong: #d6dbe3;
+    --text: #202633;
+    --muted: #697386;
+    --faint: #8a94a6;
+    --accent: #2f6feb;
+    --accent-soft: rgba(47,111,235,.10);
+    --accent-hover: rgba(47,111,235,.065);
+    --inline-code: #c92c6d;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.05);
+    --radius: 6px;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --page-bg: #11161e;
+    --surface: #171d26;
+    --surface-2: #1c2430;
+    --code-bg: #151b24;
+    --border: #293342;
+    --border-strong: #344052;
+    --text: #e7ebf1;
+    --muted: #9aa6b8;
+    --faint: #748096;
+    --accent: #72a7ff;
+    --accent-soft: rgba(114,167,255,.12);
+    --accent-hover: rgba(114,167,255,.075);
+    --inline-code: #ff8fbd;
+    --shadow: 0 1px 2px rgba(0,0,0,.20), 0 12px 30px rgba(0,0,0,.18);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    transition: background .18s ease, color .18s ease;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- fixed toolbar ---------- */
+  .toolbar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: var(--toolbar-h);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    background: color-mix(in srgb, var(--page-bg) 94%, transparent);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .brand {
+    width: calc(var(--sidebar-w) - 10px);
+    min-width: calc(var(--sidebar-w) - 10px);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+  .brand-icon {
+    width: 16px; height: 18px;
+    border: 1.5px solid var(--accent);
+    border-radius: 2px;
+    position: relative;
+    display: inline-block;
+  }
+  .brand-icon::before, .brand-icon::after {
+    content: ""; position: absolute; left: 3px; right: 3px; height: 1px;
+    background: var(--accent); opacity: .75;
+  }
+  .brand-icon::before { top: 6px; box-shadow: 0 3px 0 var(--accent), 0 6px 0 var(--accent); }
+  .brand-icon::after { display: none; }
+  .brand-name { color: var(--accent); }
+
+  .search {
+    width: min(350px, 34vw);
+    height: 23px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+  }
+  .search svg { flex: 0 0 auto; }
+  .search input {
+    width: 100%; border: 0; outline: 0; background: transparent;
+    color: var(--text); font: inherit; font-size: 11px;
+  }
+  .search input::placeholder { color: var(--faint); }
+  .shortcut { font-size: 9px; color: var(--faint); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .toolbar-spacer { flex: 1; }
+  .toolbar-link, .theme-button {
+    height: 23px; display: inline-flex; align-items: center; gap: 5px;
+    padding: 0 7px; border-radius: 4px; border: 0; background: transparent;
+    color: var(--muted); font: inherit; font-size: 11px; cursor: pointer;
+  }
+  .toolbar-link:hover, .theme-button:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+
+  /* ---------- three-column shell ---------- */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--toolbar-h);
+    bottom: 0;
+    width: var(--sidebar-w);
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding: 25px 15px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .nav-group { margin-bottom: 21px; }
+  .nav-label {
+    margin: 0 8px 7px;
+    color: var(--faint);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .nav-item {
+    position: relative;
+    display: block;
+    padding: 3px 9px;
+    margin: 1px 0;
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+    transition: background-color .18s ease, color .18s ease, transform .18s ease;
+  }
+  .nav-item.current {
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  .nav-item:hover {
+    color: var(--text);
+    text-decoration: none;
+    animation: navHover .35s ease forwards;
+  }
+  @keyframes navHover {
+    0% { background: transparent; }
+    45% { background: var(--accent-hover); }
+    100% { background: var(--accent-hover); }
+  }
+  .nav-sub { padding-left: 10px; }
+  .nav-chevron { display: inline-block; width: 12px; color: var(--faint); }
+
+  .main {
+    margin-left: var(--sidebar-w);
+    margin-right: var(--toc-w);
+    min-height: 100vh;
+  }
+  .content {
+    width: min(var(--content-max), calc(100vw - var(--sidebar-w) - var(--toc-w) - 64px));
+    margin: 0 auto;
+    padding: 70px 0 0;
+  }
+
+  /* ---------- right TOC ---------- */
+  .right-toc {
+    position: fixed;
+    right: 0;
+    top: var(--toolbar-h);
+    bottom: 0;
+    width: var(--toc-w);
+    padding: 56px 20px 30px 10px;
+    overflow-y: auto;
+  }
+  .right-toc-inner { border-left: 1px solid var(--border); padding-left: 13px; }
+  .right-label {
+    margin: 0 0 9px;
+    color: var(--faint);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .right-toc a {
+    display: block;
+    padding: 3px 0;
+    color: var(--muted);
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+  .right-toc a:hover { color: var(--text); text-decoration: none; }
+  .right-toc a.active { color: var(--accent); font-weight: 600; }
+
+  /* ---------- prose ---------- */
+  .breadcrumbs { color: var(--faint); font-size: 10.5px; margin-bottom: 10px; }
+  .breadcrumbs a { color: var(--muted); }
+  .breadcrumbs span { margin: 0 5px; }
+  h1, h2, h3 { letter-spacing: -.025em; line-height: 1.25; }
+  h1 { font-size: 30px; margin: 0 0 7px; }
+  h2 { font-size: 20px; margin: 45px 0 11px; scroll-margin-top: 48px; }
+  h3 { font-size: 15px; margin: 28px 0 8px; scroll-margin-top: 48px; }
+  p { margin: 0 0 16px; }
+  .lead { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: .88em;
+  }
+  :not(pre) > code {
+    color: var(--inline-code);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  ul, ol { margin: 0 0 18px; padding-left: 23px; }
+  li { margin: 4px 0; }
+  strong { font-weight: 650; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 35px 0; }
+
+  /* ---------- code ---------- */
+  .code-block {
+    margin: 18px 0 26px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .code-head {
+    height: 31px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--faint); font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  }
+  .copy {
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    border-radius: 4px; padding: 3px 7px; cursor: pointer; font-size: 10px;
+  }
+  .copy:hover { background: var(--surface-2); color: var(--text); }
+  pre {
+    margin: 0; padding: 16px 18px 18px;
+    overflow-x: auto;
+    color: var(--text);
+    font: 12px/1.7 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  .tag { color: #2f6feb; }
+  .attr { color: #9b59b6; }
+  .str { color: #147d55; }
+  .comment { color: var(--faint); }
+  html[data-theme="dark"] .tag { color: #7eb0ff; }
+  html[data-theme="dark"] .attr { color: #c69ae8; }
+  html[data-theme="dark"] .str { color: #69c79d; }
+
+  /* ---------- table ---------- */
+  .table-wrap { overflow-x: auto; margin: 18px 0 24px; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--border); }
+  th { background: var(--surface); font-weight: 650; color: var(--text); }
+  tr:last-child td { border-bottom: 0; }
+  td { color: var(--muted); }
+  td code { color: var(--text); }
+
+  /* ---------- footer ---------- */
+  .footer {
+    margin-top: 80px;
+    padding: 25px 0 34px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; gap: 20px;
+    color: var(--faint); font-size: 10px;
+  }
+  .footer a { color: var(--muted); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1050px) {
+    :root { --sidebar-w: 205px; --toc-w: 0px; }
+    .right-toc { display: none; }
+    .content { width: min(790px, calc(100vw - var(--sidebar-w) - 44px)); }
+  }
+  @media (max-width: 760px) {
+    :root { --sidebar-w: 0px; }
+    .sidebar { display: none; }
+    .main { margin: 0; }
+    .content { width: auto; margin: 0; padding: 58px 18px 0; }
+    .brand { width: auto; min-width: auto; }
+    .search { flex: 1; width: auto; }
+    .toolbar-link { display: none; }
+    h1 { font-size: 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <a class="brand" href="#top" aria-label="DocTML home">
+    <span class="brand-icon" aria-hidden="true"></span>
+    <span class="brand-name">DocTML</span>
+  </a>
+
+  <label class="search" aria-label="Search documentation">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+    <input id="searchInput" type="search" placeholder="Search documentation…" autocomplete="off">
+    <span class="shortcut">⌘K</span>
+  </label>
+
+  <div class="toolbar-spacer"></div>
+  <button class="theme-button" id="themeButton" type="button" title="Toggle light/dark theme">
+    <span id="themeIcon">☼</span><span id="themeLabel">Light</span>
+  </button>
+  <a class="toolbar-link" href="https://github.com/" target="_blank" rel="noreferrer">GitHub ↗</a>
+</header>
+
+<aside class="sidebar" aria-label="Documentation navigation">
+  <nav>
+    <section class="nav-group">
+      <div class="nav-label">Introduction</div>
+      <a class="nav-item" href="#overview">Overview</a>
+      <a class="nav-item" href="#getting-started">Getting Started</a>
+    </section>
+
+    <section class="nav-group">
+      <div class="nav-label">Language Reference</div>
+      <a class="nav-item current" href="#table" aria-current="page">table</a>
+      <div class="nav-sub">
+        <a class="nav-item" href="#paragraph">paragraph</a>
+        <a class="nav-item" href="#heading">heading</a>
+        <a class="nav-item" href="#image">image</a>
+        <a class="nav-item" href="#list">list</a>
+      </div>
+      <a class="nav-item" href="#attributes"><span class="nav-chevron">›</span> Attributes</a>
+      <a class="nav-item" href="#layout"><span class="nav-chevron">›</span> Layout</a>
+      <a class="nav-item" href="#inline"><span class="nav-chevron">›</span> Text &amp; Inline</a>
+      <a class="nav-item" href="#expressions"><span class="nav-chevron">›</span> Expressions</a>
+    </section>
+
+    <section class="nav-group">
+      <div class="nav-label">Guides</div>
+      <a class="nav-item" href="#tutorials">Tutorials</a>
+      <a class="nav-item" href="#templates">Templates</a>
+    </section>
+
+    <section class="nav-group">
+      <div class="nav-label">Tools</div>
+      <a class="nav-item" href="#cli">CLI Reference</a>
+      <a class="nav-item" href="#api">API Reference</a>
+    </section>
+  </nav>
+</aside>
+
+<main class="main" id="top">
+  <article class="content">
+    <div class="breadcrumbs"><a href="#overview">Language Reference</a><span>›</span><a href="#table">Elements</a><span>›</span>table</div>
+
+    <section id="table">
+      <h1>&lt;table&gt;</h1>
+      <p class="lead">Creates a table for organizing structured data in a printed document.</p>
+
+      <p>The <code>&lt;table&gt;</code> element is designed for predictable page layout rather than responsive web presentation. It can contain rows and cells, and can be styled with attributes such as <a href="#attributes">width</a>, <code>border</code>, and alignment.</p>
+
+      <h2 id="syntax">Syntax</h2>
+      <div class="code-block">
+        <div class="code-head"><span>DocTML</span><button class="copy" data-copy="&lt;table&gt;\n  &lt;table-row&gt;\n    &lt;table-cell&gt;Content&lt;/table-cell&gt;\n  &lt;/table-row&gt;\n&lt;/table&gt;">Copy</button></div>
+        <pre><code><span class="tag">&lt;table</span> <span class="attr">[attributes]</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;table-row&gt;</span>
+    <span class="tag">&lt;table-cell&gt;</span>Content<span class="tag">&lt;/table-cell&gt;</span>
+  <span class="tag">&lt;/table-row&gt;</span>
+<span class="tag">&lt;/table&gt;</span></code></pre>
+      </div>
+
+      <h2 id="example">Example</h2>
+      <p>A small table is often enough to demonstrate the relationship between source markup and the final document. Notice that the source stays readable even when the rendered output is intended for a fixed page.</p>
+
+      <div class="code-block">
+        <div class="code-head"><span>Example</span><button class="copy" data-copy="&lt;table border=\"1\" width=\"100%\"&gt;\n  &lt;table-row&gt;\n    &lt;table-cell&gt;Product&lt;/table-cell&gt;\n    &lt;table-cell&gt;Price&lt;/table-cell&gt;\n    &lt;table-cell&gt;Quantity&lt;/table-cell&gt;\n  &lt;/table-row&gt;\n&lt;/table&gt;">Copy</button></div>
+        <pre><code><span class="tag">&lt;table</span> <span class="attr">border</span>=<span class="str">"1"</span> <span class="attr">width</span>=<span class="str">"100%"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;table-row&gt;</span>
+    <span class="tag">&lt;table-cell&gt;</span>Product<span class="tag">&lt;/table-cell&gt;</span>
+    <span class="tag">&lt;table-cell&gt;</span>Price<span class="tag">&lt;/table-cell&gt;</span>
+    <span class="tag">&lt;table-cell&gt;</span>Quantity<span class="tag">&lt;/table-cell&gt;</span>
+  <span class="tag">&lt;/table-row&gt;</span>
+<span class="tag">&lt;/table&gt;</span></code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product</th><th>Price</th><th>Quantity</th></tr></thead>
+          <tbody>
+            <tr><td>DocTML Guide</td><td>$29.99</td><td>1</td></tr>
+            <tr><td>Template Pack</td><td>$19.99</td><td>2</td></tr>
+            <tr><td>Professional Support</td><td>$99.00</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="attributes">Attributes</h2>
+      <p>Use table attributes when the document needs explicit geometry or visual rules. Values are interpreted by the DocTML layout engine and ultimately affect the generated page rather than a browser viewport.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Attribute</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>width</code></td><td>length | percent</td><td>Controls the table width.</td></tr>
+            <tr><td><code>border</code></td><td>number</td><td>Sets the border width.</td></tr>
+            <tr><td><code>align</code></td><td>left | center | right</td><td>Positions the table on the page.</td></tr>
+            <tr><td><code>spacing</code></td><td>length</td><td>Controls space between cells.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="content">Content</h2>
+      <p>A table may contain rows, and rows may contain cells. Cells can contain normal text as well as inline elements such as <code>&lt;strong&gt;</code>, <code>&lt;link&gt;</code>, and expressions.</p>
+
+      <ul>
+        <li>Keep the table structure shallow and predictable.</li>
+        <li>Prefer semantic rows and cells over visual spacing.</li>
+        <li>Use explicit widths when the printed layout must remain stable.</li>
+        <li>For complex page composition, consider a layout element instead.</li>
+      </ul>
+
+      <h2 id="notes">Notes</h2>
+      <p>Unlike an HTML table, a DocTML table is ultimately resolved against a page size, margins, and document flow. This makes properties such as width and pagination meaningful even when the same source is exported to different formats.</p>
+
+      <hr>
+      <p><strong>Related elements:</strong> <a href="#paragraph">&lt;paragraph&gt;</a>, <a href="#heading">&lt;heading&gt;</a>, <a href="#image">&lt;image&gt;</a>, and <a href="#layout">&lt;layout&gt;</a>.</p>
+    </section>
+
+    <!-- Anchors for the demo TOC. In the real app these would be separate single-page documents. -->
+    <section id="paragraph"><h2>paragraph</h2><p>A paragraph contains normal document text and participates in the document flow.</p></section>
+    <section id="heading"><h2>heading</h2><p>A heading creates a semantic document heading with optional level and style attributes.</p></section>
+    <section id="image"><h2>image</h2><p>An image places an image resource into the printed document and supports explicit dimensions.</p></section>
+    <section id="list"><h2>list</h2><p>A list represents ordered or unordered items with predictable indentation.</p></section>
+    <section id="layout"><h2>layout</h2><p>Layout elements provide page-level composition for columns, regions, and positioned content.</p></section>
+    <section id="inline"><h2>Text &amp; Inline</h2><p>Inline elements modify text without introducing a new block in the document flow.</p></section>
+    <section id="expressions"><h2>Expressions</h2><p>Expressions insert computed values into a document while keeping the source declarative.</p></section>
+    <section id="tutorials"><h2>Tutorials</h2><p>Step-by-step guides cover practical document creation workflows.</p></section>
+    <section id="templates"><h2>Templates</h2><p>Templates demonstrate reusable structures for common printed documents.</p></section>
+    <section id="cli"><h2>CLI Reference</h2><p>The command-line interface compiles DocTML sources into supported output formats.</p></section>
+    <section id="api"><h2>API Reference</h2><p>The API exposes parsing, rendering, and export capabilities for applications.</p></section>
+    <section id="overview"><h2>Overview</h2><p>DocTML is an HTML-like markup language optimized for generated printed documents.</p></section>
+    <section id="getting-started"><h2>Getting Started</h2><p>Install the CLI, create a source document, and render it to PDF or DOCX.</p></section>
+
+    <footer class="footer">
+      <span>DocTML documentation · v1.0.0</span>
+      <span><a href="#table">Back to top ↑</a></span>
+    </footer>
+  </article>
+</main>
+
+<aside class="right-toc" aria-label="On this page">
+  <div class="right-toc-inner">
+    <div class="right-label">On this page</div>
+    <a href="#syntax" class="active">Syntax</a>
+    <a href="#example">Example</a>
+    <a href="#attributes">Attributes</a>
+    <a href="#content">Content</a>
+    <a href="#notes">Notes</a>
+  </div>
+</aside>
+
+<script>
+  const root = document.documentElement;
+  const themeButton = document.getElementById('themeButton');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeLabel = document.getElementById('themeLabel');
+
+  function setTheme(theme) {
+    root.dataset.theme = theme;
+    localStorage.setItem('doctml-theme', theme);
+    const dark = theme === 'dark';
+    themeIcon.textContent = dark ? '☾' : '☼';
+    themeLabel.textContent = dark ? 'Dark' : 'Light';
+  }
+  const savedTheme = localStorage.getItem('doctml-theme');
+  setTheme(savedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  themeButton.addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+
+  // Keyboard shortcut for search.
+  const searchInput = document.getElementById('searchInput');
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault(); searchInput.focus(); searchInput.select();
+    }
+  });
+
+  // Simple same-page search: highlights matching navigation entries.
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.style.display = !q || item.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  // Copy buttons.
+  document.querySelectorAll('.copy').forEach(button => {
+    button.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(button.dataset.copy); } catch (_) {}
+      const old = button.textContent;
+      button.textContent = 'Copied';
+      setTimeout(() => button.textContent = old, 1000);
+    });
+  });
+
+  // Highlight the right-side section currently closest to the top of the viewport.
+  const rightLinks = [...document.querySelectorAll('.right-toc a')];
+  const targets = rightLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  function updateRightToc() {
+    let active = targets[0];
+    for (const target of targets) {
+      if (target.getBoundingClientRect().top <= 100) active = target;
+    }
+    rightLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active.id));
+  }
+  addEventListener('scroll', updateRightToc, { passive: true });
+  updateRightToc();
+</script>
+</body>
+</html>

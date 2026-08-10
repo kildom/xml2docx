@@ -7,6 +7,7 @@ import { preprocessDocs } from "./preprocess";
 import { markdownToHtml } from "./markdown";
 import { compileTemplate } from "./template";
 import { asyncRetryLoop } from "./async-jobs";
+import { runCli } from "../utils";
 
 /*
 
@@ -93,6 +94,12 @@ async function main() {
 
     console.log("Generating tags...");
     await generateTags(docs);
+
+    console.log("Generating js...");
+    generateJs();
+
+    console.log("Copying static content...");
+    copyStaticContent();
 }
 
 const headerExtractRegex = qre.global`
@@ -145,6 +152,28 @@ async function generateTags(docs: Docs) {
         });
         fs.writeFileSync(fileName, htmlContent, 'utf-8');
     }
+}
+
+function generateJs() {
+    runCli('npx', [
+        'esbuild',
+        'scripts/gen-docs/templates/src/main.ts',
+        '--platform=browser',
+        '--format=iife',
+        '--bundle',
+        '--sourcemap',
+        '--target=es2020',
+        '--global-name=js',
+        `--outfile=${outputDir}/src/main.js`
+    ]);
+}
+
+function copyStaticContent() {
+    let staticDir = 'scripts/gen-docs/templates/static';
+    let outputStaticDir = `${outputDir}/static`;
+    console.log(`    from ${staticDir} to ${outputStaticDir}`);
+    fs.mkdirSync(outputStaticDir, { recursive: true });
+    fs.cpSync(staticDir, outputStaticDir, { recursive: true });
 }
 
 main();

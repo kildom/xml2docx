@@ -1,6 +1,8 @@
 
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+
 
 declare global {
     const __RUN_SELF_TEST__: boolean | undefined;
@@ -127,4 +129,22 @@ export function cloneWithRefs<T>(root: T): T {
     }
 
     return clone(root, 0) as T;
+}
+
+export function runCli(cmd: string, args: string[]): void {
+    const result = spawnSync(cmd, args, {
+        cwd: ".",
+        stdio: "inherit",
+        shell: false,
+    });
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    if (result.status !== 0) {
+        throw new Error(
+            `Process exited with status ${result.status ?? "unknown"}`
+        );
+    }
 }

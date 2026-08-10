@@ -275,6 +275,8 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
                 you can set DOCX_CONVERT_SOFFICE environment variable to the path of your soffice
                 executable (e.g. DOCX_CONVERT_SOFFICE=soffice). Don't do it for production uses
                 when generating public documentation or on official CI testing.
+                TIP: Run LibreOffice Writer window in background - it will speed up the conversion
+                process significantly.
             `.replace(/\s+/g, ' ').trim().replace(/(.{1,79})(?: |$)/g, '$1\n').trim());
             process.exit(1);
         }
