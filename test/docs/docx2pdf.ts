@@ -6,6 +6,9 @@ import * as path from 'node:path';
 import { isDirectExecution, mkdir, mkdirFor } from './common';
 
 
+const tempDir = 'temp/docx2pdf';
+
+
 async function checkJSONResponse(res: http.IncomingMessage): Promise<any> {
     let data = '';
     for await (const chunk of res) {
@@ -203,6 +206,50 @@ async function convertDocxFilesOnServer(address: string, files: { [key: string]:
     }
 }
 
+async function convertDocxFilesWithSoffice(sofficePath: string, files: { [key: string]: string }) {
+    let tempLocalDir = path.join(tempDir, crypto.randomUUID());
+    fs.mkdirSync(tempLocalDir, { recursive: true });
+    let entries = Object.entries(files).map((v, i) => ({
+        input: v[0],
+        output: v[1],
+        index: i,
+        tempDocx: path.join(tempLocalDir, `${i}.docx`),
+        tempPdf: path.join(tempLocalDir, `${i}.pdf`),
+        tempHtml: path.join(tempLocalDir, `${i}.html`),
+    }));
+    for (let e of entries) {
+        fs.copyFileSync(e.input, e.tempDocx);
+    }
+    let res = child_process.spawnSync(sofficePath,
+        [
+            '--headless', '--convert-to', 'pdf',
+            ...entries.map(v => path.basename(v.tempDocx))
+        ], { stdio: 'inherit', cwd: tempLocalDir });
+    if (res.error) {
+        throw res.error;
+    } else if (res.status) {
+        throw new Error(`Process exit code ${res.status}`);
+    }
+    res = child_process.spawnSync(sofficePath,
+        [
+            '--headless', '--convert-to', 'html',
+            ...entries.map(v => path.basename(v.tempDocx))
+        ], { stdio: 'inherit', cwd: tempLocalDir });
+    if (res.error) {
+        throw res.error;
+    } else if (res.status) {
+        throw new Error(`Process exit code ${res.status}`);
+    }
+    for (let e of entries) {
+        mkdirFor(e.output);
+        fs.copyFileSync(e.tempPdf, path.join(path.dirname(e.output), path.basename(e.output, path.extname(e.output)) + '.pdf'));
+        if (!fs.existsSync(e.tempHtml)) {
+            e.tempHtml = path.join(path.dirname(e.output), path.basename(e.output, path.extname(e.output)) + '.htm');
+        }
+        fs.copyFileSync(e.tempHtml, path.join(path.dirname(e.output), path.basename(e.output, path.extname(e.output)) + '.html'));
+    }
+    fs.rmSync(tempLocalDir, { recursive: true, force: true });
+}
 
 export async function convertDocxFiles(files: { [key: string]: string }) {
     for (let ext of ['.pdf', '.html']) {
@@ -213,6 +260,8 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
     }
     if (process.env.DOCX_CONVERT_SERVER) {
         await convertDocxFilesOnServer(process.env.DOCX_CONVERT_SERVER, files);
+    } else if (process.env.DOCX_CONVERT_SOFFICE) {
+        await convertDocxFilesWithSoffice(process.env.DOCX_CONVERT_SOFFICE, files);
     } else {
         if (!process.platform.toLowerCase().startsWith('win')) {
             console.error(`
@@ -221,6 +270,11 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
                 variable to its address (e.g. DOCX_CONVERT_SERVER=localhost:8083). You can start the server with node.js using the
                 "dist/dev/convert-server.js" script. Build it first with a "npm run dev-build-convert-server" command.
                 This server IS NOT SECURE, so do not expose it to the public network.
+
+                If you happy with LibreOffice rendering which may be different from Microsoft Office,
+                you can set DOCX_CONVERT_SOFFICE environment variable to the path of your soffice
+                executable (e.g. DOCX_CONVERT_SOFFICE=soffice). Don't do it for production uses
+                when generating public documentation or on official CI testing.
             `.replace(/\s+/g, ' ').trim().replace(/(.{1,79})(?: |$)/g, '$1\n').trim());
             process.exit(1);
         }
