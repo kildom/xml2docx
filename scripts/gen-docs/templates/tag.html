@@ -33,6 +33,7 @@ div.doctml-preview-group {
     border-radius: 0.6em;
     overflow: hidden;
     border: 1px solid #E2E2E2;
+    container-type: inline-size;
 }
 
 div.doctml-preview-group pre {
@@ -46,8 +47,20 @@ div.doctml-preview-group pre code.hljs {
 
 div.doctml-preview-group img {
     display: block;
-    width: 100%;
     background-color: white;
+    border: 1px solid #c9c9c9;
+    margin: 0.8em auto;
+    box-shadow: #CCC 0px 0px 6px;
+}
+
+div.doctml-preview-panel {
+    overflow-y: auto;
+    width: 100%;
+    max-height: 30cqw;
+}
+
+div.doctml-preview-group code.hljs {
+    padding-bottom: 0.2em;
 }
 
 .hljs {

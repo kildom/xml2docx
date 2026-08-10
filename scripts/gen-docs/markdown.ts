@@ -146,16 +146,19 @@ function registerPlugins() {
                 if (doc === jobPostponed) {
                     throw new Error("This should not happen!");
                 }
+                let images = '';
+                for (let page of doc.pages) {
+                    let width = Math.round(page.pixelWidth / doc.pngWidth * 95);
+                    images += `<div class="doctml-preview-img"><img src="preview/${page.svgCroppedName}" style="width: ${width}%"/></div>`;
+                }
                 return `
                     <div class="doctml-preview-group">
                         ${codeHTML}
-                        <div class="doctml-preview-panel">
-                            <img class="doctml-preview-img" src="preview/${doc.pngName}"/>
-                        </div>
+                        <div class="doctml-preview-panel">${images}</div>
                     </div>`;
-                    // TODO: Switch to SVG cropped
-                    // TODO: Add controls to preview PDF and download DOCX and PDF
-                    // TODO: If preview is too large, crop at the bottom (with nice fade out) and show more when clicked.
+                    // TODO: Add controls to preview PDF and download DOCX
+                    // click on page shows dialog with PDF iframe preview
+                    // button on that dialog to download the DOCX
             }
         };
         return [ext1, ext2];
