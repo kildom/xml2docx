@@ -1,0 +1,216 @@
+/*
+:root {
+    --border: #e3e7ed;
+
+    --toolbar-bg: #ffffff;
+    --toolbar-height: 48px;
+    --toolbar-padding: 0 16px;
+
+    --toc-bg: #ffffff;
+    --toc-width: 190px;
+
+    --sidebar-width: 230px;
+
+    --content-max: 800px;
+    --page-bg: #ffffff;
+    --surface: #f7f8fa;
+    --surface-2: #f1f3f6;
+    --code-bg: #f5f7fa;
+    --border: #e3e7ed;
+    --border-strong: #d6dbe3;
+    --text: #202633;
+    --muted: #697386;
+    --faint: #8a94a6;
+    --accent: #2f6feb;
+    --accent-soft: rgba(47,111,235,.10);
+    --accent-hover: rgba(47,111,235,.065);
+    --inline-code: #c92c6d;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.05);
+    --radius: 6px;
+    color-scheme: light;
+}*/
+
+/* Light theme colors */
+:root {
+
+    --background: #ffffff;
+    --text: #202633;
+    --border: #e3e7ed;
+    --border-strong: #d6dbe3;
+    --toolbar-bg: #f9fafb;
+    --link: #2f6feb;
+    --inline-code: #c92c6d;
+    --inline-code-bg: #f8f9fb;
+
+}
+
+/* Dark theme colors */
+html[data-theme="dark"] {
+
+    --background: #222222;
+    --text: #e7ebf1;
+    --border: #293342;
+    --border-strong: #344052;
+    --toolbar-bg: #242d3a;
+    --link: #72a7ff;
+    --inline-code: #ff8fbd;
+    --inline-code-bg: #1c2430;
+
+}
+
+/* Repeat dark theme colors for auto mode */
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] {
+
+    --background: #222222;
+    --text: #e7ebf1;
+    --border: #293342;
+    --border-strong: #344052;
+    --toolbar-bg: #242d3a;
+    --link: #72a7ff;
+    --inline-code: #ff8fbd;
+    --inline-code-bg: #1c2430;
+
+    }
+}
+
+/* Metrics for the page */
+:root {
+
+    --toolbar-height: 48px;
+    --toolbar-padding: 0 16px;
+
+    --sidebar-width: 260px;
+    --toc-width: 200px;
+
+    --border-size: 2px;
+
+    --content-max: 810px;
+
+    --footer-height: 80px;
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    transition: background .18s ease, color .18s ease;
+}
+
+
+.toolbar {
+    height: var(--toolbar-height);
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    padding: var(--toolbar-padding);
+    background: var(--toolbar-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--toolbar-height);
+    bottom: 0;
+    width: var(--sidebar-width);
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding: 25px 15px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+
+
+.main {
+    margin-left: var(--sidebar-width);
+    margin-right: var(--toc-width);
+    padding-top: var(--toolbar-height);
+    min-height: 100vh;
+    xborder: 1px solid green;
+}
+
+
+.content {
+    width: min(var(--content-max), calc(100vw - var(--sidebar-width) - var(--toc-width) - 64px));
+    margin: 0 auto;
+    padding: 20px 0 0;
+    xborder: 1px solid red;
+    min-height: calc(100vh - var(--toolbar-height) - var(--footer-height));
+}
+
+.footer {
+    width: min(var(--content-max), calc(100vw - var(--sidebar-width) - var(--toc-width) - 64px));
+    margin: 0 auto;
+    padding: 20px 15px 0;
+    xborder: 1px solid blue;
+    height: var(--footer-height);
+    border-top: 1px solid var(--border-strong);
+}
+
+.footer a {
+    color: var(--muted);
+}
+
+
+.right-toc {
+    position: fixed;
+    right: 0;
+    top: var(--toolbar-height);
+    bottom: 0;
+    width: var(--toc-width);
+    padding: 56px 15px 5px 0px;
+    overflow-y: auto;
+    xborder: 1px solid sienna;
+}
+
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+
+a:hover {
+    text-decoration: underline;
+
+}
+
+code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: .88em;
+}
+
+:not(pre)>code {
+    color: var(--inline-code);
+    background: var(--inline-code-bg);
+    border: 1px solid var(--border);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+a code {
+    color: var(--link);
+    border: 1px solid color-mix(in srgb, var(--link) 10%, var(--inline-code-bg) 90%);
+}
+
+a:hover code {
+    background: var(--background);
+}

@@ -87,7 +87,7 @@
       value: alignment
       brief: Text alignment.
       details: |
-        Possible values are:
+        Supported values:
         @enum ParagraphAlignment
       docx-js: "alignment?: typeof AlignmentType[keyof typeof AlignmentType]"
       examples:

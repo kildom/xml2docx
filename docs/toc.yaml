@@ -16,7 +16,7 @@
         - _link: document-structure.md
         - <document>
         - <section>
-        - Page Header and Footer:
+        - Header and Footer:
           - _link: header-footer.md
           - <header>
           - <footer>
@@ -30,17 +30,17 @@
         - <p-style>
         - <tab/>
         - <br/>
-      - Headings:
-        - _link: headings.md
-        - _collapse: true
-        - _expandOn: [headings.md, <title>, <h1>, <h2>, <h3>, <h4>, <h5>, <h6>]
-        - <title>
-        - <h1>
-        - <h2>
-        - <h3>
-        - <h4>
-        - <h5>
-        - <h6>
+        - Headings:
+          - _link: headings.md
+          - _collapse: true
+          - _expandOn: [headings.md, <title>, <h1>, <h2>, <h3>, <h4>, <h5>, <h6>]
+          - <title>
+          - <h1>
+          - <h2>
+          - <h3>
+          - <h4>
+          - <h5>
+          - <h6>
       - Text Formatting:
         - _link: formatting.md
         - <font>
