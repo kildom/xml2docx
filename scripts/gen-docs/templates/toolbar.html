@@ -1,0 +1,37 @@
+<header class="toolbar" style="display: flex; align-items: center;">
+
+    <div style="display: flex; align-items: center;">
+        <img src="img/icon.svg" style="width: 32px; height: 32px; margin-right: 14px;">
+        <b>DocTML</b>
+    </div>
+
+    <div style="flex: 1;"></div>
+
+    <!-- Theme selector -->
+
+    <div class="theme-selector-container">
+
+        <div class="theme-selector" role="group" aria-label="Color theme">
+
+            <!-- Automatic -->
+            <button onclick="setTheme('auto')" class="theme-option theme-auto" aria-label="System theme" aria-pressed="true"
+                title="System">
+                <span style="font-family: 'Material Symbols Outlined'; font-size: 20px;">&#60215;</span>
+            </button>
+
+            <!-- Light -->
+            <button onclick="setTheme('light')" class="theme-option theme-light" aria-label="Light theme" aria-pressed="false"
+                title="Light">
+                <span style="font-family: 'Material Symbols Outlined'; font-size: 20px;">&#58648;</span>
+            </button>
+
+            <!-- Dark -->
+            <button onclick="setTheme('dark')" class="theme-option theme-dark" aria-label="Dark theme" aria-pressed="false"
+                title="Dark">
+                <span style="font-family: 'Material Symbols Outlined'; font-size: 20px;">&#58652;</span>
+            </button>
+
+        </div>
+    </div>
+
+</header>

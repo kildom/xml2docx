@@ -1,47 +1,140 @@
 <!doctype html>
 <html lang="en" data-theme="auto">
 
+<%!
+let baseTag = tag.aliasOf?.tag || tag;
+%>
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= include('head.html') %>
+    <%! if (baseTag.allChildren.length) { %>
     <title>&lt;<% tag.name %>&gt; DocTML element</title>
-    <link rel="stylesheet" href="static/style.css">
+    <%! } else { %>
+    <title>&lt;<% tag.name %>/&gt; DocTML element</title>
+    <%! } %>
 </head>
 
 <body>
 
-    <header class="toolbar">
-        Toolbar
-    </header>
-
-    <aside class="sidebar">
-        Navigation<br>
-    </aside>
+    <%= include('toolbar.html') %>
+    <%= include('sidebar.html') %>
 
     <main class="main" id="top">
         <article class="content">
             <div class="breadcrumbs"><a href="#overview">Language Reference</a><span>›</span><a
                     href="#table">Elements</a><span>›</span>table</div>
 
+            <%! if (!tag.customPage) { %>
 
+            <%! if (baseTag.allChildren.length) { %>
             <h1 class="tag-name">&lt;<% tag.name %>&gt;</h1>
+            <%! } else { %>
+            <h1 class="tag-name">&lt;<% tag.name %>/&gt;</h1>
+            <%! } %>
+
+            <%! if (tag.aliasOf) { %>
+            <p><b>Alias of:
+            <%! if (tag.aliasOf.text) { %>
+            <%= markdown(tag.aliasOf.text, false) %></p>
+            <%! } else { %>
+            <a href="<% tag.aliasOf.tag.name %>.html" class="tag-link"><code>&lt;<% tag.aliasOf.tag.name %>&gt;</code></a>
+            <%! } %>
+            </b></p>
+            <%! } %>
 
             <div class="tag-brief">
                 <%= markdown(tag.brief) %>
             </div>
 
+            <%! } %>
+
             <div class="tag-details">
                 <%= markdown(tag.details) %>
             </div>
 
+            <%! if (!tag.aliasOf && (tag.allParents.length + tag.allChildren.length) > 0) { %>
+            <div class="collapsed">
+
+            <h3 onclick="js.toggleExpand(this)" class="related-tags-header"><div class="expand-marker"></div>Related Tags</h3>
+
+            <p class="hide-when-collapsed"><a href="graph.html">View detailed relations graph</a></p>
+
+            <table class="related-tags-table hide-when-collapsed">
+                <thead>
+                <tr>
+                    <td>Effective Parents<br/>(incl. wrappers)</td>
+                    <td>Direct Parents</td>
+                    <td>Direct Children</td>
+                    <td>Effective Children<br/>(incl. wrappers)</td>
+                    <%! if (tag.aliases.length) { %>
+                    <td>Aliases</td>
+                    <%! } %>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <%! for (let parent of tag.allParents) if (!tag.parents.includes(parent)) { %>
+                        <div><a href="<% parent.name %>.html" class="tag-link"><code>&lt;<% parent.name %>&gt;</code></a></div>
+                        <%! } %>
+                    </td>
+                    <td>
+                        <%! for (let parent of tag.parents) { %>
+                        <div><a href="<% parent.name %>.html" class="tag-link"><code>&lt;<% parent.name %>&gt;</code></a></div>
+                        <%! } %>
+                    </td>
+                    <td>
+                        <%! for (let child of tag.children) if (child === tag.implicit) { %>
+                        <div><a href="<% child.name %>.html" class="tag-link"><code><b>&lt;<% child.name %>&gt;</b></code></a> (<a href="graph.html#implicit-wrapper">implicit</a>)</div>
+                        <%! } %>
+                        <%! for (let child of tag.children) if (child !== tag.implicit) { %>
+                        <div><a href="<% child.name %>.html" class="tag-link"><code>&lt;<% child.name %>&gt;</code></a></div>
+                        <%! } %>
+                    </td>
+                    <td>
+                        <%! for (let child of tag.allChildren) if (!tag.children.includes(child)) { %>
+                        <div><a href="<% child.name %>.html" class="tag-link"><code>&lt;<% child.name %>&gt;</code></a></div>
+                        <%! } %>
+                    </td>
+                    <%! if (tag.aliases.length) { %>
+                    <td>
+                        <%! for (let alias of tag.aliases) { %>
+                        <div><a href="<% alias.name %>.html" class="tag-link"><code>&lt;<% alias.name %>&gt;</code></a></div>
+                        <%! } %>
+                    </td>
+                    <%! } %>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+            <%! } %>
+
+            <%! if (tag.examples.length) { %>
+            <div class="examples-title">Examples:</div>
+            <%! for (let example of tag.examples) { %>
+            <div class="example collapsed">
+                <div class="example-title" onclick="js.toggleExpand(this)">
+                    <div class="expand-marker"></div>
+                    <%= markdown(example.brief, false) %>
+                </div>
+                <div class="example-content">
+                    <%= example.details && markdown(example.details) %>
+                    <%= markdown('```xml\n' + example.code + '\n```\n') %>
+                </div>
+            </div>
+            <%! } %>
+            <%! } %>
+
+            <%! if (!tag.aliasOf && !tag.customPage && Object.keys(tag.attributes).length) { %>
             <h1>Attributes</h1>
 
     <div class="tag-attributes">
         <%! for (let attr of Object.values(tag.attributes)) { %>
-            <div class="attr-container <% attr.details ? 'collapsed' : 'non-expandable' %>" id="attr-<% attr.name %>--container">
-                <h2 class="attr-header" id="attr-<% attr.name %>">
-                    <div class="attr-expand-btn" onclick="toggleCollapse('attr-<% attr.name %>--container')"><div class="attr-expand-marker"></div><span
-                     class="attr-name"><% attr.name %></span></div><span
+            <div class="attr-container <%= attr.details || attr.examples.length ? 'collapsed' : 'non-expandable' %>">
+                <div class="archon" id="attr-<% attr.name %>"></div>
+                <h2 class="attr-header" onclick="js.toggleExpand(this, true)">
+                    <div class="expand-marker"></div><span
+                     class="attr-name"><% attr.name %></span><span
                      class="attr-quotes">="</span><span
                      class="attr-value"><%= markdown(attr.value, false) %></span><span
                      class="attr-quotes">"</span><%! if (attr.required) { %><span
@@ -57,27 +150,28 @@
                     <%= markdown(attr.details) %>
                 </div>
                 <%! } %>
+                    
                 <%! if (attr.examples.length) { %>
                 <div class="attr-examples">
-                    <%! for (let example of attr.examples) { %>
-                        <div class="attr-example">
-                            <div class="attr-example-title"><%= markdown(example.brief, false) %></div>
-                            <%! if (example.details) { %>
-                            <div class="attr-example-details">
-                                <%= markdown(example.details) %>
-                            </div>
-                            <%! } %>
-                            <div class="attr-example-code">
-                                <%= markdown('```xml\n' + example.code + '\n```\n') %>
-                            </div>
+                <div class="examples-title">Examples:</div>
+                <%! for (let example of attr.examples) { %>
+                    <div class="example collapsed">
+                        <div class="example-title" onclick="js.toggleExpand(this)">
+                            <div class="expand-marker"></div>
+                            <%= markdown(example.brief, false) %>
                         </div>
-                    <%! } %>
+                        <div class="example-content">
+                            <%= example.details && markdown(example.details) %>
+                            <%= markdown('```xml\n' + example.code + '\n```\n') %>
+                        </div>
+                    </div>
+                <%! } %>
                 </div>
                 <%! } %>
             </div>
         <%! } %>
     </div>
-
+            <%! } %>
         </article>
         <footer class="footer">
             <span>DocTML documentation · v1.0.0</span>

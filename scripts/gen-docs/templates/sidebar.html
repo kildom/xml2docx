@@ -1,0 +1,65 @@
+<%!
+
+function showTocTag(item, level, collapse, active)
+{
+    let tag = item.link;
+    let section = item.section ? '#' + item.section : '';
+    let activeClass = active ? " toc-active" : "";
+    %>
+    <div><a href="<% tag.name %>.html<% section %>" class="toc-tag<% activeClass %>"><% item.title %><% collapse ? " ›››" : ""%></a></div>
+    <%!
+}
+
+function showTocPage(item, level, collapse, active)
+{
+    let page = item.link;
+    let section = item.section ? '#' + item.section : '';
+    let activeClass = active ? " toc-active" : "";
+    %>
+    <div><a href="<% page.name %>.html<% section %>" class="toc-page<% activeClass %>"><% item.title %><% collapse ? " ›››" : ""%></a></div>
+    <%!
+}
+
+function showTocSection(item, level, collapse)
+{
+    %>
+    <div class="toc-section"><% item.title %><% collapse ? " ›››" : ""%></div>
+    <%!
+}
+
+function showTocItem(item, level)
+{
+    let currentLink = (typeof tag !== 'undefined') ? tag : (typeof page !== 'undefined') ? page : null;
+    let active = currentLink === item.link;
+    let collapse = item.collapse && !item.expandOn.includes(currentLink);
+    switch (item.type) {
+        case 'tag':
+            showTocTag(item, level, collapse, active);
+            break;
+        case 'page':
+            showTocPage(item, level, collapse, active);
+            break;
+        default:
+            showTocSection(item, level, collapse);
+            break;
+    }
+    if (item.children.length > 0 && !collapse) {
+        showTocItems(item.children, level + 1);
+    }
+}
+
+function showTocItems(items, level)
+{
+    %><div class="toc-sub toc-sub-<% level %>"><%!
+    for (let item of items) {
+        showTocItem(item, level);
+    }
+    %></div><%!
+}
+
+%>
+
+
+<aside class="sidebar">
+    <%! showTocItems(docs.tocs.main.items, 0) %>
+</aside>

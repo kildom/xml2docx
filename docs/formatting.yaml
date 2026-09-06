@@ -11,6 +11,9 @@
   alias-of: font
   alias-text: '`<font bold="true"`'
   brief: Bold text.
+  examples:
+    - brief: Simple
+      code: <b>Hello, world!</b>
 
 - tag-name: i
   alias-of: font
@@ -113,3 +116,24 @@
     ```
     Hello, World!
     ```
+
+    If your text contains special characters, you need to use XML entity references:
+
+    Character | Entity reference
+    --------- | ----------------
+    non-breaking space | `&nbsp;`
+    `<`       | `&lt;`
+    `>`       | `&gt;`
+    `&`       | `&amp;`
+    `"`       | `&quot;`
+    `'`       | `&apos;`
+
+    If the number of entities is high, you should consider using `<CDATA>` node instead of TEXT node.
+    
+  examples:
+    - brief: Simple
+      details: The TEXT node is used directly inside `<document>` element.
+      code: |
+        <document>
+          Hello,&euro;World!
+        </document>

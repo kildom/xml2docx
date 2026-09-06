@@ -38,6 +38,10 @@ function copyResources() {
 
 export async function generatePreview(code: string, name: string, args: PreviewArgs): Promise<DocumentMetrics> {
 
+    if (fs.existsSync(`${outPath}/${name}.json`)) {
+        return JSON.parse(fs.readFileSync(`${outPath}/${name}.json`, 'utf-8')) as DocumentMetrics;
+    }
+
     fs.mkdirSync(tempPath, { recursive: true });
     fs.mkdirSync(outPath, { recursive: true });
 
@@ -86,7 +90,8 @@ export async function generatePreview(code: string, name: string, args: PreviewA
         page.svgCroppedName = `${name}${i + 1}-cropped.svg`;
     }
 
-    console.log(metrics);
+    // console.log(metrics);
+    fs.writeFileSync(`${outPath}/${name}.json`, JSON.stringify(metrics, null, 2));
 
     return metrics;
 }

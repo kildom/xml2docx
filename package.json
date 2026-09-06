@@ -30,7 +30,7 @@
         "prebuild-cli": "npx esbuild src/cli/cliDocTML.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/cli/doctml.json --outfile=dist/cli/doctml.cjs && npm run _lic -- dist/cli/license.txt dist/cli/doctml.json && npx tsx scripts/get-version.ts",
         "build-cli": "npx tsx scripts/build-deno-exec.ts",
         "build-api": "npx tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
-        "build-docs": "npx tsx scripts/gen-docs/gen-docs.ts",
+        "build-docs": "npx tsx scripts/gen-docs/gen-html.ts",
         "_lic": "npx license-checker --json --out dist/licenses.json && npx tsx scripts/gen-licenses.ts dist/licenses.json",
         "check": "npx tsc -p tsconfig.check.json && npx eslint src test",
         "_old-_lic": "npx license-checker --json --out dist/licenses.json && npx ts-node --swc scripts/gen-licenses.ts dist/licenses.json",

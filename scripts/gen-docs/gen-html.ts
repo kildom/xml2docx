@@ -76,7 +76,8 @@ async function main() {
                     `${attribute.name}="${escapeHtml(value) || '…'}"\`</a>`;
             } else {
                 return `<a href="${tag.name}.html#attr-${attribute.name}" class="attr-link">\`` +
-                    `<${tag.name}&nbsp;${attribute.name}="${escapeHtml(value) || '…'}"\`</a>`;
+                    `<${tag.name} ${attribute.name}="${escapeHtml(value) || '…'}"\`</a>`;
+                     // TODO: here should be a nbsp, but showdown escapes it, but it should not
             }
         },
         templateData(ctx, tag, attribute, page, enumObj) {
@@ -99,7 +100,18 @@ async function main() {
     generateJs();
 
     console.log("Copying static content...");
-    copyStaticContent();
+    copyStaticContent('scripts/gen-docs/templates/static', 'static');
+    copyStaticContent('docs/img', 'img');
+}
+
+function prepareTemplateData(obj: Record<string, any>) {
+    obj.markdown = markdownToHtml;
+    obj.include = (filePath: string) => {
+        let source = fs.readFileSync(`scripts/gen-docs/templates/${filePath}`, 'utf-8');
+        let template = compileTemplate(source);
+        return template(obj);
+    };
+    return obj;
 }
 
 const headerExtractRegex = qre.global`
@@ -135,7 +147,7 @@ async function generatePages(docs: Docs) {
         fs.writeFileSync(fileName, html, 'utf-8');
         let htmlContent!: string;
         await asyncRetryLoop(() => {
-            htmlContent = template({ page, html, title });
+            htmlContent = template(prepareTemplateData({ docs, page, html, title }));
         });
         fs.writeFileSync(fileName, htmlContent, 'utf-8');
     }
@@ -148,7 +160,7 @@ async function generateTags(docs: Docs) {
         let fileName = `${outputDir}/${tag.name}.html`;
         let htmlContent!: string;
         await asyncRetryLoop(() => {
-            htmlContent = template({ tag, markdown: markdownToHtml });
+            htmlContent = template(prepareTemplateData({ docs, tag }));
         });
         fs.writeFileSync(fileName, htmlContent, 'utf-8');
     }
@@ -168,12 +180,11 @@ function generateJs() {
     ]);
 }
 
-function copyStaticContent() {
-    let staticDir = 'scripts/gen-docs/templates/static';
-    let outputStaticDir = `${outputDir}/static`;
-    console.log(`    from ${staticDir} to ${outputStaticDir}`);
-    fs.mkdirSync(outputStaticDir, { recursive: true });
-    fs.cpSync(staticDir, outputStaticDir, { recursive: true });
+function copyStaticContent(fromDir: string, toDir: string) {
+    let outputDstDir = `${outputDir}/${toDir}`;
+    console.log(`    from ${fromDir} to ${outputDstDir}`);
+    fs.mkdirSync(outputDstDir, { recursive: true });
+    fs.cpSync(fromDir, outputDstDir, { recursive: true });
 }
 
 main();

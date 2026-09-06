@@ -6,25 +6,27 @@
     The heading tags `<title>`, `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, and `<h6>` are aliases of
     `<p>` tag with the `heading=""` attribute set to the corresponding heading level.
 
-    You can use attributes passing to change text style of this paragraph since direct children are `<font>` tags,
-    for example:
-    ```xml
-    <p font.color="red">Warning!</p>
-    ```
-    This is shorter version of the following:
-    ```xml
-    <p><font color="red">Warning!</font></p>
-    ```
-
     For multiple paragraphs that share the same style, you should use the `style=""` attribute and `<p-style>` tag.
   combine: [ -IParagraphPropertiesOptions- ]
   examples:
     - brief: Simple
       code: <p>Hello, world!</p>
     - brief: Alignment
-      code: <p align="justify">This is a justified paragraph. <# lorem(500, 952727959) #></p>
-    - brief: Font color
-      code: <p font.color="red">Warning!</p>
+      code: |
+        <p align="justify">
+          This is a justified paragraph.
+          <# lorem({ length: 400, seed: 9531, wordWrap: 77, lineBreak: "\n  " }) #>
+        </p>
+    - brief: Setting font attributes
+      details: |
+        You can use attributes passing to change text style of this paragraph since direct children are `<font>` tags.
+
+        The following two paragraphs are equivalent:
+      code: |
+        <group>
+          <p font.color="red">Warning!</p>
+          <p><font color="red">Warning!</font></p>
+        </group>
   docx-js: https://docx.js.org/api/types/IParagraphOptions.html
   unused-docx-js:
     - children
@@ -57,9 +59,8 @@
 
 - tag-name: h5
   alias-of: p
+  alias-text: '`<p heading="5"`'
   brief: Heading level 5 paragraph.
-  details: |
-    This is an alias of the `<p>` tag with the `heading="5"` attribute.
 
 - tag-name: h6
   alias-of: p

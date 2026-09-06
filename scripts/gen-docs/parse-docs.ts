@@ -42,6 +42,9 @@ export interface DocsTag {
     location: string;              ///< Location: file and top-level item name
     children: DocsTag[];           ///< List of child tags
     implicit?: DocsTag;            ///< Implicit wrapper tag
+    allChildren: DocsTag[];        ///< List of all child tags also available over implicit wrapper tag
+    parents: DocsTag[];            ///< List of parent tags (if any)
+    allParents: DocsTag[];         ///< List of all parent tags also available over implicit wrapper tag
     brief: string;                 ///< Brief description
     details: string;               ///< Detailed description (custom page content if customPage is true)
     attributes: Record<string, DocsAttribute>;   ///< Tag attributes
@@ -220,6 +223,9 @@ export function parseDocs(): Docs {
             location: tagYaml.location,
             children: [],
             implicit: undefined,
+            allChildren: [],
+            parents: [],
+            allParents: [],
             brief: tagYaml.brief || '',
             details: tagYaml['custom-page'] || tagYaml.details || '',
             attributes: {},
@@ -259,6 +265,39 @@ export function parseDocs(): Docs {
     function parseTags() {
         for (let tagName of Object.keys(yaml.tags)) {
             getTag(tagName);
+        }
+    }
+
+    function resolveTagsRelations() {
+
+        let visited: Set<string> = new Set();
+        function findAllChildren(tag: DocsTag) {
+            if (visited.has(tag.name)) {
+                return;
+            }
+            visited.add(tag.name);
+            tag.allChildren = [...tag.children];
+            if (tag.implicit) {
+                findAllChildren(tag.implicit);
+                tag.allChildren = [...tag.allChildren, ...tag.implicit.allChildren];
+            }
+            for (let child of tag.children) {
+                child.parents.push(tag);
+            }
+            for (let child of tag.allChildren) {
+                child.allParents.push(tag);
+            }
+        }
+
+        for (let tag of Object.values(result.tags)) {
+            findAllChildren(tag);
+        }
+
+        for (let tag of Object.values(result.tags)) {
+            tag.children = [...new Set(tag.children)].filter(x => !x.name.startsWith('-'));
+            tag.allChildren = [...new Set(tag.allChildren)].filter(x => !x.name.startsWith('-'));
+            tag.parents = [...new Set(tag.parents)].filter(x => !x.name.startsWith('-'));
+            tag.allParents = [...new Set(tag.allParents)].filter(x => !x.name.startsWith('-'));
         }
     }
 
@@ -487,6 +526,7 @@ export function parseDocs(): Docs {
     }
 
     parseTags();
+    resolveTagsRelations();
     parsePages();
     parseGroups();
     parseEnums();

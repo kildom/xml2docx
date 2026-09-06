@@ -11,8 +11,9 @@
       value: level
       brief: Heading level.
       details: |
-        By default, it is deduced from the tag name.
         Possible values are `title` and numbers from `1` to `6`.
+
+        You can use aliases `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`, and `<title>`.
     style:
       type: str
       brief: Paragraph style name.
@@ -88,7 +89,9 @@
       brief: Text alignment.
       details: |
         Supported values:
-        @enum ParagraphAlignment
+        <# enumerator('enums.AlignmentTypeAliases', {
+            collapse: '`left`, `right`, `center`, `justify`, and more...',
+          }) #>
       docx-js: "alignment?: typeof AlignmentType[keyof typeof AlignmentType]"
       examples:
         - brief: align="right"
@@ -109,14 +112,13 @@
       value: left right first-line
       brief: Paragraph indentation.
       details: |
-        - **left** @required - Left indentation in [positive length](#positive-length) units.
-          Zero by default.
-        - **right** @optional - Right indentation in [positive length](#positive-length) units.
-          Zero by default.
-        - **first-line** @optional - First line indentation in [length](#length) units.
+        - **left** - Left indentation in [positive length](#positive-length) units.
+          Zero by default. @required
+        - **right** - Right indentation in [positive length](#positive-length) units.
+          Zero by default. @optional
+        - **first-line** - First line indentation in [length](#length) units.
           This is relative to the left indentation and it can be negative to create a hanging indent.
-          Zero by default.
-      docx-js: "indent?: IIndentAttributesProperties"
+          Zero by default. @optional
     keep-lines:
       type: bool
       brief: Keep all lines on a single page if possible.
@@ -136,9 +138,8 @@
       value: before after
       brief: Paragraph spacing.
       details: |
-        - **before** @optional - Space before paragraph in [positive length](#positive-length) units.
-        - **after** @optional - Space after paragraph in [positive length](#positive-length) units.
-      docx-js: "spacing?: ISpacingProperties"
+        - **before** - Space before paragraph in [positive length](#positive-length) units. @required
+        - **after** - Space after paragraph in [positive length](#positive-length) units. @optional
     line-spacing:
       value: requirement distance
       brief: Line spacing.

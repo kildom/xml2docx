@@ -1,0 +1,15 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="static/style.css">
+<script src="src/main.js" defer></script>
+<script>
+    <%!/* Theme switching logic cannot be deferred to avoid flickering when page loads. */%>
+    function setTheme(theme) {
+        if (!theme) {
+            theme = localStorage.getItem("theme") || "auto";
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("theme", theme);
+    }
+    setTheme();
+</script>

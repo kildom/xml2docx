@@ -7,11 +7,32 @@
     border:
       type: border
       brief: Page borders.
+      examples:
+        - brief: Simple border 10mm from content
+          code: |
+            <document>
+              <section border="0.5mm 10mm"/>
+              <p>Page with simple border.</p>
+            </document>
+        - brief: Different border vertical and horizontal
+          code: |
+            <document>
+              <section border="0.5mm 10mm, 2mm 10mm"/>
+              <p>Page with custom border.</p>
+            </document>
+
     width:
       type: positive-length
       brief: Custom paper width.
       details: |
         Not needed if `size=""` attribute is set.
+      examples:
+        - brief: Custom paper size
+          code: |
+            <document>
+              <section width="10cm" height="10cm"/>
+              <p>This section is 10cm by 10cm paper.</p>
+            </document>
     height:
       type: positive-length
       brief: Custom paper height.
@@ -31,6 +52,21 @@
         - `ANSIA` `ANSIB` `ANSIC` `ANSID` `ANSIE`
         - `JB0` `JB1` `JB2` `JB3` `JB4` `JB5` `JB6` `JB7` `JB8` `JB9` `JB10`
         - `DL` `DLEnvelope` `C6C5` `C7C6`
+      examples:
+        - brief: A6 paper format
+          code: |
+            <document>
+              <section size="A6"/>
+              <p>This section is A6 paper format.</p>
+            </document>
+        - brief: Multiple paper formats
+          code: |
+            <document>
+              <section size="Letter"/>
+              <p>This section is Letter paper format.</p>
+              <section size="A5"/>
+              <p>This section is A5 paper format.</p>
+            </document>
 - tag-name: p-style
   brief: Paragraph style.
   details: |

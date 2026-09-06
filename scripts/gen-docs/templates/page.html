@@ -2,110 +2,21 @@
 <html lang="en" data-theme="auto">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>&lt;table&gt; DocTML element</title>
-    <link rel="stylesheet" href="static/style.css">
+    <%= include('head.html') %>
+    <title><% title %> - DocTML</title>
 </head>
 
 <body>
 
-    <header class="toolbar">
-        Toolbar
-    </header>
-
-    <aside class="sidebar">
-        Navigation<br>
-        i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i
-        i
-        i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i
-        i
-        i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i
-        i
-        i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i
-        i
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-        Navigation<br>
-    </aside>
+    <%= include('toolbar.html') %>
+    <%= include('sidebar.html') %>
 
     <main class="main" id="top">
         <article class="content">
             <div class="breadcrumbs"><a href="#overview">Language Reference</a><span>›</span><a
                     href="#table">Elements</a><span>›</span>table</div>
 
-            Content for the <code>&lt;table&gt;</code> element. This is a preview of the generated documentation page.
-            The actual content is generated from the DocTML source files and may vary based on the version of the
-            documentation generator.
+            <%= html %>
 
         </article>
         <footer class="footer">

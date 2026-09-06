@@ -1,15 +1,16 @@
 
 # Enumerations imported from docx module.
 
-- enum-name: docx.AlignmentType
 - enum-name: docx.UnderlineType
 - enum-name: docx.HorizontalPositionRelativeFrom
 - enum-name: docx.HorizontalPositionAlign
 - enum-name: docx.VerticalPositionRelativeFrom
 - enum-name: docx.VerticalPositionAlign
+- enum-name: docx.AlignmentType
 
 # Enumerations imported from local enums file.
 
 - enum-name: enums.RegularImageFileTypes
-
+- enum-name: enums.AlignmentTypeAliases
+  combine: [ docx.AlignmentType ]
 
