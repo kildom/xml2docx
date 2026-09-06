@@ -120,19 +120,27 @@ function embedMainInner() {
     for (let file of args.inputFiles) {
         let data = fs.readFileSync(file === '-' ? 0 : file) as Uint8Array<ArrayBuffer>;
         let view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+        process.stderr.write(`${file}\n`);
         if (view.getUint16(0) == 0x504B) { // PK (docx document)
+            process.stderr.write(`        DOCX file (styles)\n`);
             embedStyles(data, true);
         } else if (view.getUint32(0) == 0x00010000 && data[4] == 0x00) { // TTF
+            process.stderr.write(`        TrueType font\n`);
             embedFont(file, data);
         } else if (view.getUint32(0) == 0x4F54544F || view.getUint32(0) == 0x74746366) { // OTF or TTC
+            process.stderr.write(`        OTF/TTC font\n`);
             embedFont(file, data);
         } else if (view.getUint32(0) == 0x89504E47 && view.getUint32(4) == 0x0D0A1A0A) { // PNG
+            process.stderr.write(`        PNG image\n`);
             embedImage(file, data, 'image/png');
         } else if ((view.getUint32(0) | 0xFF) == (0xFFD8FF00 | 0xFF)) { // JPEG
+            process.stderr.write(`        JPEG image\n`);
             embedImage(file, data, 'image/jpeg');
         } else if (view.getUint16(0) === 0x424D) { // BMP
+            process.stderr.write(`        BMP image\n`);
             embedImage(file, data, 'image/bmp');
         } else if (view.getUint32(0) === 0x47494638) { // GIF
+            process.stderr.write(`        GIF image\n`);
             embedImage(file, data, 'image/gif');
         } else {
             let text = new TextDecoder().decode(data.slice(0, 1024)).trimStart().toLowerCase();
@@ -140,8 +148,10 @@ function embedMainInner() {
                 let posSvg = text.indexOf('<svg') & 0x3FFFFFFF;
                 let posStyles = text.indexOf('<w:styles') & 0x3FFFFFFF;
                 if (posSvg < posStyles) {
+                    process.stderr.write(`        SVG image\n`);
                     embedImage(file, data, 'image/svg+xml');
                 } else if (posStyles < 0x20000000) {
+                    process.stderr.write(`        XML styles file\n`);
                     embedStyles(data, false);
                 } else {
                     throw new Error(`Unsupported file format: ${file}`);
@@ -202,6 +212,8 @@ function embedMainInner() {
     } else {
         fs.writeFileSync(args.outputFile, output);
     }
+
+    process.stderr.write(`Output file size: ${output.length} bytes\n\n`);
 }
 
 function embedStyles(data: Uint8Array, packed: boolean) {
@@ -217,6 +229,9 @@ function embedStyles(data: Uint8Array, packed: boolean) {
 
 function createDataURI(data: Uint8Array, type: string): string {
     let base64 = Buffer.from(data).toString('base64');
+    process.stderr.write(`        MIME Type: ${type}\n`);
+    process.stderr.write(`        Original size: ${data.length} bytes\n`);
+    process.stderr.write(`        Embedded size: ${base64.length} bytes\n`);
     return `data:${type};base64,${base64}`;
 }
 
@@ -228,6 +243,7 @@ function embedFont(name: string, data: Uint8Array) {
         name: m![1],
         uri: createDataURI(data, `font/${ext}`),
     });
+    process.stderr.write(`        Font name: ${m![1]}\n`);
 }
 
 function embedImage(file: string, data: Uint8Array<ArrayBuffer>, mime: string) {
@@ -238,5 +254,6 @@ function embedImage(file: string, data: Uint8Array<ArrayBuffer>, mime: string) {
         width: info?.width || 100,
         height: info?.height || 100,
     });
+    process.stderr.write(`        Image size: ${info?.width || '?'}x${info?.height || '?'} pixels\n`);
 }
 

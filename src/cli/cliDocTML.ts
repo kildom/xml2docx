@@ -21,6 +21,7 @@
 import * as fs from 'node:fs';
 import { DebugFileType, DocTMLError, generate, Options, Result } from '../doctml';
 import { embedMain } from './cliEmbed';
+import { stylesMain } from './cliStyles';
 import { printUsage } from './cliUsage';
 
 const USAGE = `
@@ -56,9 +57,11 @@ Options:                                                 $$
 
 ~-t <tool>~
 ~--tool <tool>~
-    Execute the specified tool. Currently only "embed" is supported.
+    Execute the specified tool. Following tools are available:
+    ~embed~    Embeds images, fonts and styles into DocTML files.
+    ~styles~   Shows styles defined in DOCX or XML styles file.
     For help on the tool, type:
-        doctml -t embed
+        doctml -t <tool-name>
 
 ~--help~
     Show this message.
@@ -260,6 +263,9 @@ async function main() {
     switch (toolName) {
     case 'embed':
         embedMain();
+        return;
+    case 'styles':
+        stylesMain();
         return;
     case 'doctml':
         break;
