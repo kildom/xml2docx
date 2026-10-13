@@ -38,7 +38,7 @@ export function parse(ctx: Context): Element {
 
     let parser = sax.parser(true, {
         trim: false,
-        normalize: true,
+        normalize: false,
         lowercase: true,
         xmlns: false,
         position: true,
@@ -85,6 +85,7 @@ export function parse(ctx: Context): Element {
     };
 
     parser.ontext = (t: string) => {
+        t = t.replace(/[\r\n\t ]+/g, ' ');
         let text: Element = {
             ctx,
             name: '#TEXT',
