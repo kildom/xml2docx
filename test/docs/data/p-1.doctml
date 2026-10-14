@@ -7,11 +7,12 @@
     p: Check if simple `<p>` tag generates correct paragraph.
     -->
 
-    <p>Lorem ipsum,</p>
+    <p>Lorem ipsum,</p><a
     <p>dolor sit amet.</p>
 
     <!--
     p.align: Check a few variants of paragraph alignment.
+    p: Check some attributes.
     -->
 
     <p align="left"><b>Left.</b></p>
@@ -66,12 +67,12 @@
 
     <p font.face="Arial" b.face="Courier New">Arial, <b>Bold Courier New<font face="Times New Roman">aaaaa</font></b>, <font face="Times New Roman">Times New Roman.</font></p>
 
-    <!-- TODO
+    <!--
     p: Table is not allowed inside `<p>`.
     ERROR: The <table> tag not expected here.
-    - - >
+    -->
 
-    <p><table><tr><td></td></tr></table></p> -->
+    <p><table><tr><td></td></tr></table></p>
 
     <!--
     END

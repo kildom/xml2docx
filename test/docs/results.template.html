@@ -1,0 +1,125 @@
+<%!
+let groupToId = new Map();
+let nextGroupId = 1;
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Test Results</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Rosarivo:ital@0;1&display=swap');
+
+        body {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            hyphens: none;
+            word-break: keep-all;
+        }
+
+        #content {
+            margin: 0px auto;
+            max-width: 1000px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Rosarivo", serif;
+            font-weight: bold;
+        }
+
+        code:not(.hljs) {
+            font-family: monospace;
+            font-size: 90%;
+            background-color: #f4f4f4;
+            border: 1px solid #e2e2e2;
+            border-radius: 2px;
+            padding: 1px 3px;
+        }
+
+        pre>code.hljs {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f4f4f4;
+            border: 1px solid #e2e2e2;
+            display: block;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .case-img {
+            border: 1px solid black;
+            padding: 10px;
+            background: #707070;
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: visible;
+        }
+
+        .case-img>img {
+            display: block;
+            margin: 0px auto;
+        }
+
+        .case-pdf {
+        }
+
+        .case-pdf>iframe {
+            display: block;
+            width: 100%;
+            height: 400px;
+        }
+
+        .case-html {
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: visible;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="content">
+
+    <%! let showGroup = function(group) {
+        let id = nextGroupId++;
+        groupToId.set(group, `test-group-${id}`);
+        if (group.error) return;
+        %>
+        <div class="tag-group" id="test-group-<% id %>">
+            <%! for (let testCase of group.cases) { %>
+                <div class="case-name">
+                    <% testCase.name %>
+                </div>
+                <div class="case-desc">
+                    <%= markdownToHtml(testCase.desc) %>
+                </div>
+            <%! } %>
+            <div class="case-img"><img src="rendered/<% group.stem %>.png"></div>
+            <div class="case-pdf"><iframe src="rendered/<% group.stem %>.pdf">PDF</iframe></div>
+            <div class="case-html"><%= markdownToHtml('```html\n' + fs.readFileSync('test/outputs/cur/rendered/' + group.stem + '.html', 'utf-8') + '\n```\n') %></div>
+            <!-- 
+            | PNG | PDF | WEB | HTML | DOCX | DocTML | X |
+            -->
+        </div>
+    <%! } %>
+
+    <%! for (let tag of tags) { %>
+        <h1><% tag.name %></h1>
+        <div class="tag-brief"><%= markdownToHtml(tag.brief) %></div>
+        <%! for (let group of tag.testGroups) { %>
+            <%! if (groupToId.has(group)) { %>
+                ...
+            <%! } else { showGroup(group); } %>
+        <%! } %>
+        <%! for (let attr of Object.values(tag.attributes)) { %>
+            <h2><% attr.name %></h2>
+            <div class="attr-brief"><%= markdownToHtml(attr.brief) %></div>
+        <%! } %>
+    <%! } %>
+
+    </div>
+</body>
+</html>

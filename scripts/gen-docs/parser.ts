@@ -24,7 +24,6 @@ export interface AttributeDocs {
     required: boolean | string;
     brief: string;
     details: string;
-    testCases: string[];
 }
 
 export interface TagDocs {
@@ -39,7 +38,6 @@ export interface TagDocs {
     brief: string;
     details: string;
     attributes: Record<string, AttributeDocs>;
-    testCases: string[];
 }
 
 export interface PageDocs {
@@ -64,7 +62,6 @@ interface AttributeYaml {
     brief?: string;
     details?: string;
     type?: string;
-    TC?: string[];
 }
 
 interface TypeYaml extends AttributeYaml {
@@ -80,7 +77,6 @@ interface TagYaml {
     brief?: string;
     details?: string;
     attributes?: Record<string, AttributeYaml>;
-    TC?: string[];
 }
 
 interface GroupYaml {
@@ -202,7 +198,6 @@ function getTag(name: string, optional?: boolean): TagDocs | undefined {
         attributes: {},
         brief: '',
         details: '',
-        testCases: [],
     };
 
     tags[name] = tagDocs;
@@ -229,7 +224,6 @@ function getTag(name: string, optional?: boolean): TagDocs | undefined {
         attributes,
         brief: tagYaml.brief || '',
         details: tagYaml.details || '',
-        testCases: tagYaml.TC || [],
     });
 
     return tagDocs;
@@ -267,7 +261,6 @@ function combineTagDocs(tagDocs: TagDocs, combined: TagDocs) {
     for (let [attrName, attr] of Object.entries(combined.attributes)) {
         tagDocs.attributes[attrName] = attr;
     }
-    tagDocs.testCases.push(...combined.testCases);
     if (combined.brief) {
         tagDocs.brief = (tagDocs.brief + ' ' + combined.brief).trim();
     }
@@ -325,7 +318,6 @@ function convertAttribute(attrName: string, attr: AttributeYaml): AttributeDocs 
         required: attr.required || false,
         brief: attr.brief || '',
         details: attr.details || '',
-        testCases: attr.TC || []
     };
     if (attr.type) {
         let type = yamlElements.find(x => 'type-name' in x && x['type-name'] === attr.type);

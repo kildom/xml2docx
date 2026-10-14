@@ -1,0 +1,9 @@
+<!--
+document: Hello World!!!
+-->
+
+<document>
+  <p>
+    Hello <b>World</b>!!!
+  </p>
+</document>
