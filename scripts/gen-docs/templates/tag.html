@@ -51,6 +51,9 @@ let baseTag = tag.aliasOf?.tag || tag;
             <div class="tag-details">
                 <%= markdown(tag.details) %>
             </div>
+            <%! if (tag.dev) { %>
+            <%= devAlert(tag.dev) %>
+            <%! } %>
 
             <%! if (!tag.aliasOf && (tag.allParents.length + tag.allChildren.length) > 0) { %>
             <div class="collapsed">
@@ -130,7 +133,7 @@ let baseTag = tag.aliasOf?.tag || tag;
 
     <div class="tag-attributes">
         <%! for (let attr of Object.values(tag.attributes)) { %>
-            <div class="attr-container <%= attr.details || attr.examples.length ? 'collapsed' : 'non-expandable' %>">
+            <div class="attr-container <%= attr.details || attr.examples.length || (devMode && attr.dev) ? 'collapsed' : 'non-expandable' %>">
                 <div class="archon" id="attr-<% attr.name %>"></div>
                 <h2 class="attr-header" onclick="js.toggleExpand(this, true)">
                     <div class="expand-marker"></div><span
@@ -145,9 +148,12 @@ let baseTag = tag.aliasOf?.tag || tag;
                 <div class="attr-brief">
                     <%= markdown(attr.brief, false) || "&nbsp;" %>
                 </div>
-                <%! if (attr.details) { %>
+                <%! if (attr.details || (devMode && attr.dev)) { %>
                 <div class="attr-details">
                     <%= markdown(attr.details) %>
+                    <%! if (attr.dev) { %>
+                    <%= devAlert(attr.dev) %>
+                    <%! } %>
                 </div>
                 <%! } %>
                     

@@ -21,6 +21,7 @@ const ExampleOptionsSchema = z.object({
     'prefix': z.string().optional(),
     'suffix': z.string().optional(),
     'data': z.unknown().optional(),
+    'fullPage': z.boolean().optional(),
 }).strict();
 
 const ExampleSchema = z.object({
@@ -36,7 +37,7 @@ const AttributeSchema = z.object({
     'brief': z.string().optional(),
     'details': z.string().optional(),
     'type': z.string().optional(),
-    'docx-js': z.string().optional(),
+    'dev': z.string().optional(),
     'experimental': z.boolean().optional(),
     'examples': z.array(ExampleSchema).optional(),
     'validation': z.string().optional(),
@@ -59,8 +60,7 @@ const TagSchema = z.object({
     'custom-page': z.string().optional(),
     'alias-of': z.string().optional(),
     'alias-text': z.string().optional(),
-    'docx-js': z.string().optional(),
-    'unused-docx-js': z.array(z.string()).optional(),
+    'dev': z.string().optional(),
     'examples': z.array(ExampleSchema).optional(),
 }).strict();
 

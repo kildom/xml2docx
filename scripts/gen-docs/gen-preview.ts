@@ -14,12 +14,12 @@ const outPath = 'dist/html/preview';
 const includePath = 'test/docs/data/include';
 const cliPath = 'dist/deno-compile/x64-linux/doctml'; // TODO: Depends on the platform, should be configurable
 
-interface PreviewArgs {
+export interface PreviewArgs {
     noPreview?: boolean;
     prefix?: string;
     suffix?: string;
     data?: any;
-    // TODO: Full page preview (disable cropping) to show examples where entire page is important.
+    fullPage?: boolean;
 };
 
 

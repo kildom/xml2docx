@@ -8,6 +8,7 @@ import { markdownToHtml } from "./markdown";
 import { compileTemplate } from "./template";
 import { asyncRetryLoop } from "./async-jobs";
 import { runCli } from "../utils";
+import { isDevMode, setDevMode } from "./dev";
 
 /*
 
@@ -50,6 +51,8 @@ function stripHtmlTags<T>(text: T): T {
 
 async function main() {
 
+    setDevMode(process.argv[2] === 'dev');
+
     // Load the docs data from files
     let docs = parseDocs();
 
@@ -86,6 +89,7 @@ async function main() {
         templateData(ctx, tag, attribute, page, enumObj) {
             return {
                 agents: false,
+                dev: isDevMode(),
             }
         },
     });
@@ -108,7 +112,11 @@ async function main() {
 }
 
 function prepareTemplateData(obj: Record<string, any>) {
+    obj.devMode = isDevMode();
     obj.markdown = markdownToHtml;
+    obj.devAlert = (text: string) => markdownToHtml(
+        `> [!DEV]\n${text.split(/\r?\n/).map(line => `> ${line}`).join('\n')}`
+    );
     obj.exampleCode = (example: { code: string; options?: object }) => {
         let options = example.options ? ` ${JSON.stringify(example.options)}` : '';
         return markdownToHtml(`\`\`\`xml${options}\n${example.code}\n\`\`\`\n`);

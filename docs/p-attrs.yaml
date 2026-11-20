@@ -1,12 +1,17 @@
 
 - tag-name: -IParagraphPropertiesOptions-
   combine: [ -IParagraphStylePropertiesOptions- ]
-  docx-js: docx.IParagraphPropertiesOptions
+  dev: |
+    Uses docx.js interface `docx.IParagraphPropertiesOptions`.
+
+    Not exposed by DocTML:
+    - `frame`
+    - `run`
   attributes:
     page-break:
       type: bool
       brief: Page break before paragraph.
-      docx-js: "pageBreakBefore?: boolean"
+      dev: 'Underlying docx.js property: `pageBreakBefore?: boolean`.'
     heading:
       value: level
       brief: Heading level.
@@ -17,8 +22,8 @@
     style:
       type: str
       brief: Paragraph style name.
-      details: Defined by the `<p-style>` tag.
-      docx-js: "style?: string"
+      details: Defined by the `<p-style>` tag or imported by `<document styles="..."`.
+      dev: 'Underlying docx.js property: `style?: string`.'
     tabs:
       value: position type leader, ...
       brief: Tabulator stops.
@@ -28,43 +33,40 @@
             @enum TabStopType
         - **leader** @optional - Tabulator stop leader. Default is `none`.
             @enum LeaderType
-      docx-js: "tabStops?: readonly TabStopDefinition[]"
+      dev: 'Underlying docx.js property: `tabStops?: readonly TabStopDefinition[]`.'
     widow-control:
       type: bool
       brief: Paragraph widow control.
-      docx-js: "widowControl?: boolean"
+      dev: 'Underlying docx.js property: `widowControl?: boolean`.'
     word-wrap:
       type: bool
       brief: Word wrapping.
-      docx-js: "wordWrap?: boolean"
+      dev: 'Underlying docx.js property: `wordWrap?: boolean`.'
     # Experimental attributes
     auto-space-east-asian-text:
       experimental: true
       type: bool
-      docx-js: "autoSpaceEastAsianText?: boolean"
+      dev: 'Underlying docx.js property: `autoSpaceEastAsianText?: boolean`.'
     bidirectional:
       experimental: true
       type: bool
-      docx-js: "bidirectional?: boolean"
+      dev: 'Underlying docx.js property: `bidirectional?: boolean`.'
     bullet-level:
       experimental: true
       type: int
-      docx-js: "bullet?: { level: number }"
+      dev: 'Underlying docx.js property: `bullet?: { level: number }`.'
     overflow-punctuation:
       experimental: true
       type: bool
-      docx-js: "overflowPunctuation?: boolean"
+      dev: 'Underlying docx.js property: `overflowPunctuation?: boolean`.'
     scale:
       experimental: true
       type: float
-      docx-js: "scale?: number"
+      dev: 'Underlying docx.js property: `scale?: number`.'
     suppress-line-numbers:
       experimental: true
       type: bool
-      docx-js: "suppressLineNumbers?: boolean"
-  unused-docx-js:
-    - frame
-    - run
+      dev: 'Underlying docx.js property: `suppressLineNumbers?: boolean`.'
 
 
 - tag-name: -IParagraphStylePropertiesOptions-
@@ -73,13 +75,14 @@
     border:
       type: border
       brief: Paragraph borders.
-      docx-js: "border?: IBordersOptions"
+      dev: 'Underlying docx.js property: `border?: IBordersOptions`.'
     background:
       type: color
       brief: Paragraph background color.
-      docx-js: "shading?: IShadingAttributesProperties"
-  unused-docx-js:
-    - numbering
+      dev: 'Underlying docx.js property: `shading?: IShadingAttributesProperties`.'
+  dev: |
+    Not exposed by DocTML:
+    - `numbering`
 
 
 - tag-name: -ILevelParagraphStylePropertiesOptions-
@@ -92,7 +95,7 @@
         <# enumerator('enums.AlignmentTypeAliases', {
             collapse: '`left`, `right`, `center`, `justify`, and more...',
           }) #>
-      docx-js: "alignment?: typeof AlignmentType[keyof typeof AlignmentType]"
+      dev: 'Underlying docx.js property: `alignment?: typeof AlignmentType[keyof typeof AlignmentType]`.'
       examples:
         - brief: align="right"
           details: |
@@ -122,18 +125,18 @@
     keep-lines:
       type: bool
       brief: Keep all lines on a single page if possible.
-      docx-js: "keepLines?: boolean"
+      dev: 'Underlying docx.js property: `keepLines?: boolean`.'
     keep-next:
       type: bool
       brief: Keep next paragraph on the same page if possible.
-      docx-js: "keepNext?: boolean"
+      dev: 'Underlying docx.js property: `keepNext?: boolean`.'
     outline:
       type: uint
       brief: Outline level.
       details: |
         Possible values are numbers from `1` to `9`.
         By default, paragraph is not in the document outline.
-      docx-js: "outlineLevel?: number"
+      dev: 'Underlying docx.js property: `outlineLevel?: number`.'
     spacing:
       value: before after
       brief: Paragraph spacing.
@@ -167,19 +170,20 @@
             <p line-spacing="exactly 3mm">
               <# lorem({ length: 400, seed: 1054, wordWrap: 77, lineBreak: '\n  ' }) #>
             </p>
-      docx-js: "spacing?: ISpacingProperties"
+      dev: 'Underlying docx.js property: `spacing?: ISpacingProperties`.'
     # Experimental attributes
     contextual-spacing:
       experimental: true
       type: bool
-      docx-js: "contextualSpacing?: boolean"
+      dev: 'Underlying docx.js property: `contextualSpacing?: boolean`.'
     thematic-break:
       experimental: true
       type: bool
-      docx-js: "thematicBreak?: boolean"
-  unused-docx-js:
-    - leftTabStop
-    - rightTabStop
+      dev: 'Underlying docx.js property: `thematicBreak?: boolean`.'
+  dev: |
+    Not exposed by DocTML:
+    - `leftTabStop`
+    - `rightTabStop`
 
 
 - enum-name: ParagraphAlignment

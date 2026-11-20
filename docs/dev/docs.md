@@ -29,7 +29,7 @@ Start an alert with a quoted marker line, `> [!TYPE]`, then put the alert text o
 > Useful information that users should know, even when skimming content.
 ```
 
-The accepted types are `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, and `CAUTION`. Use alerts sparingly for important information; GitHub recommends no more than one or two per article. Alerts cannot be nested, and consecutive alerts should be avoided. See [GitHub’s alert syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
+The accepted types are `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`, and `DEV`. A `DEV` alert is for internal developer notes and is visible only when the documentation is generated in `dev` mode; it is omitted from the regular documentation. Use other alerts sparingly for important information; GitHub recommends no more than one or two per article. Alerts cannot be nested, and consecutive alerts should be avoided. See [GitHub’s alert syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 
 ### Light/dark image variants
 
@@ -95,7 +95,7 @@ Documentation text (Markdown pages, tag/attribute descriptions, aliases, example
 
 For example, **&lt;# enumerator('docx.AlignmentType', { oneLine: true }) #&gt;** inserts a compact list of supported alignments without duplicating the values in prose.
 
-The current item and parsed docs are available through `ctx` (`ctx.docs`, `ctx.tag`, `ctx.attribute`, `ctx.page`, or `ctx.enumerator`, depending on the content being processed). The per-build `data` object is also available; the HTML build currently sets `data.agents` to `false`. `lorem(options)` generates sample text, and `enumerator(name, options)` renders an enum as a list. The `enumerator` options are `indent`, `oneLine`, and `collapse`; `collapse` wraps the output in an HTML `<details>` block with the supplied summary. Template code is not escaped: use it only in trusted documentation, and use Markdown-safe output.
+The current item and parsed docs are available through `ctx` (`ctx.docs`, `ctx.tag`, `ctx.attribute`, `ctx.page`, or `ctx.enumerator`, depending on the content being processed). The per-build `data` object is also available; the HTML build sets `data.agents` to `false` and `data.dev` according to whether developer mode is enabled. Use `data.dev` to conditionally render developer-only template content. `lorem(options)` generates sample text, and `enumerator(name, options)` renders an enum as a list. The `enumerator` options are `indent`, `oneLine`, and `collapse`; `collapse` wraps the output in an HTML `<details>` block with the supplied summary. Template code is not escaped: use it only in trusted documentation, and use Markdown-safe output.
 
 Example code is templated too, but its code is not processed for Markdown links or auto-references. Keep template markers out of code unless you deliberately want them evaluated.
 

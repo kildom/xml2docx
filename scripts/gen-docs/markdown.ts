@@ -5,7 +5,8 @@ import JSON5 from 'json5';
 import showdown from 'showdown';
 import showdownHighlight from 'showdown-highlight';
 import { asyncJob, jobPostponed, JobPostponed } from './async-jobs';
-import { DocumentMetrics, generatePreview } from './gen-preview';
+import { DocumentMetrics, generatePreview, PreviewArgs } from './gen-preview';
+import { isDevMode } from './dev';
 
 let pluginsRegistered = false;
 
@@ -62,9 +63,12 @@ function registerPlugins() {
     showdown.extension('gitHubAlerts', function () {
         let ext1 = {
             type: 'lang',
-            regex: /(?<!(?:^|\n)\s*>[^\n]*\r?\n)(?<=^|\n)(?<prefix>[ \t]*>)(?<type>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*)(?<text>(?:\r?\n\k<prefix>.*?(?=\r?\n|$))+)/gsi,
+            regex: /(?<!(?:^|\n)\s*>[^\n]*\r?\n)(?<=^|\n)(?<prefix>[ \t]*>)(?<type>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION|DEV)\][ \t]*)(?<text>(?:\r?\n\k<prefix>.*?(?=\r?\n|$))+)/gsi,
             replace: (m0, prefix, type, text) => {
                 let className = type.replace(/[^a-z]+/gi, '').toLowerCase();
+                if (className === 'dev' && !isDevMode()) {
+                    return '';
+                }
                 let title = className.substring(0, 1).toUpperCase() + className.substring(1);
                 let res = `${prefix}<div class="--gitHubAlert-begin-${className}">${title}</div>${text}\n`
                     + `${prefix}<div class="--gitHubAlert-end"></div>\n`;
@@ -141,12 +145,30 @@ function registerPlugins() {
     });
 
     showdown.extension('doctmlCode', function () {
+        function toBase64(value: unknown): string {
+            const json = JSON.stringify(value);
+            const bytes = new TextEncoder().encode(json);
+
+            let binary = "";
+            bytes.forEach(byte => {
+                binary += String.fromCharCode(byte);
+            });
+
+            return btoa(binary);
+        }
+        function fromBase64<T = unknown>(base64: string): T {
+            const binary = atob(base64);
+            const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+
+            const json = new TextDecoder().decode(bytes);
+            return JSON.parse(json) as T;
+        }
         // ```xml
         let ext1 = {
             type: 'lang',
             regex: /(?:^|(?<=\n))(```xml)(.*?)(\r?\n)([\s\S]*?)(\r?\n```)(?:(?=\r?\n)|$)/g,
             replace: (m0: string, start: string, argsText: string, nl1: string, code: string, end: string) => {
-                let args = argsText.trim() ? JSON5.parse(argsText) : {};
+                let args = (argsText.trim() ? JSON5.parse(argsText) : {}) as PreviewArgs;
                 if (args.noPreview) {
                     return [start, nl1, code, end].join('');
                 }
@@ -157,7 +179,7 @@ function registerPlugins() {
                     return [start, nl1, code, end].join('');
                 }
                 console.log("doctml code block found:", hash, code, args);
-                return `${start}${nl1}${code}${end}\n\`\`\`\nHerEGoEsAPreVIewoFtHecODEaboVe_${hash}\n\`\`\``;
+                return `${start}${nl1}${code}${end}\n\`\`\`plaintext\nHerEGoEsAPreVIewoFtHecODEaboVe_${hash}:${toBase64(args)}:\n\`\`\``;
             }
         };
         let ext2 = {
@@ -176,12 +198,16 @@ function registerPlugins() {
                     lazy-repeat any
                     "HerEGoEsAPreVIewoFtHecODEaboVe_"
                     2: repeat [a-z]
+                    ":"
+                    3: lazy-repeat any
+                    ":"
                     lazy-repeat any
                     "</pre>"
                 }
-                `, // https://kildom.github.io/qre-web-demo/#2xVVNT8MwDOWcX1HltsOY4Lh1kZAobCdASLtME0uCS9c2S5UM9oH47zjNuom2wGlaDz04ju3n5xdLbH23MPCxgPWlSu0FwcEZexqf3rH3TuwIygSoeAPWIjhL6jw7mumAEC8utJZc7xmuSCV1rV71g08nWNhwVaC+HOOByLXMGq7uoyEWQNuPGHWCOXaz1Svnuy1y5Slfbn9J0sMsrJnmq2HZR/ojaYlO8beFRNbOD20EJrrXkb15NDAZw1rfrUYgH24jLvQEXtrzX/croFPe3c1O0dj5YXKcgHF25oS4hqAYV2ZIN5SF5WhI3C52SCl71spPS9hzf+ZDl3e8K/sHKldpkmVxkr8WaVIIEHnGOV6UPF7GIol/xj0UWO2RKb6DrtTjZjLQmXVqXmgbkG8=
-            replace: (m0: string, codeHTML: string, hash: string) => {
-                
+                `, // https://kildom.github.io/qre-web-demo/#2xVU7T8MwEGb2r6i8dSgVKZObWEIi0E6AkLpUFXXMhTSPJrILfSD+O+e4aUWSAhIDHjyc7/3d55PY+l6h4G0B6/Ms1mcEB2dsYXx4xd4bsmNRqoOMV6A1FqdJHWcDMx0SYsmF0hLrPcIVqKTO1QvWeTeEhY3ICuSXQbwTpLlMGqrmUBcToO1PnBrCHLvZqpWK3RaxspAvtyeC9DEKb4b5aEj2nr4JWlaXiZeFRNT+v7QRKP829/XVvYLJGNb5zWoE8u7aF0E+gaf2+A6rCp2K3m7W7pm12w7Y7xI7Yf5HvOaHgTT/Ao7knBDTZ+T4Snl0Q7lbTpzEpaU9SvljntkhdPvm5tZ1aWNV+Q8dFFkcJUkYpc9FHBUBBGkiBBpKES7DIAqZczlwPPbV/SHPaktN8Zc1GR/3noLurFvTQtmQfAI=
+            replace: (m0: string, codeHTML: string, hash: string, argsEncoded: string) => {
+
+                let args = fromBase64<PreviewArgs>(argsEncoded);
                 let doc: DocumentMetrics | JobPostponed;
                 doc = asyncJob(`doctml-preview-${hash}`);
                 if (doc === jobPostponed) {
@@ -190,16 +216,16 @@ function registerPlugins() {
                 let images = '';
                 for (let page of doc.pages) {
                     let width = Math.round(page.pixelWidth / doc.pngWidth * 95);
-                    images += `<div class="doctml-preview-img"><img src="preview/${page.svgCroppedName}" style="width: ${width}%"/></div>`;
+                    images += `<div class="doctml-preview-img"><img src="preview/${args.fullPage ? page.svgName : page.svgCroppedName}" style="width: ${width}%"/></div>`;
                 }
                 return `
                     <div class="doctml-preview-group">
                         ${codeHTML}
                         <div class="doctml-preview-panel">${images}</div>
                     </div>`;
-                    // TODO: Add controls to preview PDF and download DOCX
-                    // click on page shows dialog with PDF iframe preview
-                    // button on that dialog to download the DOCX
+                // TODO: Add controls to preview PDF and download DOCX
+                // click on page shows dialog with PDF iframe preview
+                // button on that dialog to download the DOCX
             }
         };
         return [ext1, ext2];

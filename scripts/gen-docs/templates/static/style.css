@@ -679,3 +679,110 @@ tbody tr:last-child td {
     border: 0;
     text-decoration: none;
 }
+
+
+/* TODO: Apply theme to following styles */
+
+blockquote:has(> div.gitHubAlert-note:first-child),
+blockquote:has(> div.gitHubAlert-tip:first-child),
+blockquote:has(> div.gitHubAlert-important:first-child),
+blockquote:has(> div.gitHubAlert-warning:first-child),
+blockquote:has(> div.gitHubAlert-caution:first-child),
+blockquote:has(> div.gitHubAlert-dev:first-child)
+{
+    padding: 0px;
+    border-radius: 0.3em;
+    margin: 0.5em 0px 1em;
+}
+
+blockquote:has(> div.gitHubAlert-note:first-child)
+{
+    border-left: 0.3em solid #0969da;
+    background-color: #f1f7ff;
+}
+
+blockquote:has(> div.gitHubAlert-tip:first-child)
+{
+    border-left: 0.3em solid #1a7f37;
+    background-color: #edfff2;
+}
+
+blockquote:has(> div.gitHubAlert-important:first-child)
+{
+    border-left: 0.3em solid #8250df;
+    background-color: #f5efff;
+}
+
+blockquote:has(> div.gitHubAlert-warning:first-child)
+{
+    border-left: 0.3em solid #9a6700;
+    background-color: #fffbf4;
+}
+
+blockquote:has(> div.gitHubAlert-caution:first-child)
+{
+    border-left: 0.3em solid #cf222e;
+    background-color: #fff3f4;
+}
+
+blockquote:has(> div.gitHubAlert-dev:first-child)
+{
+    border-left: 0.3em solid #18a6ae;
+    background-color: #eafeff;
+}
+
+
+div.gitHubAlert-note div.gitHubAlert-title
+{
+    color: #0969da;
+}
+
+div.gitHubAlert-tip div.gitHubAlert-title
+{
+    color: #1a7f37;
+}
+
+div.gitHubAlert-important div.gitHubAlert-title
+{
+    color: #8250df;
+}
+
+div.gitHubAlert-warning div.gitHubAlert-title
+{
+    color: #9a6700;
+}
+
+div.gitHubAlert-caution div.gitHubAlert-title
+{
+    color: #cf222e;
+}
+
+div.gitHubAlert-dev div.gitHubAlert-title
+{
+    color: #18a6ae;
+}
+
+div.gitHubAlert-note,
+div.gitHubAlert-tip,
+div.gitHubAlert-important,
+div.gitHubAlert-warning,
+div.gitHubAlert-caution,
+div.gitHubAlert-dev
+{
+    margin: 0px;
+    padding: 0.8em 1em 0.2em;
+}
+
+div.gitHubAlert-title,
+div.gitHubAlert-text
+{
+    margin: 0px;
+    padding: 0px;
+}
+
+div.gitHubAlert-title
+{
+    font-size: 115%;
+    font-weight: bold;
+    margin-left: 1em;
+}

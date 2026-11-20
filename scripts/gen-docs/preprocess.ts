@@ -182,6 +182,7 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
         templateData.data = templateData.ctx.options.templateData!(templateData.ctx, tag);
         tag.brief = preprocessMarkdown(templateData, tag.brief);
         tag.details = preprocessMarkdown(templateData, tag.details);
+        tag.dev = preprocessMarkdown(templateData, tag.dev);
         if (tag.aliasOf) {
             tag.aliasOf.text = preprocessMarkdown(templateData, tag.aliasOf.text);
         }
@@ -191,6 +192,7 @@ export function preprocessDocs(docs: Docs, options: PreprocessOptions = {}): voi
             templateData.data = templateData.ctx.options.templateData!(templateData.ctx, tag, attribute);
             attribute.brief = preprocessMarkdown(templateData, attribute.brief);
             attribute.details = preprocessMarkdown(templateData, attribute.details);
+            attribute.dev = preprocessMarkdown(templateData, attribute.dev);
             attribute.validation = preprocessMarkdown(templateData, attribute.validation);
             attribute.value = preprocessMarkdown(templateData, attribute.value);
             preprocessExamples(templateData, attribute.examples);

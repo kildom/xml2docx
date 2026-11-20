@@ -30,6 +30,7 @@ export interface DocsAttribute {
     required: boolean;
     brief: string;
     details: string;
+    dev: string;
     experimental: boolean;
     examples: DocsExample[];
     validation: string;
@@ -48,6 +49,7 @@ export interface DocsTag {
     allParents: DocsTag[];         ///< List of all parent tags also available over implicit wrapper tag
     brief: string;                 ///< Brief description
     details: string;               ///< Detailed description (custom page content if customPage is true)
+    dev: string;                   ///< Developer-only notes
     attributes: Record<string, DocsAttribute>;   ///< Tag attributes
     customPage: boolean;           ///< If true, this tag shows a custom page instead of generated content
     aliasOf?: {                    ///< This tag is an alias of another tag
@@ -193,6 +195,7 @@ export function parseDocs(): Docs {
             name: attrName,
             brief: attrYaml.brief || '',
             details: attrYaml.details || '',
+            dev: attrYaml.dev || '',
             value: attrYaml.value || '',
             required: !!attrYaml.required,
             examples: parseExamples(attrYaml.examples),
@@ -230,6 +233,7 @@ export function parseDocs(): Docs {
             allParents: [],
             brief: tagYaml.brief || '',
             details: tagYaml['custom-page'] || tagYaml.details || '',
+            dev: tagYaml.dev || '',
             attributes: {},
             customPage: tagYaml['custom-page'] ? true : false,
             examples: [],

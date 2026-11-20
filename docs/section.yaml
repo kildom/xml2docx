@@ -9,12 +9,14 @@
       brief: Page borders.
       examples:
         - brief: Simple border 10mm from content
+          options: { fullPage: true }
           code: |
             <document>
               <section border="0.5mm 10mm"/>
               <p>Page with simple border.</p>
             </document>
         - brief: Different border vertical and horizontal
+          options: { fullPage: true }
           code: |
             <document>
               <section border="0.5mm 10mm, 2mm 10mm"/>
@@ -28,6 +30,7 @@
         Not needed if `size=""` attribute is set.
       examples:
         - brief: Custom paper size
+          options: { fullPage: true }
           code: |
             <document>
               <section width="10cm" height="10cm"/>
@@ -54,12 +57,14 @@
         - `DL` `DLEnvelope` `C6C5` `C7C6`
       examples:
         - brief: A6 paper format
+          options: { fullPage: true }
           code: |
             <document>
               <section size="A6"/>
               <p>This section is A6 paper format.</p>
             </document>
         - brief: Multiple paper formats
+          options: { fullPage: true }
           code: |
             <document>
               <section size="Letter"/>

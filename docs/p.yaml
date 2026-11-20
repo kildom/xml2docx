@@ -28,10 +28,15 @@
       options: # TODO: multiple tags at top-level should be possible, so this should not be needed.
         prefix: '<document>'
         suffix: '</document>'
-  docx-js: https://docx.js.org/api/types/IParagraphOptions.html
-  unused-docx-js:
-    - children
-    - text
+  dev: |
+    docx.js API reference: https://docx.js.org/api/types/IParagraphOptions.html
+    Uses docx.js interface `docx.IParagraphPropertiesOptions`.
+
+    Not exposed by DocTML:
+    - `children`
+    - `text`
+    - `frame`
+    - `run`
 
 
 - tag-name: h1

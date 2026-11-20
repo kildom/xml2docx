@@ -43,9 +43,9 @@ A basic tag entry looks like this:
 - `implicit` names a tag that is implicitly wrapped around the content. It is also treated as a child. Both `children` and `implicit` must reference existing tags or groups as applicable.
 - `attributes` is a map from attribute name to an attribute definition (see below).
 - `examples` is a list of tag examples (see [Examples](#examples)).
+- `dev` is an optional Markdown comment for DocTML developers. It appears as a DEV alert on the generated tag page only in developer mode; it is omitted from the regular documentation.
 - `combine` merges one or more other tag definitions into this tag. Attributes merge by key, and later definitions override earlier fields. It is commonly used for shared attribute sets and local overrides.
 - `custom-page` supplies the Markdown content for a custom tag page. It replaces the normal generated tag summary/attribute reference layout; use it for entries that need a hand-written page rather than the standard tag reference.
-- `docx-js` and `unused-docx-js` are accepted metadata fields, but they are not displayed on the generated tag page.
 
 ### Writing the description fields
 
@@ -64,7 +64,7 @@ Each attribute is a mapping under `attributes`. Common supported fields are:
 - `required`: `true` to mark it required; `false` or omission means not required. A string is also accepted as a truthy required marker. Put conditional wording in `details` or `brief`, because the generated badge itself is simply “Required”.
 - `experimental`: `true` displays an Experimental badge.
 - `validation`: Markdown validation text, including templates if needed.
-- `docx-js`: accepted mapping metadata; it does not replace the user-facing `brief` or `details`.
+- `dev`: optional Markdown comment for DocTML developers. It appears as a DEV alert on the generated attribute page only in developer mode; it is omitted from regular documentation.
 - `examples`: examples specific to this attribute.
 
 Reusable types use the same attribute fields, with `type-name` as their identifier. Types may inherit from another type using `type`. Define them at the top level:
