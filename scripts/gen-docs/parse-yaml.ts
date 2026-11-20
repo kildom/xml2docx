@@ -16,10 +16,18 @@ modifications. It only adds "location" property to all top-level items.
 const DOCS_DIR = 'docs';
 const DEV_DOCS_SUB_DIR = 'dev';
 
+const ExampleOptionsSchema = z.object({
+    'noPreview': z.boolean().optional(),
+    'prefix': z.string().optional(),
+    'suffix': z.string().optional(),
+    'data': z.unknown().optional(),
+}).strict();
+
 const ExampleSchema = z.object({
     'brief': z.string(),
     'details': z.string().optional(),
     'code': z.string(),
+    'options': ExampleOptionsSchema.optional(),
 }).strict();
 
 const AttributeSchema = z.object({

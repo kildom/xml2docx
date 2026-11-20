@@ -108,12 +108,14 @@ For a tag or attribute, add examples in its YAML definition. Each item requires 
   brief: A short summary.
   examples:
     - brief: Basic use
-      details: The surrounding root is supplied by the preview options.
+      options:
+        prefix: '<document>'
+        suffix: '</document>'
       code: |
         <p>Hello from the example.</p>
 ```
 
-For attributes, place the `examples` list under the attribute key. Prefer literal YAML block scalars (`|`) for multiline DocTML. A fence option such as `prefix` can add required wrapping DocTML while leaving the example focused. To disable rendering for a Markdown DocTML code block, set `noPreview: true` in its fence options.
+For attributes, place the `examples` list under the attribute key. Prefer literal YAML block scalars (`|`) for multiline DocTML. The optional `options` mapping on a YAML example accepts `prefix`, `suffix`, `data`, and `noPreview`, with the same behavior as the JSON5 options after a Markdown `xml` fence. Use `prefix` and `suffix` to add required wrapping DocTML while keeping the displayed example focused. Set `noPreview: true` to display the code without generating a preview.
 
 A preview is generated automatically for every XML-labelled fenced block unless disabled. Examples within YAML are displayed as XML fenced blocks and get the same preview behavior. Check that the finished example is valid and that it does not rely on undocumented local files.
 

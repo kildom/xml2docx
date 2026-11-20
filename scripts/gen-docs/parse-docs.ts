@@ -19,6 +19,7 @@ export interface DocsExample {
     brief: string;                 ///< Example title
     details: string;               ///< Example details
     code: string;                  ///< Example code
+    options?: YamlExample['options'];
 }
 
 export interface DocsAttribute {
@@ -135,6 +136,7 @@ export function parseDocs(): Docs {
                 brief: example.brief,
                 details: example.details || '',
                 code: example.code,
+                options: example.options,
             });
         }
 

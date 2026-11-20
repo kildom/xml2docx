@@ -127,13 +127,16 @@ A group can be referenced by a tag’s `children` list or by another group’s `
 
 ## Examples
 
-Examples are attached to a tag or an attribute. Each example requires `brief` and `code`; `details` is optional and supports Markdown:
+Examples are attached to a tag or an attribute. Each example requires `brief` and `code`; `details` is optional and supports Markdown. The optional `options` mapping is passed to the XML code-block renderer:
 
 ```yaml
 - tag-name: p
   examples:
     - brief: Centered paragraph
       details: The `align` attribute controls paragraph alignment.
+      options:
+        prefix: '<document>'
+        suffix: '</document>'
       code: |
         <p align="center">Hello.</p>
   attributes:
@@ -144,7 +147,7 @@ Examples are attached to a tag or an attribute. Each example requires `brief` an
           code: <p align="right">Text.</p>
 ```
 
-Write multiline DocTML as a literal block (`|`). The generated page displays the code as XML and tries to render a document preview. Examples are processed for documentation templates; the XML code itself is not transformed as Markdown. If the code needs root-level wrapping, consider using an XML code fence with `prefix`/`suffix` on a Markdown page. See [Adding examples](../dev/docs.md#adding-examples).
+Write multiline DocTML as a literal block (`|`). The generated page displays the code as XML and tries to render a document preview. `options` accepts the same keys as the JSON5 object after an `xml` fence: `prefix` and `suffix` wrap the example code for preview generation, `data` supplies renderer data, and `noPreview: true` disables preview generation while keeping the code block. The options are serialized into the generated XML fence, so the visible code remains just `code`. Examples are processed for documentation templates; the XML code itself is not transformed as Markdown. See [Adding examples](../dev/docs.md#adding-examples).
 
 ## Enumerations
 

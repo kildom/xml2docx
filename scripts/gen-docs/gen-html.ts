@@ -109,6 +109,10 @@ async function main() {
 
 function prepareTemplateData(obj: Record<string, any>) {
     obj.markdown = markdownToHtml;
+    obj.exampleCode = (example: { code: string; options?: object }) => {
+        let options = example.options ? ` ${JSON.stringify(example.options)}` : '';
+        return markdownToHtml(`\`\`\`xml${options}\n${example.code}\n\`\`\`\n`);
+    };
     obj.include = (filePath: string) => {
         let source = fs.readFileSync(`scripts/gen-docs/templates/${filePath}`, 'utf-8');
         let template = compileTemplate(source);

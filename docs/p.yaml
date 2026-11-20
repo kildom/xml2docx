@@ -23,10 +23,11 @@
 
         The following two paragraphs are equivalent:
       code: |
-        <group>
-          <p font.color="red">Warning!</p>
-          <p><font color="red">Warning!</font></p>
-        </group>
+        <p font.color="red">Warning!</p>
+        <p><font color="red">Warning!</font></p>
+      options: # TODO: multiple tags at top-level should be possible, so this should not be needed.
+        prefix: '<document>'
+        suffix: '</document>'
   docx-js: https://docx.js.org/api/types/IParagraphOptions.html
   unused-docx-js:
     - children
