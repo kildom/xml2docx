@@ -5,66 +5,192 @@
   attributes:
     page-break:
       type: bool
-      brief: Page break before paragraph.
+      brief: Insert a page break before the paragraph.
       docx-js: "pageBreakBefore?: boolean"
+      examples:
+        - brief: Start on a new page
+          code: <p page-break="true">This paragraph starts on a new page.</p>
     heading:
       value: level
-      brief: Heading level.
+      brief: Apply a built-in heading style.
       details: |
-        Possible values are `title` and numbers from `1` to `6`.
-
-        You can use aliases `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`, and `<title>`.
+        Use `title` or a heading level from `1` to `6`. The `<h1>` through `<h6>` tags and `<title>` tag are aliases that set this attribute.
+      docx-js: |
+        `heading?: (typeof HeadingLevel)[keyof typeof HeadingLevel]`. DocTML's `title` and numeric levels `1`–`6` are normalized to the corresponding `HeadingLevel` enum values.
+      examples:
+        - brief: Heading level 2
+          code: <p heading="2">A section heading</p>
+        - brief: Document title
+          code: <p heading="title">A document title</p>
     style:
       type: str
-      brief: Paragraph style name.
-      details: Defined by the `<p-style>` tag.
+      brief: Apply a paragraph style defined by a `<p-style>` tag.
       docx-js: "style?: string"
+      examples:
+        - brief: Apply a named style
+          code: <p style="Lead">Introductory text.</p>
     tabs:
       value: position type leader, ...
-      brief: Tabulator stops.
+      brief: Define custom tab stops for the paragraph.
       details: |
-        - **position** @required - Tabulator stop position in [positive length](#positive-length).
-        - **type** @optional - Tabulator stop type. Default is `left`.
-            @enum TabStopType
-        - **leader** @optional - Tabulator stop leader. Default is `none`.
-            @enum LeaderType
-      docx-js: "tabStops?: readonly TabStopDefinition[]"
+        Each tab stop is described by these values:
+        - **position** @required - Stop position in [positive length](#positive-length) units.
+        - **type** @optional - Alignment type; defaults to `left`.
+        - **leader** @optional - Leader character type; defaults to `none`.
+
+        Multiple tab stops may be specified.
+      docx-js: |
+        `tabStops?: readonly TabStopDefinition[]`. Each DocTML tab-stop group becomes one array item: its position maps to `position`, the optional type to `type`, and the optional leader to `leader`; lengths are converted to twips.
+      examples:
+        - brief: Right-aligned stop
+          code: <p tabs="5cm right">Name<tab/>Value</p>
+        - brief: Dotted leader
+          code: <p tabs="8cm right dot">Contents<tab/>12</p>
     widow-control:
       type: bool
-      brief: Paragraph widow control.
+      brief: Prevent a single paragraph line from being left at the top or bottom of a page.
       docx-js: "widowControl?: boolean"
+      examples:
+        - brief: Enable widow and orphan control
+          code: <p widow-control="true">A paragraph that should not leave a single line at a page edge.</p>
     word-wrap:
       type: bool
-      brief: Word wrapping.
+      brief: Allow or prevent line wrapping within the paragraph.
       docx-js: "wordWrap?: boolean"
-    # Experimental attributes
+      examples:
+        - brief: Allow wrapping
+          code: <p word-wrap="true">A long paragraph may wrap onto additional lines.</p>
     auto-space-east-asian-text:
-      experimental: true
       type: bool
+      brief: Control automatic spacing between East Asian text and adjacent numbers.
+      details: Set to `false` to suppress the automatic spacing.
       docx-js: "autoSpaceEastAsianText?: boolean"
+      examples:
+        - brief: Disable spacing
+          code: <p auto-space-east-asian-text="false">日本語 123</p>
+    auto-space-latin-and-east-asian-text:
+      type: bool
+      brief: Control automatic spacing between East Asian text and adjacent Latin text.
+      details: Set to `false` to suppress the automatic spacing.
+      docx-js: "autoSpaceLatinAndEastAsianText?: boolean"
+      examples:
+        - brief: Disable spacing
+          code: <p auto-space-latin-and-east-asian-text="false">日本語 ABC</p>
     bidirectional:
-      experimental: true
       type: bool
+      brief: Set right-to-left paragraph direction.
+      details: Alignment values `start` and `end` follow the paragraph direction; `left` and `right` still name the page sides.
       docx-js: "bidirectional?: boolean"
+      examples:
+        - brief: Right-to-left paragraph
+          code: <p bidirectional="true" align="right">مرحبا</p>
     bullet-level:
-      experimental: true
-      type: int
-      docx-js: "bullet?: { level: number }"
+      type: uint
+      brief: Set the indentation level of a bullet paragraph.
+      details: The level ranges from `0` to `8`.
+      docx-js: |
+        `bullet?: { level: number }`. The scalar `bullet-level` value is wrapped as the object's `level` property.
+      examples:
+        - brief: Nested bullet
+          code: <p bullet-level="1">Nested list item</p>
     overflow-punctuation:
-      experimental: true
       type: bool
+      brief: Allow punctuation to extend beyond the text margins.
       docx-js: "overflowPunctuation?: boolean"
+      examples:
+        - brief: Enable punctuation hanging
+          code: <p overflow-punctuation="true">“Quoted text.”</p>
     scale:
-      experimental: true
       type: float
+      brief: Scale paragraph characters by a percentage.
+      details: A value of `100` keeps the original width; `200` doubles it.
       docx-js: "scale?: number"
+      examples:
+        - brief: Double character width
+          code: <p scale="200">Wide text</p>
     suppress-line-numbers:
-      experimental: true
       type: bool
+      brief: Suppress line numbering for this paragraph.
       docx-js: "suppressLineNumbers?: boolean"
-  unused-docx-js:
-    - frame
-    - run
+      examples:
+        - brief: Hide line numbers
+          code: <p suppress-line-numbers="true">This paragraph has no line number.</p>
+    include-if-empty:
+      type: bool
+      brief: Include this paragraph in the document even when it has no content.
+      docx-js: "includeIfEmpty?: boolean"
+      examples:
+        - brief: Retain an empty paragraph
+          code: <p include-if-empty="true"></p>
+    numbering:
+      value: reference level instance restart custom
+      brief: Apply or remove list numbering for the paragraph.
+      details: |
+        The numbering value has these fields:
+        - **reference** @required - A numbering definition reference, or an inline numbering definition.
+        - **level** @required - Numbering level, from `0` to `8`.
+        - **instance** @optional - List instance identifier.
+        - **restart** @optional - Restart numbering at this paragraph.
+        - **custom** @optional - Mark the numbering as fully custom.
+
+        Set the whole attribute to `false` to remove numbering.
+      docx-js: |
+        `numbering?: { reference: string | NumberingDefinition; level: number; instance?: number; restart?: boolean; custom?: boolean } | false`. The DocTML fields map by name to the API object's `reference`, `level`, `instance`, `restart`, and `custom` properties; the literal `false` is passed through to disable numbering.
+      examples:
+        - brief: Numbered list item
+          code: <p numbering="steps 0">First step</p>
+        - brief: Remove inherited numbering
+          code: <p numbering="false">Ordinary paragraph</p>
+    frame:
+      value: type position alignment anchor width height wrap drop-cap lines space rule anchor-lock, ...
+      brief: Position the paragraph as a frame.
+      details: |
+        The frame values are:
+        - **type** @required - `absolute` or `alignment`; selects which positioning values follow.
+        - **position** @required for `absolute` - x and y coordinates in twips.
+        - **alignment** @required for `alignment` - Horizontal and vertical alignment values.
+        - **anchor** @required - Horizontal and vertical anchor points.
+        - **width** @optional - Frame width in twips.
+        - **height** @optional - Frame height in twips.
+        - **wrap** @optional - Text wrapping behavior.
+        - **drop-cap** @optional - Drop-cap effect type.
+        - **lines** @optional - Number of lines used by a drop cap.
+        - **space** @optional - Horizontal and vertical spacing in twips.
+        - **rule** @optional - Height calculation rule.
+        - **anchor-lock** @optional - Lock the frame's anchor position.
+      docx-js: |
+        `frame?: IFrameOptions` (`IXYFrameOptions` or `IAlignmentFrameOptions`). The `type` selects the variant. An absolute frame's x/y pair forms `position`; an aligned frame's horizontal/vertical pair forms `alignment`. Anchor values map to `anchor.horizontal` and `anchor.vertical`; remaining fields populate the optional frame properties. Length-like values are converted to twips.
+      examples:
+        - brief: Absolute frame
+          code: <p frame="absolute 720 720 page margin 2880 1440">Framed text</p>
+        - brief: Aligned frame
+          code: <p frame="alignment center top page margin 2880 1440">Framed text</p>
+    run:
+      value: run formatting attributes
+      brief: Apply run formatting to all text runs in the paragraph.
+      details: Use the same formatting attributes as `<font>` with the `run.` prefix, for example `run.bold` or `run.color`.
+      docx-js: |
+        `run?: IParagraphRunOptions`. Attributes using the `run.` prefix are grouped into this nested object; the prefix is removed and the remaining names map to run-option properties.
+      examples:
+        - brief: Bold all paragraph text
+          code: <p run.bold="true">Emphasized paragraph text</p>
+        - brief: Set the text color
+          code: <p run.color="red">Red paragraph text</p>
+    revision:
+      value: id author date
+      brief: Mark paragraph-property formatting as a tracked revision.
+      details: |
+        The revision metadata consists of:
+        - **id** @required - Unique change identifier.
+        - **author** @required - Name of the person who made the change.
+        - **date** @required - Revision date and time in ISO 8601 format.
+
+        The revision object can also contain paragraph-property options; use the `revision.` prefix for those properties.
+      docx-js: |
+        `revision?: IParagraphPropertiesChangeOptions`. The dotted `revision.id`, `revision.author`, and `revision.date` attributes form the change metadata; other `revision.` attributes populate the paragraph-property options on that object.
+      examples:
+        - brief: Record a paragraph formatting revision
+          code: <p revision.id="1" revision.author="Editor" revision.date="2025-01-15T12:00:00Z" revision.align="center">Reviewed paragraph</p>
 
 
 - tag-name: -IParagraphStylePropertiesOptions-
@@ -72,114 +198,146 @@
   attributes:
     border:
       type: border
-      brief: Paragraph borders.
-      docx-js: "border?: IBordersOptions"
+      brief: Set paragraph borders.
+      docx-js: |
+        `border?: IBordersOptions`. The border value is expanded into side-specific border options; the side names and their `color`, `style`, `size`, and `space` values populate the corresponding API fields.
+      examples:
+        - brief: Add a top border
+          code: <p border="top black single 1pt">Paragraph with a top border.</p>
     background:
       type: color
-      brief: Paragraph background color.
-      docx-js: "shading?: IShadingAttributesProperties"
-  unused-docx-js:
-    - numbering
+      brief: Set the paragraph background color.
+      docx-js: |
+        `shading?: IShadingAttributesProperties`. The DocTML color becomes the shading fill color in the API object.
+      examples:
+        - brief: Light yellow background
+          code: <p background="yellow">Highlighted paragraph.</p>
 
 
 - tag-name: -ILevelParagraphStylePropertiesOptions-
   attributes:
     align:
       value: alignment
-      brief: Text alignment.
+      brief: Set paragraph text alignment.
       details: |
         Supported values:
         <# enumerator('enums.AlignmentTypeAliases', {
             collapse: '`left`, `right`, `center`, `justify`, and more...',
           }) #>
-      docx-js: "alignment?: typeof AlignmentType[keyof typeof AlignmentType]"
+      docx-js: |
+        `alignment?: (typeof AlignmentType)[keyof typeof AlignmentType]`. DocTML alignment names and aliases are normalized to the corresponding `AlignmentType` enum value.
       examples:
-        - brief: align="right"
-          details: |
-            This paragraph is right-aligned.
-          code: |
-            <p align="right">
-              <# lorem({ length: 400, seed: 2412, wordWrap: 77, lineBreak: '\n  ' }) #>
-            </p>
-        - brief: align="justify"
-          details: |
-            This paragraph is justified.
-          code: |
-            <p align="justify">
-              <# lorem({ length: 400, seed: 1234, wordWrap: 77, lineBreak: '\n  ' }) #>
-            </p>
+        - brief: Right alignment
+          code: <p align="right">Right-aligned text.</p>
+        - brief: Justified alignment
+          code: <p align="justify">Justified text.</p>
     indent:
-      value: left right first-line
-      brief: Paragraph indentation.
+      value: start end left right hanging first-line first-line-chars
+      brief: Set paragraph indentation.
       details: |
-        - **left** - Left indentation in [positive length](#positive-length) units.
-          Zero by default. @required
-        - **right** - Right indentation in [positive length](#positive-length) units.
-          Zero by default. @optional
-        - **first-line** - First line indentation in [length](#length) units.
-          This is relative to the left indentation and it can be negative to create a hanging indent.
-          Zero by default. @optional
+        Indentation values are positional and follow this order:
+        - **start** @optional - Indent from the leading edge (left in LTR, right in RTL).
+        - **end** @optional - Indent from the trailing edge (right in LTR, left in RTL).
+        - **left** @optional - Indent from the left page margin.
+        - **right** @optional - Indent from the right page margin.
+        - **hanging** @optional - Positive offset of the first line relative to the following lines.
+        - **first-line** @optional - Positive additional first-line indentation.
+        - **first-line-chars** @optional - First-line indentation in hundredths of a character width.
+
+        Length values are converted to twips; `first-line-chars` is a number.
+      docx-js: |
+        `indent?: IIndentAttributesProperties`. The positional DocTML values are translated to the named `start`, `end`, `left`, `right`, `hanging`, `firstLine`, or `firstLineChars` fields; lengths are converted to twips.
+      examples:
+        - brief: Indent the paragraph from the left
+          code: <p indent="0 0 1cm">Indented text.</p>
+        - brief: Hanging indent
+          code: <p indent="0 0 1cm 0 0.5cm">Hanging-indent text.</p>
     keep-lines:
       type: bool
-      brief: Keep all lines on a single page if possible.
+      brief: Keep all lines of the paragraph on one page when possible.
       docx-js: "keepLines?: boolean"
+      examples:
+        - brief: Keep paragraph lines together
+          code: <p keep-lines="true">A multi-line paragraph.</p>
     keep-next:
       type: bool
-      brief: Keep next paragraph on the same page if possible.
+      brief: Keep this paragraph on the same page as the next one when possible.
       docx-js: "keepNext?: boolean"
+      examples:
+        - brief: Keep heading with following text
+          code: <p keep-next="true">Section heading</p>
     outline:
       type: uint
-      brief: Outline level.
-      details: |
-        Possible values are numbers from `1` to `9`.
-        By default, paragraph is not in the document outline.
+      brief: Set the paragraph outline level.
+      details: Values range from `0` to `9`; level `0` is the top outline level.
       docx-js: "outlineLevel?: number"
+      examples:
+        - brief: Set outline level 1
+          code: <p outline="1">Outline paragraph</p>
     spacing:
-      value: before after
-      brief: Paragraph spacing.
+      value: before after before-auto-spacing after-auto-spacing
+      brief: Set paragraph spacing before and after.
       details: |
-        - **before** - Space before paragraph in [positive length](#positive-length) units. @required
-        - **after** - Space after paragraph in [positive length](#positive-length) units. @optional
+        Spacing values are positional and follow this order:
+        - **before** @optional - Space before the paragraph in [positive length](#positive-length) units.
+        - **after** @optional - Space after the paragraph in [positive length](#positive-length) units.
+        - **before-auto-spacing** @optional - Enable automatic spacing before the paragraph.
+        - **after-auto-spacing** @optional - Enable automatic spacing after the paragraph.
+      docx-js: |
+        `spacing?: ISpacingProperties`. The ordered `spacing` values map to `before`, `after`, `beforeAutoSpacing`, and `afterAutoSpacing`; lengths are converted to twips.
+      examples:
+        - brief: Space after paragraph
+          code: <p spacing="0 6pt">Paragraph with extra space after it.</p>
+        - brief: Space before and after
+          code: <p spacing="3pt 6pt">Paragraph spacing example.</p>
+        - brief: Use automatic spacing before
+          code: <p spacing="0 0 true false">Paragraph with automatic spacing before.</p>
     line-spacing:
       value: requirement distance
-      brief: Line spacing.
+      brief: Set spacing between paragraph lines.
       details: |
-        - **requirement** @optional - Defines spacing if line height is greater than the specified distance.
-            - `exactly` - The line spacing is exactly the specified distance.
-            - `at-least` - The line spacing is at least the specified distance (default).
-
-        - **distance** @required - The distance between lines can be expressed in two ways:
-            - Absolute value in [positive length](#positive-length) units, e.g. `1.5cm`.
-            - Relative to line height, e.g. `1.25`.
+        The values are:
+        - **requirement** @optional - `exactly` or `at-least` (the default); defines the minimum line-spacing requirement.
+        - **distance** @required - Line distance as a [positive length](#positive-length), such as `3mm`, or a line-height multiplier, such as `1.25`.
+      docx-js: |
+        `spacing?: ISpacingProperties`. The distance maps to `line` and is converted to the numeric format expected by docx.js; the requirement maps to `lineRule`.
       examples:
-        - brief: line-spacing="1.75"
-          details: |
-            This paragraph has 1.75 space between lines which is 100% of line and 75%
-            for empty space in between.
-          code: |
-            <p line-spacing="1.75">
-              <# lorem({ length: 400, seed: 3281, wordWrap: 77, lineBreak: '\n  ' }) #>
-            </p>
-        - brief: line-spacing="exactly 3mm"
-          details: |
-            This paragraph has exactly 3mm space between lines.
-          code: |
-            <p line-spacing="exactly 3mm">
-              <# lorem({ length: 400, seed: 1054, wordWrap: 77, lineBreak: '\n  ' }) #>
-            </p>
-      docx-js: "spacing?: ISpacingProperties"
-    # Experimental attributes
+        - brief: Relative line spacing
+          code: <p line-spacing="1.75">Paragraph with 1.75 line spacing.</p>
+        - brief: Exact line spacing
+          code: <p line-spacing="exactly 3mm">Paragraph with exact 3 mm line spacing.</p>
+    left-tab-stop:
+      type: positive-length
+      brief: Set a left-aligned tab stop position.
+      details: The position is expressed in twips by docx.js.
+      docx-js: |
+        `leftTabStop?: number`. The DocTML length is converted to a twip number.
+      examples:
+        - brief: Set left tab stop
+          code: <p left-tab-stop="5cm">Name<tab/>Value</p>
+    right-tab-stop:
+      type: positive-length
+      brief: Set a right-aligned tab stop position.
+      details: The position is expressed in twips by docx.js.
+      docx-js: |
+        `rightTabStop?: number`. The DocTML length is converted to a twip number.
+      examples:
+        - brief: Set right tab stop
+          code: <p right-tab-stop="8cm">Total<tab/>42</p>
     contextual-spacing:
-      experimental: true
       type: bool
+      brief: Suppress extra spacing between adjacent paragraphs with the same style.
       docx-js: "contextualSpacing?: boolean"
+      examples:
+        - brief: Enable contextual spacing
+          code: <p contextual-spacing="true" style="BodyText">Paragraph in a style group.</p>
     thematic-break:
-      experimental: true
       type: bool
+      brief: Draw a horizontal rule below the paragraph.
       docx-js: "thematicBreak?: boolean"
-  unused-docx-js:
-    - leftTabStop
-    - rightTabStop
+      examples:
+        - brief: Add a thematic break
+          code: <p thematic-break="true">Text above a horizontal rule.</p>
 
 
 - enum-name: ParagraphAlignment

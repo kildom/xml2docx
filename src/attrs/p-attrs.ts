@@ -86,6 +86,8 @@ function getIndent(element: Element, name: string): docx.IIndentAttributesProper
         delete result.firstLine;
     }
 
+    // TODO: If first line is percent, use firstLineChars option
+
     return result;
 }
 

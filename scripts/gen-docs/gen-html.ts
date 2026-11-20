@@ -8,6 +8,7 @@ import { markdownToHtml } from "./markdown";
 import { compileTemplate } from "./template";
 import { asyncRetryLoop } from "./async-jobs";
 import { runCli } from "../utils";
+import { setDevMode } from "./dev";
 
 /*
 
@@ -49,6 +50,8 @@ function stripHtmlTags<T>(text: T): T {
 
 
 async function main() {
+
+    setDevMode(process.argv[2] === 'dev');
 
     // Load the docs data from files
     let docs = parseDocs();

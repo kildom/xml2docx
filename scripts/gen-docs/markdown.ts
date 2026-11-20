@@ -6,6 +6,7 @@ import showdown from 'showdown';
 import showdownHighlight from 'showdown-highlight';
 import { asyncJob, jobPostponed, JobPostponed } from './async-jobs';
 import { DocumentMetrics, generatePreview } from './gen-preview';
+import { isDevMode } from './dev';
 
 let pluginsRegistered = false;
 
@@ -62,9 +63,12 @@ function registerPlugins() {
     showdown.extension('gitHubAlerts', function () {
         let ext1 = {
             type: 'lang',
-            regex: /(?<!(?:^|\n)\s*>[^\n]*\r?\n)(?<=^|\n)(?<prefix>[ \t]*>)(?<type>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*)(?<text>(?:\r?\n\k<prefix>.*?(?=\r?\n|$))+)/gsi,
+            regex: /(?<!(?:^|\n)\s*>[^\n]*\r?\n)(?<=^|\n)(?<prefix>[ \t]*>)(?<type>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION|DEV)\][ \t]*)(?<text>(?:\r?\n\k<prefix>.*?(?=\r?\n|$))+)/gsi,
             replace: (m0, prefix, type, text) => {
                 let className = type.replace(/[^a-z]+/gi, '').toLowerCase();
+                if (className === 'dev' && !isDevMode()) {
+                    return '';
+                }
                 let title = className.substring(0, 1).toUpperCase() + className.substring(1);
                 let res = `${prefix}<div class="--gitHubAlert-begin-${className}">${title}</div>${text}\n`
                     + `${prefix}<div class="--gitHubAlert-end"></div>\n`;
