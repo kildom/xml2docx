@@ -60,6 +60,9 @@ async function main() {
             let [address, fragment] = m ? [m[1], m[2]] : [link, ""];
             if (address.endsWith(".md")) {
                 address = address.slice(0, -3) + ".html";
+                if (address.startsWith("../dev/")) {
+                    address = 'dev-' + address.slice(7);
+                }
             }
             return `${address}${fragment ? "#" + fragment : ""}`;
         },

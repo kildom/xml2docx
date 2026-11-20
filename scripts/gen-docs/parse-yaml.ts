@@ -14,6 +14,7 @@ modifications. It only adds "location" property to all top-level items.
 */
 
 const DOCS_DIR = 'docs';
+const DEV_DOCS_SUB_DIR = 'dev';
 
 const ExampleSchema = z.object({
     'brief': z.string(),
@@ -182,6 +183,20 @@ export function parseDocsInput(): YamlDocs {
             result.pages[file.substring(0, file.length - 3)] = {
                 "page-name": file.substring(0, file.length - 3),
                 "location": file,
+                "text": fs.readFileSync(fullPath, 'utf-8'),
+            };
+        }
+    }
+    for (let file of fs.readdirSync(path.join(DOCS_DIR, DEV_DOCS_SUB_DIR))) {
+        let fullPath = path.join(DOCS_DIR, DEV_DOCS_SUB_DIR, file);
+        if (file.endsWith('.md')) {
+            let name = DEV_DOCS_SUB_DIR + '-' + file.substring(0, file.length - 3);
+            if (name == DEV_DOCS_SUB_DIR + '-index') {
+                name = 'dev';
+            }
+            result.pages[name] = {
+                "page-name": name,
+                "location": DEV_DOCS_SUB_DIR + '/' + file,
                 "text": fs.readFileSync(fullPath, 'utf-8'),
             };
         }
