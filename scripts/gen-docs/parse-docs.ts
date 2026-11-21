@@ -4,7 +4,7 @@ import * as yaml from 'yaml';
 import { z } from 'zod';
 import * as docx from 'docx';
 import * as customEnums from '../../src/enums';
-import { cloneWithRefs, isDirectExecution } from '../utils';
+import { cloneWithRefs, isDirectExecution } from '../common/utils';
 import { parseDocsInput, YamlAttribute, YamlDocs, YamlEnum, YamlExample, YamlGroup, YamlTag, YamlToc, TocItemsSchemaType } from './parse-yaml';
 
 /*

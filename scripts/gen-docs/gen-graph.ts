@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { isDirectExecution, runCli } from "../utils";
+import { isDirectExecution, runCli } from "../common/utils";
 import { Docs, DocsTag } from "./parse-docs";
 import { compileTemplate } from "./template";
 

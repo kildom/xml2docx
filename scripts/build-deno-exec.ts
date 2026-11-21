@@ -2,8 +2,14 @@ import fs from 'fs';
 import child_process from 'node:child_process';
 
 
+const packageJson = {
+    "name": "doctml",
+    "main": "doctml.cjs"
+};
+
+
 const targets:{[key:string]:[string, string, string[]]} = {
-    'x64-win': [ 'x86_64-pc-windows-msvc', '.exe', ['--icon', '../../scripts/icon.ico']],
+    'x64-win': [ 'x86_64-pc-windows-msvc', '.exe', ['--icon', '../../scripts/resources/icon.ico']],
     'x64-macos': [ 'x86_64-apple-darwin', '', []],
     'arm64-macos': [ 'aarch64-apple-darwin', '', []],
     'x64-linux': [ 'x86_64-unknown-linux-gnu', '', []],
@@ -12,7 +18,7 @@ const targets:{[key:string]:[string, string, string[]]} = {
 
 
 fs.mkdirSync('dist/deno-compile', { recursive: true });
-fs.copyFileSync('scripts/build-deno-package.json', 'dist/deno-compile/package.json');
+fs.writeFileSync('dist/deno-compile/package.json', JSON.stringify(packageJson, null, 4));
 fs.copyFileSync('dist/cli/doctml.cjs', 'dist/deno-compile/doctml.cjs');
 fs.copyFileSync('dist/cli/license.txt', 'dist/deno-compile/license.txt');
 fs.copyFileSync('dist/version.json', 'dist/deno-compile/version.json');

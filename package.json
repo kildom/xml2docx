@@ -40,7 +40,6 @@
         "_old-postbuild-web": "npm run _lic -- web/license.html dist/web-main.json dist/web-monaco.json dist/web-worker.json",
         "_old-check": "npx tsc -p tsconfig.json && npx eslint src",
         "_old-_test__old": "npx ts-node --swc test/testInputs.ts",
-        "_old-docs": "npx ts-node --swc scripts/gen-docs.ts && npx ts-node --swc scripts/build-docs.ts",
         "_old-all": "npm run check && npm run docs && npm run build && npm run test && npm run build-web",
         "dev-build-convert-server": "npx esbuild scripts/convert-server.ts --log-override:empty-import-meta=silent --loader:.ps1=text --platform=node --format=cjs --bundle --target=node18 --outfile=dist/dev/convert-server.js"
     },
@@ -54,7 +53,7 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.5",
         "@eslint/js": "^10.0.1",
-        "@types/node": "^25.9.4",
+        "@types/node": "^25.9.9",
         "@types/pako": "^2.0.4",
         "@types/sax": "^1.2.7",
         "@types/showdown": "^2.0.6",

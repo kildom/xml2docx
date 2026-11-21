@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as yaml from 'yaml';
 import { z } from 'zod';
-import { isDirectExecution } from '../utils';
+import { isDirectExecution } from '../common/utils';
 
 /*
 

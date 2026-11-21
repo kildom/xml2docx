@@ -2,16 +2,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { runCli } from '../utils';
+import { runCli } from '../common/utils.ts';
 import * as mupdf from 'mupdf';
 
-import { convertDocxFiles } from '../../test/docs/docx2pdf.ts';
+import { convertDocxFiles } from '../../test/conformance/src/docx2pdf.ts';
 
 let firstRun = true;
 
 const tempPath = 'temp/preview';
 const outPath = 'dist/html/preview';
-const includePath = 'test/docs/data/include';
+const includePath = 'test/conformance/inputs/include';
 const cliPath = 'dist/deno-compile/x64-linux/doctml'; // TODO: Depends on the platform, should be configurable
 
 export interface PreviewArgs {
@@ -24,7 +24,7 @@ export interface PreviewArgs {
 
 
 function copyResources() {
-    // Copy entire directory from `test/docs/data/include` to tempPath recursively, but the directory structure
+    // Copy entire directory from `test/conformance/inputs/include` to tempPath recursively, but the directory structure
     // should be flattened (i.e., all files should be copied directly into tempPath, without subdirectories).
     const files = fs.readdirSync(includePath, { recursive: true, encoding: 'utf-8', withFileTypes: true });
     for (const file of files) {

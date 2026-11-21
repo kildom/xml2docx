@@ -1,8 +1,8 @@
 import qre from "qre";
 import { template } from 'underscore';
 import { Docs, DocsAttribute, DocsEnum, DocsExample, DocsPage, DocsTag, parseDocs } from "./parse-docs";
-import { lorem } from "../lorem";
-import { cloneWithRefs, isDirectExecution } from '../utils';
+import { lorem } from "../common/lorem";
+import { cloneWithRefs, isDirectExecution } from '../common/utils';
 
 
 /*

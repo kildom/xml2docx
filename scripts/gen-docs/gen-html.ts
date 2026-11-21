@@ -7,7 +7,7 @@ import { preprocessDocs } from "./preprocess";
 import { markdownToHtml } from "./markdown";
 import { compileTemplate } from "./template";
 import { asyncRetryLoop } from "./async-jobs";
-import { runCli } from "../utils";
+import { runCli } from "../common/utils";
 import { isDevMode, setDevMode } from "./dev";
 
 /*
