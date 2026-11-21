@@ -19,7 +19,7 @@ export default [
         ignores: [
             "**/*.min.js",
             "test/outputs/**",
-            "test/non-win-helper/post-inst/convert-server.js",
+            "test/docker-helper/post-inst/convert-server.js",
         ],
     },
     ...compat.extends('eslint:recommended', 'plugin:@typescript-eslint/recommended'),
