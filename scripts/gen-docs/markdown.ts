@@ -180,7 +180,7 @@ function registerPlugins() {
                     return [start, nl1, code, end].join('');
                 }
                 console.log("doctml code block found:", hash, code, args);
-                return `${start}${nl1}${code}${end}\n\`\`\`plaintext\nHerEGoEsAPreVIewoFtHecODEaboVe_${hash}:${toBase64(args)}:\n\`\`\``;
+                return `${start}${nl1}${code}${end}\n\n<p>HerEGoEsAPreVIewoFtHecODEaboVe_${hash}:${toBase64(args)}:</p>`;
             }
         };
         let ext2 = {
@@ -189,23 +189,29 @@ function registerPlugins() {
                 1: { // example code block
                     "<pre"
                     ">" or whitespace
-                    lazy-repeat any
+                    lazy-repeat {
+                        {
+                            [^<]
+                        } or {
+                            "<"
+                            look-ahead not "/pre>"
+                        }
+                    }
                     "</pre>"
                 }
                 repeat whitespace
-                { // magic pre block
-                    "<pre"
-                    ">" or whitespace
-                    lazy-repeat any
+                { // magic paragraph
+                    "<p>"
+                    repeat whitespace
                     "HerEGoEsAPreVIewoFtHecODEaboVe_"
                     2: repeat [a-z]
                     ":"
                     3: lazy-repeat any
                     ":"
-                    lazy-repeat any
-                    "</pre>"
+                    repeat whitespace
+                    "</p>"
                 }
-                `, // https://kildom.github.io/qre-web-demo/#2xVU7T8MwEGb2r6i8dSgVKZObWEIi0E6AkLpUFXXMhTSPJrILfSD+O+e4aUWSAhIDHjyc7/3d55PY+l6h4G0B6/Ms1mcEB2dsYXx4xd4bsmNRqoOMV6A1FqdJHWcDMx0SYsmF0hLrPcIVqKTO1QvWeTeEhY3ICuSXQbwTpLlMGqrmUBcToO1PnBrCHLvZqpWK3RaxspAvtyeC9DEKb4b5aEj2nr4JWlaXiZeFRNT+v7QRKP829/XVvYLJGNb5zWoE8u7aF0E+gaf2+A6rCp2K3m7W7pm12w7Y7xI7Yf5HvOaHgTT/Ao7knBDTZ+T4Snl0Q7lbTpzEpaU9SvljntkhdPvm5tZ1aWNV+Q8dFFkcJUkYpc9FHBUBBGkiBBpKES7DIAqZczlwPPbV/SHPaktN8Zc1GR/3noLurFvTQtmQfAI=
+                `, // https://kildom.github.io/qre-web-demo/#2lZVBT8IwFMc991MsvXFAVG5jLDERhRMaEy4EpW2e22RjS4eCEL+7722whdEx6WGH9r2u//frv09h6duJhu8A1tfRZ3rF8OKMcowvX1h7MjuK0hY6XkOaoriUVTkTZt5jLDcXzmas94QPUFnVq7e2tSPDwkZECfqLiFsyjNXiJJQGd/AA3LzkcjJMWU1jVCi2P8gqQ74zRtCoX6ExfXNmtQG5a8/mc8esoDhjSZLuHe+gZrc+5de4Yp7lTs1mp+H7Ip2pZwYuEl6gLGwKwtMi8euo1Zy/+SdZ/hD04CkepPfPGiYjWMePqyGo8cNAyHgC7+a97+zD9lPR3pqJcduc27WPbgp696L0f8pCGEYU88JG9JqhkeaM0cXHl2ml+3zDXSfzicJWm/a5kIq745UPOrOP06Gvm5NuTnyNo9x2x3mIrKHqoRSB8hP5IZVY+nIBHoh4mSyTMISFFwU2dG/6NmlkhaJDF55iFyFtZV/X0Jq1KlE412N/
             replace: (m0: string, codeHTML: string, hash: string, argsEncoded: string) => {
 
                 let args = fromBase64<PreviewArgs>(argsEncoded);
