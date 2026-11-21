@@ -3,7 +3,7 @@ import * as http from 'node:http';
 import * as fs from 'node:fs';
 import * as child_process from 'node:child_process';
 import * as path from 'node:path';
-import { isDirectExecution, mkdir, mkdirFor } from './common';
+import { isDirectExecution, mkdir, mkdirFor } from './utils';
 
 
 const tempDir = 'temp/docx2pdf';

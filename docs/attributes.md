@@ -103,46 +103,9 @@ Example of using color attribute in DocTML:
 
 <#! if (!data.agents) { #>
 
-<style>
-/* TODO: Move to CSS file */
-.color {
-    line-height: 1;
-    clear: both;
-}
-.color b {
-    display: inline-block;
-    width: 1.7em;
-    height: 1.7em;
-    border: 1px solid #000;
-    float: left;
-    margin: 0 0.5em 0.5em 0.5em;
-}
-.color small {
-    font-size: 60%;
-    color: #AAA;
-}
-table, th, td {
-    border-spacing: 0px;
-    border-collapse: collapse;
-}
+&nbsp;
 
-th, td {
-    border: 1px solid silver;
-    padding: 10px;
-}
-
-th {
-    background-color: #e7e7e7;
-}
-
-
-tr:nth-child(2n) {
-    background-color: #F5F5F5;
-}
-
-</style>
-
-<table>
+<table class="color-table">
 <tr><td>
 <div class="color"><b style="background-color: #F0F8FF"></b>aliceblue<small><br>#F0F8FF</small></div>
 <div class="color"><b style="background-color: #FAEBD7"></b>antiquewhite<small><br>#FAEBD7</small></div>
@@ -297,6 +260,8 @@ tr:nth-child(2n) {
 <div class="color"><b style="background-color: #9ACD32"></b>yellowgreen<small><br>#9ACD32</small></div>
 </td></tr>
 </table>
+
+&nbsp;
 
 <#! } else { #>
 

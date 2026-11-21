@@ -46,6 +46,12 @@
     --inline-code-bg: #f8f9fb;
     --muted: #7e8796;
 
+    --table-head-bg: #f4f6f8;
+    --table-border: #e9e9e9;
+    --table-row-alt: #fafafa;
+    --table-row-hover: #f0f4f8;
+    --toc-active-bg: #e3ecff;
+
     --xml-bg: #F5F5F5;
     --xml-fg: #5e666d;
     --xml-border: #E2E2E2;
@@ -54,6 +60,19 @@
     --xml-string: #c92c6d;
 
     --preview-shadow: #7070705c;
+
+    --alert-note-color: #0969da;
+    --alert-note-bg: #f1f7ff;
+    --alert-tip-color: #1a7f37;
+    --alert-tip-bg: #edfff2;
+    --alert-important-color: #8250df;
+    --alert-important-bg: #f5efff;
+    --alert-warning-color: #9a6700;
+    --alert-warning-bg: #fffbf4;
+    --alert-caution-color: #cf222e;
+    --alert-caution-bg: #fff3f4;
+    --alert-dev-color: #18a6ae;
+    --alert-dev-bg: #eafeff;
 
 }
 
@@ -70,6 +89,12 @@ html[data-theme="dark"] {
     --inline-code-bg: #1c2430;
     --muted: #898c90;
 
+    --table-head-bg: #242d3a;
+    --table-border: #2e333c;
+    --table-row-alt: #252d39;
+    --table-row-hover: #2e3948;
+    --toc-active-bg: #26364f;
+
     --xml-bg: #1c2430;
     --xml-fg: #ced2d8;
     --xml-border: #344052;
@@ -78,6 +103,19 @@ html[data-theme="dark"] {
     --xml-string: #c92c6d;
 
     --preview-shadow: #3879fa;
+
+    --alert-note-color: #2f81f7;
+    --alert-note-bg: #182b40;
+    --alert-tip-color: #3fb950;
+    --alert-tip-bg: #1b3022;
+    --alert-important-color: #a371f7;
+    --alert-important-bg: #2b213a;
+    --alert-warning-color: #d29922;
+    --alert-warning-bg: #302a1b;
+    --alert-caution-color: #f85149;
+    --alert-caution-bg: #321f22;
+    --alert-dev-color: #39c5cf;
+    --alert-dev-bg: #192e30;
 
 }
 
@@ -96,6 +134,12 @@ html[data-theme="dark"] {
         --inline-code-bg: #1c2430;
         --muted: #898c90;
 
+        --table-head-bg: #242d3a;
+        --table-border: #252930;
+        --table-row-alt: #252d39;
+        --table-row-hover: #2e3948;
+        --toc-active-bg: #26364f;
+
         --xml-bg: #1c2430;
         --xml-fg: #ced2d8;
         --xml-border: #344052;
@@ -104,6 +148,19 @@ html[data-theme="dark"] {
         --xml-string: #c92c6d;
 
         --preview-shadow: #3879fa;
+
+        --alert-note-color: #2f81f7;
+        --alert-note-bg: #182b40;
+        --alert-tip-color: #3fb950;
+        --alert-tip-bg: #1b3022;
+        --alert-important-color: #a371f7;
+        --alert-important-bg: #2b213a;
+        --alert-warning-color: #d29922;
+        --alert-warning-bg: #302a1b;
+        --alert-caution-color: #f85149;
+        --alert-caution-bg: #321f22;
+        --alert-dev-color: #39c5cf;
+        --alert-dev-bg: #192e30;
     }
 
     html[data-theme="auto"] .only-light-mode {
@@ -565,7 +622,7 @@ div.expand-marker {
 }
 
 .related-tags-table td {
-    border: 1px solid var(--border);
+    border: 1px solid var(--table-border);
     margin: 0;
     padding: 0.5em;
 }
@@ -590,38 +647,87 @@ div.expand-marker {
 }
 
 table {
-  max-width: 700px;
   border-collapse: collapse;
-  border: 1px solid var(--border);
+  border: 1px solid var(--table-border);
   overflow: hidden;
 }
 
 thead {
-  background: #f4f6f8;
+  background: var(--table-head-bg);
+}
+
+thead th {
+  background: var(--table-head-bg);
+  color: var(--text);
 }
 
 th {
-  padding: 14px 18px;
+  padding: 8px 12px;
   text-align: left;
   font-weight: 600;
-  border-bottom: 2px solid #ddd;
+  border: 1px solid var(--table-border);
+  border-bottom-width: 2px;
 }
 
 td {
-  padding: 13px 18px;
-  border-bottom: 1px solid #e9e9e9;
+  padding: 8px 12px;
+  border: 1px solid var(--table-border);
 }
 
 tbody tr:nth-child(even) {
-  background: #fafafa;
+  background: var(--table-row-alt);
 }
 
 tbody tr:hover {
-  background: #f0f4f8;
+  background: var(--table-row-hover);
 }
 
 tbody tr:last-child td {
-  border-bottom: none;
+  border-bottom: 1px solid var(--table-border);
+}
+
+.color {
+    line-height: 1;
+    clear: both;
+}
+
+.color b {
+    display: inline-block;
+    width: 1.7em;
+    height: 1.7em;
+    border: 1px solid var(--text);
+    float: left;
+    margin: 0 0.5em 0.5em 0.5em;
+}
+
+.color small {
+    font-size: 60%;
+    color: var(--muted);
+}
+
+.color-table {
+    width: 100%;
+}
+
+.color-table,
+.color-table th,
+.color-table td {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.color-table th,
+.color-table td {
+    border: 1px solid var(--table-border);
+    padding: 6px;
+}
+
+.color-table th {
+    background-color: var(--table-head-bg);
+}
+
+.color-table tr:nth-child(2n) {
+    background-color: var(--table-row-alt);
 }
 
 .sidebar {
@@ -674,14 +780,12 @@ tbody tr:last-child td {
 }
 
 .toc-active {
-    background: #e3ecff;
+    background: var(--toc-active-bg);
     border-radius: 0.4em;
     border: 0;
     text-decoration: none;
 }
 
-
-/* TODO: Apply theme to following styles */
 
 blockquote:has(> div.gitHubAlert-note:first-child),
 blockquote:has(> div.gitHubAlert-tip:first-child),
@@ -697,69 +801,69 @@ blockquote:has(> div.gitHubAlert-dev:first-child)
 
 blockquote:has(> div.gitHubAlert-note:first-child)
 {
-    border-left: 0.3em solid #0969da;
-    background-color: #f1f7ff;
+    border-left: 0.3em solid var(--alert-note-color);
+    background-color: var(--alert-note-bg);
 }
 
 blockquote:has(> div.gitHubAlert-tip:first-child)
 {
-    border-left: 0.3em solid #1a7f37;
-    background-color: #edfff2;
+    border-left: 0.3em solid var(--alert-tip-color);
+    background-color: var(--alert-tip-bg);
 }
 
 blockquote:has(> div.gitHubAlert-important:first-child)
 {
-    border-left: 0.3em solid #8250df;
-    background-color: #f5efff;
+    border-left: 0.3em solid var(--alert-important-color);
+    background-color: var(--alert-important-bg);
 }
 
 blockquote:has(> div.gitHubAlert-warning:first-child)
 {
-    border-left: 0.3em solid #9a6700;
-    background-color: #fffbf4;
+    border-left: 0.3em solid var(--alert-warning-color);
+    background-color: var(--alert-warning-bg);
 }
 
 blockquote:has(> div.gitHubAlert-caution:first-child)
 {
-    border-left: 0.3em solid #cf222e;
-    background-color: #fff3f4;
+    border-left: 0.3em solid var(--alert-caution-color);
+    background-color: var(--alert-caution-bg);
 }
 
 blockquote:has(> div.gitHubAlert-dev:first-child)
 {
-    border-left: 0.3em solid #18a6ae;
-    background-color: #eafeff;
+    border-left: 0.3em solid var(--alert-dev-color);
+    background-color: var(--alert-dev-bg);
 }
 
 
 div.gitHubAlert-note div.gitHubAlert-title
 {
-    color: #0969da;
+    color: var(--alert-note-color);
 }
 
 div.gitHubAlert-tip div.gitHubAlert-title
 {
-    color: #1a7f37;
+    color: var(--alert-tip-color);
 }
 
 div.gitHubAlert-important div.gitHubAlert-title
 {
-    color: #8250df;
+    color: var(--alert-important-color);
 }
 
 div.gitHubAlert-warning div.gitHubAlert-title
 {
-    color: #9a6700;
+    color: var(--alert-warning-color);
 }
 
 div.gitHubAlert-caution div.gitHubAlert-title
 {
-    color: #cf222e;
+    color: var(--alert-caution-color);
 }
 
 div.gitHubAlert-dev div.gitHubAlert-title
 {
-    color: #18a6ae;
+    color: var(--alert-dev-color);
 }
 
 div.gitHubAlert-note,

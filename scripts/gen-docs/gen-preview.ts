@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { runCli } from '../common/utils.ts';
 import * as mupdf from 'mupdf';
 
-import { convertDocxFiles } from '../../test/conformance/src/docx2pdf.ts';
+import { convertDocxFiles } from '../common/docx2pdf.ts';
 
 let firstRun = true;
 
