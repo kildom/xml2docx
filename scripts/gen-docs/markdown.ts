@@ -146,24 +146,6 @@ function registerPlugins() {
     });
 
     showdown.extension('doctmlCode', function () {
-        function toBase64(value: unknown): string {
-            const json = JSON.stringify(value);
-            const bytes = new TextEncoder().encode(json);
-
-            let binary = "";
-            bytes.forEach(byte => {
-                binary += String.fromCharCode(byte);
-            });
-
-            return btoa(binary);
-        }
-        function fromBase64<T = unknown>(base64: string): T {
-            const binary = atob(base64);
-            const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-
-            const json = new TextDecoder().decode(bytes);
-            return JSON.parse(json) as T;
-        }
         // ```xml
         let ext1 = {
             type: 'lang',
@@ -174,13 +156,13 @@ function registerPlugins() {
                     return [start, nl1, code, end].join('');
                 }
                 let hash = alphabeticHash(`${JSON.stringify(args)}\n${code}`);
-                let doc: DocumentMetrics | JobPostponed;
-                doc = asyncJob(`doctml-preview-${hash}`, () => generatePreview(code, hash, args));
-                if (doc === jobPostponed) {
+                let res: [DocumentMetrics, PreviewArgs] | JobPostponed;
+                res = asyncJob(`doctml-preview-${hash}`, async () => [await generatePreview(code, hash, args), args]);
+                if (res === jobPostponed) {
                     return [start, nl1, code, end].join('');
                 }
                 console.log("doctml code block found:", hash, code, args);
-                return `${start}${nl1}${code}${end}\n\n<p>HerEGoEsAPreVIewoFtHecODEaboVe_${hash}:${toBase64(args)}:</p>`;
+                return `${start}${nl1}${code}${end}\n\n<p>HerEGoEsAPreVIewoFtHecODEaboVe_${hash}</p>`;
             }
         };
         let ext2 = {
@@ -205,21 +187,18 @@ function registerPlugins() {
                     repeat whitespace
                     "HerEGoEsAPreVIewoFtHecODEaboVe_"
                     2: repeat [a-z]
-                    ":"
-                    3: lazy-repeat any
-                    ":"
                     repeat whitespace
                     "</p>"
                 }
-                `, // https://kildom.github.io/qre-web-demo/#2lZVBT8IwFMc991MsvXFAVG5jLDERhRMaEy4EpW2e22RjS4eCEL+7722whdEx6WGH9r2u//frv09h6duJhu8A1tfRZ3rF8OKMcowvX1h7MjuK0hY6XkOaoriUVTkTZt5jLDcXzmas94QPUFnVq7e2tSPDwkZECfqLiFsyjNXiJJQGd/AA3LzkcjJMWU1jVCi2P8gqQ74zRtCoX6ExfXNmtQG5a8/mc8esoDhjSZLuHe+gZrc+5de4Yp7lTs1mp+H7Ip2pZwYuEl6gLGwKwtMi8euo1Zy/+SdZ/hD04CkepPfPGiYjWMePqyGo8cNAyHgC7+a97+zD9lPR3pqJcduc27WPbgp696L0f8pCGEYU88JG9JqhkeaM0cXHl2ml+3zDXSfzicJWm/a5kIq745UPOrOP06Gvm5NuTnyNo9x2x3mIrKHqoRSB8hP5IZVY+nIBHoh4mSyTMISFFwU2dG/6NmlkhaJDF55iFyFtZV/X0Jq1KlE412N/
-            replace: (m0: string, codeHTML: string, hash: string, argsEncoded: string) => {
+                `, // https://kildom.github.io/qre-web-demo/#2jVVPT8IwFPfcT7H0xgGJHmEsMRGFExoTLgSlbZ7b3N90UxDid/e9jW1xdMweemjfa/t+f/oUQj9MNXz5sLuOPrIrhsJZlDQ+fyL2ZHYsSlvoeA1ZhsVlrM0z0cwnjJXmwtWC6xPDFams7dWbsXUkw8JeRCn6ixi3ZJio4CyUBrfxAdy85XAyTIOmMSoUh2/kqqD8aIyg0b1DY/1qbzoDStdezOe2uYL6jQ2TpDs+wpqd7pQf4455ldsdh52Hn0C6gGdBXCRcX1nYFISrRep1sdbx/v5Livw56NljMsvunjSsFrBLHvI5qOX9TMhkBW/ms2/H1fFrMTyYGfvn/YiaEbNtrXf6dlDxW8ZIofiF5HrK99yxC0Er7InZlAupuLPMPdCFzu0RzU5JSX/iSxKV/vibh9j2wBNK4Ssvle9SidiTAbggkjiN0zCEwI18qo7VtVSNco0fPVXVtF4Ng82gFYVrE/YL
+            replace: (m0: string, codeHTML: string, hash: string) => {
 
-                let args = fromBase64<PreviewArgs>(argsEncoded);
-                let doc: DocumentMetrics | JobPostponed;
-                doc = asyncJob(`doctml-preview-${hash}`);
-                if (doc === jobPostponed) {
+                let res: [DocumentMetrics, PreviewArgs] | JobPostponed;
+                res = asyncJob(`doctml-preview-${hash}`);
+                if (res === jobPostponed) {
                     throw new Error("This should not happen!");
                 }
+                let [doc, args] = res;
                 let images = '';
                 for (let page of doc.pages) {
                     let width = Math.round(page.pixelWidth / doc.pngWidth * 95);
