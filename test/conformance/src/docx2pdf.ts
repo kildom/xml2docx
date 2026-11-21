@@ -285,29 +285,37 @@ export async function convertDocxFiles(files: { [key: string]: string }) {
 }
 
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
-    const fs = await import('node:fs');
-    mkdir('test/outputs/_tmp/docx2pdf_test/in');
-    mkdir('test/outputs/_tmp/docx2pdf_test/out');
-    for (let run = 0; run < 2; run++) {
-        let list = Object.create(null);
-        console.log(`Preparing files for run ${run}`);
-        for (let file = 0; file < 10; file++) {
-            fs.copyFileSync('test/docs/data/include/styles/styles.docx', `test/outputs/_tmp/docx2pdf_test/in/${run}${file}.docx`);
-            list[`test/outputs/_tmp/docx2pdf_test/in/${run}${file}.docx`] = `test/outputs/_tmp/docx2pdf_test/out/${run}${file}.pdf`;
-            try { fs.unlinkSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.pdf`); } catch (_) { }
-            try { fs.unlinkSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.html`); } catch (_) { }
-        }
-        console.log(`Converting files for run ${run}`);
-        await convertDocxFiles(list);
-        console.log(`Checking files for run ${run}`);
-        for (let file = 0; file < 10; file++) {
-            if (fs.readFileSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.html`, 'utf-8').substring(0, 1000).indexOf('<html') === -1
-                || !fs.readFileSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.pdf`, 'latin1').startsWith('%PDF')
-            ) {
-                throw new Error(`Invalid conversion result of file ${run}${file}.docx`);
+if (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) {
+    void (async () => {
+        const fs = await import('node:fs');
+        mkdir('test/outputs/_tmp/docx2pdf_test/in');
+        mkdir('test/outputs/_tmp/docx2pdf_test/out');
+        for (let run = 0; run < 2; run++) {
+            let list = Object.create(null);
+            console.log(`Preparing files for run ${run}`);
+            for (let file = 0; file < 10; file++) {
+                let inputFile = `test/outputs/_tmp/docx2pdf_test/in/${run}${file}.docx`;
+                let outputFile = `test/outputs/_tmp/docx2pdf_test/out/${run}${file}`;
+                fs.copyFileSync('test/docs/data/include/styles/styles.docx', inputFile);
+                list[inputFile] = `${outputFile}.pdf`;
+                try {
+                    fs.unlinkSync(`${outputFile}.pdf`);
+                } catch (_) { /* File may not exist. */ }
+                try {
+                    fs.unlinkSync(`${outputFile}.html`);
+                } catch (_) { /* File may not exist. */ }
+            }
+            console.log(`Converting files for run ${run}`);
+            await convertDocxFiles(list);
+            console.log(`Checking files for run ${run}`);
+            for (let file = 0; file < 10; file++) {
+                let html = fs.readFileSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.html`, 'utf-8');
+                let pdf = fs.readFileSync(`test/outputs/_tmp/docx2pdf_test/out/${run}${file}.pdf`, 'latin1');
+                if (html.substring(0, 1000).indexOf('<html') === -1 || !pdf.startsWith('%PDF')) {
+                    throw new Error(`Invalid conversion result of file ${run}${file}.docx`);
+                }
             }
         }
-    }
-    console.log('Self test PASSED');
-})();
+        console.log('Self test PASSED');
+    })();
+}

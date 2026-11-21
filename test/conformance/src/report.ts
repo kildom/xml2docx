@@ -3,7 +3,22 @@ import { compileTemplate } from '../../scripts/gen-docs/template.ts';
 import hljs from 'highlight.js';
 import { TestMetadata } from './test-reader.ts';
 import path from 'node:path';
-import { debugFilesContent, diffHtmlFileContent, diffHtmlFileName, diffPngFileName, doctmlFileContent, docxFileName, htmlFileContent, htmlFileName, infoFileContent, listTests, pdfFileName, pngFileName, processErrors, reportFileNameNoExt } from './common.ts';
+import {
+    debugFilesContent,
+    diffHtmlFileContent,
+    diffHtmlFileName,
+    diffPngFileName,
+    doctmlFileContent,
+    docxFileName,
+    htmlFileContent,
+    htmlFileName,
+    infoFileContent,
+    listTests,
+    pdfFileName,
+    pngFileName,
+    processErrors,
+    reportFileNameNoExt,
+} from './common.ts';
 import { TestBundle } from './test-docs-diff.ts';
 import * as docsParser from '../../scripts/gen-docs/parser';
 
@@ -108,7 +123,10 @@ export async function generateDiffReport(bundles: TestBundle[]) {
     fs.writeFileSync('test/outputs/diff-errors.html', results);
 
     if (Object.values(summaryMessages).length > 0) {
-        fs.writeFileSync('test/outputs/diff-summary.md', `Count | Message\n------|--------\n${Object.entries(summaryMessages).map(([message, count]) => `${count} | ${message}`).join('\n')}\n`);
+        let summaryRows = Object.entries(summaryMessages)
+            .map(([message, count]) => `${count} | ${message}`)
+            .join('\n');
+        fs.writeFileSync('test/outputs/diff-summary.md', `Count | Message\n------|--------\n${summaryRows}\n`);
     } else {
         fs.writeFileSync('test/outputs/diff-summary.md', '**No differences found.**\n');
     }
@@ -154,7 +172,7 @@ async function createReportBundle(bundle: TestBundle, summaryMessages: { [messag
             message = ['WARNING', 'Compatibility broken and test removed.', 'Make sure it is intentional.'];
             break;
         case 'o,m,c':
-            message = ['', '', '']; // No differences, so some error in test
+            // No differences, so some error in test.
             break;
         case 'o,m,c,o!=m,m!=c':
         case 'o,m,c,o!=m,c!=o':
@@ -194,7 +212,12 @@ async function createReportBundle(bundle: TestBundle, summaryMessages: { [messag
         addDiffPanels(reportBundle, bundle.curId, 'cur', 'old', 'cur ≈ old');
     }
 
-    for (let item of [...(reportBundle.old?.test.coverage ?? []), ...(reportBundle.mix?.test.coverage ?? []), ...(reportBundle.cur?.test.coverage ?? [])]) {
+    let coverage = [
+        ...(reportBundle.old?.test.coverage ?? []),
+        ...(reportBundle.mix?.test.coverage ?? []),
+        ...(reportBundle.cur?.test.coverage ?? []),
+    ];
+    for (let item of coverage) {
         if (coverageMap[item.name]) {
             if (reportBundle.success) {
                 coverageMap[item.name].success++;
@@ -219,23 +242,41 @@ function addDiffPanels(reportBundle: ReportBundle, testId: string | undefined, r
         let diff = diffHtmlFileContent(testId, root);
         reportBundle.panels.push({
             title: `HTML: ${title}`,
-            html: '<pre class="code"><code class="language-diff">' + hljs.highlight(diff, { language: 'diff' }).value + '</code></pre>',
+            html: '<pre class="code"><code class="language-diff">'
+                + hljs.highlight(diff, { language: 'diff' }).value
+                + '</code></pre>',
         });
     }
     let diffPng = diffPngFileName(testId, root);
     if (fs.existsSync(diffPng)) {
+        let reportDir = path.dirname(reportFileNameNoExt());
+        let diffPngUrl = path.relative(reportDir, diffPng).replace(/\\/g, '/');
+        let rootPngUrl = path.relative(reportDir, pngFileName(testId, root)).replace(/\\/g, '/');
+        let root2PngUrl = path.relative(reportDir, pngFileName(testId, root2)).replace(/\\/g, '/');
         reportBundle.panels.push({
             title: `PNG: ${title}`,
             html: `
                 <div class="img-diff-container">
-                    <span class="img-diff-switcher" onmouseover="hideImage('img-diff-${testId}-${root}-${root2}-0'); showImage('img-diff-${testId}-${root}-${root2}-1')" 
-                        onmouseout="showImage('img-diff-${testId}-${root}-${root2}-0'); hideImage('img-diff-${testId}-${root}-${root2}-1')">${root}</span><span
-                    class="img-diff-switcher" onmouseover="hideImage('img-diff-${testId}-${root}-${root2}-0'); showImage('img-diff-${testId}-${root}-${root2}-2')" 
-                        onmouseout="showImage('img-diff-${testId}-${root}-${root2}-0'); hideImage('img-diff-${testId}-${root}-${root2}-2')">${root2}</span>
+                    <span class="img-diff-switcher"
+                        onmouseover="hideImage('img-diff-${testId}-${root}-${root2}-0');
+                            showImage('img-diff-${testId}-${root}-${root2}-1')"
+                        onmouseout="showImage('img-diff-${testId}-${root}-${root2}-0');
+                            hideImage('img-diff-${testId}-${root}-${root2}-1')">${root}</span><span
+                    class="img-diff-switcher"
+                        onmouseover="hideImage('img-diff-${testId}-${root}-${root2}-0');
+                            showImage('img-diff-${testId}-${root}-${root2}-2')"
+                        onmouseout="showImage('img-diff-${testId}-${root}-${root2}-0');
+                            hideImage('img-diff-${testId}-${root}-${root2}-2')">${root2}</span>
                     <div class="img-diff-flex">
-                    <div class="img-diff-diff"><img id="img-diff-${testId}-${root}-${root2}-0" src="${path.relative(path.dirname(reportFileNameNoExt()), diffPng).replace(/\\/g, '/')}" alt="Diff Image"></div>
-                    <div class="img-diff-img" style="left: -1px"><img id="img-diff-${testId}-${root}-${root2}-1" src="${path.relative(path.dirname(reportFileNameNoExt()), pngFileName(testId, root)).replace(/\\/g, '/')}" alt="Diff Image"></div>
-                    <div class="img-diff-img" style="left: -2px"><img id="img-diff-${testId}-${root}-${root2}-2" src="${path.relative(path.dirname(reportFileNameNoExt()), pngFileName(testId, root2)).replace(/\\/g, '/')}" alt="Diff Image"></div>
+                    <div class="img-diff-diff">
+                        <img id="img-diff-${testId}-${root}-${root2}-0" src="${diffPngUrl}" alt="Diff Image">
+                    </div>
+                    <div class="img-diff-img" style="left: -1px">
+                        <img id="img-diff-${testId}-${root}-${root2}-1" src="${rootPngUrl}" alt="Diff Image">
+                    </div>
+                    <div class="img-diff-img" style="left: -2px">
+                        <img id="img-diff-${testId}-${root}-${root2}-2" src="${root2PngUrl}" alt="Diff Image">
+                    </div>
                     </div>
                 </div>
             `,
@@ -286,7 +327,9 @@ async function createReportTest(id: string, root?: string, title?: string, skipC
         }
         panels.push({
             title: debugType,
-            html: '<pre class="code"><code class="language-' + language + '">' + hljs.highlight(content, { language }).value + '</code></pre>',
+            html: '<pre class="code"><code class="language-' + language + '">'
+                + hljs.highlight(content, { language }).value
+                + '</code></pre>',
         });
     }
     if (fs.existsSync(docxFileName(id, root))) {
@@ -304,7 +347,9 @@ async function createReportTest(id: string, root?: string, title?: string, skipC
     if (fs.existsSync(htmlFileName(id, root))) {
         panels.push({
             title: 'HTML',
-            html: '<pre class="code"><code class="language-html">' + hljs.highlight(htmlFileContent(id, root), { language: 'html' }).value + '</code></pre>',
+            html: '<pre class="code"><code class="language-html">'
+                + hljs.highlight(htmlFileContent(id, root), { language: 'html' }).value
+                + '</code></pre>',
         });
     }
     if (fs.existsSync(pngFileName(id, root))) {
@@ -315,7 +360,9 @@ async function createReportTest(id: string, root?: string, title?: string, skipC
     }
     panels.push({
         title: 'DocTML',
-        html: '<pre class="code"><code class="language-xml">' + hljs.highlight(doctmlFileContent(id, root), { language: 'doctml' }).value + '</code></pre>',
+        html: '<pre class="code"><code class="language-xml">'
+            + hljs.highlight(doctmlFileContent(id, root), { language: 'doctml' }).value
+            + '</code></pre>',
     });
 
     return reportTest;

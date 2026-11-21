@@ -1,16 +1,35 @@
 
 import fs from 'node:fs';
 import { Runner } from './runner.ts';
-import { CliRunner } from './runner-cli.ts';
 import { parseDocTMLTests } from './test-reader';
-import { appendError, cloneTest, cloneTestInput, dataFileName, debugFilesContent, doctmlFileName, docxFileName, errorFileContent, errorFileName, getArgs, htmlFileContent, htmlFileName, infoFileContent, infoFileName, listTests, listTestsGrouped, outputRootDir, pdfFileName, pngFileName, removeTest, setOutputPath } from './common.ts';
+import {
+    appendError,
+    cloneTest,
+    cloneTestInput,
+    dataFileName,
+    debugFilesContent,
+    doctmlFileName,
+    docxFileName,
+    errorFileContent,
+    errorFileName,
+    getArgs,
+    htmlFileName,
+    infoFileContent,
+    infoFileName,
+    listTests,
+    listTestsGrouped,
+    outputRootDir,
+    pdfFileName,
+    pngFileName,
+    removeTest,
+    setOutputPath,
+} from './common.ts';
 import { convertDocxFiles } from './docx2pdf.ts';
 import { pdf2png } from './pdf2png.ts';
 import { ApiRunner } from './runner-api.ts';
 import { generateReport } from './report.ts';
 import { compareDocxFiles } from './docx-compare.ts';
 import path from 'node:path';
-import { TsxRunner } from './runner-tsx.ts';
 
 const MAX_TESTS_IN_GROUP = 20;
 
@@ -130,7 +149,8 @@ async function runRunner(runner: Runner, doneRunners: string[]) {
                     removeTest(outputId);
                 } else {
                     // Differences detected, we need to clone all test files for all previous runners.
-                    let errorText = `Difference detected in ${difference} between runner ${runner.name} and previous runners (${doneRunners.join(', ')}).`;
+                    let errorText = `Difference detected in ${difference} between runner ${runner.name} `
+                        + `and previous runners (${doneRunners.join(', ')}).`;
                     appendError(inputId, errorText);
                     appendError(outputId, errorText);
                     console.log(`Detected difference for ${baseId}`);
@@ -239,7 +259,7 @@ async function renderTests() {
         }
     }
 
-    for (let { docxFile, pdfFile, testId } of filesToConvert) {
+    for (let { pdfFile, testId } of filesToConvert) {
 
         try {
             if (!fs.existsSync(htmlFileName(testId))) {
@@ -268,7 +288,7 @@ async function main() {
 
     try {
         fs.mkdirSync('test/outputs', { recursive: true });
-    } catch (_ex) { }
+    } catch (_ex) { /* The output directory may already exist. */ }
 
     let usage = 'Usage: npm run test-docs -- [outputPath] [inputPath] [-r <runner> ...] [-f <file> ...] [--help]';
     let { args, files: filterFiles, runners: filterRunners } = getArgs(0, 2, usage);

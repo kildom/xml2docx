@@ -37,7 +37,8 @@ export class ApiRunner implements Runner {
                     normalized: '.debug.normalized.doctml',
                     processed: '.debug.processed.doctml',
                 };
-                fs.writeFileSync(path.join(path.dirname(output), path.basename(output, path.extname(output)) + suffixes[type]), content);
+                let fileName = path.basename(output, path.extname(output)) + suffixes[type];
+                fs.writeFileSync(path.join(path.dirname(output), fileName), content);
             },
 
             readFile(result, file, binary) {

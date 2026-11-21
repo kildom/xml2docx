@@ -2,8 +2,7 @@
 import * as child_process from 'node:child_process';
 
 import { Runner } from './runner';
-import path, { dirname } from 'node:path';
-import * as fs from 'node:fs';
+import path from 'node:path';
 
 
 function getPlatform(): string {

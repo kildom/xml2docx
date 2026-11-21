@@ -1,7 +1,7 @@
 
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
-import { doctmlFileName, isDirectExecution, isTestSuite, mkdirFor, outputRootDir } from './common';
+import { doctmlFileName, isTestSuite, mkdirFor, outputRootDir } from './common';
 
 
 export interface TestMetadata {
@@ -15,9 +15,9 @@ export interface TestMetadata {
 
 
 /** Parse DocTML test files from the input copied to output directory and write separate test files.
- * 
+ *
  * For each test case, the result contains a doctml file, an info.json file with TestMetadata, and a data.json file.
- * 
+ *
  * @param filterFiles An array of file names that should be included (empty for all files).
  */
 export function parseDocTMLTests(filterFiles: string[]) {
@@ -64,7 +64,16 @@ export function parseDocTMLTests(filterFiles: string[]) {
     }
 }
 
-function createTest(inputFile: string, nameStem: string, header: string, footer: string, coverageText: string, body: string, data: string, index: number): TestMetadata {
+function createTest(
+    inputFile: string,
+    nameStem: string,
+    header: string,
+    footer: string,
+    coverageText: string,
+    body: string,
+    data: string,
+    index: number
+): TestMetadata {
     coverageText = coverageText.trim().replace(/(^[\t ]+|[\t ]+$)/gm, '').trim();
     let { coverage, expectedErrors } = parseTestCoverage(coverageText);
     let hash = hashOfCoverage(coverage);

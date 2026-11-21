@@ -2,7 +2,7 @@
 import * as child_process from 'node:child_process';
 
 import { Runner } from './runner';
-import path, { dirname } from 'node:path';
+import path from 'node:path';
 import * as fs from 'node:fs';
 
 
@@ -53,7 +53,8 @@ export class NodeRunner implements Runner {
         let cnt = fs.readFileSync(input, 'utf-8');
         if (Math.random() < 0.15) {
             let i = Math.floor(Math.random() * cnt.length);
-            cnt = cnt.substring(0, i) + String.fromCharCode('a'.charCodeAt(0) + Math.floor(Math.random() * 26)) + cnt.substring(i);
+            let replacement = String.fromCharCode('a'.charCodeAt(0) + Math.floor(Math.random() * 26));
+            cnt = cnt.substring(0, i) + replacement + cnt.substring(i);
         }
         fs.writeFileSync(`${input}.tmp`, cnt);
 

@@ -228,7 +228,7 @@ export function reportFileNameNoExt(root?: string) {
 }
 
 /** Parse command line arguments and return an object containing the parsed arguments, files, and runners.
- * 
+ *
  * @param minArgs - Minimum number of arguments required.
  * @param maxArgs - Maximum number of arguments allowed.
  * @returns An object containing the parsed arguments, files, and runners.

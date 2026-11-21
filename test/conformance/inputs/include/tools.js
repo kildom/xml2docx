@@ -69,7 +69,7 @@ function testCase(...list) {
 */
 
 
-(function(utils) {
+void (function(utils) {
 
     const LoremIpsum = eval(utils.include('include/lorem-ipsum.min.js') + ';\nLoremIpsum');
 
@@ -83,4 +83,4 @@ function testCase(...list) {
             return prefix + ipsum.generate(count - prefix.length);
         }
     };
-})
+});

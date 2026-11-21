@@ -215,17 +215,19 @@ function drawPageSeparator(
 }
 
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
-    const { convertDocxFiles } = await import('./docx2pdf');
-    const docx = 'test/docs/include/styles/styles.docx';
-    const pdf = 'test/outputs/_tmp/pdf2png_test/test.pdf';
-    const png = 'test/outputs/_tmp/pdf2png_test/test.png';
-    mkdir('test/outputs/_tmp/pdf2png_test');
-    await convertDocxFiles({[docx]: pdf});
-    await pdf2png(pdf, png);
-    let cnt = fs.readFileSync(png, 'latin1');
-    if (!cnt.startsWith('\x89PNG')) {
-        throw new Error('Invalid PNG output');
-    }
-    console.log('Self test PASSED');
-})();
+if (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) {
+    void (async () => {
+        const { convertDocxFiles } = await import('./docx2pdf');
+        const docx = 'test/docs/include/styles/styles.docx';
+        const pdf = 'test/outputs/_tmp/pdf2png_test/test.pdf';
+        const png = 'test/outputs/_tmp/pdf2png_test/test.png';
+        mkdir('test/outputs/_tmp/pdf2png_test');
+        await convertDocxFiles({[docx]: pdf});
+        await pdf2png(pdf, png);
+        let cnt = fs.readFileSync(png, 'latin1');
+        if (!cnt.startsWith('\x89PNG')) {
+            throw new Error('Invalid PNG output');
+        }
+        console.log('Self test PASSED');
+    })();
+}

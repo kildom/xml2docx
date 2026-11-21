@@ -52,19 +52,31 @@ export async function compareDocxFiles(file1: string, file2: string): Promise<st
 }
 
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
-    const path = await import('node:path');
-    const child_process = await import('node:child_process');
-    let args = [];
-    fs.mkdirSync('test/outputs/_tmp', { recursive: true });
-    fs.writeFileSync('test/outputs/_tmp/a.doctml', 'a');
-    fs.writeFileSync('test/outputs/_tmp/b.doctml', 'b');
-    fs.writeFileSync('test/outputs/_tmp/a2.doctml', '<document> <p> a </p> </document>');
-    child_process.spawnSync('dist/deno-compile/x64-linux/doctml', ['test/outputs/_tmp/a.doctml', 'test/outputs/_tmp/a.docx'], { stdio: 'inherit' });
-    child_process.spawnSync('dist/deno-compile/x64-linux/doctml', ['test/outputs/_tmp/b.doctml', 'test/outputs/_tmp/b.docx'], { stdio: 'inherit' });
-    child_process.spawnSync('dist/deno-compile/x64-linux/doctml', ['test/outputs/_tmp/a2.doctml', 'test/outputs/_tmp/a2.docx'], { stdio: 'inherit' });
-    console.log(await compareDocxFiles('test/outputs/_tmp/a.docx', 'test/outputs/_tmp/b.docx'));
-    console.log(await compareDocxFiles('test/outputs/_tmp/a.docx', 'test/outputs/_tmp/a2.docx'));
-    console.log(await compareDocxFiles('test/outputs/_tmp/a2.docx', 'test/outputs/_tmp/b.docx'));
-    console.log('Self test PASSED');
-})();
+if (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) {
+    void (async () => {
+        const child_process = await import('node:child_process');
+        fs.mkdirSync('test/outputs/_tmp', { recursive: true });
+        fs.writeFileSync('test/outputs/_tmp/a.doctml', 'a');
+        fs.writeFileSync('test/outputs/_tmp/b.doctml', 'b');
+        fs.writeFileSync('test/outputs/_tmp/a2.doctml', '<document> <p> a </p> </document>');
+        child_process.spawnSync(
+            'dist/deno-compile/x64-linux/doctml',
+            ['test/outputs/_tmp/a.doctml', 'test/outputs/_tmp/a.docx'],
+            { stdio: 'inherit' }
+        );
+        child_process.spawnSync(
+            'dist/deno-compile/x64-linux/doctml',
+            ['test/outputs/_tmp/b.doctml', 'test/outputs/_tmp/b.docx'],
+            { stdio: 'inherit' }
+        );
+        child_process.spawnSync(
+            'dist/deno-compile/x64-linux/doctml',
+            ['test/outputs/_tmp/a2.doctml', 'test/outputs/_tmp/a2.docx'],
+            { stdio: 'inherit' }
+        );
+        console.log(await compareDocxFiles('test/outputs/_tmp/a.docx', 'test/outputs/_tmp/b.docx'));
+        console.log(await compareDocxFiles('test/outputs/_tmp/a.docx', 'test/outputs/_tmp/a2.docx'));
+        console.log(await compareDocxFiles('test/outputs/_tmp/a2.docx', 'test/outputs/_tmp/b.docx'));
+        console.log('Self test PASSED');
+    })();
+}

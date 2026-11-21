@@ -1,7 +1,20 @@
 
 import fs from 'node:fs';
 import { execSync, spawnSync } from 'node:child_process';
-import { cloneTest, dataFileContent, diffHtmlFileName, diffPngFileName, doctmlFileContent, getArgs, htmlFileContent, htmlFileName, infoFileContent, listTestsGrouped, mkdirFor, pngFileName, removeTest } from './common';
+import {
+    cloneTest,
+    dataFileContent,
+    diffHtmlFileName,
+    diffPngFileName,
+    doctmlFileContent,
+    getArgs,
+    htmlFileContent,
+    htmlFileName,
+    infoFileContent,
+    listTestsGrouped,
+    pngFileName,
+    removeTest,
+} from './common';
 import { generateDiffReport } from './report';
 
 const buildCommands = [
@@ -66,7 +79,10 @@ async function runTestDocs() {
     execSync(`npm run test-docs ${filesArg} ../../../test/outputs/old`, { stdio: 'inherit', cwd: 'test/outputs/prev-workspace' });
 
     showHeader('Running tests for current source code against previous tests');
-    execSync(`npm run test-docs ${filesArg} test/outputs/mix test/outputs/prev-workspace/test/docs/data${filesArg}`, { stdio: 'inherit' });
+    execSync(
+        `npm run test-docs ${filesArg} test/outputs/mix test/outputs/prev-workspace/test/docs/data${filesArg}`,
+        { stdio: 'inherit' }
+    );
 
     fs.rmSync('test/outputs/prev-workspace', { recursive: true, force: true });
 }
@@ -250,7 +266,12 @@ function collectTests(): TestBundle[] {
         return runners;
     }
 
-    function addToPartialBundles(partialBundles: { [contentKey: string]: Set<TestGroupBundle> }, bundle: TestGroupBundle, group: TestGroup, root: string) {
+    function addToPartialBundles(
+        partialBundles: { [contentKey: string]: Set<TestGroupBundle> },
+        bundle: TestGroupBundle,
+        group: TestGroup,
+        root: string
+    ) {
         let test = infoFileContent(group.ids[0], root);
         let contentKey = test.expectedErrors.join('|||');
         contentKey += '|||' + doctmlFileContent(group.ids[0], root);
@@ -300,7 +321,7 @@ function collectTests(): TestBundle[] {
             addToPartialBundles(partialBundles, bundle, bundle.mix, 'mix');
         }
     }
-    // Bundle test with different ids but the same content together, starting with those that have matching 3 versions, then 2 versions.
+    // Bundle tests with the same content together, starting with groups matching three versions, then two.
     for (let matches of [3, 2]) {
         for (let bundleSet of Object.values(partialBundles)) {
             let curCount = 0;
@@ -331,7 +352,12 @@ function collectTests(): TestBundle[] {
         let mixRunners = collectRunners(bundle.mix);
         let allRunners = new Set<string>([...curRunners, ...oldRunners, ...mixRunners]);
         if (allRunners.size === 0) continue;
-        for (let [group, runners, root] of [[bundle.cur, curRunners, 'cur'], [bundle.old, oldRunners, 'old'], [bundle.mix, mixRunners, 'mix']] as [TestGroup | undefined, Set<string>, string][]) {
+        let versionGroups = [
+            [bundle.cur, curRunners, 'cur'],
+            [bundle.old, oldRunners, 'old'],
+            [bundle.mix, mixRunners, 'mix'],
+        ] as [TestGroup | undefined, Set<string>, string][];
+        for (let [group, runners, root] of versionGroups) {
             if (!group || runners.size > 0 || group.ids.length !== 1) continue;
             for (let runner of allRunners) {
                 cloneTest(group.ids[0], `${group.ids[0]}-${runner}`, root); // TODO: Regenerate test-docs reports if at least one test is cloned
