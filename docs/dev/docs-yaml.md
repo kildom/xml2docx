@@ -67,7 +67,7 @@ Each attribute is a mapping under `attributes`. Common supported fields are:
 - `dev`: optional Markdown comment for DocTML developers. It appears as a DEV alert on the generated attribute page only in developer mode; it is omitted from regular documentation.
 - `examples`: examples specific to this attribute.
 
-Reusable types use the same attribute fields, with `type-name` as their identifier. Types may inherit from another type using `type`. Define them at the top level:
+Reusable types use the same attribute fields, including `dev`, with `type-name` as their identifier. Types may inherit from another type using `type`. When type inheritance, attribute overrides, or tag `combine` operations bring multiple `dev` notes together, all notes are retained and separated by a blank line. The note on the current attribute or tag comes first, followed by notes inherited from its type or combined tag. Define reusable types at the top level:
 
 ```yaml
 - type-name: positive-length

@@ -145,6 +145,11 @@ export function parseDocs(): Docs {
         return result;
     }
 
+    function combineDevNotes(...notes: (string | undefined)[]): string | undefined {
+        let combined = notes.filter((note): note is string => !!note).join('\n\n');
+        return combined || undefined;
+    }
+
     function getCombinedYamlTag(tagName: string): YamlTag {
 
         let base = yaml.tags[tagName];
@@ -161,13 +166,21 @@ export function parseDocs(): Docs {
         let result = list.shift()!;
 
         for (let combineTag of list) {
+            let attributes = { ...result.attributes, ...combineTag.attributes };
+            for (let [name, attribute] of Object.entries(combineTag.attributes || {})) {
+                let inherited = result.attributes?.[name];
+                if (inherited) {
+                    attributes[name] = {
+                        ...attribute,
+                        dev: combineDevNotes(attribute.dev, inherited.dev),
+                    };
+                }
+            }
             result = {
                 ...result,
                 ...combineTag,
-                attributes: {
-                    ...result.attributes,
-                    ...combineTag.attributes,
-                },
+                dev: combineDevNotes(combineTag.dev, result.dev),
+                attributes,
             };
         }
 
@@ -182,7 +195,10 @@ export function parseDocs(): Docs {
         if (!type) {
             throw new Error(`Referenced type "${base.type}" not found in YAML input.`);
         }
-        return { ...getCombinedYamlAttribute(type), ...base };
+        let combinedType = getCombinedYamlAttribute(type);
+        let combined = { ...combinedType, ...base };
+        combined.dev = combineDevNotes(base.dev, combinedType.dev);
+        return combined;
     }
 
     function parseAttribute(attrName: string, attrYaml: YamlAttribute): DocsAttribute {

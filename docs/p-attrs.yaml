@@ -2,7 +2,7 @@
 - tag-name: -IParagraphPropertiesOptions-
   combine: [ -IParagraphStylePropertiesOptions- ]
   dev: |
-    Uses docx.js interface `docx.IParagraphPropertiesOptions`.
+    Uses docx.js interface docx.js:IParagraphPropertiesOptions.
 
     Not exposed by DocTML:
     - `frame`
@@ -11,7 +11,7 @@
     page-break:
       type: bool
       brief: Page break before paragraph.
-      dev: 'Underlying docx.js property: `pageBreakBefore?: boolean`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.pageBreakBefore.'
     heading:
       value: level
       brief: Heading level.
@@ -23,7 +23,7 @@
       type: str
       brief: Paragraph style name.
       details: Defined by the `<p-style>` tag or imported by `<document styles="..."`.
-      dev: 'Underlying docx.js property: `style?: string`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.style.'
     tabs:
       value: position type leader, ...
       brief: Tabulator stops.
@@ -33,40 +33,40 @@
             @enum TabStopType
         - **leader** @optional - Tabulator stop leader. Default is `none`.
             @enum LeaderType
-      dev: 'Underlying docx.js property: `tabStops?: readonly TabStopDefinition[]`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.tabStops.'
     widow-control:
       type: bool
       brief: Paragraph widow control.
-      dev: 'Underlying docx.js property: `widowControl?: boolean`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.widowControl.'
     word-wrap:
       type: bool
       brief: Word wrapping.
-      dev: 'Underlying docx.js property: `wordWrap?: boolean`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.wordWrap.'
     # Experimental attributes
     auto-space-east-asian-text:
       experimental: true
       type: bool
-      dev: 'Underlying docx.js property: `autoSpaceEastAsianText?: boolean`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.autoSpaceEastAsianText.'
     bidirectional:
       experimental: true
       type: bool
-      dev: 'Underlying docx.js property: `bidirectional?: boolean`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.bidirectional.'
     bullet-level:
       experimental: true
       type: int
-      dev: 'Underlying docx.js property: `bullet?: { level: number }`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.bullet.'
     overflow-punctuation:
       experimental: true
       type: bool
-      dev: 'Underlying docx.js property: `overflowPunctuation?: boolean`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.overflowPunctuation.'
     scale:
       experimental: true
       type: float
-      dev: 'Underlying docx.js property: `scale?: number`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.scale.'
     suppress-line-numbers:
       experimental: true
       type: bool
-      dev: 'Underlying docx.js property: `suppressLineNumbers?: boolean`.'
+      dev: 'Underlying property: docx.js:IParagraphPropertiesOptionsBase.suppressLineNumbers.'
 
 
 - tag-name: -IParagraphStylePropertiesOptions-
@@ -75,11 +75,13 @@
     border:
       type: border
       brief: Paragraph borders.
-      dev: 'Underlying docx.js property: `border?: IBordersOptions`.'
+      dev: 'Underlying property: docx.js:IParagraphStylePropertiesOptions.border.'
     background:
       type: color
       brief: Paragraph background color.
-      dev: 'Underlying docx.js property: `shading?: IShadingAttributesProperties`.'
+      dev: |
+        Underlying property: docx.js:IParagraphStylePropertiesOptions.shading.
+        The DocTML supports only `clear` shading - solid background color.
   dev: |
     Not exposed by DocTML:
     - `numbering`
@@ -95,7 +97,7 @@
         <# enumerator('enums.AlignmentTypeAliases', {
             collapse: '`left`, `right`, `center`, `justify`, and more...',
           }) #>
-      dev: 'Underlying docx.js property: `alignment?: typeof AlignmentType[keyof typeof AlignmentType]`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.alignment.'
       examples:
         - brief: align="right"
           details: |
@@ -125,18 +127,18 @@
     keep-lines:
       type: bool
       brief: Keep all lines on a single page if possible.
-      dev: 'Underlying docx.js property: `keepLines?: boolean`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.keepLines.'
     keep-next:
       type: bool
       brief: Keep next paragraph on the same page if possible.
-      dev: 'Underlying docx.js property: `keepNext?: boolean`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.keepNext.'
     outline:
       type: uint
       brief: Outline level.
       details: |
         Possible values are numbers from `1` to `9`.
         By default, paragraph is not in the document outline.
-      dev: 'Underlying docx.js property: `outlineLevel?: number`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.outlineLevel.'
     spacing:
       value: before after
       brief: Paragraph spacing.
@@ -170,16 +172,16 @@
             <p line-spacing="exactly 3mm">
               <# lorem({ length: 400, seed: 1054, wordWrap: 77, lineBreak: '\n  ' }) #>
             </p>
-      dev: 'Underlying docx.js property: `spacing?: ISpacingProperties`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.spacing.'
     # Experimental attributes
     contextual-spacing:
       experimental: true
       type: bool
-      dev: 'Underlying docx.js property: `contextualSpacing?: boolean`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.contextualSpacing.'
     thematic-break:
       experimental: true
       type: bool
-      dev: 'Underlying docx.js property: `thematicBreak?: boolean`.'
+      dev: 'Underlying property: docx.js:ILevelParagraphStylePropertiesOptions.thematicBreak.'
   dev: |
     Not exposed by DocTML:
     - `leftTabStop`

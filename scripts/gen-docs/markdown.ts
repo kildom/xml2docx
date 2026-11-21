@@ -40,6 +40,7 @@ export function markdownToHtml(markdown: string, withParagraphs: boolean = true)
             'gitHubDarkLightImages',
             'docs',
             'doctmlCode',
+            'docxJsLinks',
         ],
         ghCompatibleHeaderId: true,
         simplifiedAutoLink: true,
@@ -229,6 +230,28 @@ function registerPlugins() {
             }
         };
         return [ext1, ext2];
+    });
+
+    showdown.extension('docxJsLinks', function () {
+        let ext1 = {
+            type: 'lang',
+            regex: qre.global.legacy.ignoreCase`
+                "docx.js:"
+                1: repeat [a-z0-9_]
+                optional {
+                    "."
+                    2: repeat [a-z0-9_]
+                }
+                `, // https://kildom.github.io/qre-web-demo/#2SwYGvW5BUWpZZmq5Xm5WMQMXMOF4QqIxsBQY9qDMDvRUkQIwxxelFhcDPVfMhR7PoGhWsubigmQuoCg4rqExDI1U5HjmQs+2Sin5yRV6WcVWShhShlawaIpO1K0y0LWMj8VQA08X1RhSYNP1MI0FASMijK7lSoB7DJS+gF5L4OKCOTeksiAVlacHix8uLrhOWPkTDcw/IDMQJVpRqmasJpoqoJg1FwA=
+            replace: (m0: string, typeName: string, property?: string) => {
+                if (property) {
+                    return `<a href="https://docx.js.org/api/types/index.${typeName}.html#${property}" target="doctmlDocxJsFrame"><code>docx.js ${typeName}.${property}</code></a>`;
+                } else {
+                    return `<a href="https://docx.js.org/api/types/index.${typeName}.html" target="doctmlDocxJsFrame"><code>docx.js ${typeName}</code></a>`;
+                }
+            }
+        };
+        return [ext1];
     });
 
 }

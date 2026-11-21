@@ -29,14 +29,11 @@
         prefix: '<document>'
         suffix: '</document>'
   dev: |
-    docx.js API reference: https://docx.js.org/api/types/IParagraphOptions.html
-    Uses docx.js interface `docx.IParagraphPropertiesOptions`.
+    docx.js:IParagraphOptions
 
     Not exposed by DocTML:
     - `children`
     - `text`
-    - `frame`
-    - `run`
 
 
 - tag-name: h1

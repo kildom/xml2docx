@@ -31,6 +31,10 @@ Start an alert with a quoted marker line, `> [!TYPE]`, then put the alert text o
 
 The accepted types are `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`, and `DEV`. A `DEV` alert is for internal developer notes and is visible only when the documentation is generated in `dev` mode; it is omitted from the regular documentation. Use other alerts sparingly for important information; GitHub recommends no more than one or two per article. Alerts cannot be nested, and consecutive alerts should be avoided. See [GitHub’s alert syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 
+### docx.js API links
+
+Use the `docx.js:` Markdown extension to link to the docx.js API from developer notes and other documentation. Write a type reference as docx.js:TypeName, or a property reference as docx.js:TypeName.property. For example, docx.js:IParagraphOptions links to the type page, while docx.js:IParagraphOptions.pageBreakBefore links directly to that property. The link opens the corresponding page in the named docx.js API browsing context.
+
 ### Light/dark image variants
 
 Add `#gh-dark-mode-only` or `#gh-light-mode-only` to an image URL to mark the image for the matching theme. The generated site styles the image accordingly.

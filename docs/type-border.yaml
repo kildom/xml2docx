@@ -13,3 +13,14 @@
         @enum BorderStyle
     - **size** @optional - Border size in [positive length](#positive-length) units.
     - **space** @optional - Space between border and content in [positive length](#positive-length) units.
+  dev: |
+    The `border` type defiles docx.js:IBordersOptions interface.
+
+    The docx.js:IBordersOptions.between property is not implemented.
+
+    TODO: Consider implementing docx.js:IBordersOptions.between.
+
+    All properties of docx.js:IBorderOptions for each side are implemented except docx.js:ThemeColor
+    type of the color property.
+
+    TODO: Consider implementing docx.js:ThemeColor.
