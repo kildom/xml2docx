@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import { isDirectExecution, mkdir, mkdirFor } from './utils';
 
 
-const tempDir = 'temp/docx2pdf';
+const tempDir = 'artifacts/docx2pdf';
 
 
 async function checkJSONResponse(res: http.IncomingMessage): Promise<any> {

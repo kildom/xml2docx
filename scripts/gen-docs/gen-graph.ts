@@ -101,7 +101,7 @@ export function generateGraph(docs: Docs, outputLight: string, outputDark: strin
         edges: Object.values(edges),
     };
 
-    let tempDirPath = 'temp/docs-graph';
+    let tempDirPath = 'artifacts/docs-graph';
     let templateDirPath = 'scripts/gen-docs/templates';
     fs.mkdirSync(tempDirPath, { recursive: true });
     fs.mkdirSync(path.dirname(outputLight), { recursive: true });
@@ -130,5 +130,5 @@ function svgFromDot(dotPath: string, outputPath: string): void {
 (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
     let pd = await import('./parse-docs');
     let docs = pd.parseDocs();
-    generateGraph(docs, 'temp/docs-graph/graph-light.svg', 'temp/docs-graph/graph-dark.svg', tag => `${tag.name}.html`);
+    generateGraph(docs, 'artifacts/docs-graph/graph-light.svg', 'artifacts/docs-graph/graph-dark.svg', tag => `${tag.name}.html`);
 })();

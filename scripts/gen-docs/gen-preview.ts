@@ -9,7 +9,7 @@ import { convertDocxFiles } from '../common/docx2pdf.ts';
 
 let firstRun = true;
 
-const tempPath = 'temp/preview';
+const tempPath = 'artifacts/preview';
 const outPath = 'dist/html/preview';
 const includePath = 'test/conformance/inputs/include';
 const cliPath = 'dist/deno-compile/x64-linux/doctml'; // TODO: Depends on the platform, should be configurable

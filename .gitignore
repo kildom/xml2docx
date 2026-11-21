@@ -1,7 +1,7 @@
 /node_modules/
 /dist/
 /test/outputs/
-/temp/
+/artifacts/
 /docs/index.html
 .venv
 /uploads/
