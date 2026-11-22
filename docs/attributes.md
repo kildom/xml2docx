@@ -20,11 +20,9 @@ True Value | False Value | Note
 
 Example:
 
-<!-- @example Boolean attribute - bold text -->
-```xml
+```xml { test: "font.bold: Example: Bold text" }
 <font bold="y">Bold text</font>
 ```
-<!-- @end -->
 
 > [!NOTE]
 > The **Boolean** type allows you to express values in a variety of ways,
@@ -50,12 +48,10 @@ You can omit the unit name for zero length.
 
 Example:
 
-<!-- @example Length attribute - image dimensions and location -->
-```xml
+```xml { test: "img: Example: Length" }
 <img width="10cm" height="13cm" horizontal="margin 2mm"
     vertical="paragraph -5mm" margin="0" src="tree.png"/>
 ```
-<!-- @end -->
 
 > [!NOTE]
 > The **Length** type allows you to express values using different units,
@@ -94,7 +90,7 @@ Color is represented as:
 
 Example of using color attribute in DocTML:
 
-```xml { prefix: '<document>', suffix: '</document>' }
+```xml { test: 'p: Example: Passing font color', prefix: '<document>', suffix: '</document>' }
 <p font.color="#FF0000">This text is using 6-digit hex color</p>
 <p font.color="#F00">This text is using 3-digit hex color</p>
 <p font.color="red">This text is using CSS color name</p>

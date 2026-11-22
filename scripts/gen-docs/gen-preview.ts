@@ -6,6 +6,7 @@ import { runCli } from '../common/utils.ts';
 import * as mupdf from 'mupdf';
 
 import { convertDocxFiles } from '../common/docx2pdf.ts';
+import { registerTest } from './conformance-docs.ts';
 
 let firstRun = true;
 
@@ -20,6 +21,7 @@ export interface PreviewArgs {
     suffix?: string;
     data?: any;
     fullPage?: boolean;
+    test: string;
 };
 
 
@@ -37,6 +39,14 @@ function copyResources() {
 }
 
 export async function generatePreview(code: string, name: string, args: PreviewArgs): Promise<DocumentMetrics> {
+
+    if (!args.test) {
+        console.error('The following code causes error:');
+        console.error(code);
+        throw new Error('Every DocTML code preview must have "test" property do define test name for this code.');
+    }
+
+    registerTest(args.test, (args.prefix || '') + code + (args.suffix || ''), args.data);
 
     if (fs.existsSync(`${outPath}/${name}.json`)) {
         return JSON.parse(fs.readFileSync(`${outPath}/${name}.json`, 'utf-8')) as DocumentMetrics;

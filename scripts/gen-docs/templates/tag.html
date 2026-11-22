@@ -122,7 +122,7 @@ let baseTag = tag.aliasOf?.tag || tag;
                 </div>
                 <div class="example-content">
                     <%= example.details && markdown(example.details) %>
-                    <%= exampleCode(example) %>
+                    <%= exampleCode(example, tag) %>
                 </div>
             </div>
             <%! } %>
@@ -168,7 +168,7 @@ let baseTag = tag.aliasOf?.tag || tag;
                         </div>
                         <div class="example-content">
                             <%= example.details && markdown(example.details) %>
-                            <%= exampleCode(example) %>
+                            <%= exampleCode(example, tag, attr) %>
                         </div>
                     </div>
                 <%! } %>

@@ -22,6 +22,7 @@ const ExampleOptionsSchema = z.object({
     'suffix': z.string().optional(),
     'data': z.unknown().optional(),
     'fullPage': z.boolean().optional(),
+    'test': z.string().optional(),
 }).strict();
 
 const ExampleSchema = z.object({

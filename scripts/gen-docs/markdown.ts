@@ -149,7 +149,7 @@ function registerPlugins() {
         // ```xml
         let ext1 = {
             type: 'lang',
-            regex: /(?:^|(?<=\n))(```xml)(.*?)(\r?\n)([\s\S]*?)(\r?\n```)(?:(?=\r?\n)|$)/g,
+            regex: /(?:^|(?<=\n))(```xml)[ \t]+(.+?)(\r?\n)([\s\S]*?)(\r?\n```)(?:(?=\r?\n)|$)/g,
             replace: (m0: string, start: string, argsText: string, nl1: string, code: string, end: string) => {
                 let args = (argsText.trim() ? JSON5.parse(argsText) : {}) as PreviewArgs;
                 if (args.noPreview) {

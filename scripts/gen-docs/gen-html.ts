@@ -2,13 +2,15 @@ import fs from "node:fs";
 import path from "node:path";
 import qre from 'qre';
 import { generateGraph } from "./gen-graph";
-import { Docs, parseDocs } from "./parse-docs";
+import { Docs, DocsAttribute, DocsExample, DocsTag, parseDocs } from "./parse-docs";
 import { preprocessDocs } from "./preprocess";
 import { markdownToHtml } from "./markdown";
 import { compileTemplate } from "./template";
 import { asyncRetryLoop } from "./async-jobs";
 import { runCli } from "../common/utils";
 import { isDevMode, setDevMode } from "./dev";
+import { PreviewArgs } from "./gen-preview";
+import { writeConformanceTests } from "./conformance-docs";
 
 /*
 
@@ -109,6 +111,8 @@ async function main() {
     console.log("Copying static content...");
     copyStaticContent('scripts/gen-docs/templates/static', 'static');
     copyStaticContent('docs/img', 'img');
+
+    writeConformanceTests();
 }
 
 function prepareTemplateData(obj: Record<string, any>) {
@@ -117,9 +121,16 @@ function prepareTemplateData(obj: Record<string, any>) {
     obj.devAlert = (text: string) => markdownToHtml(
         `> [!DEV]\n${text.split(/\r?\n/).map(line => `> ${line}`).join('\n')}`
     );
-    obj.exampleCode = (example: { code: string; options?: object }) => {
-        let options = example.options ? ` ${JSON.stringify(example.options)}` : '';
-        return markdownToHtml(`\`\`\`xml${options}\n${example.code}\n\`\`\`\n`);
+    obj.exampleCode = (example: DocsExample, tag: DocsTag, attr?: DocsAttribute) => {
+        let options = example.options || {} as PreviewArgs;
+        if (!options.test) {
+            if (!attr) {
+                options.test = `${tag.name}: Example: ${example.brief}`;
+            } else {
+                options.test = `${tag.name}.${attr.name}: Example: ${example.brief}`;
+            }
+        }
+        return markdownToHtml(`\`\`\`xml ${JSON.stringify(options)}\n${example.code}\n\`\`\`\n`);
     };
     obj.include = (filePath: string) => {
         let source = fs.readFileSync(`scripts/gen-docs/templates/${filePath}`, 'utf-8');

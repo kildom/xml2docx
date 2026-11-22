@@ -63,7 +63,7 @@ Raw HTML in Markdown is passed through to the generated page; use it only when M
 A fenced block labelled `xml` is treated as DocTML. It is syntax-highlighted and, by default, the build also runs it to generate a document preview. The optional fence info may contain a JSON5 options object:
 
 ````markdown
-```xml { prefix: '<document>', suffix: '</document>' }
+```xml { test: 'p.align: Example: Center', prefix: '<document>', suffix: '</document>' }
 <p align="center">A previewable example.</p>
 ```
 ````
