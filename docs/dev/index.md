@@ -8,5 +8,6 @@ This section is for developers who want to understand how the DocTML project wor
 
 ## Special Table of Contents for Developers
 
+* [Project file structure](../dev/structure.md)
 * [Writing documentation](../dev/docs.md)
     * [Documentation YAML reference](../dev/docs-yaml.md)
