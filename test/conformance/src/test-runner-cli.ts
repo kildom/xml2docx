@@ -7,6 +7,7 @@ import { getRunnerDirectory } from './runners-common';
 
 const runnerName = 'cli';
 const dir = getRunnerDirectory(runnerName);
+const cliPath = path.join('dist', 'deno-compile', getPlatform(), `doctml${getSuffix()}`);
 
 function getPlatform(): string {
     switch (process.platform.toLowerCase()) {
@@ -24,7 +25,6 @@ function getSuffix(): string {
 }
 
 function runTestCase(testCase: TestCase) {
-    const cliPath = path.join('dist', 'deno-compile', getPlatform(), `doctml${getSuffix()}`);
     const inputFile = path.join(testCase.dir, `${testCase.id}.doctml`);
     const templateDataFile = path.join(testCase.dir, `${testCase.id}-data.json`);
     const dataFile = fs.existsSync(templateDataFile)
@@ -60,6 +60,14 @@ function runTestCase(testCase: TestCase) {
 }
 
 async function main() {
+    if (!fs.existsSync(cliPath)) {
+        console.error(
+            'DocTML CLI binary file is missing. Run "npm run build-cli" before starting tests with CLI runner.'
+        );
+        process.exitCode = 10;
+        return;
+    }
+
     let testCases = createTestCases(dir);
 
     for (let testCase of Object.values(testCases)) {
