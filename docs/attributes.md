@@ -20,7 +20,7 @@ True Value | False Value | Note
 
 Example:
 
-```xml { test: "font.bold: Example: Bold text" }
+```xml { test: "font.bold: Bold text" }
 <font bold="y">Bold text</font>
 ```
 
@@ -48,7 +48,7 @@ You can omit the unit name for zero length.
 
 Example:
 
-```xml { test: "img: Example: Length" }
+```xml { test: "img: Length" }
 <img width="10cm" height="13cm" horizontal="margin 2mm"
     vertical="paragraph -5mm" margin="0" src="tree.png"/>
 ```
@@ -90,7 +90,7 @@ Color is represented as:
 
 Example of using color attribute in DocTML:
 
-```xml { test: 'p: Example: Passing font color', prefix: '<document>', suffix: '</document>' }
+```xml { test: 'p: Passing font color', prefix: '<document>', suffix: '</document>' }
 <p font.color="#FF0000">This text is using 6-digit hex color</p>
 <p font.color="#F00">This text is using 3-digit hex color</p>
 <p font.color="red">This text is using CSS color name</p>

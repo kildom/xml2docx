@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { isDirectExecution, runCli } from "../common/utils";
+import { runCli, selfTest } from "../common/utils";
 import { Docs, DocsTag } from "./parse-docs";
 import { compileTemplate } from "./template";
 
@@ -127,8 +127,9 @@ function svgFromDot(dotPath: string, outputPath: string): void {
     runCli(dot, ['-Tsvg', dotPath, '-o', outputPath]);
 }
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
+
+void (selfTest(import.meta.url) && (async () => {
     let pd = await import('./parse-docs');
     let docs = pd.parseDocs();
     generateGraph(docs, 'artifacts/docs-graph/graph-light.svg', 'artifacts/docs-graph/graph-dark.svg', tag => `${tag.name}.html`);
-})();
+})());

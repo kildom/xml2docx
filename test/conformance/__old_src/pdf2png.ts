@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import * as mupdf from 'mupdf';
-import { isDirectExecution, mkdir, mkdirFor } from './common';
+import { mkdir, mkdirFor } from './common';
+import { selfTest } from '../../../scripts/common/utils';
 
 const pageSeparatorHeight = 16;
 const cutSeparatorHeight = 16;
@@ -215,19 +216,17 @@ function drawPageSeparator(
 }
 
 
-if (typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) {
-    void (async () => {
-        const { convertDocxFiles } = await import('./docx2pdf');
-        const docx = 'test/docs/include/styles/styles.docx';
-        const pdf = 'test/outputs/_tmp/pdf2png_test/test.pdf';
-        const png = 'test/outputs/_tmp/pdf2png_test/test.png';
-        mkdir('test/outputs/_tmp/pdf2png_test');
-        await convertDocxFiles({[docx]: pdf});
-        await pdf2png(pdf, png);
-        let cnt = fs.readFileSync(png, 'latin1');
-        if (!cnt.startsWith('\x89PNG')) {
-            throw new Error('Invalid PNG output');
-        }
-        console.log('Self test PASSED');
-    })();
-}
+void (selfTest(import.meta.url) && (async () => {
+    const { convertDocxFiles } = await import('./docx2pdf');
+    const docx = 'test/docs/include/styles/styles.docx';
+    const pdf = 'test/outputs/_tmp/pdf2png_test/test.pdf';
+    const png = 'test/outputs/_tmp/pdf2png_test/test.png';
+    mkdir('test/outputs/_tmp/pdf2png_test');
+    await convertDocxFiles({[docx]: pdf});
+    await pdf2png(pdf, png);
+    let cnt = fs.readFileSync(png, 'latin1');
+    if (!cnt.startsWith('\x89PNG')) {
+        throw new Error('Invalid PNG output');
+    }
+    console.log('Self test PASSED');
+})());

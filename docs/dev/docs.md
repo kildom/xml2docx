@@ -63,18 +63,20 @@ Raw HTML in Markdown is passed through to the generated page; use it only when M
 A fenced block labelled `xml` is treated as DocTML. It is syntax-highlighted and, by default, the build also runs it to generate a document preview. The optional fence info may contain a JSON5 options object:
 
 ````markdown
-```xml { test: 'p.align: Example: Center', prefix: '<document>', suffix: '</document>' }
+```xml { test: 'p.align: Center', prefix: '<document>', suffix: '</document>' }
 <p align="center">A previewable example.</p>
 ```
 ````
 
-The options supported by the preview builder are:
+The fence info after `xml` is a JSON5 object matching `PreviewArgs` in `scripts/gen-docs/gen-preview.ts`:
 
-- `prefix` and `suffix`: DocTML text added around the fenced code. Use these when the snippet needs a root tag or setup without showing it in the displayed code.
-- `data`: JSON-compatible data supplied to the DocTML renderer.
-- `noPreview: true`: show and highlight the code without executing it or generating a preview.
+- `test` (required unless `noPreview` is set): conformance-test coverage and title. Use the tag name, optionally followed by `.` and an attribute name, then a space and the test title. For example, `p.align: Center` covers the `align` attribute on `p`. Use one coverage item per line; prefix a line with `ERROR: ` when the example is expected to fail and include the expected error message.
+- `prefix` and `suffix`: DocTML text added around the fenced code before execution and conformance testing. Use these when the snippet needs a root tag or setup without showing it in the displayed code.
+- `data`: JSON-compatible data supplied to the DocTML renderer and included in the conformance test.
+- `fullPage: true`: show the full page in the preview instead of cropping it to the content.
+- `noPreview: true`: show and highlight the code without executing it, generating a preview, or adding it to conformance tests.
 
-The code and any prefix/suffix are executed as DocTML during the documentation build. Only use trusted, safe examples. Preview generation requires the project’s CLI build and document-to-PDF conversion tools; a preview failure may therefore be an environment/tooling issue rather than a Markdown error.
+Every previewed DocTML example in the documentation is added to the generated conformance tests, so give each one a meaningful `test` value. The code and any prefix/suffix are executed as DocTML during the documentation build. Only use trusted, safe examples. Preview generation requires the project’s CLI build and document-to-PDF conversion tools; a preview failure may therefore be an environment/tooling issue rather than a Markdown error.
 
 ### Markdown links
 
@@ -119,7 +121,7 @@ For a tag or attribute, add examples in its YAML definition. Each item requires 
         <p>Hello from the example.</p>
 ```
 
-For attributes, place the `examples` list under the attribute key. Prefer literal YAML block scalars (`|`) for multiline DocTML. The optional `options` mapping on a YAML example accepts `prefix`, `suffix`, `data`, and `noPreview`, with the same behavior as the JSON5 options after a Markdown `xml` fence. Use `prefix` and `suffix` to add required wrapping DocTML while keeping the displayed example focused. Set `noPreview: true` to display the code without generating a preview.
+For attributes, place the `examples` list under the attribute key. Prefer literal YAML block scalars (`|`) for multiline DocTML. The optional `options` mapping on a YAML example accepts the same `PreviewArgs` as a Markdown `xml` fence, including `test`, `prefix`, `suffix`, `data`, `fullPage`, and `noPreview`. Previewed YAML examples also become conformance tests, so provide a meaningful `test` value. Use `prefix` and `suffix` to add required wrapping DocTML while keeping the displayed example focused. Set `noPreview: true` to display the code without generating a preview or conformance test.
 
 A preview is generated automatically for every XML-labelled fenced block unless disabled. Examples within YAML are displayed as XML fenced blocks and get the same preview behavior. Check that the finished example is valid and that it does not rely on undocumented local files.
 

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as yaml from 'yaml';
 import { z } from 'zod';
-import { isDirectExecution } from '../common/utils';
+import { selfTest } from '../common/utils';
 
 /*
 
@@ -214,7 +214,7 @@ export function parseDocsInput(): YamlDocs {
 }
 
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
+void (selfTest(import.meta.url) && (async () => {
     console.log(JSON.stringify(parseDocsInput(), null, 2));
-})();
+})());
 

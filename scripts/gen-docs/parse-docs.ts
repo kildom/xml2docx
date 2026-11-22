@@ -4,7 +4,7 @@ import * as yaml from 'yaml';
 import { z } from 'zod';
 import * as docx from 'docx';
 import * as customEnums from '../../src/enums';
-import { cloneWithRefs, isDirectExecution } from '../common/utils';
+import { cloneWithRefs, selfTest } from '../common/utils';
 import { parseDocsInput, YamlAttribute, YamlDocs, YamlEnum, YamlExample, YamlGroup, YamlTag, YamlToc, TocItemsSchemaType } from './parse-yaml';
 
 /*
@@ -558,8 +558,8 @@ export function parseDocs(): Docs {
 }
 
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
+void (selfTest(import.meta.url) && (async () => {
     let util = await import('node:util');
     let docs = parseDocs();
     console.log(util.inspect(cloneWithRefs(docs), { depth: null, colors: false, compact: false }));
-})();
+})());

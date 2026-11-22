@@ -4,11 +4,7 @@ import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-declare global {
-    const __RUN_SELF_TEST__: boolean | undefined;
-}
-
-export function isDirectExecution(metaUrl: string): boolean {
+export function selfTest(metaUrl: string): boolean {
     const nodeArgvEntry = process.argv[1];
     if (!nodeArgvEntry) {
         return false;

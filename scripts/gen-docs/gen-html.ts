@@ -112,7 +112,7 @@ async function main() {
     copyStaticContent('scripts/gen-docs/templates/static', 'static');
     copyStaticContent('docs/img', 'img');
 
-    writeConformanceTests();
+    writeConformanceTests(docs);
 }
 
 function prepareTemplateData(obj: Record<string, any>) {
@@ -125,9 +125,9 @@ function prepareTemplateData(obj: Record<string, any>) {
         let options = example.options || {} as PreviewArgs;
         if (!options.test) {
             if (!attr) {
-                options.test = `${tag.name}: Example: ${example.brief}`;
+                options.test = `${tag.name}: ${example.brief}`;
             } else {
-                options.test = `${tag.name}.${attr.name}: Example: ${example.brief}`;
+                options.test = `${tag.name}.${attr.name}: ${example.brief}`;
             }
         }
         return markdownToHtml(`\`\`\`xml ${JSON.stringify(options)}\n${example.code}\n\`\`\`\n`);

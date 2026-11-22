@@ -2,7 +2,7 @@ import qre from "qre";
 import { template } from 'underscore';
 import { Docs, DocsAttribute, DocsEnum, DocsExample, DocsPage, DocsTag, parseDocs } from "./parse-docs";
 import { lorem } from "../common/lorem";
-import { cloneWithRefs, isDirectExecution } from '../common/utils';
+import { cloneWithRefs, selfTest } from '../common/utils';
 
 
 /*
@@ -377,7 +377,7 @@ function defaultReferenceAttribute(ctx: PreprocessContext, tag: DocsTag, attribu
     return `[\`&lt;${tag.name} ${attribute.name}="${value || '…'}"\`](${tag.name}.md#${attribute.name})`;
 }
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
+void (selfTest(import.meta.url) && (async () => {
     let util = await import('node:util');
     let docs = parseDocs();
     preprocessDocs(docs, {
@@ -396,4 +396,4 @@ function defaultReferenceAttribute(ctx: PreprocessContext, tag: DocsTag, attribu
         }
     });
     console.log(util.inspect(cloneWithRefs(docs), { depth: null, colors: false, compact: false }));
-})();
+})());

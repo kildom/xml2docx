@@ -10,7 +10,7 @@
 
     For example, if you want to align few paragraphs to the center:
 
-    ```xml { test: 'group: Example: Pass p.align="center"' }
+    ```xml { test: 'group: Pass p.align="center"' }
     <group p.align="center">
       <p>First paragraph</p>
       <p>Second paragraph</p>

@@ -1,5 +1,5 @@
 import { LoremIpsum } from 'lorem-ipsum-nn';
-import { isDirectExecution } from './utils';
+import { selfTest } from './utils';
 
 
 interface LoremOptions {
@@ -60,7 +60,7 @@ export function lorem(optionsOrLength?: LoremOptions | number, seed?: number): s
 }
 
 
-(typeof __RUN_SELF_TEST__ === 'boolean' ? __RUN_SELF_TEST__ : isDirectExecution(import.meta.url)) && (async () => {
+void (selfTest(import.meta.url) && (async () => {
     console.log('\n----------\nDefaults:')
     console.log(lorem());
     console.log('\n----------\nPL:')
@@ -82,4 +82,4 @@ export function lorem(optionsOrLength?: LoremOptions | number, seed?: number): s
     console.log(lorem(100));
     console.log(lorem(100, 12345));
     console.log(lorem(100, 12345));
-})();
+})());

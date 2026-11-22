@@ -16,12 +16,21 @@ const includePath = 'test/conformance/inputs/include';
 const cliPath = 'dist/deno-compile/x64-linux/doctml'; // TODO: Depends on the platform, should be configurable
 
 export interface PreviewArgs {
+    /// Do not generate preview of this code and do not add it to conformance tests
     noPreview?: boolean;
+    /// Prefix with this code before passing to DocTML
     prefix?: string;
+    /// Suffix with this code before passing to DocTML
     suffix?: string;
+    /// Data for DocTML templating
     data?: any;
+    /// Show full page on preview, otherwise pages will be cropped to content
     fullPage?: boolean;
-    test: string;
+    /// Test coverage and title. Mandatory if test goes into conformance tests
+    /// Format like in conformance tests: tag name, optionally dot and attribute name,
+    /// test title after whitespace. One tag or attribute per line. If errors are expected
+    /// add line "ERROR: [error message]".
+    test?: string;
 };
 
 
