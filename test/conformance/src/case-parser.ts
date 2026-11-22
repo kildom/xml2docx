@@ -16,6 +16,10 @@ export interface TestCaseCoverageEntry {
     title: string;
 }
 
+export class TestCaseIntermediateData {
+    errors: string[] = [];
+}
+
 /** Metadata and source files for a single conformance test case. */
 export class TestCase {
     /** Stable identifier used to name the case's files. */
@@ -30,6 +34,8 @@ export class TestCase {
     public coverage: TestCaseCoverageEntry[] = [];
     /** Error messages expected when this case is processed. */
     public expectedErrors: string[] = [];
+    /** Intermediate data user temporary by different stages of test, not save in metadata. */
+    public intermediate: TestCaseIntermediateData = new TestCaseIntermediateData();
 
     /**
      * Creates an empty test case or loads its metadata from a saved JSON file.
@@ -51,7 +57,9 @@ export class TestCase {
     public write() {
         const file = path.join(this.dir, `${this.id}.json`);
         fs.mkdirSync(this.dir, { recursive: true });
-        fs.writeFileSync(file, `${JSON.stringify(this, null, 4)}\n`, 'utf-8');
+        let toSave = { ...this } as any;
+        delete toSave.intermediate;
+        fs.writeFileSync(file, JSON.stringify(toSave, null, 4), 'utf-8');
     }
 
     /**
@@ -61,7 +69,7 @@ export class TestCase {
     public writeData(data: any) {
         const file = path.join(this.dir, `${this.id}-data.json`);
         fs.mkdirSync(this.dir, { recursive: true });
-        fs.writeFileSync(file, `${JSON.stringify(data, null, 4)}\n`, 'utf-8');
+        fs.writeFileSync(file, JSON.stringify(data, null, 4), 'utf-8');
     }
 
     /**
@@ -90,11 +98,17 @@ export class TestCase {
         return fs.readFileSync(file, 'utf-8');
     }
 
+    /** Returns the output path `<dir>/<id>.docx`. */
+    public getDocxFile(): string {
+        return path.join(this.dir, `${this.id}.docx`);
+    }
+
 };
 
 
 /**
- * Parses conformance inputs and writes each test case's metadata, source, and optional data to `dir`.
+ * Resets `dir`, copies shared include assets into `dir/include`, and writes each test case's
+ * metadata, source, and optional data there.
  *
  * Inputs are read from `test/conformance/inputs/` and the generated documentation
  * examples in `artifacts/test/conformance/docs/tests.doctml`, relative to the project root.
@@ -105,6 +119,10 @@ export class TestCase {
  */
 export function createTestCases(dir: string): Record<string, TestCase> {
     const inputDir = 'test/conformance/inputs';
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.mkdirSync(dir, { recursive: true });
+    fs.cpSync(path.join(inputDir, 'include'), path.join(dir, 'include'), { recursive: true });
+
     const docsFile = 'artifacts/test/conformance/docs/tests.doctml';
     if (!fs.existsSync(docsFile)) {
         throw new Error(
@@ -331,6 +349,7 @@ void (selfTest(import.meta.url) && (async () => {
         const created = createTestCases(outputDir);
         const read = readTestCases(outputDir);
 
+        assert.ok(fs.existsSync(path.join(outputDir, 'include/tools.js')));
         assert.deepEqual(Object.keys(read).sort(), Object.keys(created).sort());
         for (const [id, testCase] of Object.entries(created)) {
             assert.deepEqual(read[id], testCase);

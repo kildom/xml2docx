@@ -1,0 +1,76 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { createTestCases, TestCase } from './case-parser';
+import { getRunnerDirectory } from './runners-common';
+
+
+const runnerName = 'cli';
+const dir = getRunnerDirectory(runnerName);
+
+function getPlatform(): string {
+    switch (process.platform.toLowerCase()) {
+    case 'win32':
+        return `${process.arch}-win`;
+    case 'darwin':
+        return `${process.arch}-macos`;
+    default:
+        return `${process.arch}-linux`;
+    }
+}
+
+function getSuffix(): string {
+    return process.platform.toLowerCase() === 'win32' ? '.exe' : '';
+}
+
+function runTestCase(testCase: TestCase) {
+    const cliPath = path.join('dist', 'deno-compile', getPlatform(), `doctml${getSuffix()}`);
+    const inputFile = path.join(testCase.dir, `${testCase.id}.doctml`);
+    const templateDataFile = path.join(testCase.dir, `${testCase.id}-data.json`);
+    const dataFile = fs.existsSync(templateDataFile)
+        ? templateDataFile
+        : path.join(testCase.dir, 'include/empty.json');
+    const outputFile = testCase.getDocxFile();
+    const args = ['--debug', '-d', dataFile, inputFile, outputFile];
+    const errors = testCase.intermediate.errors;
+
+    fs.rmSync(outputFile, { force: true });
+    const result = spawnSync(cliPath, args, {
+        encoding: 'utf8',
+        maxBuffer: 50 * 1024 * 1024,
+    });
+    if (result.error) throw result.error;
+    if (result.stderr) errors.push(result.stderr);
+
+    if (result.status === 0 && testCase.expectedErrors.length > 0) {
+        errors.push('DocTML CLI exit code is zero, but error was expected in this test case');
+    } else if (result.status !== 0 && testCase.expectedErrors.length === 0) {
+        errors.push(`DocTML CLI exit code is ${result.status}, but not errors were expected in this test case`);
+    }
+
+    if (result.status === 0) {
+        if (!fs.existsSync(outputFile)) {
+            errors.push(`DocTML CLI did not create output DOCX file: ${outputFile}`);
+        } else if (fs.statSync(outputFile).size === 0) {
+            errors.push(`DocTML CLI created an empty output DOCX file: ${outputFile}`);
+        }
+    } else if (fs.existsSync(outputFile)) {
+        errors.push(`DocTML CLI created output DOCX file despite exit code ${result.status}: ${outputFile}`);
+    }
+}
+
+async function main() {
+    let testCases = createTestCases(dir);
+
+    for (let testCase of Object.values(testCases)) {
+        try {
+            runTestCase(testCase);
+        } catch (ex) {
+            testCase.intermediate.errors.push(`Unexpected exception: ${ex}`);
+        }
+    }
+
+    // TODO: Call finalizeRunner(runnerName, dir, testCases)
+}
+
+main();

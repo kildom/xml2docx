@@ -9,8 +9,7 @@ TODO: Detailed description of Conformance Tests
 
 The tests have different entry point depending on level of testing that need to be done:
 
-- `src/test-runner.ts` - Test all input files with specific runner. 
-  The runner name is provided in first parameter. By default, `cli` runner is used.
+- `src/test-runner-<name>.ts` - Test all input files with runner specified by `<name>`. 
   It generates report in `artifacts/test/conformance/runner-{runner-name}/report.html`.
   Returns:
   - 0 - no issues were found
