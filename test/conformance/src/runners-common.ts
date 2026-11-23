@@ -170,7 +170,7 @@ async function processErrors(testCases: TestCase[], coverage: Record<string, Cov
             }
         }
         testCase.expectedErrors = unmatchedExpected;
-        if (testCase.isSuccessRun()) {
+        if (!testCase.isSuccessRun()) {
             console.log('    Unexpected errors detected');
         }
     }
