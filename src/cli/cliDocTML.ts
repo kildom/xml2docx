@@ -75,8 +75,9 @@ Options:                                                 $$
 ~--debug~
     Dump intermediate files alongside the output after each step of
     processing and show more verbose output in case of errors. This option
-    is mainly useful when debugging the template or the tool.
-    The output file will be generated if possible, even when an error occurs.
+    is mainly useful when debugging the template or the tool. Intermediate
+    debug files are generated when possible, but the DOCX output is only
+    written if no errors occur.
 
 You can use ~"-"~ as <input.xml> or <data.json> to read the file from standard
 input. You can also use ~"-"~ as [output.docx] to write result to standard output.
@@ -138,7 +139,7 @@ function printVersion(): void {
 
 function parseArguments() {
     let options: Options = {};
-    let debug = false; // TODO: If error occurs in debug mode file is generated if possible, in normal mode no file is generated and only error message is printed.
+    let debug = false;
     let argCounter = 0;
     let args = process.argv.slice(2);
     if (args.length === 0) {
@@ -196,6 +197,8 @@ function addCallbacks(options: Options, debug: boolean) {
     };
 
     options.writeFile = (result: Result, content: Uint8Array) => {
+        if (result.errors.length > 0) return;
+
         let nameOrFd: string | number = result.outputFile;
         if (!nameOrFd || nameOrFd[0] === ':') {
             nameOrFd = 'doctml-output.docx';
@@ -241,7 +244,8 @@ function printError(err: any, debug: boolean): void {
     }
     if (err) {
         if (debug) {
-            console.error(err);
+            let details = err instanceof Error && err.stack ? err.stack : String(err);
+            console.error(details.split('\n').map(line => `    ${line}`).join('\n'));
         } else {
             console.error(err.message);
         }
