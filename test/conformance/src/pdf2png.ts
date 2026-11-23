@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import * as mupdf from 'mupdf';
-import { mkdir, mkdirFor } from './common';
-import { selfTest } from '../../../scripts/common/utils';
+import { mkdir, mkdirFor, selfTest } from '../../../scripts/common/utils';
 
 const pageSeparatorHeight = 16;
 const cutSeparatorHeight = 16;
@@ -217,11 +216,11 @@ function drawPageSeparator(
 
 
 void (selfTest(import.meta.url) && (async () => {
-    const { convertDocxFiles } = await import('./docx2pdf');
-    const docx = 'test/docs/include/styles/styles.docx';
-    const pdf = 'test/outputs/_tmp/pdf2png_test/test.pdf';
-    const png = 'test/outputs/_tmp/pdf2png_test/test.png';
-    mkdir('test/outputs/_tmp/pdf2png_test');
+    const { convertDocxFiles } = await import('../../../scripts/common/docx2pdf');
+    const docx = 'test/conformance/inputs/include/styles/styles.docx';
+    const pdf = 'artifacts/temp/pdf2png_test/test.pdf';
+    const png = 'artifacts/temp/pdf2png_test/test.png';
+    mkdir('artifacts/temp/pdf2png_test');
     await convertDocxFiles({[docx]: pdf});
     await pdf2png(pdf, png);
     let cnt = fs.readFileSync(png, 'latin1');

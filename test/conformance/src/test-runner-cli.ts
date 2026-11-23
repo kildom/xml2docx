@@ -30,7 +30,7 @@ function runTestCase(testCase: TestCase) {
     const dataFile = fs.existsSync(templateDataFile)
         ? templateDataFile
         : path.join(testCase.dir, 'include/empty.json');
-    const outputFile = testCase.getDocxFile();
+    const outputFile = testCase.getOutputFile('docx');
     const args = ['--debug', '-d', dataFile, inputFile, outputFile];
     const errors = testCase.intermediate.errors;
 
@@ -69,16 +69,21 @@ async function main() {
     }
 
     let testCases = createTestCases(dir);
+    let i = 0;
+    let total = Object.values(testCases).length;
 
     for (let testCase of Object.values(testCases)) {
         try {
+            console.log(`Execute case ${i + 1} of ${total}: ${testCase.getOutputFile('docx')}`);
             runTestCase(testCase);
         } catch (ex) {
+            console.log(`    Unexpected exception: ${ex}`)
             testCase.intermediate.errors.push(`Unexpected exception: ${ex}`);
         }
+        i++;
     }
 
-    // TODO: Call finalizeRunner(runnerName, dir, testCases)
+    finalizeRunner(runnerName, dir, testCases);
 }
 
 main();

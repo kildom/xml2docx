@@ -16,6 +16,11 @@ export interface TestCaseCoverageEntry {
     title: string;
 }
 
+export interface TestCaseError {
+    message: string[];
+    
+}
+
 export class TestCaseIntermediateData {
     errors: string[] = [];
 }
@@ -99,8 +104,8 @@ export class TestCase {
     }
 
     /** Returns the output path `<dir>/<id>.docx`. */
-    public getDocxFile(): string {
-        return path.join(this.dir, `${this.id}.docx`);
+    public getOutputFile(type: 'docx' | 'pdf' | 'html' | 'png'): string {
+        return path.join(this.dir, `${this.id}.${type}`);
     }
 
 };
