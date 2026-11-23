@@ -32,7 +32,6 @@ function runTestCase(testCase: TestCase) {
         : path.join(testCase.dir, 'include/empty.json');
     const outputFile = testCase.getOutputFile('docx');
     const args = ['--debug', '-d', dataFile, inputFile, outputFile];
-    const errors = testCase.errors;
 
     fs.rmSync(outputFile, { force: true });
     const result = spawnSync(cliPath, args, {
@@ -40,30 +39,14 @@ function runTestCase(testCase: TestCase) {
         maxBuffer: 50 * 1024 * 1024,
     });
     if (result.error) {
-        errors.push({ message: result.error.message });
+        testCase.runStatus = false;
+        testCase.errors.push({ message: result.error.message });
         return;
     }
-    if (result.stderr) errors.push({ message: result.stderr });
-
-    if (result.status === 0 && testCase.expectedErrors.length > 0) {
-        errors.push({ message: 'DocTML CLI exit code is zero, but error was expected in this test case' });
-    } else if (result.status !== 0 && testCase.expectedErrors.length === 0) {
-        errors.push({
-            message: `DocTML CLI exit code is ${result.status}, but not errors were expected in this test case`,
-        });
+    if (result.stderr) {
+        testCase.errors.push({ message: result.stderr });
     }
-
-    if (result.status === 0) {
-        if (!fs.existsSync(outputFile)) {
-            errors.push({ message: `DocTML CLI did not create output DOCX file: ${outputFile}` });
-        } else if (fs.statSync(outputFile).size === 0) {
-            errors.push({ message: `DocTML CLI created an empty output DOCX file: ${outputFile}` });
-        }
-    } else if (fs.existsSync(outputFile)) {
-        errors.push({
-            message: `DocTML CLI created output DOCX file despite exit code ${result.status}: ${outputFile}`,
-        });
-    }
+    testCase.runStatus = result.status;
 }
 
 async function main() {

@@ -40,6 +40,8 @@ export class TestCase {
     public expectedErrors: string[] = [];
     /** Test case errors. */
     public errors: TestCaseError[] = [];
+    /** Test case run status. If runner produces exit code, it is exit code. Otherwise, it is boolean indicating success. */
+    public runStatus: number | boolean = false;
 
     /**
      * Creates an empty test case or loads its metadata from a saved JSON file.
@@ -104,6 +106,16 @@ export class TestCase {
     /** Returns the output path `<dir>/<id>.docx`. */
     public getOutputFile(type: 'docx' | 'pdf' | 'html' | 'png'): string {
         return path.join(this.dir, `${this.id}.${type}`);
+    }
+
+    /** Returns true if test case run was successful. */
+    public isSuccessRun(): boolean {
+        for (let error of this.errors) {
+            if (!error.expectedMessage) {
+                return false;
+            }
+        }
+        return true;
     }
 
 };
