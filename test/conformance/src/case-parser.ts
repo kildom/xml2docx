@@ -106,7 +106,7 @@ export class TestCase {
     }
 
     /** Returns the output path `<dir>/<id>.docx`. */
-    public getOutputFile(type: 'docx' | 'pdf' | 'html' | 'png' | 'doctml'): string {
+    public getOutputFile(type: 'docx' | 'pdf' | 'html' | 'png' | 'doctml' | 'docx.txt' | 'diff'): string {
         return path.join(this.dir, `${this.id}.${type}`);
     }
 
