@@ -381,8 +381,9 @@ function generateRunnerReport(
     for (const testCase of sortedCases) {
         const success = isSuccessful(testCase);
         for (const item of testCase.coverage) {
-            const rowSpecs: Array<[string, string | undefined]> = [[item.tag, undefined]];
-            if (item.attribute) rowSpecs.push([item.tag, item.attribute]);
+            const rowSpecs: Array<[string, string | undefined]> = [
+                [item.tag, item.attribute || undefined],
+            ];
             for (const [tag, attribute] of rowSpecs) {
                 const row = ensureCoverageRow(tag, attribute);
                 const key = `${tag}\0${attribute ?? ''}`;

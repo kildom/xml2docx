@@ -98,7 +98,8 @@
         .coverage-desc { color: #687588; }
         .coverage-cases { margin: .45rem 0 .15rem; padding-left: 1.2rem; }
         .coverage-cases li { margin: .25rem 0; padding: .2rem .45rem; border-radius: 5px; }
-        .coverage-cases li.failure { background: #ffe8e9; }
+        .coverage-cases li.failure { background: #fabdc0; }
+        .coverage-cases li.failure a { color: #8d1e2b; }
         .coverage-cases li.success { background: transparent; }
         tr.has-failures td, tr.not-covered td { background: #fff0f1; }
         .empty { color: #667085; font-style: italic; }
@@ -184,7 +185,7 @@
                 <tbody>
                     <% for (const input of inputGroups) { %>
                         <tr class="<%= input.counts.failed > 0 ? 'has-failures' : '' %>">
-                            <td><a href="#<%- input.anchor %>" onmousedown="showCaseTarget()"><%- input.baseName %></a></td>
+                            <td><a href="#<%- input.anchor %>" onmousedown="showCaseTarget(event)"><%- input.baseName %></a></td>
                             <td><span class="badge failed"><%- input.counts.failed %></span></td>
                             <td><span class="badge success"><%- input.counts.success %></span></td>
                             <td><span class="badge total"><%- input.counts.total %></span></td>
@@ -209,7 +210,7 @@
                                     <% if (row.cases.length > 0) { %>
                                         <ul class="coverage-cases">
                                             <% for (const item of row.cases) { %>
-                                                <li class="<%= item.success ? 'success' : 'failure' %>"><a href="#<%- item.id %>" onmousedown="showCaseTarget()"><%- item.title %></a></li>
+                                                <li class="<%= item.success ? 'success' : 'failure' %>"><a href="#<%- item.id %>" onmousedown="showCaseTarget(event)"><%- item.title %></a></li>
                                             <% } %>
                                         </ul>
                                     <% } else { %><p class="empty">Not covered</p><% } %>
@@ -228,9 +229,24 @@
 
     <script>
         const lazyContent = <%= lazyContentJson %>;
-        function showCaseTarget() {
+        function showCaseTarget(event) {
+            const targetHash = event.currentTarget.hash;
+            const targetId = decodeURIComponent(targetHash.slice(1));
             document.getElementById('case-results').open = true;
-            document.querySelector('.filter-chip[data-filter="all"]').click();
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                const active = chip.dataset.filter === 'all';
+                chip.classList.toggle('active', active);
+                chip.setAttribute('aria-pressed', String(active));
+            });
+            document.querySelectorAll('.case-card').forEach(card => {
+                card.hidden = false;
+            });
+            requestAnimationFrame(() => {
+                const target = document.getElementById(targetId);
+                if (!target) return;
+                window.location.hash = targetHash;
+                target.scrollIntoView();
+            });
         }
 
         document.querySelectorAll('.filter-chip').forEach(button => {
