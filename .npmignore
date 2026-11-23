@@ -1,0 +1,14 @@
+/.*
+/node_modules/
+/artifacts/
+/uploads/
+/dist/*
+!/dist/cjs
+!/dist/esm
+/test/
+/scripts/
+/docs/
+/doctml-*.tgz
+/eslint.config.mjs
+/tsconfig.*
+/typedoc.json
