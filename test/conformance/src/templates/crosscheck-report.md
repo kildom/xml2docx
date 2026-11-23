@@ -20,8 +20,12 @@ File: `<%= testCase.inputFile %>` · line <%= testCase.inputLine %>
 Coverage:
 <%= testCase.coverage.map(item => `- ${item.attribute ? `${item.tag}.${item.attribute}` : item.tag}: ${item.title}`).join('\n') %>
 
+<% if (testCase.issue) { %>
 | Runner | Status | Matching |
 | --- | --- | --- |
 <%= testCase.runners.map(runner => `| ${runner.name} | ${runner.status} | ${runner.matching} |`).join('\n') %>
+<% } else { %>
+All runners succeeded and matched.
+<% } %>
 
 <% } %>
