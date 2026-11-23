@@ -215,6 +215,8 @@ function generateRunnerReport(
         inputAnchor: string;
         success: boolean;
         coverage: TestCase['coverage'];
+        errors: ErrorView[];
+        expectedErrors: string[];
         tabs: Tab[];
     };
     type CoverageView = {
@@ -330,6 +332,8 @@ function generateRunnerReport(
             inputAnchor: inputAnchors.get(testCase.inputFile)!,
             success,
             coverage: testCase.coverage,
+            errors,
+            expectedErrors: [...testCase.expectedErrors],
             tabs,
         });
     }
@@ -421,6 +425,79 @@ function generateRunnerReport(
         counts,
         lazyContentJson,
     }), 'utf8');
+
+    function escapeMarkdown(text: string): string {
+        return text
+            .replace(/\\/g, '\\\\')
+            .replace(/`/g, '\\`')
+            .replace(/\*/g, '\\*')
+            .replace(/_/g, '\\_')
+            .replace(/\|/g, '\\|')
+            .replace(/\[/g, '\\[')
+            .replace(/\]/g, '\\]')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\r?\n/g, ' ');
+    }
+
+    function markdownCode(text: string): string {
+        return `\`${text.replace(/`/g, '\\`')}\``;
+    }
+
+    function errorFence(messages: string[]): string {
+        const longestRun = Math.max(0, ...messages.flatMap(message =>
+            [...message.matchAll(/`+/g)].map(match => match[0].length)
+        ));
+        return '`'.repeat(Math.max(3, longestRun + 1));
+    }
+
+    const markdownCases = reportCases.map(testCase => {
+        const matchedExpectedErrors = testCase.errors.filter(error => error.expected).map(error => error.message);
+        const unexpectedErrors = testCase.errors.filter(error => !error.expected).map(error => error.message);
+        const missingExpectedErrors = [...testCase.expectedErrors];
+        const fence = errorFence([...matchedExpectedErrors, ...unexpectedErrors, ...missingExpectedErrors]);
+        return {
+            ...testCase,
+            inputBaseNameMd: escapeMarkdown(testCase.inputBaseName),
+            coverage: testCase.coverage.map(item => ({
+                label: markdownCode(item.attribute ? `${item.tag}.${item.attribute}` : item.tag),
+                title: escapeMarkdown(item.title),
+            })),
+            matchedExpectedErrors,
+            missingExpectedErrors,
+            unexpectedErrors,
+            errorFence: fence,
+        };
+    });
+    const markdownInputGroups = inputGroups.map(group => {
+        const baseNameMd = escapeMarkdown(group.baseName);
+        return {
+            tableRow: `| ${baseNameMd} | ${group.counts.failed} | ${group.counts.success} | ${group.counts.total} |`,
+        };
+    });
+    const markdownCoverageRows = sortedCoverageRows.map(row => {
+        const label = markdownCode(row.attribute ? `${row.tag}.${row.attribute}` : row.tag);
+        const brief = escapeMarkdown(row.brief);
+        const cells = [label, brief, row.counts.failed, row.counts.success, row.counts.total];
+        return { tableRow: `| ${cells.join(' | ')} |` };
+    });
+    const markdownTemplate = template(fs.readFileSync(
+        'test/conformance/src/templates/runner-report.md',
+        'utf8'
+    ));
+    const markdownFile = path.join(conformanceRoot, `runner-${runnerName}.md`);
+    const markdown = markdownTemplate({
+        runnerName: escapeMarkdown(runnerName),
+        outputDirectory: `runner-${runnerName}`,
+        counts,
+        inputGroups: markdownInputGroups,
+        reportCases: markdownCases,
+        coverageRows: markdownCoverageRows,
+    }).replace(/\r\n?/g, '\n')
+        .replace(/[ \t]+$/gm, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trimEnd() + '\n';
+    fs.writeFileSync(markdownFile, markdown, 'utf8');
 
 }
 

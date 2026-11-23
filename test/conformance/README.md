@@ -85,7 +85,7 @@ If LibreOffice is available, set `DOCX_CONVERT_SOFFICE=soffice` to enable DOCX-t
 DOCX_CONVERT_SOFFICE=soffice npx tsx test/conformance/src/test-runner-cli.ts
 ```
 
-The runner writes case files and outputs under `artifacts/test/conformance/runner-{name}/` (including the shared `include/` files). The self-contained interactive report is written beside that directory as `artifacts/test/conformance/runner-{name}.html`. It contains result counts and filters, per-input summaries, coverage rows, error details, source/debug tabs, and links or previews for generated outputs when those files exist.
+The runner writes case files and outputs under `artifacts/test/conformance/runner-{name}/` (including the shared `include/` files). The self-contained interactive report is written beside that directory as `artifacts/test/conformance/runner-{name}.html`. A Markdown summary for agents is written next to it as `artifacts/test/conformance/runner-{name}.md`; it links to the interactive report and to per-case artifacts. The HTML report contains result counts and filters, per-input summaries, coverage rows, error details, source/debug tabs, and links or previews for generated outputs when those files exist.
 
 ### Adding or changing a runner script
 
