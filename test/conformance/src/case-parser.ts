@@ -110,6 +110,10 @@ export class TestCase {
         return path.join(this.dir, `${this.id}.${type}`);
     }
 
+    public getDebugFiles(): string[] {
+        // TODO: Implement it, get all files from `this.dir` that matched pattern `<id>.debug.*`
+    }
+
     /** Returns true if test case run was successful. */
     public isSuccessRun(): boolean {
         for (let error of this.errors) {

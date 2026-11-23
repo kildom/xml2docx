@@ -23,7 +23,7 @@ export function getRunnerDirectory(runnerName: string)
 }
 
 
-async function processErrors(testCases: TestCase[]): Promise<void> {
+async function processErrors(testCases: TestCase[], coverage: Record<string, CoverageTagInformation>): Promise<void> {
 
     function addError(testCase: TestCase, message: string): void {
         testCase.errors.push({ message });
@@ -157,6 +157,7 @@ async function processErrors(testCases: TestCase[]): Promise<void> {
 
     for (const [i, testCase] of Object.entries(testCases)) {
         console.log(`Validating output ${Number(i) + 1} of ${testCases.length}: ${testCase.getOutputFile('doctml')}`);
+        // TODO: Add above and call here function checkCoverage that checks if all tags and attributes defined in coverage of this test case are actually available in `coverage` parameter. If not, add error to test case.
         processOutputStatus(testCase);
     }
     await convertFromDocx();
@@ -169,13 +170,96 @@ async function processErrors(testCases: TestCase[]): Promise<void> {
 
 function generateRunnerReport(runnerName: string, dir: string, testCases: TestCase[])
 {
-    // Do not implement yet.
+    /* TODO: Implement as described below
+
+    Create interactive test report for the runner.
+    Use templating to produce it. You can use `template` function from `underscore` module as in other
+    parts of this project. Template file is empty for now - need to be implemented. It is in 
+    `test/conformance/src/templates/runner-report.html`. It will contain CSS, JS and templated HTML.
+    The output HTML must be self-contained except references to test results.
+    The output location is `artifacts/test/conformance/runner-${runnerName}.html`.
+
+    The report will have following sections. Each section is collapsible (can be hidden) and it is visible by default:
+    - Test cases results section. In the title, also contains total number of test cases failed (on red), success (on green), and both (gray)
+      - At the beginning, there is a button that allows to filter test cases: "Only failures", if clicked, success test cases are hidden and the button label is now "All tests"
+      - Test cases are ordered by inputFile first, inputLine next.
+      - Each input file section start with file name as a header with id, so it can be linked
+      - Test case is a card (that is red-ish if test is failure, white or almost-white gray on success).
+        - The test case id is in HTML id to allow navigate to specific test case with `#<id>` URL.
+        - The identification information is located at top right corner of the card as smaller, gray text that contains:
+            - Source file name (inputFile) only base name, as a link to that file (relative path) with target "_blank"
+            - Source file line (inputLine)
+            - Test case id
+        - Next, there is a coverage information, each item in single line, that looks like card title, but font should not be bigger than other text. The tag and attribute should be bold and title should be gray.
+        - Next, there is tab view that allows to switch between different information of the test case. If test is a failure, the "Errors" tab is active by default. If success, no tab is active by default.
+        - The following tabs should be implemented:
+          - `Errors` - show errors from test case run (TestCase.errors).
+             - If some error is expected show it with default background and highlight the expected substring of error message with light green text background.
+             - If some error is not expected show it with light red background.
+             - If some expected errors did not happen (TestCase.expectedErrors is not empty), show label "Expected errors that did not happen" and show them below with light red background.
+             - If nothing to show (both errors and expectedErrors are empty), do now show `Errors` tab.
+          - `DocTML` - show doctml source code of the test case (TestCase.readCode() result)
+            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
+          - `JSON` - show template data JSON (TestCase.readData() result). This tab only exists if data exists.
+            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
+          - `DOCX` - this is actually not a tab, but relative link to test case docx file that opens in new window (exists only if docx file actually exists)
+          - `PDF` - show PDF in iframe (full width and 40% of vertical view), above iframe is a button that is a relative link to pdf that opens in new window (exists only if pdf file actually exists).
+            The iframe should be lazy-created when user clicks the tab to avoid overwhelming page with iframes.
+          - `HTML` - show HTML source code (not preview) (full width and 40% of vertical view)
+            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
+            This tab should not exists if HTML file does not exists
+          - `PNG` - show PNG image (full width and 40% of vertical view)
+            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
+            This tab should not exists if PNG file does not exists
+          - Create one tab per one debug file that was produced when DocTML tool worked.
+            Use `TestCase.getDebugFiles` method. It is not implemented yet - you need to implement.
+            Remove test id and "debug" string from file name and use it as tab name.
+            Show the debug file as a source code.
+            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
+    - Input files section.
+      - Contains input (source file) summary table
+      - one row for each input source test file, just base name, no dir, not the file name with id, but the original file that contains multiple test cases (the inputFile property of TestCase)
+      - each row contains total number of test cases failed (on red), success (on green), and both (gray) in that source file
+      - file name is a link to input file header in cases results section.
+        The link must have special onmousedown event that expands cases results section if collapsed.
+    - Coverage section
+      - It contains table with all tags and attributes
+      - The list of all tags and attributes must be read from `artifacts/test/conformance/docs/tags.json`
+      - If some tag or attribute from test case does not exists in `tags.json`, add it (error reporting was be done before).
+      - Sort table by tag name first, attribute name next
+      - Each row contains number of test cases failed (on red), success (on green), and both (gray) for this tag or attribute
+      - The row is expandable:
+        - after expansion, it shows list of test cases that cover that tag or attribute.
+        - shows only titles (no need to repeat tag or attribute name)
+        - each item in list shows if it is failure or success
+        - failures has light red background
+        - title is a link to actual test case in cases results section
+          The link must have special onmousedown event that expands cases results section if collapsed.
+
+    Use modern and readable style, layout and graphics.
+
+    */
+}
+
+export interface CoverageTagInformation {
+    /** Tag name */
+    name: string;
+    /** Brief description of tag. */
+    brief: string;
+    /** Tag attributes as record of attribute name and attribute brief description. */
+    attributes: Record<string, string>;
+};
+
+export function readCoverage(): Record<string, CoverageTagInformation> {
+    return JSON.parse(fs.readFileSync('artifacts/test/conformance/docs/tags.json', 'utf-8'));
 }
 
 export async function finalizeRunner(runnerName: string, dir: string, testCases: TestCase[]): Promise<void>
 {
-    await processErrors(testCases);
+    let coverage = readCoverage();
+    await processErrors(testCases, coverage);
     generateRunnerReport(runnerName, dir, testCases);
+    // TODO: go over all test cases, if any of them failed, set process exit code to 4 if it is not set or below 4
 }
 
 /*
