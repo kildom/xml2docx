@@ -60,6 +60,7 @@ A single-runner script executes every generated conformance case using one imple
 
 - [`src/case-parser.ts`](./src/case-parser.ts) defines `TestCase`, discovers the `.doctml` inputs under `test/conformance/inputs/` and the generated documentation examples at `artifacts/test/conformance/docs/tests.doctml`, then saves one case per annotated XML comment. The text before the first case and after `END` is shared by each case. Comment lines describe tag or attribute coverage (`tag:` / `tag.attribute:`), expected errors (`ERROR:`), and template values (`DATA:`). A sibling `.json` file provides base template data; inline `DATA` values override it. The output directory is reset before use, shared `include/` assets are copied into it, and each case gets metadata, source, and optional data files.
 - [`src/test-runner-cli.ts`](./src/test-runner-cli.ts) is the CLI runner example. It checks for the platform-specific binary (build it with `npm run build-cli` if missing), then runs the CLI once per case with `--debug`, `-d`, the case source, and the output DOCX path. When a case has no data file, it passes the copied `include/empty.json`. A runner should record the raw `runStatus` and append each raw error as `{ message }` to `testCase.errors`; shared finalization handles interpretation.
+- [`src/test-runner-api.ts`](./src/test-runner-api.ts) imports `src/doctml.ts` and invokes `generate` directly for every case, using the same input/data files, debug outputs, and shared report finalization as the CLI runner.
 - [`src/runners-common.ts`](./src/runners-common.ts) provides `finalizeRunner`. It checks execution status and DOCX outputs, verifies declared tag/attribute coverage against `artifacts/test/conformance/docs/tags.json`, optionally converts outputs, normalizes error messages and matches them against expected errors, saves updated metadata, and writes the interactive report. A failed case sets the process exit code to `4` unless a larger exit code is already set. The report template is [`src/templates/runner-report.html`](./src/templates/runner-report.html).
 - [`src/pdf2png.ts`](./src/pdf2png.ts) creates the combined PNG preview from a PDF. DOCX-to-PDF/HTML conversion is shared through [`scripts/common/docx2pdf.ts`](../../scripts/common/docx2pdf.ts).
 
@@ -71,6 +72,12 @@ Run commands from the repository root. Build documentation first if `artifacts/t
 npm run build-docs
 npm run build-cli
 npx tsx test/conformance/src/test-runner-cli.ts
+```
+
+Run the direct API runner without building the CLI binary:
+
+```sh
+npx tsx test/conformance/src/test-runner-api.ts
 ```
 
 To generate DOCX files and debug output without PDF, HTML, or PNG conversion, pass `--only-docx`:

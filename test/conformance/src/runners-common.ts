@@ -15,6 +15,7 @@ export const conformanceRoot = 'artifacts/test/conformance';
 
 export const runnersList = [
     'cli',
+    'api',
 ];
 
 
