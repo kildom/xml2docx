@@ -56,6 +56,8 @@ export class TestCase {
             this.inputLine = testCaseData.inputLine;
             this.coverage = testCaseData.coverage;
             this.expectedErrors = testCaseData.expectedErrors;
+            this.errors = testCaseData.errors ?? [];
+            this.runStatus = testCaseData.runStatus ?? false;
         }
     }
 
@@ -104,7 +106,7 @@ export class TestCase {
     }
 
     /** Returns the output path `<dir>/<id>.docx`. */
-    public getOutputFile(type: 'docx' | 'pdf' | 'html' | 'png'): string {
+    public getOutputFile(type: 'docx' | 'pdf' | 'html' | 'png' | 'doctml'): string {
         return path.join(this.dir, `${this.id}.${type}`);
     }
 

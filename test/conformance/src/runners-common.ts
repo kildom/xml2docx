@@ -1,102 +1,181 @@
 
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { TestCase } from './case-parser';
 import { convertDocxFiles } from '../../../scripts/common/docx2pdf';
 import { pdf2png } from './pdf2png';
 
+
 const conversionBatch = 10;
 
+
 export const conformanceRoot = 'artifacts/test/conformance';
+
 
 export const runnersList = [
     'cli',
 ];
+
 
 export function getRunnerDirectory(runnerName: string)
 {
     return path.join(conformanceRoot, `runner-${runnerName}`);
 }
 
-function processErrors(runnerName: string, dir: string, testCases: TestCase[])
-{
-    /* TODO: Implement this function as described below
 
-    Do following steps in separate functions for cleaner code.
+async function processErrors(testCases: TestCase[]): Promise<void> {
 
-    Function 1: processOutputStatus
-
-    Check status of running of the test case. Here is old implementation.
-    New one should work the same, except result.status is in testCase.runStatus and it may be not only
-    number, but also boolean if runner does not support exit code, just failure/success status.
-    
-    if (result.status === 0 && testCase.expectedErrors.length > 0) {
-        errors.push({ message: 'DocTML CLI exit code is zero, but error was expected in this test case' });
-    } else if (result.status !== 0 && testCase.expectedErrors.length === 0) {
-        errors.push({
-            message: `DocTML CLI exit code is ${result.status}, but not errors were expected in this test case`,
-        });
+    function addError(testCase: TestCase, message: string): void {
+        testCase.errors.push({ message });
+        console.log(`    ${message}`);
     }
 
-    if (result.status === 0) {
-        if (!fs.existsSync(outputFile)) {
-            errors.push({ message: `DocTML CLI did not create output DOCX file: ${outputFile}` });
-        } else if (fs.statSync(outputFile).size === 0) {
-            errors.push({ message: `DocTML CLI created an empty output DOCX file: ${outputFile}` });
+    function processOutputStatus(testCase: TestCase): void {
+        const status = testCase.runStatus;
+        const success = typeof status === 'boolean' ? status : status === 0;
+        const outputFile = testCase.getOutputFile('docx');
+
+        if (success && testCase.expectedErrors.length > 0) {
+            addError(testCase, typeof status === 'number'
+                ? 'DocTML CLI exit code is zero, but error was expected in this test case'
+                : 'Runner reported success, but error was expected in this test case');
+        } else if (!success && testCase.expectedErrors.length === 0) {
+            addError(testCase, typeof status === 'number'
+                ? `DocTML CLI exit code is ${status}, but not errors were expected in this test case`
+                : 'Runner reported failure, but no errors were expected in this test case');
         }
-    } else if (fs.existsSync(outputFile)) {
-        errors.push({
-            message: `DocTML CLI created output DOCX file despite exit code ${result.status}: ${outputFile}`,
-        });
+
+        if (success) {
+            if (!fs.existsSync(outputFile)) {
+                addError(testCase, `DocTML CLI did not create output DOCX file: ${outputFile}`);
+            } else if (fs.statSync(outputFile).size === 0) {
+                addError(testCase, `DocTML CLI created an empty output DOCX file: ${outputFile}`);
+            }
+        } else if (fs.existsSync(outputFile)) {
+            addError(testCase, `DocTML CLI created output DOCX file despite exit code ${status}: ${outputFile}`);
+        }
     }
 
-    Function 2: convertFromDocx
+    async function convertFromDocx(): Promise<void> {
+        if (process.argv.includes('--only-docx')) return;
 
-    if `--only-docx` command line argument is provided anywhere in the arguments list, return from this function immediately - do not convert docx file
+        const convertibleCases = testCases.filter(testCase =>
+            fs.existsSync(testCase.getOutputFile('docx'))
+        );
 
-    if conversion is expected, convert docx files to pdf, html and png
-    - if test case docx file does not exists, skip conversion
-    - group test cases into batches of length `conversionBatch`
-    - convert batch with `convertDocxFiles`. If batch conversion fails, retry to convert one file at a time from batch.
-      Note: use `getOutputFile` to get source and target file name.
-      Note: `convertDocxFiles` assumes that pdf and html output file names are the same only extension is different - this is always true here, so you don't need to do additional copying
-    - if conversion of single file fails, add to test case errors: "Conversion from DOCX to PDF or HTML failed."
-    - if conversion success, but html or pdf is missing or it is empty:
-      - add to test case errors: "Conversion from DOCX to PDF or HTML did not produced correct files."
-      - if file is empty, remove it
-    - if pdf exist and it is not empty, use `pdf2png` to convert pdf do png file.
-    - if conversion fails or output file does not exists or it is empty, add to test case errors: "Conversion from PDF to PNG failed."
+        let i = 0;
 
-    Function 3: normalizeErrors
+        for (let offset = 0; offset < convertibleCases.length; offset += conversionBatch) {
+            const batch = convertibleCases.slice(offset, offset + conversionBatch);
+            const failedCases = new Set<TestCase>();
+            const files = Object.fromEntries(batch.map(testCase => [
+                testCase.getOutputFile('docx'),
+                testCase.getOutputFile('pdf'),
+            ]));
 
-    For each test case, normalize error messages, so each error is in single array item:
-    - join all error message array into single string with "\n" as separator
-    - split into lines
-    - trim end of each line
-    - error starts with line without indentation and spans over all following lines with indentation - combine them together with "\n" as separator
-    - now, we have normalized errors, put them back to TestCase.errors
+            try {
+                console.log(`Converting batch of ${Object.keys(files).length} test cases from DOCX to PDF and HTML`);
+                await convertDocxFiles(files);
+            } catch {
+                for (const testCase of batch) {
+                    try {
+                        await convertDocxFiles({
+                            [testCase.getOutputFile('docx')]: testCase.getOutputFile('pdf'),
+                        });
+                    } catch {
+                        addError(testCase, 'Conversion from DOCX to PDF or HTML failed.');
+                        failedCases.add(testCase);
+                    }
+                }
+            }
 
-    Compare normalized errors with expected errors:
-    - go over all normalized errors
-    - if any of the expected errors is a substring of normalized, then:
-      - assign this expected error to normalized error (expectedMessage property of TestCaseError)
-      - remove expected error from expected errors list (from expectedErrors of TestCase)
+            for (const testCase of batch) {
+                i++;
+                console.log(`Validating conversion ${i} of ${convertibleCases.length}: ${testCase.getOutputFile('doctml')}`);
+                if (failedCases.has(testCase)) continue;
 
-    Back in this function:
-    
-    Save all test cases metadata with `TestCase.write` method.
+                const pdfFile = testCase.getOutputFile('pdf');
+                const htmlFile = testCase.getOutputFile('html');
+                const pdfExists = fs.existsSync(pdfFile);
+                const htmlExists = fs.existsSync(htmlFile);
+                const pdfValid = pdfExists && fs.statSync(pdfFile).size > 0;
+                const htmlValid = htmlExists && fs.statSync(htmlFile).size > 0;
+                if (!pdfValid || !htmlValid) {
+                    addError(testCase, 'Conversion from DOCX to PDF or HTML did not produced correct files.');
+                }
+                if (pdfExists && !pdfValid) fs.rmSync(pdfFile, { force: true });
+                if (htmlExists && !htmlValid) fs.rmSync(htmlFile, { force: true });
+                if (!pdfValid) {
+                    continue;
+                }
 
-    */
+                const pngFile = testCase.getOutputFile('png');
+                try {
+                    await pdf2png(pdfFile, pngFile);
+                } catch {
+                    // Report through the same output validation below.
+                }
+                if (!fs.existsSync(pngFile) || fs.statSync(pngFile).size === 0) {
+                    if (fs.existsSync(pngFile)) fs.rmSync(pngFile, { force: true });
+                    addError(testCase, 'Conversion from PDF to PNG failed.');
+                }
+            }
+        }
+    }
+
+    function normalizeErrors(testCase: TestCase): void {
+        const rawText = testCase.errors.map(error => error.message).join('\n');
+        const normalizedMessages: string[] = [];
+        let currentMessage: string | undefined;
+
+        for (const rawLine of rawText.split('\n')) {
+            const line = rawLine.trimEnd();
+            if (!line.trim()) continue;
+            if (!/^\s/.test(line) || currentMessage === undefined) {
+                if (currentMessage !== undefined) normalizedMessages.push(currentMessage);
+                currentMessage = line.trimStart();
+            } else {
+                currentMessage += `\n${line}`;
+            }
+        }
+        if (currentMessage !== undefined) normalizedMessages.push(currentMessage);
+
+        testCase.errors = normalizedMessages.map(message => ({ message }));
+        const unmatchedExpected = [...testCase.expectedErrors];
+        for (const error of testCase.errors) {
+            const matchIndex = unmatchedExpected.findIndex(expected => error.message.includes(expected));
+            if (matchIndex >= 0) {
+                error.expectedMessage = unmatchedExpected[matchIndex];
+                unmatchedExpected.splice(matchIndex, 1);
+            }
+        }
+        testCase.expectedErrors = unmatchedExpected;
+        if (testCase.isSuccessRun()) {
+            console.log('    Unexpected errors detected');
+        }
+    }
+
+    for (const [i, testCase] of Object.entries(testCases)) {
+        console.log(`Validating output ${Number(i) + 1} of ${testCases.length}: ${testCase.getOutputFile('doctml')}`);
+        processOutputStatus(testCase);
+    }
+    await convertFromDocx();
+    for (const [i, testCase] of Object.entries(testCases)) {
+        console.log(`Interpreting errors ${Number(i) + 1} of ${testCases.length}: ${testCase.getOutputFile('doctml')}`);
+        normalizeErrors(testCase);
+        testCase.write();
+    }
 }
 
-function generateReport(runnerName: string, dir: string, testCases: TestCase[])
+function generateRunnerReport(runnerName: string, dir: string, testCases: TestCase[])
 {
     // Do not implement yet.
 }
 
-export function finalizeRunner(runnerName: string, dir: string, testCases: TestCase[])
+export async function finalizeRunner(runnerName: string, dir: string, testCases: TestCase[]): Promise<void>
 {
-    processErrors(runnerName, dir, testCases);
-    generateReport(runnerName, dir, testCases);
+    await processErrors(testCases);
+    generateRunnerReport(runnerName, dir, testCases);
 }
 
 /*

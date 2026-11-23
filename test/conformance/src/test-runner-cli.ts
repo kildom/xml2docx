@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createTestCases, TestCase } from './case-parser';
-import { getRunnerDirectory } from './runners-common';
+import { finalizeRunner, getRunnerDirectory } from './runners-common';
 
 
 const runnerName = 'cli';
@@ -46,7 +46,7 @@ function runTestCase(testCase: TestCase) {
     if (result.stderr) {
         testCase.errors.push({ message: result.stderr });
     }
-    testCase.runStatus = result.status;
+    testCase.runStatus = result.status ?? false;
 }
 
 async function main() {
@@ -64,7 +64,7 @@ async function main() {
 
     for (let testCase of Object.values(testCases)) {
         try {
-            console.log(`Execute case ${i + 1} of ${total}: ${testCase.getOutputFile('docx')}`);
+            console.log(`Execute case ${i + 1} of ${total}: ${testCase.getOutputFile('doctml')}`);
             runTestCase(testCase);
         } catch (ex) {
             console.log(`    Unexpected exception: ${ex}`);
@@ -73,7 +73,7 @@ async function main() {
         i++;
     }
 
-    finalizeRunner(runnerName, dir, testCases);
+    await finalizeRunner(runnerName, dir, Object.values(testCases));
 }
 
 main();
