@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Conformance crosscheck report</title>
+    <style>
+        :root { color-scheme: light; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #202938; background: #f4f6fa; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 1rem 1.25rem; }
+        h1 { margin: 0 0 .25rem; font-size: clamp(1.7rem, 3vw, 2.5rem); }
+        h2 { margin: 1.4rem 0 .65rem; font-size: 1.2rem; }
+        a { color: #1769aa; }
+        table { width: 100%; border-collapse: collapse; background: #fff; }
+        th, td { padding: .55rem .7rem; border-bottom: 1px solid #e5eaf1; text-align: left; vertical-align: top; }
+        th { color: #526176; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
+        tr.failure td { background: #fff0f1; }
+        .counts { display: flex; flex-wrap: wrap; gap: .35rem; margin: 1rem 0; }
+        .filter-chip { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid #cbd5e1; border-radius: 7px; padding: .2rem .35rem; color: #243248; background: #fff; font: inherit; cursor: pointer; }
+        .filter-chip.active { border-color: #64748b; box-shadow: 0 0 0 2px #cbd5e166; }
+        .tick { visibility: hidden; width: .8rem; font-weight: 800; text-align: center; }
+        .filter-chip.active .tick { visibility: visible; }
+        .badge { display: inline-block; border-radius: 5px; padding: .12rem .55rem; white-space: nowrap; }
+        .success { color: #17633a; background: #dff4e7; }
+        .failed { color: #8d1e2b; background: #fce3e5; }
+        .total { color: #475569; background: #e5eaf1; }
+        .case-card { margin: .8rem 0; padding: .9rem 1rem; border: 1px solid #dce2ea; border-radius: 10px; background: #fff; }
+        .case-card.failure { border-color: #efb7bc; background: #fff4f4; }
+        .case-meta { float: right; margin-left: 1rem; color: #667085; font-size: .82rem; text-align: right; }
+        .coverage { margin: .4rem 0 .8rem; }
+        .coverage code { font-weight: 650; }
+        .coverage-title { color: #667085; }
+        .case-runners { clear: both; }
+        pre { margin: .45rem 0; padding: .8rem; border: 1px solid #dce2ea; border-radius: 7px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f9fc; font: .84rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+        details summary { cursor: pointer; }
+        .empty { color: #667085; font-style: italic; }
+        @media (max-width: 700px) { body { padding: .75rem .65rem; } .case-meta { float: none; margin: 0 0 .5rem; text-align: left; } th, td { padding: .45rem .35rem; } }
+    </style>
+</head>
+<body>
+    <h1>Conformance crosscheck</h1>
+    <h2>Runners</h2>
+    <table>
+        <thead><tr><th>Runner</th><th>Report</th><th>Exit code</th></tr></thead>
+        <tbody>
+            <% for (const runner of runnerRows) { %>
+                <tr class="<%= runner.failed ? 'failure' : '' %>">
+                    <td><%- runner.name %></td>
+                    <td><a href="<%- runner.href %>">Open report</a></td>
+                    <td><%- runner.exitCode %></td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+    <h2>Test cases</h2>
+    <div class="counts" role="group" aria-label="Filter test cases">
+        <button class="filter-chip" type="button" data-filter="success" aria-pressed="false"><span class="tick">✓</span><span class="badge success">SUCCESS and MATCH <%- counts.success %></span></button>
+        <button class="filter-chip" type="button" data-filter="failed" aria-pressed="false"><span class="tick">✓</span><span class="badge failed">FAILED or MISMATCH <%- counts.failed %></span></button>
+        <button class="filter-chip active" type="button" data-filter="all" aria-pressed="true"><span class="tick">✓</span><span class="badge total">TOTAL <%- counts.total %></span></button>
+    </div>
+    <% if (cases.length === 0) { %><p class="empty">No test cases were run.</p><% } %>
+    <% for (const testCase of cases) { %>
+        <article class="case-card <%= testCase.issue ? 'failure' : '' %>" data-success="<%= testCase.successAndMatch %>">
+            <div class="case-meta"><a href="<%- testCase.inputHref %>" target="_blank" rel="noopener"><%- testCase.inputBaseName %></a> · line <%- testCase.inputLine %> · <code><%- testCase.id %></code></div>
+            <div class="coverage">
+                <% for (const item of testCase.coverage) { %>
+                    <div><code><%- item.tag %><% if (item.attribute) { %>.<%- item.attribute %><% } %></code>: <span class="coverage-title"><%- item.title %></span></div>
+                <% } %>
+            </div>
+            <% if (testCase.issue) { %>
+                <table class="case-runners">
+                    <thead><tr><th>Runner</th><th>Status</th><th>Matching</th><th>Diff</th></tr></thead>
+                    <tbody>
+                        <% for (const runner of testCase.runners) { %>
+                            <tr class="<%= runner.status === 'FAILED' || runner.matching === 'MISMATCH' ? 'failure' : '' %>">
+                                <td><a href="<%- runner.reportHref %>" target="_blank" rel="noopener"><%- runner.name %></a></td>
+                                <td><%- runner.status %></td>
+                                <td><%- runner.matching %></td>
+                                <td><% if (runner.diff) { %><details><summary>Show diff</summary><pre><%- runner.diff %></pre></details><% } %></td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p class="badge success">All runners succeeded and matched</p>
+            <% } %>
+        </article>
+    <% } %>
+
+    <script>
+        document.querySelectorAll('.filter-chip').forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.dataset.filter;
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    const active = chip === button;
+                    chip.classList.toggle('active', active);
+                    chip.setAttribute('aria-pressed', String(active));
+                });
+                document.querySelectorAll('.case-card').forEach(card => {
+                    card.hidden = filter === 'success' ? card.dataset.success !== 'true'
+                        : filter === 'failed' ? card.dataset.success === 'true'
+                            : false;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

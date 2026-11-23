@@ -17,12 +17,14 @@ The tests have different entry point depending on level of testing that need to 
   - 4 - failure in any of the tests
   - other - unexpected error
 
-- `src/test-crosscheck.ts` - Test all input with multiple runners as compare the outputs.
-  Each runner is executed in a new process of `src/test-runner.ts` script.
-  By default all runner will be used. You can provide which runners to run by providing them in arguments.
-  For each runner, it generates report in `artifacts/test/conformance/runner-{runner-name}/report.html`.
-  The scripts compares results of all runners. If difference if found, the test fails.
-  Report with comparison between runners is in `artifacts/test/conformance/crosscheck-report.html`.
+- `src/test-crosscheck.ts` - Run selected runners and compare their normalized DOCX contents.
+  Each runner is executed in a new process of its `src/test-runner-<name>.ts` script. By default all runners
+  are used; runner names can be supplied as arguments. Only the first runner performs output conversion;
+  subsequent runners run with `--only-docx`. Pass `--only-docx` to skip output conversion for all runners.
+  Each runner generates a report at `artifacts/test/conformance/runner-{runner-name}.html` and
+  `artifacts/test/conformance/runner-{runner-name}.md`. The crosscheck writes an interactive report to
+  `artifacts/test/conformance/crosscheck-report.html` and a concise Markdown report to
+  `artifacts/test/conformance/crosscheck-report.md`. Differences are saved beside the corresponding test cases.
   Returns:
   - 0 - no issues were found
   - 3 - comparison error (some runners produce different output)
