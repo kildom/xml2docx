@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Conformance report — <%- runnerName %></title>
+    <style>
+        :root {
+            color-scheme: light;
+            font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+            color: #202938;
+            background: #f4f6fa;
+        }
+        * { box-sizing: border-box; }
+        body { width: 100%; margin: 0; padding: 1rem 1.25rem; }
+        h1 { margin: 0 0 .25rem; font-size: clamp(1.7rem, 3vw, 2.5rem); }
+        h2 { margin: 0; font-size: 1.2rem; }
+        h3 { margin: 1.5rem 0 .75rem; font-size: 1rem; }
+        a { color: #1769aa; }
+        a:hover { color: #0d4778; }
+        details.report-section {
+            width: 100%; margin: 0; border: 0; border-radius: 0;
+            background: transparent; box-shadow: none; overflow: visible;
+        }
+        details.report-section > summary {
+            display: flex; align-items: center; gap: .65rem; margin: 1rem 0; padding: 1rem 1.2rem;
+            border: 1px solid #cbd5e1; border-radius: 8px;
+            cursor: pointer; font-size: 1.12rem; font-weight: 700; background: #e9eef5;
+        }
+        details.report-section > summary { list-style: none; }
+        details.report-section > summary::-webkit-details-marker { display: none; }
+        details.report-section > summary::after { content: '▸'; margin-left: auto; color: #526176; transition: transform .15s ease; }
+        details.report-section[open] > summary::after { transform: rotate(90deg); }
+        .section-body { width: 100%; padding: 1rem 0 1.3rem; }
+        .counts { display: inline-flex; flex-wrap: wrap; gap: .35rem; margin: 0 0 1rem; font-size: .8rem; font-weight: 650; }
+        .badge { display: inline-block; border-radius: 999px; padding: .12rem .55rem; white-space: nowrap; }
+        .badge.failed { color: #8d1e2b; background: #fce3e5; }
+        .badge.success { color: #17633a; background: #dff4e7; }
+        .badge.total { color: #475569; background: #e5eaf1; }
+        .filter-chip {
+            border: 1px solid #cbd5e1; border-radius: 7px; padding: .42rem .75rem;
+            color: #243248; background: #fff; font: inherit; cursor: pointer;
+        }
+        .filter-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .35rem; }
+        .filter-chip.active { border-color: #64748b; box-shadow: 0 0 0 2px #cbd5e166; }
+        .filter-tick { visibility: hidden; width: .8rem; color: #334155; font-weight: 800; text-align: center; }
+        .filter-chip.active .filter-tick { visibility: visible; }
+        .filter-chip .badge { border-radius: 5px; }
+        .file-section { margin-top: 1rem; }
+        .file-section > h3 {
+            scroll-margin-top: 1rem; padding: .65rem .8rem; border-left: 4px solid #6484ad;
+            background: #f2f5f9; overflow-wrap: anywhere;
+        }
+        .case-card {
+            margin: .8rem 0; padding: .9rem 1rem; border: 1px solid #dce2ea;
+            border-radius: 10px; background: #fff;
+        }
+        .case-card.failure { border-color: #efb7bc; background: #fff4f4; }
+        .case-meta { float: right; margin: 0 0 .6rem 1rem; color: #667085; font-size: .78rem; text-align: right; }
+        .case-meta a { color: inherit; }
+        .coverage-list { margin: 0 0 .8rem; }
+        .coverage-item { margin: .12rem 0; }
+        .coverage-item code { font: 650 .95em ui-monospace, SFMono-Regular, Consolas, monospace; }
+        .coverage-title { color: #667085; }
+        .tab-bar { display: flex; flex-wrap: wrap; gap: .35rem; clear: both; margin-left: 10px; border-bottom: 0; }
+        .tab-button, .tab-link {
+            display: inline-block; border: 1px solid #dce2ea; border-bottom: 0; border-radius: 7px 7px 0 0;
+            padding: .38rem .7rem; color: #31577f; background: #f4f7fb; font: inherit;
+            font-size: .88rem; text-decoration: none; cursor: pointer;
+        }
+        .tab-button.active { color: #fff; border-color: #315f91; background: #315f91; }
+        .tab-close { padding: .25rem .65rem; color: #6b3440; }
+        .tab-panel { padding: 0; }
+        .tab-panel[hidden] { display: none; }
+        pre.code, pre.error-message {
+            margin: .45rem 0; padding: .8rem; border: 1px solid #dce2ea; border-radius: 7px;
+            overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: .84rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+        }
+        pre.code { max-height: 65vh; background: #f7f9fc; }
+        .tab-panel[data-kind="source"] pre.code { max-height: 40vh; }
+        .tab-panel pre.error-message:first-child, .tab-panel pre.code { margin-top: 0; }
+        pre.error-message.unexpected, .missing-expected {
+            border-color: #efb7bc; background: #ffe8e9; color: #702a32;
+        }
+        pre.error-message.expected { background: #fff; }
+        mark.expected-text { border-radius: 3px; color: #155c2d; background: #c9f2d4; }
+        .missing-label { margin: .9rem 0 .3rem; font-weight: 700; color: #8d1e2b; }
+        .missing-expected { margin: .25rem 0; padding: .45rem .7rem; border-radius: 6px; }
+        .pdf-frame { display: block; width: 100%; height: 40vh; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; }
+        .result-frame { width: 100%; height: auto; max-height: 40vh; padding: .8rem; overflow: auto; border: 1px solid #dce2ea; border-radius: 7px; background: #f7f9fc; }
+        .result-image { display: block; width: 100%; height: auto; max-width: none; max-height: none; margin: 0; border: 1px solid #cbd5e1; background: #fff; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: .55rem .7rem; border-bottom: 1px solid #e5eaf1; text-align: left; vertical-align: top; }
+        th { color: #526176; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
+        td.numeric { width: 1%; white-space: nowrap; }
+        .coverage-table details summary { cursor: pointer; }
+        .coverage-table code { font: 650 .9rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+        .coverage-desc { color: #687588; }
+        .coverage-cases { margin: .45rem 0 .15rem; padding-left: 1.2rem; }
+        .coverage-cases li { margin: .25rem 0; padding: .2rem .45rem; border-radius: 5px; }
+        .coverage-cases li.failure { background: #ffe8e9; }
+        .coverage-cases li.success { background: transparent; }
+        tr.has-failures td, tr.not-covered td { background: #fff0f1; }
+        .empty { color: #667085; font-style: italic; }
+        @media (max-width: 700px) {
+            body { padding: .75rem .65rem; }
+            details.report-section > summary { padding: .8rem; flex-wrap: wrap; }
+            .counts { margin: 0 0 .8rem; }
+            .case-meta { float: none; margin: 0 0 .5rem; text-align: left; }
+            table { font-size: .88rem; }
+            th, td { padding: .45rem .35rem; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Conformance report</h1>
+    <p class="empty">Runner: <strong><%- runnerName %></strong></p>
+
+    <details class="report-section" id="case-results" open>
+        <summary>
+            Test cases
+        </summary>
+        <div class="section-body">
+            <div class="counts" role="group" aria-label="Filter test cases">
+                <button class="filter-chip" type="button" data-filter="failed" aria-pressed="false"><span class="filter-tick" aria-hidden="true">✓</span><span class="badge failed">Failed <%- counts.failed %></span></button>
+                <button class="filter-chip" type="button" data-filter="success" aria-pressed="false"><span class="filter-tick" aria-hidden="true">✓</span><span class="badge success">Success <%- counts.success %></span></button>
+                <button class="filter-chip active" type="button" data-filter="all" aria-pressed="true"><span class="filter-tick" aria-hidden="true">✓</span><span class="badge total">Total <%- counts.total %></span></button>
+            </div>
+            <% if (reportCases.length === 0) { %><p class="empty">No test cases were run.</p><% } %>
+            <% for (const group of inputGroups) { %>
+                <section class="file-section">
+                    <h3 id="<%- group.anchor %>"><%- group.inputFile %></h3>
+                    <% for (const testCase of group.cases) { %>
+                        <article class="case-card <%= testCase.success ? 'success' : 'failure' %>"
+                            id="<%- testCase.id %>" data-success="<%= testCase.success %>">
+                            <div class="case-meta">
+                                <a href="<%- testCase.inputHref %>" target="_blank" rel="noopener"><%- testCase.inputBaseName %></a>
+                                · line <%- testCase.inputLine %> · <code><%- testCase.id %></code>
+                            </div>
+                            <div class="coverage-list">
+                                <% for (const item of testCase.coverage) { %>
+                                    <div class="coverage-item"><code><%- item.tag %><% if (item.attribute) { %>.<%- item.attribute %><% } %></code>: <span class="coverage-title"><%- item.title %></span></div>
+                                <% } %>
+                            </div>
+                            <div class="tab-bar" role="tablist">
+                                <% for (const tab of testCase.tabs) { %>
+                                    <% if (tab.kind === 'link') { %>
+                                        <a class="tab-link" href="<%- tab.href %>" target="_blank" rel="noopener"><%- tab.title %> ↗</a>
+                                    <% } else { %>
+                                        <button class="tab-button<%= tab.active ? ' active' : '' %>" type="button"
+                                            data-tab="<%- testCase.id %>-<%- tab.key %>" aria-selected="<%= Boolean(tab.active) %>"><%- tab.title %></button>
+                                    <% } %>
+                                <% } %>
+                                <button class="tab-button tab-close" type="button" aria-label="Close tab" title="Close tab">×</button>
+                            </div>
+                            <% for (const tab of testCase.tabs) { if (tab.kind === 'link') continue; %>
+                                <div class="tab-panel" data-panel="<%- testCase.id %>-<%- tab.key %>"
+                                    data-kind="<%- tab.kind %>" data-content="<%- testCase.id %>-<%- tab.key %>"
+                                    <% if (tab.href) { %>data-href="<%- tab.href %>"<% } %>
+                                    <%= tab.active ? '' : 'hidden' %>>
+                                    <% if (tab.kind === 'errors') { %>
+                                        <% for (const error of tab.errors) { %>
+                                            <pre class="error-message <%= error.expected ? 'expected' : 'unexpected' %>"><%- error.before %><% if (error.match) { %><mark class="expected-text"><%- error.match %></mark><%- error.after %><% } %></pre>
+                                        <% } %>
+                                        <% if (tab.missingExpected.length > 0) { %>
+                                            <div class="missing-label">Expected errors that did not happen</div>
+                                            <% for (const missing of tab.missingExpected) { %><div class="missing-expected"><%- missing %></div><% } %>
+                                        <% } %>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                        </article>
+                    <% } %>
+                </section>
+            <% } %>
+        </div>
+    </details>
+
+    <details class="report-section" open>
+        <summary>Input files</summary>
+        <div class="section-body">
+            <table>
+                <thead><tr><th>Input file</th><th>Failed</th><th>Success</th><th>Total</th></tr></thead>
+                <tbody>
+                    <% for (const input of inputGroups) { %>
+                        <tr class="<%= input.counts.failed > 0 ? 'has-failures' : '' %>">
+                            <td><a href="#<%- input.anchor %>" onmousedown="showCaseTarget()"><%- input.baseName %></a></td>
+                            <td><span class="badge failed"><%- input.counts.failed %></span></td>
+                            <td><span class="badge success"><%- input.counts.success %></span></td>
+                            <td><span class="badge total"><%- input.counts.total %></span></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </details>
+
+    <details class="report-section" open>
+        <summary>Coverage</summary>
+        <div class="section-body">
+            <table class="coverage-table">
+                <thead><tr><th>Tag / attribute</th><th>Description</th><th>Failed</th><th>Success</th><th>Total</th></tr></thead>
+                <tbody>
+                    <% for (const row of coverageRows) { %>
+                        <tr class="<%= row.counts.failed > 0 ? 'has-failures' : row.counts.total === 0 ? 'not-covered' : '' %>">
+                            <td>
+                                <details>
+                                    <summary><code><%- row.tag %><% if (row.attribute) { %>.<%- row.attribute %><% } %></code></summary>
+                                    <% if (row.cases.length > 0) { %>
+                                        <ul class="coverage-cases">
+                                            <% for (const item of row.cases) { %>
+                                                <li class="<%= item.success ? 'success' : 'failure' %>"><a href="#<%- item.id %>" onmousedown="showCaseTarget()"><%- item.title %></a></li>
+                                            <% } %>
+                                        </ul>
+                                    <% } else { %><p class="empty">Not covered</p><% } %>
+                                </details>
+                            </td>
+                            <td class="coverage-desc"><%- row.brief %></td>
+                            <td class="numeric"><span class="badge failed"><%- row.counts.failed %></span></td>
+                            <td class="numeric"><span class="badge success"><%- row.counts.success %></span></td>
+                            <td class="numeric"><span class="badge total"><%- row.counts.total %></span></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </details>
+
+    <script>
+        const lazyContent = <%= lazyContentJson %>;
+        function showCaseTarget() {
+            document.getElementById('case-results').open = true;
+            document.querySelector('.filter-chip[data-filter="all"]').click();
+        }
+
+        document.querySelectorAll('.filter-chip').forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.dataset.filter;
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    const active = chip === button;
+                    chip.classList.toggle('active', active);
+                    chip.setAttribute('aria-pressed', String(active));
+                });
+                document.querySelectorAll('.case-card').forEach(card => {
+                    card.hidden = filter === 'failed' ? card.dataset.success === 'true'
+                        : filter === 'success' ? card.dataset.success !== 'true'
+                            : false;
+                });
+            });
+        });
+
+        document.addEventListener('click', event => {
+            const button = event.target.closest('.tab-button');
+            if (!button) return;
+            const card = button.closest('.case-card');
+            if (button.classList.contains('tab-close')) {
+                card.querySelectorAll('.tab-button').forEach(tab => {
+                    tab.classList.remove('active');
+                    tab.setAttribute('aria-selected', 'false');
+                });
+                card.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.hidden = true;
+                });
+                return;
+            }
+            card.querySelectorAll('.tab-button').forEach(tab => {
+                tab.classList.toggle('active', tab === button);
+                tab.setAttribute('aria-selected', String(tab === button));
+            });
+            card.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.hidden = panel.dataset.panel !== button.dataset.tab;
+            });
+
+            const panel = card.querySelector(`[data-panel="${button.dataset.tab}"]`);
+            if (panel.dataset.loaded === 'true') return;
+            if (panel.dataset.kind === 'source') {
+                const pre = document.createElement('pre');
+                pre.className = 'code';
+                const code = document.createElement('code');
+                code.textContent = lazyContent[panel.dataset.content] ?? '';
+                pre.append(code);
+                panel.append(pre);
+            } else if (panel.dataset.kind === 'png') {
+                const frame = document.createElement('div');
+                frame.className = 'result-frame';
+                const image = document.createElement('img');
+                image.className = 'result-image';
+                image.alt = 'PNG output';
+                image.loading = 'lazy';
+                image.src = panel.dataset.href;
+                frame.append(image);
+                panel.append(frame);
+            } else if (panel.dataset.kind === 'pdf') {
+                const frame = document.createElement('iframe');
+                frame.className = 'pdf-frame';
+                frame.title = 'PDF preview';
+                frame.src = panel.dataset.href;
+                panel.append(frame);
+            }
+            panel.dataset.loaded = 'true';
+        });
+    </script>
+</body>
+</html>

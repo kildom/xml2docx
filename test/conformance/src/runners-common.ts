@@ -1,6 +1,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { template } from 'underscore';
 import { TestCase } from './case-parser';
 import { convertDocxFiles } from '../../../scripts/common/docx2pdf';
 import { pdf2png } from './pdf2png';
@@ -53,6 +54,25 @@ async function processErrors(testCases: TestCase[], coverage: Record<string, Cov
             }
         } else if (fs.existsSync(outputFile)) {
             addError(testCase, `DocTML CLI created output DOCX file despite exit code ${status}: ${outputFile}`);
+        }
+    }
+
+    function checkCoverage(testCase: TestCase): void {
+        for (const item of testCase.coverage) {
+            let tagInfo = coverage[item.tag];
+            if (!tagInfo) {
+                addError(testCase, `Coverage tag "${item.tag}" is not defined in tags.json.`);
+                tagInfo = coverage[item.tag] = {
+                    name: item.tag,
+                    brief: '',
+                    attributes: {},
+                };
+            }
+
+            if (item.attribute && !Object.prototype.hasOwnProperty.call(tagInfo.attributes, item.attribute)) {
+                addError(testCase, `Coverage attribute "${item.tag}.${item.attribute}" is not defined in tags.json.`);
+                tagInfo.attributes[item.attribute] = '';
+            }
         }
     }
 
@@ -157,7 +177,7 @@ async function processErrors(testCases: TestCase[], coverage: Record<string, Cov
 
     for (const [i, testCase] of Object.entries(testCases)) {
         console.log(`Validating output ${Number(i) + 1} of ${testCases.length}: ${testCase.getOutputFile('doctml')}`);
-        // TODO: Add above and call here function checkCoverage that checks if all tags and attributes defined in coverage of this test case are actually available in `coverage` parameter. If not, add error to test case.
+        checkCoverage(testCase);
         processOutputStatus(testCase);
     }
     await convertFromDocx();
@@ -168,77 +188,239 @@ async function processErrors(testCases: TestCase[], coverage: Record<string, Cov
     }
 }
 
-function generateRunnerReport(runnerName: string, dir: string, testCases: TestCase[])
+function generateRunnerReport(
+    runnerName: string,
+    dir: string,
+    testCases: TestCase[],
+    coverage: Record<string, CoverageTagInformation>,
+)
 {
-    /* TODO: Implement as described below
+    type Counts = { failed: number; success: number; total: number };
+    type ErrorView = { message: string; expected: boolean; before: string; match: string; after: string };
+    type Tab = {
+        key: string;
+        title: string;
+        kind: 'errors' | 'source' | 'pdf' | 'png' | 'link';
+        href?: string;
+        errors?: ErrorView[];
+        missingExpected?: string[];
+        active?: boolean;
+    };
+    type CaseView = {
+        id: string;
+        inputFile: string;
+        inputBaseName: string;
+        inputLine: string;
+        inputHref: string;
+        inputAnchor: string;
+        success: boolean;
+        coverage: TestCase['coverage'];
+        tabs: Tab[];
+    };
+    type CoverageView = {
+        tag: string;
+        attribute?: string;
+        brief: string;
+        counts: Counts;
+        cases: Array<{ id: string; title: string; success: boolean }>;
+    };
 
-    Create interactive test report for the runner.
-    Use templating to produce it. You can use `template` function from `underscore` module as in other
-    parts of this project. Template file is empty for now - need to be implemented. It is in 
-    `test/conformance/src/templates/runner-report.html`. It will contain CSS, JS and templated HTML.
-    The output HTML must be self-contained except references to test results.
-    The output location is `artifacts/test/conformance/runner-${runnerName}.html`.
+    const reportFile = path.join(conformanceRoot, `runner-${runnerName}.html`);
 
-    The report will have following sections. Each section is collapsible (can be hidden) and it is visible by default:
-    - Test cases results section. In the title, also contains total number of test cases failed (on red), success (on green), and both (gray)
-      - At the beginning, there is a button that allows to filter test cases: "Only failures", if clicked, success test cases are hidden and the button label is now "All tests"
-      - Test cases are ordered by inputFile first, inputLine next.
-      - Each input file section start with file name as a header with id, so it can be linked
-      - Test case is a card (that is red-ish if test is failure, white or almost-white gray on success).
-        - The test case id is in HTML id to allow navigate to specific test case with `#<id>` URL.
-        - The identification information is located at top right corner of the card as smaller, gray text that contains:
-            - Source file name (inputFile) only base name, as a link to that file (relative path) with target "_blank"
-            - Source file line (inputLine)
-            - Test case id
-        - Next, there is a coverage information, each item in single line, that looks like card title, but font should not be bigger than other text. The tag and attribute should be bold and title should be gray.
-        - Next, there is tab view that allows to switch between different information of the test case. If test is a failure, the "Errors" tab is active by default. If success, no tab is active by default.
-        - The following tabs should be implemented:
-          - `Errors` - show errors from test case run (TestCase.errors).
-             - If some error is expected show it with default background and highlight the expected substring of error message with light green text background.
-             - If some error is not expected show it with light red background.
-             - If some expected errors did not happen (TestCase.expectedErrors is not empty), show label "Expected errors that did not happen" and show them below with light red background.
-             - If nothing to show (both errors and expectedErrors are empty), do now show `Errors` tab.
-          - `DocTML` - show doctml source code of the test case (TestCase.readCode() result)
-            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
-          - `JSON` - show template data JSON (TestCase.readData() result). This tab only exists if data exists.
-            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
-          - `DOCX` - this is actually not a tab, but relative link to test case docx file that opens in new window (exists only if docx file actually exists)
-          - `PDF` - show PDF in iframe (full width and 40% of vertical view), above iframe is a button that is a relative link to pdf that opens in new window (exists only if pdf file actually exists).
-            The iframe should be lazy-created when user clicks the tab to avoid overwhelming page with iframes.
-          - `HTML` - show HTML source code (not preview) (full width and 40% of vertical view)
-            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
-            This tab should not exists if HTML file does not exists
-          - `PNG` - show PNG image (full width and 40% of vertical view)
-            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
-            This tab should not exists if PNG file does not exists
-          - Create one tab per one debug file that was produced when DocTML tool worked.
-            Use `TestCase.getDebugFiles` method. It is not implemented yet - you need to implement.
-            Remove test id and "debug" string from file name and use it as tab name.
-            Show the debug file as a source code.
-            Content should be lazy-created when user clicks the tab to avoid overwhelming page with too much elements.
-    - Input files section.
-      - Contains input (source file) summary table
-      - one row for each input source test file, just base name, no dir, not the file name with id, but the original file that contains multiple test cases (the inputFile property of TestCase)
-      - each row contains total number of test cases failed (on red), success (on green), and both (gray) in that source file
-      - file name is a link to input file header in cases results section.
-        The link must have special onmousedown event that expands cases results section if collapsed.
-    - Coverage section
-      - It contains table with all tags and attributes
-      - The list of all tags and attributes must be read from `artifacts/test/conformance/docs/tags.json`
-      - If some tag or attribute from test case does not exists in `tags.json`, add it (error reporting was be done before).
-      - Sort table by tag name first, attribute name next
-      - Each row contains number of test cases failed (on red), success (on green), and both (gray) for this tag or attribute
-      - The row is expandable:
-        - after expansion, it shows list of test cases that cover that tag or attribute.
-        - shows only titles (no need to repeat tag or attribute name)
-        - each item in list shows if it is failure or success
-        - failures has light red background
-        - title is a link to actual test case in cases results section
-          The link must have special onmousedown event that expands cases results section if collapsed.
+    function relativeUrl(target: string): string {
+        return path.relative(path.dirname(reportFile), target)
+            .split(path.sep)
+            .map(encodeURIComponent)
+            .join('/');
+    }
 
-    Use modern and readable style, layout and graphics.
+    function isSuccessful(testCase: TestCase): boolean {
+        return testCase.isSuccessRun() && testCase.expectedErrors.length === 0;
+    }
 
-    */
+    function newCounts(): Counts {
+        return { failed: 0, success: 0, total: 0 };
+    }
+
+    function countCase(counts: Counts, success: boolean): void {
+        counts.total++;
+        if (success) counts.success++;
+        else counts.failed++;
+    }
+
+    const inputAnchors = new Map<string, string>();
+    const lazyContent: Record<string, string> = {};
+    const reportCases: CaseView[] = [];
+    const sortedCases = [...testCases].sort((a, b) =>
+        a.inputFile.localeCompare(b.inputFile) || Number(a.inputLine) - Number(b.inputLine) || a.id.localeCompare(b.id)
+    );
+
+    for (const testCase of sortedCases) {
+        const success = isSuccessful(testCase);
+        if (!inputAnchors.has(testCase.inputFile)) {
+            inputAnchors.set(testCase.inputFile, `input-${inputAnchors.size}`);
+        }
+
+        const tabs: Tab[] = [];
+        const linkTabs: Tab[] = [];
+        const errors: ErrorView[] = testCase.errors.map(error => {
+            const expected = error.expectedMessage;
+            const matchAt = expected ? error.message.indexOf(expected) : -1;
+            return {
+                message: error.message,
+                expected: Boolean(expected),
+                before: matchAt >= 0 ? error.message.slice(0, matchAt) : error.message,
+                match: matchAt >= 0 ? expected! : '',
+                after: matchAt >= 0 ? error.message.slice(matchAt + expected!.length) : '',
+            };
+        });
+
+        if (errors.length > 0 || testCase.expectedErrors.length > 0) {
+            tabs.push({
+                key: `panel-${tabs.length}`,
+                title: 'Errors',
+                kind: 'errors',
+                errors,
+                missingExpected: [...testCase.expectedErrors],
+                active: !success,
+            });
+        }
+
+        const addSourceTab = (title: string, content: string): void => {
+            const key = `panel-${tabs.length}`;
+            lazyContent[`${testCase.id}-${key}`] = content;
+            tabs.push({ key, title, kind: 'source' });
+        };
+
+        addSourceTab('DocTML', testCase.readCode());
+        const dataFile = path.join(dir, `${testCase.id}-data.json`);
+        if (fs.existsSync(dataFile)) {
+            addSourceTab('JSON', JSON.stringify(testCase.readData(), null, 4));
+        }
+
+        const docxFile = testCase.getOutputFile('docx');
+        if (fs.existsSync(docxFile)) {
+            linkTabs.push({ key: `link-${linkTabs.length}`, title: 'DOCX', kind: 'link', href: relativeUrl(docxFile) });
+        }
+        const pdfFile = testCase.getOutputFile('pdf');
+        if (fs.existsSync(pdfFile)) {
+            tabs.push({ key: `panel-${tabs.length}`, title: 'PDF', kind: 'pdf', href: relativeUrl(pdfFile) });
+            linkTabs.push({ key: `link-${linkTabs.length}`, title: 'PDF', kind: 'link', href: relativeUrl(pdfFile) });
+        }
+        const htmlFile = testCase.getOutputFile('html');
+        if (fs.existsSync(htmlFile)) {
+            addSourceTab('HTML', fs.readFileSync(htmlFile, 'utf8'));
+        }
+        const pngFile = testCase.getOutputFile('png');
+        if (fs.existsSync(pngFile)) {
+            tabs.push({ key: `panel-${tabs.length}`, title: 'PNG', kind: 'png', href: relativeUrl(pngFile) });
+        }
+        for (const debugFile of testCase.getDebugFiles()) {
+            const title = path.basename(debugFile).replace(`${testCase.id}.debug.`, '');
+            addSourceTab(title, fs.readFileSync(debugFile, 'utf8'));
+        }
+        tabs.push(...linkTabs);
+
+        reportCases.push({
+            id: testCase.id,
+            inputFile: testCase.inputFile,
+            inputBaseName: path.basename(testCase.inputFile),
+            inputLine: testCase.inputLine,
+            inputHref: relativeUrl(testCase.inputFile),
+            inputAnchor: inputAnchors.get(testCase.inputFile)!,
+            success,
+            coverage: testCase.coverage,
+            tabs,
+        });
+    }
+
+    const casesByInput = new Map<string, CaseView[]>();
+    for (const item of reportCases) {
+        const group = casesByInput.get(item.inputFile) ?? [];
+        group.push(item);
+        casesByInput.set(item.inputFile, group);
+    }
+    const inputGroups = [...casesByInput.entries()].map(([inputFile, cases]) => {
+        const counts = newCounts();
+        for (const item of cases) countCase(counts, item.success);
+        return {
+            inputFile,
+            baseName: path.basename(inputFile),
+            anchor: cases[0].inputAnchor,
+            counts,
+            cases,
+        };
+    });
+
+    const coverageRows = new Map<string, CoverageView>();
+    const coveredCaseIds = new Map<string, Set<string>>();
+    function ensureCoverageRow(tag: string, attribute?: string): CoverageView {
+        const key = `${tag}\0${attribute ?? ''}`;
+        let row = coverageRows.get(key);
+        if (!row) {
+            const tagInfo = coverage[tag];
+            row = {
+                tag,
+                ...(attribute ? { attribute } : {}),
+                brief: attribute ? tagInfo?.attributes[attribute] ?? '' : tagInfo?.brief ?? '',
+                counts: newCounts(),
+                cases: [],
+            };
+            coverageRows.set(key, row);
+            coveredCaseIds.set(key, new Set());
+        }
+        return row;
+    }
+
+    for (const [tag, info] of Object.entries(coverage)) {
+        ensureCoverageRow(tag);
+        for (const attribute of Object.keys(info.attributes)) {
+            ensureCoverageRow(tag, attribute);
+        }
+    }
+    for (const testCase of sortedCases) {
+        const success = isSuccessful(testCase);
+        for (const item of testCase.coverage) {
+            const rowSpecs: Array<[string, string | undefined]> = [[item.tag, undefined]];
+            if (item.attribute) rowSpecs.push([item.tag, item.attribute]);
+            for (const [tag, attribute] of rowSpecs) {
+                const row = ensureCoverageRow(tag, attribute);
+                const key = `${tag}\0${attribute ?? ''}`;
+                const caseIds = coveredCaseIds.get(key)!;
+                if (caseIds.has(testCase.id)) continue;
+                caseIds.add(testCase.id);
+                countCase(row.counts, success);
+                row.cases.push({ id: testCase.id, title: item.title, success });
+            }
+        }
+    }
+
+    const sortedCoverageRows = [...coverageRows.values()].sort((a, b) =>
+        a.tag.localeCompare(b.tag) || (a.attribute ?? '').localeCompare(b.attribute ?? '')
+    );
+    const counts = newCounts();
+    for (const item of reportCases) countCase(counts, item.success);
+
+    const reportTemplate = template(fs.readFileSync(
+        'test/conformance/src/templates/runner-report.html',
+        'utf8'
+    ));
+    const lazyContentJson = JSON.stringify(lazyContent)
+        .replace(/</g, '\\u003c')
+        .replace(/>/g, '\\u003e')
+        .replace(/&/g, '\\u0026')
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029');
+    fs.mkdirSync(path.dirname(reportFile), { recursive: true });
+    fs.writeFileSync(reportFile, reportTemplate({
+        runnerName,
+        reportCases,
+        inputGroups,
+        coverageRows: sortedCoverageRows,
+        counts,
+        lazyContentJson,
+    }), 'utf8');
+
 }
 
 export interface CoverageTagInformation {
@@ -258,8 +440,12 @@ export async function finalizeRunner(runnerName: string, dir: string, testCases:
 {
     let coverage = readCoverage();
     await processErrors(testCases, coverage);
-    generateRunnerReport(runnerName, dir, testCases);
-    // TODO: go over all test cases, if any of them failed, set process exit code to 4 if it is not set or below 4
+    generateRunnerReport(runnerName, dir, testCases, coverage);
+    if (testCases.some(testCase => !testCase.isSuccessRun() || testCase.expectedErrors.length > 0)) {
+        if (process.exitCode === undefined || process.exitCode === null || Number(process.exitCode) < 4) {
+            process.exitCode = 4;
+        }
+    }
 }
 
 /*

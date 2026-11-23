@@ -110,8 +110,12 @@ export class TestCase {
         return path.join(this.dir, `${this.id}.${type}`);
     }
 
+    /** Lists this case's debug outputs matching the `<id>.debug.*` filename pattern. */
     public getDebugFiles(): string[] {
-        // TODO: Implement it, get all files from `this.dir` that matched pattern `<id>.debug.*`
+        const prefix = `${this.id}.debug.`;
+        return fs.readdirSync(this.dir, { withFileTypes: true })
+            .filter(entry => entry.isFile() && entry.name.startsWith(prefix))
+            .map(entry => path.join(this.dir, entry.name));
     }
 
     /** Returns true if test case run was successful. */
@@ -307,7 +311,8 @@ function hashOfCoverage(inputFile: string, coverage: TestCaseCoverageEntry[]): s
 
 
 void (selfTest(import.meta.url) && (async () => {
-    const { default: assert } = await import('node:assert/strict');
+    const assert: Pick<typeof import('node:assert/strict'), 'deepEqual' | 'equal' | 'ok'> =
+        (await import('node:assert/strict')).default;
 
     const parserCheckText = `<document>
             <section size="A4" margin="5mm"/>
