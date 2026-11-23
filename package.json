@@ -3,7 +3,16 @@
     "version": "0.1.0",
     "description": "Generate DOCX documents using a simple HTML-like syntax with optional templating.",
     "type": "module",
-    "main": "src/cli.ts",
+    "main": "./dist/cjs/doctml.js",
+    "module": "./dist/esm/doctml.js",
+    "types": "./dist/esm/doctml.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/esm/doctml.d.ts",
+            "import": "./dist/esm/doctml.js",
+            "require": "./dist/cjs/doctml.js"
+        }
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/kildom/doctml.git"
@@ -29,7 +38,7 @@
         "test-template": "npx tsx test/template/test-template.ts",
         "prebuild-cli": "npx esbuild src/cli/cliDocTML.ts --platform=node --format=cjs --bundle --sourcemap --target=node18 --metafile=dist/cli/doctml.json --outfile=dist/cli/doctml.cjs && npm run _lic -- dist/cli/license.txt dist/cli/doctml.json && npx tsx scripts/get-version.ts",
         "build-cli": "npx tsx scripts/build-deno-exec.ts",
-        "build-api": "npx tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
+        "build-api": "npx tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json && npx tsx scripts/finalize-api-build.ts",
         "build-docs": "npx tsx scripts/gen-docs/gen-html.ts",
         "_lic": "npx license-checker --json --out dist/licenses.json && npx tsx scripts/gen-licenses.ts dist/licenses.json",
         "check": "npx tsc -p tsconfig.check.json && npx eslint src test",
