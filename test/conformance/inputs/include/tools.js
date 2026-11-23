@@ -69,7 +69,8 @@ function testCase(...list) {
 */
 
 
-void (function(utils) {
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+(function(utils) {
 
     const LoremIpsum = eval(utils.include('include/lorem-ipsum.min.js') + ';\nLoremIpsum');
 

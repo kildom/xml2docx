@@ -132,8 +132,8 @@ export class TestCase {
 
 
 /**
- * Resets `dir`, copies shared include assets into `dir/include`, and writes each test case's
- * metadata, source, and optional data there.
+ * Resets `dir`, copies shared include assets into both `dir/include` and `dir`, and writes each
+ * test case's metadata, source, and optional data there.
  *
  * Inputs are read from `test/conformance/inputs/` and the generated documentation
  * examples in `artifacts/test/conformance/docs/tests.doctml`, relative to the project root.
@@ -146,7 +146,22 @@ export function createTestCases(dir: string): Record<string, TestCase> {
     const inputDir = 'test/conformance/inputs';
     fs.rmSync(dir, { recursive: true, force: true });
     fs.mkdirSync(dir, { recursive: true });
-    fs.cpSync(path.join(inputDir, 'include'), path.join(dir, 'include'), { recursive: true });
+    const includeDir = path.join(inputDir, 'include');
+    fs.cpSync(includeDir, path.join(dir, 'include'), { recursive: true });
+    fs.cpSync(includeDir, dir, { recursive: true });
+
+    function copyFilesFlat(sourceDir: string): void {
+        for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+            const sourceFile = path.join(sourceDir, entry.name);
+            if (entry.isDirectory()) {
+                copyFilesFlat(sourceFile);
+            } else if (entry.isFile()) {
+                fs.copyFileSync(sourceFile, path.join(dir, entry.name));
+            }
+        }
+    }
+
+    copyFilesFlat(includeDir);
 
     const docsFile = 'artifacts/test/conformance/docs/tests.doctml';
     if (!fs.existsSync(docsFile)) {
@@ -376,6 +391,26 @@ void (selfTest(import.meta.url) && (async () => {
         const read = readTestCases(outputDir);
 
         assert.ok(fs.existsSync(path.join(outputDir, 'include/tools.js')));
+        assert.ok(fs.existsSync(path.join(outputDir, 'tools.js')));
+        assert.ok(fs.existsSync(path.join(outputDir, 'gray.png')));
+        assert.ok(fs.existsSync(path.join(outputDir, 'PrintedCircuitBoard.ttf')));
+        assert.ok(fs.existsSync(path.join(outputDir, 'styles/styles.docx')));
+
+        function assertFlattenedFiles(sourceDir: string): void {
+            for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+                const sourceFile = path.join(sourceDir, entry.name);
+                if (entry.isDirectory()) {
+                    assertFlattenedFiles(sourceFile);
+                } else if (entry.isFile()) {
+                    assert.deepEqual(
+                        fs.readFileSync(path.join(outputDir, entry.name)),
+                        fs.readFileSync(sourceFile)
+                    );
+                }
+            }
+        }
+
+        assertFlattenedFiles('test/conformance/inputs/include');
         assert.deepEqual(Object.keys(read).sort(), Object.keys(created).sort());
         for (const [id, testCase] of Object.entries(created)) {
             assert.deepEqual(read[id], testCase);
