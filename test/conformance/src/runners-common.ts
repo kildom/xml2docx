@@ -47,9 +47,10 @@ export function finalizeRunner(runnerName: string, dir: string, testCases: TestC
     Compare normalized errors with expected errors:
     - go over all normalized errors
     - if any of the expected errors is a substring of normalized, then:
-      - mark this normalized error as expected
-      - assign this expected error to normalized error
-      - remove expected error from expected errors list
+      - assign this expected error to normalized error (expectedMessage property of TestCaseError)
+      - remove expected error from expected errors list (from expectedErrors of TestCase)
+    
+    Save all test cases metadata with `TestCase.write` method.
 
     */
 }

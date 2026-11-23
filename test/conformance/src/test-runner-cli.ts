@@ -32,30 +32,37 @@ function runTestCase(testCase: TestCase) {
         : path.join(testCase.dir, 'include/empty.json');
     const outputFile = testCase.getOutputFile('docx');
     const args = ['--debug', '-d', dataFile, inputFile, outputFile];
-    const errors = testCase.intermediate.errors;
+    const errors = testCase.errors;
 
     fs.rmSync(outputFile, { force: true });
     const result = spawnSync(cliPath, args, {
         encoding: 'utf8',
         maxBuffer: 50 * 1024 * 1024,
     });
-    if (result.error) throw result.error;
-    if (result.stderr) errors.push(result.stderr);
+    if (result.error) {
+        errors.push({ message: result.error.message });
+        return;
+    }
+    if (result.stderr) errors.push({ message: result.stderr });
 
     if (result.status === 0 && testCase.expectedErrors.length > 0) {
-        errors.push('DocTML CLI exit code is zero, but error was expected in this test case');
+        errors.push({ message: 'DocTML CLI exit code is zero, but error was expected in this test case' });
     } else if (result.status !== 0 && testCase.expectedErrors.length === 0) {
-        errors.push(`DocTML CLI exit code is ${result.status}, but not errors were expected in this test case`);
+        errors.push({
+            message: `DocTML CLI exit code is ${result.status}, but not errors were expected in this test case`,
+        });
     }
 
     if (result.status === 0) {
         if (!fs.existsSync(outputFile)) {
-            errors.push(`DocTML CLI did not create output DOCX file: ${outputFile}`);
+            errors.push({ message: `DocTML CLI did not create output DOCX file: ${outputFile}` });
         } else if (fs.statSync(outputFile).size === 0) {
-            errors.push(`DocTML CLI created an empty output DOCX file: ${outputFile}`);
+            errors.push({ message: `DocTML CLI created an empty output DOCX file: ${outputFile}` });
         }
     } else if (fs.existsSync(outputFile)) {
-        errors.push(`DocTML CLI created output DOCX file despite exit code ${result.status}: ${outputFile}`);
+        errors.push({
+            message: `DocTML CLI created output DOCX file despite exit code ${result.status}: ${outputFile}`,
+        });
     }
 }
 
@@ -77,8 +84,8 @@ async function main() {
             console.log(`Execute case ${i + 1} of ${total}: ${testCase.getOutputFile('docx')}`);
             runTestCase(testCase);
         } catch (ex) {
-            console.log(`    Unexpected exception: ${ex}`)
-            testCase.intermediate.errors.push(`Unexpected exception: ${ex}`);
+            console.log(`    Unexpected exception: ${ex}`);
+            testCase.errors.push({ message: `Unexpected exception: ${ex}` });
         }
         i++;
     }

@@ -16,13 +16,12 @@ export interface TestCaseCoverageEntry {
     title: string;
 }
 
+/** Describes single error message from the test case and associated expected error message. */
 export interface TestCaseError {
-    message: string[];
-    
-}
-
-export class TestCaseIntermediateData {
-    errors: string[] = [];
+    /** Message produced by execution of the test case. */
+    message: string;
+    /** If set, matching expected message from test case description. If not set, indicates that this error was not expected. */
+    expectedMessage?: string;
 }
 
 /** Metadata and source files for a single conformance test case. */
@@ -39,8 +38,8 @@ export class TestCase {
     public coverage: TestCaseCoverageEntry[] = [];
     /** Error messages expected when this case is processed. */
     public expectedErrors: string[] = [];
-    /** Intermediate data user temporary by different stages of test, not save in metadata. */
-    public intermediate: TestCaseIntermediateData = new TestCaseIntermediateData();
+    /** Test case errors. */
+    public errors: TestCaseError[] = [];
 
     /**
      * Creates an empty test case or loads its metadata from a saved JSON file.
@@ -63,7 +62,6 @@ export class TestCase {
         const file = path.join(this.dir, `${this.id}.json`);
         fs.mkdirSync(this.dir, { recursive: true });
         let toSave = { ...this } as any;
-        delete toSave.intermediate;
         fs.writeFileSync(file, JSON.stringify(toSave, null, 4), 'utf-8');
     }
 
