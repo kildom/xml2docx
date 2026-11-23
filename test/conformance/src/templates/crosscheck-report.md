@@ -1,5 +1,7 @@
 # Conformance crosscheck
 
+## <%= counts.failed === 0 && runnerRows.every(runner => runner.exitCode === 0) ? 'SUCCESS' : 'FAILED' %>
+
 ## Runners
 
 | Runner | Exit code |

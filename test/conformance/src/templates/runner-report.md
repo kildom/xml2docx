@@ -1,6 +1,6 @@
-# Conformance report
+# Conformance report for `<%= runnerName %>` runner
 
-Runner: **<%= runnerName %>**
+## <%= counts.failed === 0 ? 'SUCCESS' : 'FAILED' %>
 
 ## Test cases
 

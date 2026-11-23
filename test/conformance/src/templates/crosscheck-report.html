@@ -10,6 +10,9 @@
         body { margin: 0; padding: 1rem 1.25rem; }
         h1 { margin: 0 0 .25rem; font-size: clamp(1.7rem, 3vw, 2.5rem); }
         h2 { margin: 1.4rem 0 .65rem; font-size: 1.2rem; }
+        .report-status { display: inline-block; margin: 0 0 .5rem; padding: .3rem .8rem; border-radius: 8px; font-size: 1.35rem; font-weight: 800; letter-spacing: .04em; }
+        .report-status.success { color: #17633a; background: #dff4e7; }
+        .report-status.failed { color: #8d1e2b; background: #fce3e5; }
         a { color: #1769aa; }
         table { width: 100%; border-collapse: collapse; background: #fff; }
         th, td { padding: .55rem .7rem; border-bottom: 1px solid #e5eaf1; text-align: left; vertical-align: top; }
@@ -39,6 +42,7 @@
 </head>
 <body>
     <h1>Conformance crosscheck</h1>
+    <p class="report-status <%= counts.failed === 0 && runnerRows.every(runner => runner.exitCode === 0) ? 'success' : 'failed' %>"><%= counts.failed === 0 && runnerRows.every(runner => runner.exitCode === 0) ? 'SUCCESS' : 'FAILED' %></p>
     <h2>Runners</h2>
     <table>
         <thead><tr><th>Runner</th><th>Report</th><th>Exit code</th></tr></thead>

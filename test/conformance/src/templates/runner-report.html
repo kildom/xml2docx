@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Conformance report — <%- runnerName %></title>
+    <title>Conformance report for <%- runnerName %> runner</title>
     <style>
         :root {
             color-scheme: light;
@@ -16,6 +16,9 @@
         h1 { margin: 0 0 .25rem; font-size: clamp(1.7rem, 3vw, 2.5rem); }
         h2 { margin: 0; font-size: 1.2rem; }
         h3 { margin: 1.5rem 0 .75rem; font-size: 1rem; }
+        .report-status { display: inline-block; margin: 0 0 1rem; padding: .3rem .8rem; border-radius: 8px; font-size: 1.35rem; font-weight: 800; letter-spacing: .04em; }
+        .report-status.success { color: #17633a; background: #dff4e7; }
+        .report-status.failed { color: #8d1e2b; background: #fce3e5; }
         a { color: #1769aa; }
         a:hover { color: #0d4778; }
         details.report-section {
@@ -114,8 +117,8 @@
     </style>
 </head>
 <body>
-    <h1>Conformance report</h1>
-    <p class="empty">Runner: <strong><%- runnerName %></strong></p>
+    <h1>Conformance report for <code><%- runnerName %></code> runner</h1>
+    <p class="report-status <%= counts.failed === 0 ? 'success' : 'failed' %>"><%= counts.failed === 0 ? 'SUCCESS' : 'FAILED' %></p>
 
     <details class="report-section" id="case-results" open>
         <summary>
